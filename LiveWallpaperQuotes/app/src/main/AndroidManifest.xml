@@ -4,6 +4,29 @@
     <application android:allowBackup="true" android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme">
 
+        <!-- Activities -->
+
+        <activity android:name=".ui.activity.LWQSettingsActivity"
+            android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- Services -->
+
+        <service android:name=".api.service.LWQWallpaperService"
+            android:permission="android.permission.BIND_WALLPAPER">
+
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService"/>
+            </intent-filter>
+
+            <meta-data android:name="android.service.wallpaper"
+                android:resource="@xml/meta"/>
+        </service>
+
     </application>
 
 </manifest>
