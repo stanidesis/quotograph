@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Live Wallpaper Quotes</string>
+    <string name="wallpaper_author" translatable="false">Stanley Idesis</string>
+    <string name="wallpaper_description">A live wallpaper featuring inspirational quotes</string>
 </resources>
