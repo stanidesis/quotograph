@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="default_category_titles">
+        <item>@string/category_inspirational</item>
+    </string-array>
+
+    <array name="default_category_quote_map">
+        <item>@array/default_inspirational_quotes</item>
+    </array>
+
+    <array name="default_category_author_map">
+        <item>@array/default_inspirational_authors</item>
+    </array>
+
+    <string-array name="default_inspirational_quotes">
+        <item>@string/inspirational_quote_0</item>
+        <item>@string/inspirational_quote_1</item>
+        <item>@string/inspirational_quote_2</item>
+        <item>@string/inspirational_quote_3</item>
+        <item>@string/inspirational_quote_4</item>
+        <item>@string/inspirational_quote_5</item>
+        <item>@string/inspirational_quote_6</item>
+        <item>@string/inspirational_quote_7</item>
+        <item>@string/inspirational_quote_8</item>
+        <item>@string/inspirational_quote_9</item>
+    </string-array>
+
+    <string-array name="default_inspirational_authors">
+        <item>@string/inspirational_author_0</item>
+        <item>@string/inspirational_author_1</item>
+        <item>@string/inspirational_author_2</item>
+        <item>@string/inspirational_author_3</item>
+        <item>@string/inspirational_author_4</item>
+        <item>@string/inspirational_author_5</item>
+        <item>@string/inspirational_author_6</item>
+        <item>@string/inspirational_author_7</item>
+        <item>@string/inspirational_author_8</item>
+        <item>@string/inspirational_author_9</item>
+    </string-array>
+
+</resources>

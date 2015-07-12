@@ -7,13 +7,11 @@ import com.orm.SugarRecord;
  */
 public class Author extends SugarRecord<Author> {
 
-    String firstName;
-    String lastName;
+    public String name;
 
     public Author() {}
 
-    public Author(String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public Author(String name) {
+        this.name = name;
     }
 }

@@ -6,7 +6,7 @@ import com.orm.SugarRecord;
  * Created by stanleyidesis on 7/11/15.
  */
 public class Category extends SugarRecord<Category> {
-    String name;
+    public String name;
 
     public Category() {}
 
