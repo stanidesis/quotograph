@@ -7,12 +7,16 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+
 /**
  * Created by stanleyidesis on 7/11/15.
  */
 public class LWQWallpaperService extends WallpaperService {
 
     public class LWQWallpaperEngine extends Engine {
+
+        private Quote activeQuote;
 
         @Override
         public void onApplyWindowInsets(WindowInsets insets) {
@@ -30,6 +34,15 @@ public class LWQWallpaperService extends WallpaperService {
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
             Log.v(getClass().getSimpleName(), null, new Throwable());
+            activeQuote = Quote.active();
+            if (activeQuote == null) {
+                activeQuote = Quote.random();
+                Log.v(getClass().getSimpleName(), "Active quote recovered: " + activeQuote);
+//                activeQuote.active = true;
+//                activeQuote.save();
+            } else {
+                Log.v(getClass().getSimpleName(), "Active quote found: " + activeQuote);
+            }
         }
 
         @Override

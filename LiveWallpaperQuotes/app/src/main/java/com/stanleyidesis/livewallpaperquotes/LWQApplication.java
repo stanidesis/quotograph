@@ -49,7 +49,7 @@ public class LWQApplication extends SugarApp {
                         defaultAuthor = new Author(defaultCategoryAuthors[j]);
                         defaultAuthor.save();
                     }
-                    new Quote(defaultCategoryQuotes[j], defaultAuthor, defaultCategory).save();
+                    new Quote(defaultCategoryQuotes[j], false, defaultAuthor, defaultCategory).save();
                 }
             }
             defaultSharedPreferences.edit().putBoolean(getString(R.string.preference_key_first_launch), false).apply();
