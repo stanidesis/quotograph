@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.wallpaper.WallpaperService;
@@ -21,6 +20,7 @@ import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
 /**
  * Created by stanleyidesis on 7/11/15.
@@ -159,31 +159,45 @@ public class LWQWallpaperService extends WallpaperService {
             canvas.clipRect(clipRect, Region.Op.REPLACE);
 
             // Test clip
-            canvas.drawColor(getResources().getColor(android.R.color.holo_orange_light));
+//            canvas.drawColor(getResources().getColor(android.R.color.holo_orange_light));
 
+            // TODO use Palette class's swatch abilities to get title/text colors see: https://www.bignerdranch.com/blog/extracting-colors-to-a-palette-with-android-lollipop/
             TextPaint textPaint = new TextPaint();
             textPaint.setTextAlign(Paint.Align.LEFT);
             textPaint.setColor(getResources().getColor(android.R.color.black));
             textPaint.setFlags(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-            textPaint.setTypeface(Typeface.DEFAULT_BOLD);
-            textPaint.setTextSize(85f);
+            textPaint.setTypeface(Fonts.SERIFICO.load(LWQWallpaperService.this));
+            textPaint.setTextSize(145f);
             textPaint.setStyle(Paint.Style.FILL);
 
-            StaticLayout staticLayout = new StaticLayout(activeQuote.text, textPaint,
+            StaticLayout staticLayout = new StaticLayout(activeQuote.text.toUpperCase(), textPaint,
                     clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
             canvas.translate(clipRect.left, clipRect.top);
             staticLayout.draw(canvas);
 
             final float quoteHeight = staticLayout.getHeight();
-            textPaint.setTextSize(55f);
-            textPaint.setTypeface(Typeface.DEFAULT);
+            textPaint.setTextSize(100f);
+            textPaint.setTextAlign(Paint.Align.RIGHT);
+            textPaint.setTypeface(Fonts.DAWNING_OF_A_NEW_DAY.load(LWQWallpaperService.this));
             staticLayout = new StaticLayout(activeQuote.author.name, textPaint,
                     clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
-            canvas.translate(0, quoteHeight);
+            canvas.translate(clipRect.width()/*0*/, quoteHeight);
             staticLayout.draw(canvas);
 
             canvas.restore();
             holder.unlockCanvasAndPost(canvas);
+        }
+
+        void strokeText(StaticLayout staticLayout, Canvas canvas) {
+            TextPaint strokePaint = new TextPaint(staticLayout.getPaint());
+            strokePaint.setColor(getResources().getColor(android.R.color.holo_orange_light));
+            strokePaint.setStyle(Paint.Style.STROKE);
+            strokePaint.setStrokeWidth(5f);
+            strokePaint.setStrokeJoin(Paint.Join.MITER);
+            StaticLayout strokeLayout = new StaticLayout(staticLayout.getText(), strokePaint,
+                    staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),
+                    staticLayout.getSpacingAdd(), true);
+            strokeLayout.draw(canvas);
         }
 
     }
