@@ -1,12 +1,14 @@
 package com.stanleyidesis.livewallpaperquotes.api.service;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.service.wallpaper.WallpaperService;
 import android.text.Layout;
@@ -141,6 +143,19 @@ public class LWQWallpaperService extends WallpaperService {
             final int verticalPadding = (int) (maxQuoteHeight * .07);
 
             Rect clipRect = new Rect(horizontalPadding, verticalPadding, maxQuoteWidth - horizontalPadding, maxQuoteHeight - verticalPadding);
+
+            // Google Now Search Offset
+            int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
+            if (currentAPIVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                // There's a good chance the Google Search Bar is there, I'm going to assume
+                // it is for ICS+ installs, and just offset the top
+                final TypedArray styledAttributes = getTheme().obtainStyledAttributes(
+                        new int[] { android.R.attr.actionBarSize });
+                int actionBarSize = (int) styledAttributes.getDimension(0, 0);
+                styledAttributes.recycle();
+                clipRect.top += actionBarSize;
+            }
+
             canvas.clipRect(clipRect, Region.Op.REPLACE);
 
             // Test clip
@@ -156,28 +171,19 @@ public class LWQWallpaperService extends WallpaperService {
 
             StaticLayout staticLayout = new StaticLayout(activeQuote.text, textPaint,
                     clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
-            canvas.translate(horizontalPadding, verticalPadding);
+            canvas.translate(clipRect.left, clipRect.top);
             staticLayout.draw(canvas);
 
-            final float quoteHeight = getTextHeight(activeQuote.text, textPaint);
+            final float quoteHeight = staticLayout.getHeight();
             textPaint.setTextSize(55f);
             textPaint.setTypeface(Typeface.DEFAULT);
             staticLayout = new StaticLayout(activeQuote.author.name, textPaint,
                     clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
-            canvas.translate(0, quoteHeight + verticalPadding);
+            canvas.translate(0, quoteHeight);
             staticLayout.draw(canvas);
 
             canvas.restore();
             holder.unlockCanvasAndPost(canvas);
-        }
-
-        /**
-         * @return text height
-         */
-        private float getTextHeight(String text, Paint paint) {
-            Rect rect = new Rect();
-            paint.getTextBounds(text, 0, text.length(), rect);
-            return rect.height();
         }
 
     }
