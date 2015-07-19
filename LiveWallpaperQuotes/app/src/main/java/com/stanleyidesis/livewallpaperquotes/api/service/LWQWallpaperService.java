@@ -166,7 +166,7 @@ public class LWQWallpaperService extends WallpaperService {
             textPaint.setTextAlign(Paint.Align.LEFT);
             textPaint.setColor(getResources().getColor(android.R.color.black));
             textPaint.setFlags(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-            textPaint.setTypeface(Fonts.SERIFICO.load(LWQWallpaperService.this));
+            textPaint.setTypeface(Fonts.JOSEFIN_LIGHT.load(LWQWallpaperService.this));
             textPaint.setTextSize(145f);
             textPaint.setStyle(Paint.Style.FILL);
 
@@ -181,7 +181,7 @@ public class LWQWallpaperService extends WallpaperService {
             textPaint.setTypeface(Fonts.DAWNING_OF_A_NEW_DAY.load(LWQWallpaperService.this));
             staticLayout = new StaticLayout(activeQuote.author.name, textPaint,
                     clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
-            canvas.translate(clipRect.width()/*0*/, quoteHeight);
+            canvas.translate(clipRect.width(), quoteHeight);
             staticLayout.draw(canvas);
 
             canvas.restore();
