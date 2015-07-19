@@ -1,7 +1,9 @@
 package com.stanleyidesis.livewallpaperquotes.api.service;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
@@ -11,8 +13,10 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+import android.view.WindowManager;
 
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 
@@ -119,14 +123,24 @@ public class LWQWallpaperService extends WallpaperService {
             canvas.drawColor(getResources().getColor(android.R.color.white));
             canvas.save();
 
-            final Rect clipBounds = canvas.getClipBounds();
+            // Get screen width/height
+            WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+            final Display defaultDisplay = windowManager.getDefaultDisplay();
+            final Point size = new Point();
+            defaultDisplay.getSize(size);
+            final int screenWidth = size.x;
+            final int screenHeight = size.y;
 
             final int desiredMinimumHeight = getDesiredMinimumHeight();
             final int desiredMinimumWidth = getDesiredMinimumWidth();
-            final int horizontalPadding = (int) (desiredMinimumWidth * .07);
-            final int verticalPadding = (int) (desiredMinimumHeight * .07);
 
-            Rect clipRect = new Rect(horizontalPadding, verticalPadding, desiredMinimumWidth - horizontalPadding, desiredMinimumHeight - verticalPadding);
+            final int maxQuoteWidth = Math.min(screenWidth, desiredMinimumWidth);
+            final int maxQuoteHeight = Math.max(screenHeight, desiredMinimumHeight);
+
+            final int horizontalPadding = (int) (maxQuoteWidth * .07);
+            final int verticalPadding = (int) (maxQuoteHeight * .07);
+
+            Rect clipRect = new Rect(horizontalPadding, verticalPadding, maxQuoteWidth - horizontalPadding, maxQuoteHeight - verticalPadding);
             canvas.clipRect(clipRect, Region.Op.REPLACE);
 
             // Test clip
@@ -161,7 +175,6 @@ public class LWQWallpaperService extends WallpaperService {
          * @return text height
          */
         private float getTextHeight(String text, Paint paint) {
-
             Rect rect = new Rect();
             paint.getTextBounds(text, 0, text.length(), rect);
             return rect.height();
