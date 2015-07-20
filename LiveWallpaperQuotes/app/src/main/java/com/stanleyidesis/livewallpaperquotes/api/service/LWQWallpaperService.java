@@ -173,6 +173,7 @@ public class LWQWallpaperService extends WallpaperService {
             StaticLayout staticLayout = new StaticLayout(activeQuote.text.toUpperCase(), textPaint,
                     clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
             canvas.translate(clipRect.left, clipRect.top);
+            staticLayout = correctFontSize(staticLayout, clipRect.height() - verticalPadding);
             staticLayout.draw(canvas);
 
             final float quoteHeight = staticLayout.getHeight();
@@ -186,6 +187,17 @@ public class LWQWallpaperService extends WallpaperService {
 
             canvas.restore();
             holder.unlockCanvasAndPost(canvas);
+        }
+
+        StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight) {
+            final TextPaint textPaint = staticLayout.getPaint();
+            while (staticLayout.getHeight() > maxHeight) {
+                textPaint.setTextSize(textPaint.getTextSize() * .95f);
+                staticLayout = new StaticLayout(staticLayout.getText(), textPaint,
+                        staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),
+                        staticLayout.getSpacingAdd(), true);
+            }
+            return staticLayout;
         }
 
         void strokeText(StaticLayout staticLayout, Canvas canvas) {
