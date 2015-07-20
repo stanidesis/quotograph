@@ -2,7 +2,15 @@
     package="com.stanleyidesis.livewallpaperquotes">
 
     <application android:allowBackup="true" android:label="@string/app_name"
-        android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme">
+        android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme"
+        android:name=".LWQApplication">
+
+        <!-- Sugar ORM Meta Data -->
+
+        <meta-data android:name="DATABASE" android:value="live_wallpaper_quote.db" />
+        <meta-data android:name="VERSION" android:value="1" />
+        <meta-data android:name="QUERY_LOG" android:value="true" />
+        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="com.stanleyidesis.livewallpaperquotes.api.db"/>
 
         <!-- Activities -->
 

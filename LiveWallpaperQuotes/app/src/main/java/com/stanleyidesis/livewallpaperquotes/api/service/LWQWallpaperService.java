@@ -1,11 +1,27 @@
 package com.stanleyidesis.livewallpaperquotes.api.service;
 
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.Region;
+import android.os.Build;
 import android.os.Bundle;
 import android.service.wallpaper.WallpaperService;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.WindowInsets;
+import android.view.WindowManager;
+
+import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
 /**
  * Created by stanleyidesis on 7/11/15.
@@ -14,11 +30,16 @@ public class LWQWallpaperService extends WallpaperService {
 
     public class LWQWallpaperEngine extends Engine {
 
-        @Override
-        public void onApplyWindowInsets(WindowInsets insets) {
-            super.onApplyWindowInsets(insets);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
-        }
+        private Quote activeQuote;
+        private float xOffset;
+        private float yOffset;
+        private float xOffsetStep;
+        private float yOffsetStep;
+        private int xPixelOffset;
+        private int yPixelOffset;
+        private int format;
+        private int width;
+        private int height;
 
         @Override
         public Bundle onCommand(String action, int x, int y, int z, Bundle extras, boolean resultRequested) {
@@ -29,7 +50,17 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
+            setOffsetNotificationsEnabled(true);
             Log.v(getClass().getSimpleName(), null, new Throwable());
+            activeQuote = Quote.active();
+            if (activeQuote == null) {
+                activeQuote = Quote.random();
+                Log.v(getClass().getSimpleName(), "Active quote recovered: " + activeQuote);
+//                activeQuote.active = true;
+//                activeQuote.save();
+            } else {
+                Log.v(getClass().getSimpleName(), "Active quote found: " + activeQuote);
+            }
         }
 
         @Override
@@ -48,12 +79,21 @@ public class LWQWallpaperService extends WallpaperService {
         public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep, float yOffsetStep, int xPixelOffset, int yPixelOffset) {
             super.onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixelOffset, yPixelOffset);
             Log.v(getClass().getSimpleName(), null, new Throwable());
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
+            this.xOffsetStep = xOffsetStep;
+            this.yOffsetStep = yOffsetStep;
+            this.xPixelOffset = xPixelOffset;
+            this.yPixelOffset = yPixelOffset;
         }
 
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
             Log.v(getClass().getSimpleName(), null, new Throwable());
+            this.format = format;
+            this.width = width;
+            this.height = height;
         }
 
         @Override
@@ -66,6 +106,7 @@ public class LWQWallpaperService extends WallpaperService {
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             super.onSurfaceRedrawNeeded(holder);
             Log.v(getClass().getSimpleName(), null, new Throwable());
+            draw(holder);
         }
 
         @Override
@@ -78,6 +119,102 @@ public class LWQWallpaperService extends WallpaperService {
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
             Log.v(getClass().getSimpleName(), null, new Throwable());
+        }
+
+        void draw(SurfaceHolder holder) {
+            final Canvas canvas = holder.lockCanvas();
+            canvas.drawColor(getResources().getColor(android.R.color.white));
+            canvas.save();
+
+            // Get screen width/height
+            WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+            final Display defaultDisplay = windowManager.getDefaultDisplay();
+            final Point size = new Point();
+            defaultDisplay.getSize(size);
+            final int screenWidth = size.x;
+            final int screenHeight = size.y;
+
+            final int desiredMinimumHeight = getDesiredMinimumHeight();
+            final int desiredMinimumWidth = getDesiredMinimumWidth();
+
+            final int maxQuoteWidth = Math.min(screenWidth, desiredMinimumWidth);
+            final int maxQuoteHeight = Math.max(screenHeight, desiredMinimumHeight);
+
+            final int horizontalPadding = (int) (maxQuoteWidth * .07);
+            final int verticalPadding = (int) (maxQuoteHeight * .07);
+
+            Rect clipRect = new Rect(horizontalPadding, verticalPadding, maxQuoteWidth - horizontalPadding, maxQuoteHeight - verticalPadding);
+
+            // Google Now Search Offset
+            int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
+            if (currentAPIVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                // There's a good chance the Google Search Bar is there, I'm going to assume
+                // it is for ICS+ installs, and just offset the top
+                final TypedArray styledAttributes = getTheme().obtainStyledAttributes(
+                        new int[] { android.R.attr.actionBarSize });
+                int actionBarSize = (int) styledAttributes.getDimension(0, 0);
+                styledAttributes.recycle();
+                clipRect.top += actionBarSize;
+            }
+
+            canvas.clipRect(clipRect, Region.Op.REPLACE);
+
+            // Test clip
+//            canvas.drawColor(getResources().getColor(android.R.color.holo_orange_light));
+
+            // TODO use Palette class's swatch abilities to get title/text colors see: https://www.bignerdranch.com/blog/extracting-colors-to-a-palette-with-android-lollipop/
+            TextPaint textPaint = new TextPaint();
+            textPaint.setTextAlign(Paint.Align.LEFT);
+            textPaint.setColor(getResources().getColor(android.R.color.black));
+            textPaint.setFlags(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
+            textPaint.setTypeface(Fonts.JOSEFIN_LIGHT.load(LWQWallpaperService.this));
+            textPaint.setTextSize(145f);
+            textPaint.setStyle(Paint.Style.FILL);
+
+            StaticLayout staticLayout = new StaticLayout(activeQuote.text.toUpperCase(), textPaint,
+                    clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
+            canvas.translate(clipRect.left, clipRect.top);
+            staticLayout = correctFontSize(staticLayout, clipRect.height() - verticalPadding);
+            staticLayout.draw(canvas);
+
+            final float quoteHeight = staticLayout.getHeight();
+            textPaint.setTextSize(100f);
+            textPaint.setTextAlign(Paint.Align.RIGHT);
+            textPaint.setTypeface(Fonts.DAWNING_OF_A_NEW_DAY.load(LWQWallpaperService.this));
+            String author = getString(R.string.unknown);
+            if (activeQuote.author != null && activeQuote.author.name != null && !activeQuote.author.name.isEmpty()) {
+                author = activeQuote.author.name;
+            }
+            staticLayout = new StaticLayout(author, textPaint,
+                    clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
+            canvas.translate(clipRect.width(), quoteHeight);
+            staticLayout.draw(canvas);
+
+            canvas.restore();
+            holder.unlockCanvasAndPost(canvas);
+        }
+
+        StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight) {
+            final TextPaint textPaint = staticLayout.getPaint();
+            while (staticLayout.getHeight() > maxHeight) {
+                textPaint.setTextSize(textPaint.getTextSize() * .95f);
+                staticLayout = new StaticLayout(staticLayout.getText(), textPaint,
+                        staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),
+                        staticLayout.getSpacingAdd(), true);
+            }
+            return staticLayout;
+        }
+
+        void strokeText(StaticLayout staticLayout, Canvas canvas) {
+            TextPaint strokePaint = new TextPaint(staticLayout.getPaint());
+            strokePaint.setColor(getResources().getColor(android.R.color.holo_orange_light));
+            strokePaint.setStyle(Paint.Style.STROKE);
+            strokePaint.setStrokeWidth(5f);
+            strokePaint.setStrokeJoin(Paint.Join.MITER);
+            StaticLayout strokeLayout = new StaticLayout(staticLayout.getText(), strokePaint,
+                    staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),
+                    staticLayout.getSpacingAdd(), true);
+            strokeLayout.draw(canvas);
         }
 
     }
