@@ -19,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
+import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
@@ -180,7 +181,11 @@ public class LWQWallpaperService extends WallpaperService {
             textPaint.setTextSize(100f);
             textPaint.setTextAlign(Paint.Align.RIGHT);
             textPaint.setTypeface(Fonts.DAWNING_OF_A_NEW_DAY.load(LWQWallpaperService.this));
-            staticLayout = new StaticLayout(activeQuote.author.name, textPaint,
+            String author = getString(R.string.unknown);
+            if (activeQuote.author != null && activeQuote.author.name != null && !activeQuote.author.name.isEmpty()) {
+                author = activeQuote.author.name;
+            }
+            staticLayout = new StaticLayout(author, textPaint,
                     clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
             canvas.translate(clipRect.width(), quoteHeight);
             staticLayout.draw(canvas);

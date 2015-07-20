@@ -23,4 +23,5 @@
     <string name="inspirational_author_8">William Shakespeare</string>
     <string name="inspirational_quote_9">It is during our darkest moments that we must focus to see the light.</string>
     <string name="inspirational_author_9">Aristotle Onassis</string>
+    <string name="unknown">Unknown</string>
 </resources>
