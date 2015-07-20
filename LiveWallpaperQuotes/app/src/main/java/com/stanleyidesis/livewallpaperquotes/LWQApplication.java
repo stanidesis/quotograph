@@ -39,8 +39,6 @@ public class LWQApplication extends SugarApp {
                 }
                 final String[] defaultCategoryQuotes = getResources().getStringArray(quoteArrayResourceId);
                 final String[] defaultCategoryAuthors = getResources().getStringArray(authorArrayResourceId);
-                defaultCategoryQuoteMap.recycle();
-                defaultCategoryAuthorMap.recycle();
 
                 // Populate DB with default quotes and authors (repeat authors accounted for)
                 for (int j = 0; j < defaultCategoryQuotes.length; j++) {
@@ -52,6 +50,8 @@ public class LWQApplication extends SugarApp {
                     new Quote(defaultCategoryQuotes[j], false, defaultAuthor, defaultCategory).save();
                 }
             }
+            defaultCategoryQuoteMap.recycle();
+            defaultCategoryAuthorMap.recycle();
             defaultSharedPreferences.edit().putBoolean(getString(R.string.preference_key_first_launch), false).apply();
         }
     }
