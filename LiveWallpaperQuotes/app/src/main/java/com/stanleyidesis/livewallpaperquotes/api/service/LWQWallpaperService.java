@@ -143,7 +143,9 @@ public class LWQWallpaperService extends WallpaperService {
             final int horizontalPadding = (int) (maxQuoteWidth * .07);
             final int verticalPadding = (int) (maxQuoteHeight * .07);
 
-            Rect clipRect = new Rect(horizontalPadding, verticalPadding, maxQuoteWidth - horizontalPadding, maxQuoteHeight - verticalPadding);
+            int googleBarOffset = 0;
+
+            Rect drawingArea = new Rect(horizontalPadding, verticalPadding, maxQuoteWidth - horizontalPadding, maxQuoteHeight - verticalPadding);
 
             // Google Now Search Offset
             int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
@@ -154,41 +156,50 @@ public class LWQWallpaperService extends WallpaperService {
                         new int[] { android.R.attr.actionBarSize });
                 int actionBarSize = (int) styledAttributes.getDimension(0, 0);
                 styledAttributes.recycle();
-                clipRect.top += actionBarSize;
+                googleBarOffset = actionBarSize;
             }
 
-            canvas.clipRect(clipRect, Region.Op.REPLACE);
-
-            // Test clip
-//            canvas.drawColor(getResources().getColor(android.R.color.holo_orange_light));
+            canvas.clipRect(drawingArea, Region.Op.REPLACE);
 
             // TODO use Palette class's swatch abilities to get title/text colors see: https://www.bignerdranch.com/blog/extracting-colors-to-a-palette-with-android-lollipop/
-            TextPaint textPaint = new TextPaint();
-            textPaint.setTextAlign(Paint.Align.LEFT);
-            textPaint.setColor(getResources().getColor(android.R.color.black));
-            textPaint.setFlags(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-            textPaint.setTypeface(Fonts.JOSEFIN_LIGHT.load(LWQWallpaperService.this));
-            textPaint.setTextSize(145f);
-            textPaint.setStyle(Paint.Style.FILL);
 
-            StaticLayout staticLayout = new StaticLayout(activeQuote.text.toUpperCase(), textPaint,
-                    clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
-            canvas.translate(clipRect.left, clipRect.top);
-            staticLayout = correctFontSize(staticLayout, clipRect.height() - verticalPadding);
-            staticLayout.draw(canvas);
+            // Setup Quote text
+            TextPaint quoteTextPaint = new TextPaint();
+            quoteTextPaint.setTextAlign(Paint.Align.LEFT);
+            quoteTextPaint.setColor(getResources().getColor(android.R.color.black));
+            quoteTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
+            quoteTextPaint.setTypeface(Fonts.JOSEFIN_LIGHT.load(LWQWallpaperService.this));
+            quoteTextPaint.setTextSize(145f);
+            quoteTextPaint.setStyle(Paint.Style.FILL);
 
-            final float quoteHeight = staticLayout.getHeight();
-            textPaint.setTextSize(100f);
-            textPaint.setTextAlign(Paint.Align.RIGHT);
-            textPaint.setTypeface(Fonts.DAWNING_OF_A_NEW_DAY.load(LWQWallpaperService.this));
+            // Setup Author Text
+            TextPaint authorTextPaint = new TextPaint(quoteTextPaint);
+            authorTextPaint.setTextSize(100f);
+            authorTextPaint.setTextAlign(Paint.Align.RIGHT);
+            authorTextPaint.setTypeface(Fonts.DAWNING_OF_A_NEW_DAY.load(LWQWallpaperService.this));
             String author = getString(R.string.unknown);
             if (activeQuote.author != null && activeQuote.author.name != null && !activeQuote.author.name.isEmpty()) {
                 author = activeQuote.author.name;
             }
-            staticLayout = new StaticLayout(author, textPaint,
-                    clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
-            canvas.translate(clipRect.width(), quoteHeight);
-            staticLayout.draw(canvas);
+            StaticLayout quoteLayout = new StaticLayout(activeQuote.text.toUpperCase(), quoteTextPaint,
+                    drawingArea.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
+            StaticLayout authorLayout = new StaticLayout(author, authorTextPaint,
+                    drawingArea.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
+
+            // Correct the quote height, if necessary
+            quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight());
+
+            int centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
+            if (drawingArea.top + centerQuoteOffset < googleBarOffset) {
+                quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight() - googleBarOffset);
+                centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
+            }
+
+            // Draw the quote centered vertically
+            canvas.translate(drawingArea.left, drawingArea.top + centerQuoteOffset);
+            quoteLayout.draw(canvas);
+            canvas.translate(drawingArea.width(), quoteLayout.getHeight());
+            authorLayout.draw(canvas);
 
             canvas.restore();
             holder.unlockCanvasAndPost(canvas);
