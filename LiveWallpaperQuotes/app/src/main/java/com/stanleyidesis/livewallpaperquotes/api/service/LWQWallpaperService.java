@@ -86,13 +86,14 @@ public class LWQWallpaperService extends WallpaperService {
             this.yOffsetStep = yOffsetStep;
             this.xPixelOffset = xPixelOffset;
             this.yPixelOffset = yPixelOffset;
+            /*
             Log.v(getClass().getSimpleName(), "xOffset: " + xOffset);
             Log.v(getClass().getSimpleName(), "yOffset: " + yOffset);
             Log.v(getClass().getSimpleName(), "xOffsetStep: " + xOffsetStep);
             Log.v(getClass().getSimpleName(), "yOffsetStep: " + yOffsetStep);
             Log.v(getClass().getSimpleName(), "xPixelOffset: " + xPixelOffset);
             Log.v(getClass().getSimpleName(), "yPixelOffset: " + yPixelOffset);
-            if (redraw) {draw(getSurfaceHolder());}
+            */
         }
 
         @Override
