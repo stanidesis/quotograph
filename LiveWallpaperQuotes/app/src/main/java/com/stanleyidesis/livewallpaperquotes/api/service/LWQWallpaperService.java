@@ -85,6 +85,14 @@ public class LWQWallpaperService extends WallpaperService {
             this.yOffsetStep = yOffsetStep;
             this.xPixelOffset = xPixelOffset;
             this.yPixelOffset = yPixelOffset;
+            /*
+            Log.v(getClass().getSimpleName(), "xOffset: " + xOffset);
+            Log.v(getClass().getSimpleName(), "yOffset: " + yOffset);
+            Log.v(getClass().getSimpleName(), "xOffsetStep: " + xOffsetStep);
+            Log.v(getClass().getSimpleName(), "yOffsetStep: " + yOffsetStep);
+            Log.v(getClass().getSimpleName(), "xPixelOffset: " + xPixelOffset);
+            Log.v(getClass().getSimpleName(), "yPixelOffset: " + yPixelOffset);
+            */
         }
 
         @Override
@@ -118,7 +126,7 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
+            Log.v(getClass().getSimpleName(), "Visible: " + visible, new Throwable());
         }
 
         void draw(SurfaceHolder holder) {
@@ -134,18 +142,12 @@ public class LWQWallpaperService extends WallpaperService {
             final int screenWidth = size.x;
             final int screenHeight = size.y;
 
-            final int desiredMinimumHeight = getDesiredMinimumHeight();
-            final int desiredMinimumWidth = getDesiredMinimumWidth();
-
-            final int maxQuoteWidth = Math.min(screenWidth, desiredMinimumWidth);
-            final int maxQuoteHeight = Math.max(screenHeight, desiredMinimumHeight);
-
-            final int horizontalPadding = (int) (maxQuoteWidth * .07);
-            final int verticalPadding = (int) (maxQuoteHeight * .07);
+            final int horizontalPadding = (int) (screenWidth * .07);
+            final int verticalPadding = (int) (screenHeight * .07);
 
             int googleBarOffset = 0;
 
-            Rect drawingArea = new Rect(horizontalPadding, verticalPadding, maxQuoteWidth - horizontalPadding, maxQuoteHeight - verticalPadding);
+            Rect drawingArea = new Rect(horizontalPadding, verticalPadding, screenWidth - horizontalPadding, screenHeight - verticalPadding);
 
             // Google Now Search Offset
             int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
@@ -160,6 +162,7 @@ public class LWQWallpaperService extends WallpaperService {
             }
 
             canvas.clipRect(drawingArea, Region.Op.REPLACE);
+//            canvas.drawColor(getResources().getColor(android.R.color.darker_gray));
 
             // TODO use Palette class's swatch abilities to get title/text colors see: https://www.bignerdranch.com/blog/extracting-colors-to-a-palette-with-android-lollipop/
 
@@ -227,7 +230,6 @@ public class LWQWallpaperService extends WallpaperService {
                     staticLayout.getSpacingAdd(), true);
             strokeLayout.draw(canvas);
         }
-
     }
 
     @Override
