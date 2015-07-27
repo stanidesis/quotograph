@@ -149,7 +149,7 @@ public class LWQWallpaperService extends WallpaperService {
 
             // Google Now Search Offset
             int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
-            if (currentAPIVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && false) {
+            if (currentAPIVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 // There's a good chance the Google Search Bar is there, I'm going to assume
                 // it is for ICS+ installs, and just offset the top
                 final TypedArray styledAttributes = getTheme().obtainStyledAttributes(
