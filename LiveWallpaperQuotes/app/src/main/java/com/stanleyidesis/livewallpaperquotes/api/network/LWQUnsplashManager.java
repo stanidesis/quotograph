@@ -1,6 +1,5 @@
 package com.stanleyidesis.livewallpaperquotes.api.network;
 
-import android.content.Context;
 import android.util.Log;
 
 import org.jsoup.Connection;
@@ -19,7 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * Created by stanleyidesis on 7/28/15.
  */
-public class UnsplashManager {
+public class LWQUnsplashManager {
     public enum Category {
         BUILDINGS(2),
         FOOD_DRINK(3),
@@ -35,9 +34,9 @@ public class UnsplashManager {
         }
     }
 
-    public static UnsplashManager getInstance(Context context) {
+    public static LWQUnsplashManager getInstance() {
         if (sUnsplashManager == null) {
-            sUnsplashManager = new UnsplashManager(context);
+            sUnsplashManager = new LWQUnsplashManager();
         }
         return sUnsplashManager;
     }
@@ -56,7 +55,7 @@ public class UnsplashManager {
                         urlBuilder.append(String.format(CATEGORY_PARAM, category.identifier, 1));
                     }
                 }
-                Log.v(UnsplashManager.class.getSimpleName(), "URL: " + urlBuilder.toString());
+                Log.v(LWQUnsplashManager.class.getSimpleName(), "URL: " + urlBuilder.toString());
 
                 final Connection connection = Jsoup.connect(urlBuilder.toString());
                 final Connection.Response response;
@@ -68,7 +67,7 @@ public class UnsplashManager {
                     return;
                 }
 
-                Log.v(UnsplashManager.class.getSimpleName(), "Response: " + response.statusMessage());
+                Log.v(LWQUnsplashManager.class.getSimpleName(), "Response: " + response.statusMessage());
 
                 final Document document;
                 try {
@@ -108,11 +107,11 @@ public class UnsplashManager {
     private static final String FEATURED_PARAM = "scope[featured]=%d&";
     private static final String PAGE_PARAM = "page=%d&";
 
-    private static UnsplashManager sUnsplashManager;
+    private static LWQUnsplashManager sUnsplashManager;
 
     private ScheduledExecutorService scheduledExecutorService;
 
-    private UnsplashManager(Context context) {
+    private LWQUnsplashManager() {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 

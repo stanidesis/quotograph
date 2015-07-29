@@ -6,9 +6,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -19,8 +19,14 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
+import com.facebook.common.references.CloseableReference;
+import com.facebook.imagepipeline.image.CloseableBitmap;
+import com.facebook.imagepipeline.image.CloseableImage;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.api.network.Callback;
+import com.stanleyidesis.livewallpaperquotes.api.network.LWQImageDownloader;
+import com.stanleyidesis.livewallpaperquotes.api.network.LWQUnsplashManager;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
 /**
@@ -40,6 +46,7 @@ public class LWQWallpaperService extends WallpaperService {
         private int format;
         private int width;
         private int height;
+        private CloseableReference<CloseableImage> closeableImageReference;
 
         @Override
         public Bundle onCommand(String action, int x, int y, int z, Bundle extras, boolean resultRequested) {
@@ -131,6 +138,35 @@ public class LWQWallpaperService extends WallpaperService {
         }
 
         void draw(SurfaceHolder holder) {
+            // Recover the Unsplash image
+            Callback<CloseableReference<CloseableImage>> callback = new Callback<CloseableReference<CloseableImage>>() {
+                @Override
+                public void onSuccess(CloseableReference<CloseableImage> closeableImageCloseableReference) {
+                    if (closeableImageReference != null) {
+                        CloseableReference.closeSafely(closeableImageReference);
+                        closeableImageReference = null;
+                    }
+                    closeableImageReference = closeableImageCloseableReference.clone();
+                    _draw(getSurfaceHolder());
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Log.e(getClass().getSimpleName(), errorMessage);
+                }
+            };
+            final String storedImageURL = PreferenceManager.getDefaultSharedPreferences(LWQWallpaperService.this)
+                    .getString(LWQWallpaperService.this.getString(R.string.preference_key_image_url), null);
+            if (storedImageURL == null) {
+                // TODO base this on the quote category?
+                LWQImageDownloader.getInstance().fetchFeaturedImage(LWQUnsplashManager.Category.PEOPLE, 0, callback);
+            } else {
+                LWQImageDownloader.getInstance().fetchImageAtURL(storedImageURL, callback);
+            }
+            _draw(holder);
+        }
+
+        void _draw(SurfaceHolder holder) {
             final Canvas canvas = holder.lockCanvas();
             canvas.drawColor(getResources().getColor(android.R.color.white));
             canvas.save();
@@ -142,6 +178,17 @@ public class LWQWallpaperService extends WallpaperService {
             defaultDisplay.getSize(size);
             final int screenWidth = size.x;
             final int screenHeight = size.y;
+
+            // Image Processing
+            if (closeableImageReference != null) {
+                final CloseableImage closeableImage = closeableImageReference.get();
+                if (closeableImage instanceof CloseableBitmap) {
+                    CloseableBitmap closeableBitmap = (CloseableBitmap) closeableImage;
+                    canvas.drawBitmap(closeableBitmap.getUnderlyingBitmap(), 0, 0, new Paint());
+                } else {
+                    Log.e(getClass().getSimpleName(), "It's not a bitmap");
+                }
+            }
 
             final int horizontalPadding = (int) (screenWidth * .07);
             final int verticalPadding = (int) (screenHeight * .07);
@@ -162,7 +209,7 @@ public class LWQWallpaperService extends WallpaperService {
                 googleBarOffset = actionBarSize;
             }
 
-            canvas.clipRect(drawingArea, Region.Op.REPLACE);
+//            canvas.clipRect(drawingArea, Region.Op.REPLACE);
 //            canvas.drawColor(getResources().getColor(android.R.color.darker_gray));
 
             // TODO use Palette class's swatch abilities to get title/text colors see: https://www.bignerdranch.com/blog/extracting-colors-to-a-palette-with-android-lollipop/
