@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
+import android.support.v7.graphics.Palette;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -29,6 +30,8 @@ import com.stanleyidesis.livewallpaperquotes.api.network.LWQImageDownloader;
 import com.stanleyidesis.livewallpaperquotes.api.network.LWQUnsplashManager;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
+import java.util.List;
+
 /**
  * Created by stanleyidesis on 7/11/15.
  */
@@ -47,6 +50,7 @@ public class LWQWallpaperService extends WallpaperService {
         private int width;
         private int height;
         private CloseableReference<CloseableImage> closeableImageReference;
+        private Palette palette;
 
         @Override
         public Bundle onCommand(String action, int x, int y, int z, Bundle extras, boolean resultRequested) {
@@ -80,6 +84,10 @@ public class LWQWallpaperService extends WallpaperService {
         public void onDestroy() {
             super.onDestroy();
             Log.v(getClass().getSimpleName(), null, new Throwable());
+            if (closeableImageReference != null) {
+                CloseableReference.closeSafely(closeableImageReference);
+                closeableImageReference = null;
+            }
         }
 
         @Override
@@ -145,6 +153,7 @@ public class LWQWallpaperService extends WallpaperService {
                     if (closeableImageReference != null) {
                         CloseableReference.closeSafely(closeableImageReference);
                         closeableImageReference = null;
+                        palette = null;
                     }
                     closeableImageReference = closeableImageCloseableReference.clone();
                     _draw(getSurfaceHolder());
@@ -159,7 +168,7 @@ public class LWQWallpaperService extends WallpaperService {
                     .getString(LWQWallpaperService.this.getString(R.string.preference_key_image_url), null);
             if (storedImageURL == null) {
                 // TODO base this on the quote category?
-                LWQImageDownloader.getInstance().fetchFeaturedImage(LWQUnsplashManager.Category.PEOPLE, 0, callback);
+                LWQImageDownloader.getInstance().fetchFeaturedImage(LWQUnsplashManager.Category.NATURE, 0, callback);
             } else {
                 LWQImageDownloader.getInstance().fetchImageAtURL(storedImageURL, callback);
             }
@@ -177,14 +186,27 @@ public class LWQWallpaperService extends WallpaperService {
             final Point size = new Point();
             defaultDisplay.getSize(size);
             final int screenWidth = size.x;
-            final int screenHeight = size.y;
+            final int screenHeight = holder.getSurfaceFrame().height();
 
             // Image Processing
             if (closeableImageReference != null) {
                 final CloseableImage closeableImage = closeableImageReference.get();
                 if (closeableImage instanceof CloseableBitmap) {
                     CloseableBitmap closeableBitmap = (CloseableBitmap) closeableImage;
-                    canvas.drawBitmap(closeableBitmap.getUnderlyingBitmap(), 0, 0, new Paint());
+                    Paint bitmapPaint = new Paint();
+                    bitmapPaint.setAntiAlias(true);
+                    bitmapPaint.setFilterBitmap(true);
+                    bitmapPaint.setDither(true);
+                    canvas.drawBitmap(closeableBitmap.getUnderlyingBitmap(), null, new Rect(0, 0, screenWidth, screenHeight), bitmapPaint);
+                    if (palette == null) {
+                        Palette.generateAsync(closeableBitmap.getUnderlyingBitmap(), new Palette.PaletteAsyncListener() {
+                            @Override
+                            public void onGenerated(Palette palette) {
+                                LWQWallpaperEngine.this.palette = palette;
+                                _draw(getSurfaceHolder());
+                            }
+                        });
+                    }
                 } else {
                     Log.e(getClass().getSimpleName(), "It's not a bitmap");
                 }
@@ -195,7 +217,8 @@ public class LWQWallpaperService extends WallpaperService {
 
             int googleBarOffset = 0;
 
-            Rect drawingArea = new Rect(horizontalPadding, verticalPadding, screenWidth - horizontalPadding, screenHeight - verticalPadding);
+            Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
+                    screenWidth - horizontalPadding, screenHeight - verticalPadding);
 
             // Google Now Search Offset
             int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
@@ -212,12 +235,20 @@ public class LWQWallpaperService extends WallpaperService {
 //            canvas.clipRect(drawingArea, Region.Op.REPLACE);
 //            canvas.drawColor(getResources().getColor(android.R.color.darker_gray));
 
-            // TODO use Palette class's swatch abilities to get title/text colors see: https://www.bignerdranch.com/blog/extracting-colors-to-a-palette-with-android-lollipop/
+            // TODO fix palette inconsistency
+            int quoteColor = getResources().getColor(android.R.color.black);
+            int authorColor = quoteColor;
+            if (palette != null) {
+                final List<Palette.Swatch> swatches = palette.getSwatches();
+                final Palette.Swatch swatch = swatches.get(0);
+                quoteColor = swatch.getBodyTextColor();
+                authorColor = swatch.getTitleTextColor();
+            }
 
             // Setup Quote text
             TextPaint quoteTextPaint = new TextPaint();
             quoteTextPaint.setTextAlign(Paint.Align.LEFT);
-            quoteTextPaint.setColor(getResources().getColor(android.R.color.black));
+            quoteTextPaint.setColor(quoteColor);
             quoteTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
             quoteTextPaint.setTypeface(Fonts.JOSEFIN_LIGHT.load(LWQWallpaperService.this));
             quoteTextPaint.setTextSize(145f);
@@ -227,6 +258,7 @@ public class LWQWallpaperService extends WallpaperService {
             TextPaint authorTextPaint = new TextPaint(quoteTextPaint);
             authorTextPaint.setTextSize(100f);
             authorTextPaint.setTextAlign(Paint.Align.RIGHT);
+            authorTextPaint.setColor(authorColor);
             authorTextPaint.setTypeface(Fonts.DAWNING_OF_A_NEW_DAY.load(LWQWallpaperService.this));
             String author = getString(R.string.unknown);
             if (activeQuote.author != null && activeQuote.author.name != null && !activeQuote.author.name.isEmpty()) {

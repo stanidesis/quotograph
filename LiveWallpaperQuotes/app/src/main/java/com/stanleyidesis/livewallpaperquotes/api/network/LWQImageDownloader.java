@@ -62,7 +62,7 @@ public class LWQImageDownloader {
     }
 
     public void fetchImageAtURL(String url, Callback<CloseableReference<CloseableImage>> callback) {
-
+        // TODO
     }
 
     private static LWQImageDownloader sImageDownloader;

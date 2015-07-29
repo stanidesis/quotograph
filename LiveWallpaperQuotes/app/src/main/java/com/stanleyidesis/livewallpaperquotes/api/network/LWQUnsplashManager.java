@@ -90,7 +90,7 @@ public class LWQUnsplashManager {
                         final String dataHeight = element.attr("data-height");
 
                         // TODO use that data?
-                        returnURLs.add(src);
+                        returnURLs.add(fullSrc + "?fm=jpg");
                     }
                 }
                 callback.onSuccess(returnURLs);
