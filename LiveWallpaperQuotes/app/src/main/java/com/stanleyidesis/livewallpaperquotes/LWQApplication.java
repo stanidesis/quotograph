@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.orm.SugarApp;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -21,9 +20,6 @@ public class LWQApplication extends SugarApp {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        // Initialize Fresco
-        Fresco.initialize(this);
 
         // Pre-populate database
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
