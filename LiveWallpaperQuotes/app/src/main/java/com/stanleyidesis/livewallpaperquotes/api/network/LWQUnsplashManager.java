@@ -2,6 +2,8 @@ package com.stanleyidesis.livewallpaperquotes.api.network;
 
 import android.util.Log;
 
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,6 +13,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,17 +35,23 @@ public class LWQUnsplashManager {
         Category(int identifier) {
             this.identifier = identifier;
         }
+
+        public static Category random() {
+            final int randomIndex = new Random().nextInt(Category.values().length);
+            return Category.values()[randomIndex];
+        }
     }
 
-    public static LWQUnsplashManager getInstance() {
-        if (sUnsplashManager == null) {
-            sUnsplashManager = new LWQUnsplashManager();
-        }
-        return sUnsplashManager;
+    public static String appendJPGFormat(String unsplashUri) {
+        return unsplashUri + "?fm=jpg";
+    }
+
+    public LWQUnsplashManager() {
+        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void getPhotoURLs(final int pageIndex, final Set<Category> categorySet,
-                             final boolean featured, final Callback<List<String>> callback) {
+                             final boolean featured, final Callback<List<LWQUnsplashImage>> callback) {
         submit(new Runnable() {
             @Override
             public void run() {
@@ -78,7 +87,7 @@ public class LWQUnsplashManager {
                     return;
                 }
 
-                List<String> returnURLs = new ArrayList<String>();
+                List<LWQUnsplashImage> returnImages = new ArrayList<>();
 
                 final Elements elements = document.select("div.photo-grid img");
                 for (final Element element : elements) {
@@ -88,12 +97,10 @@ public class LWQUnsplashManager {
                         final String byLine = element.attr("alt");
                         final String dataWidth = element.attr("data-width");
                         final String dataHeight = element.attr("data-height");
-
-                        // TODO use that data?
-                        returnURLs.add(fullSrc + "?fm=jpg");
+                        returnImages.add(new LWQUnsplashImage(src, byLine, dataWidth, dataHeight));
                     }
                 }
-                callback.onSuccess(returnURLs);
+                callback.onSuccess(returnImages);
             }
         });
     }
@@ -107,13 +114,7 @@ public class LWQUnsplashManager {
     private static final String FEATURED_PARAM = "scope[featured]=%d&";
     private static final String PAGE_PARAM = "page=%d&";
 
-    private static LWQUnsplashManager sUnsplashManager;
-
     private ScheduledExecutorService scheduledExecutorService;
-
-    private LWQUnsplashManager() {
-        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-    }
 
     private void submit(final Runnable runnable) {
         scheduledExecutorService.execute(new Runnable() {
@@ -126,5 +127,19 @@ public class LWQUnsplashManager {
                 }
             }
         });
+    }
+
+    public class LWQUnsplashImage {
+        public String url;
+        public String altText;
+        public String width;
+        public String height;
+
+        public LWQUnsplashImage(String url, String altText, String width, String height) {
+            this.url = url;
+            this.altText = altText;
+            this.width = width;
+            this.height = height;
+        }
     }
 }
