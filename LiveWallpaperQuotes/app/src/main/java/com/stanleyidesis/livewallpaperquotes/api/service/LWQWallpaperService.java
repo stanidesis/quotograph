@@ -32,6 +32,8 @@ import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
+import java.util.List;
+
 /**
  * Created by stanleyidesis on 7/11/15.
  */
@@ -106,7 +108,6 @@ public class LWQWallpaperService extends WallpaperService {
         public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep, float yOffsetStep, int xPixelOffset, int yPixelOffset) {
             super.onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixelOffset, yPixelOffset);
             Log.v(getClass().getSimpleName(), null, new Throwable());
-            boolean redraw = this.yPixelOffset != yPixelOffset;
             this.xOffset = xOffset;
             this.yOffset = yOffset;
             this.xOffsetStep = xOffsetStep;
@@ -148,7 +149,9 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public void onTouchEvent(MotionEvent event) {
             super.onTouchEvent(event);
-            gestureDetectorCompat.onTouchEvent(event);
+            if (gestureDetectorCompat != null) {
+                gestureDetectorCompat.onTouchEvent(event);
+            }
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
@@ -226,26 +229,14 @@ public class LWQWallpaperService extends WallpaperService {
             */
 
             int quoteColor = getResources().getColor(android.R.color.black);
-            int quoteStrokeColor = quoteColor;
+            int quoteStrokeColor = getResources().getColor(android.R.color.holo_blue_light);
             int authorColor = quoteColor;
             if (palette != null) {
-                Palette.Swatch textSwatch = palette.getDarkVibrantSwatch();
-                if (textSwatch == null) {
-                    textSwatch = palette.getDarkMutedSwatch();
-                }
-                if (textSwatch != null) {
-                    quoteColor = textSwatch.getBodyTextColor();
-                    authorColor = textSwatch.getTitleTextColor();
-                }
-
-                Palette.Swatch strokeSwatch = palette.getLightVibrantSwatch();
-                if (strokeSwatch == null) {
-                    strokeSwatch = palette.getLightMutedSwatch();
-                }
-                if (strokeSwatch != null) {
-                    quoteStrokeColor = strokeSwatch.getTitleTextColor();
-                }
-
+                final List<Palette.Swatch> swatches = palette.getSwatches();
+                final Palette.Swatch swatch = swatches.get(0);
+                quoteColor = swatch.getBodyTextColor();
+                authorColor = swatch.getTitleTextColor();
+                quoteStrokeColor = swatch.getRgb();
             } else if (backgroundImage != null) {
                 Palette.from(backgroundImage).generate(new Palette.PaletteAsyncListener() {
                     @Override
