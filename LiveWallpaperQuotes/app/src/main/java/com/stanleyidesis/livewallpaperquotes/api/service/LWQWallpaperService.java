@@ -148,6 +148,7 @@ public class LWQWallpaperService extends WallpaperService {
                 if (wallpaperController.activeWallpaperExists()) {
                     wallpaperController.retrieveActiveWallpaper(callback);
                 } else {
+                    // TODO ultimately does not belong here
                     wallpaperController.generateNewWallpaper(callback);
                 }
             }
@@ -175,10 +176,8 @@ public class LWQWallpaperService extends WallpaperService {
                 bitmapPaint.setFilterBitmap(true);
                 bitmapPaint.setDither(true);
 
-                float scaleY = (float) Math.min(backgroundImage.getHeight(), surfaceFrame.height()) /
-                        (float) Math.max(backgroundImage.getHeight(), surfaceFrame.height());
-                float scaleX = (float) Math.min(backgroundImage.getWidth(), surfaceFrame.width()) /
-                        (float) Math.max(backgroundImage.getWidth(), surfaceFrame.width());
+                float scaleY = (float) surfaceFrame.height() / (float) backgroundImage.getHeight();
+                float scaleX = (float) surfaceFrame.width() / (float) backgroundImage.getWidth();
                 float finalScale = Math.max(scaleX, scaleY);
 
                 Matrix scaleMatrix = new Matrix();
