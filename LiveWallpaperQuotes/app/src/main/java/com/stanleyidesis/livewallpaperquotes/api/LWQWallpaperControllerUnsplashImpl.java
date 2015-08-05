@@ -3,6 +3,7 @@ package com.stanleyidesis.livewallpaperquotes.api;
 import android.graphics.Bitmap;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.db.BackgroundImage;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Wallpaper;
@@ -41,20 +42,18 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     @Override
     public String getQuote() {
-        if (activeWallpaperLoaded()) {
+        if (activeWallpaper != null) {
             return activeWallpaper.quote.text;
         }
-        // TODO return a default quote
-        return null;
+        return LWQApplication.get().getString(R.string.default_quote);
     }
 
     @Override
     public String getAuthor() {
-        if (activeWallpaperLoaded()) {
+        if (activeWallpaper != null) {
             return activeWallpaper.quote.author.name;
         }
-        // TODO return a default author
-        return null;
+        return LWQApplication.get().getString(R.string.default_author);
     }
 
     @Override
@@ -74,10 +73,11 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             listeners.get(RetrievalState.NEW_WALLPAPER).add(callback);
             return;
         } else if (retrievalState == RetrievalState.ACTIVE_WALLPAPER) {
-            listeners.get(RetrievalState.ACTIVE_WALLPAPER).clear();
+            final List<Callback<Boolean>> activeWallpaperCallbacks = listeners.get(RetrievalState.ACTIVE_WALLPAPER);
+            listeners.get(RetrievalState.NEW_WALLPAPER).addAll(activeWallpaperCallbacks);
+            activeWallpaperCallbacks.clear();
         }
         retrievalState = RetrievalState.NEW_WALLPAPER;
-        listeners.get(RetrievalState.NEW_WALLPAPER).clear();
         listeners.get(RetrievalState.NEW_WALLPAPER).add(callback);
 
         // TODO query BrainyQuote
@@ -124,25 +124,26 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     @Override
     public synchronized void retrieveActiveWallpaper(final Callback<Boolean> callback) {
         if (retrievalState == RetrievalState.ACTIVE_WALLPAPER) {
-            listeners.get(RetrievalState.ACTIVE_WALLPAPER).remove(callback);
-            listeners.get(RetrievalState.ACTIVE_WALLPAPER).add(callback);
+            if (!listeners.get(RetrievalState.ACTIVE_WALLPAPER).contains(callback)) {
+                listeners.get(RetrievalState.ACTIVE_WALLPAPER).add(callback);
+            }
             return;
         } else if (retrievalState == RetrievalState.NEW_WALLPAPER) {
-            listeners.get(RetrievalState.NEW_WALLPAPER).remove(callback);
-            listeners.get(RetrievalState.NEW_WALLPAPER).add(callback);
+            if (!listeners.get(RetrievalState.NEW_WALLPAPER).contains(callback)) {
+                listeners.get(RetrievalState.NEW_WALLPAPER).add(callback);
+            }
             return;
         } else {
             retrievalState = RetrievalState.ACTIVE_WALLPAPER;
-            listeners.get(RetrievalState.ACTIVE_WALLPAPER).clear();
             listeners.get(RetrievalState.ACTIVE_WALLPAPER).add(callback);
         }
         if (!activeWallpaperExists()) {
-            notifyAndClearListeners(RetrievalState.ACTIVE_WALLPAPER, "No active wallpaper set");
             retrievalState = null;
+            notifyAndClearListeners(RetrievalState.ACTIVE_WALLPAPER, "No active wallpaper set");
             return;
         } else if (activeWallpaperLoaded()) {
-            notifyAndClearListeners(RetrievalState.ACTIVE_WALLPAPER, true);
             retrievalState = null;
+            notifyAndClearListeners(RetrievalState.ACTIVE_WALLPAPER, true);
             return;
         }
         if (activeWallpaper == null) {

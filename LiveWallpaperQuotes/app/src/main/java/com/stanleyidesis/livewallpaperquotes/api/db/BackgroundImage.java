@@ -32,7 +32,7 @@ public class BackgroundImage extends SugarRecord<BackgroundImage> {
     }
 
     public static final BackgroundImage random() {
-        final long count = Select.from(Quote.class).count();
+        final long count = Select.from(BackgroundImage.class).count();
         final int offset = new Random().nextInt((int) count);
         return BackgroundImage.findWithQuery(BackgroundImage.class,
                 "Select * from " + StringUtil.toSQLName("BackgroundImage") + " LIMIT 1 OFFSET " + offset, null).get(0);

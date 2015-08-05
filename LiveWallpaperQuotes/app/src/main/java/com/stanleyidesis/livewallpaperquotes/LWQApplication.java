@@ -11,12 +11,12 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.LWQImageController;
+import com.stanleyidesis.livewallpaperquotes.api.LWQImageLoaderFrescoImpl;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperControllerUnsplashImpl;
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
-import com.stanleyidesis.livewallpaperquotes.api.LWQImageLoaderFrescoImpl;
 
 /**
  * Created by stanleyidesis on 7/11/15.
@@ -81,6 +81,10 @@ public class LWQApplication extends SugarApp {
                 public void onError(String errorMessage) {}
             });
         }
+    }
+
+    public static LWQApplication get() {
+        return sApplication;
     }
 
     public static LWQWallpaperController getWallpaperController() {
