@@ -1,6 +1,7 @@
 package com.stanleyidesis.livewallpaperquotes.api;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
@@ -30,6 +31,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     LWQUnsplashManager unsplashManager;
     Wallpaper activeWallpaper;
     Bitmap activeBackgroundImage;
+    Bitmap defaultBackgroundImage;
     RetrievalState retrievalState;
     Map<RetrievalState, List<Callback<Boolean>>> listeners;
 
@@ -58,6 +60,13 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     @Override
     public Bitmap getBackgroundImage() {
+        if (activeBackgroundImage == null) {
+            if (defaultBackgroundImage == null) {
+                defaultBackgroundImage = BitmapFactory.decodeResource(LWQApplication.get().getResources(),
+                        R.drawable.default_background);
+            }
+            return defaultBackgroundImage;
+        }
         return activeBackgroundImage;
     }
 
@@ -172,6 +181,10 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     @Override
     public void discardActiveWallpaper() {
         if (activeWallpaperLoaded()) {
+            if (defaultBackgroundImage != null) {
+                defaultBackgroundImage.recycle();
+                defaultBackgroundImage = null;
+            }
             LWQApplication.getImageController().clearBitmap(getFullUri());
             activeBackgroundImage = null;
             activeWallpaper = null;
