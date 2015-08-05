@@ -46,8 +46,7 @@ public interface LWQWallpaperController {
     void retrieveActiveWallpaper(Callback<Boolean> callback);
 
     /**
-     * The user has decided to remove LWQ as their active wallpaper, this method should perform
-     * the necessary behaviors to discard it.
+     * This method should cleans up any bitmaps and references which the active wallpaper required.
      */
     void discardActiveWallpaper();
 }

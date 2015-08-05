@@ -101,6 +101,10 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 if (newBackgroundImage == null) {
                     newBackgroundImage = BackgroundImage.random();
                 }
+                if (activeWallpaper != null) {
+                    activeWallpaper.active = false;
+                    activeWallpaper.save();
+                }
                 discardActiveWallpaper();
                 activeWallpaper = new Wallpaper(newQuote, newBackgroundImage, true, System.currentTimeMillis());
                 activeWallpaper.save();
@@ -170,8 +174,6 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         if (activeWallpaperLoaded()) {
             LWQApplication.getImageController().clearBitmap(getFullUri());
             activeBackgroundImage = null;
-            activeWallpaper.active = false;
-            activeWallpaper.save();
             activeWallpaper = null;
         }
     }

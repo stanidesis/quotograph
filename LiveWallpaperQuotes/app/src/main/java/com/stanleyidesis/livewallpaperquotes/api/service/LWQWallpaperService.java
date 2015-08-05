@@ -84,7 +84,6 @@ public class LWQWallpaperService extends WallpaperService {
         public void onDestroy() {
             super.onDestroy();
             Log.v(getClass().getSimpleName(), null, new Throwable());
-            LWQApplication.getWallpaperController().discardActiveWallpaper();
         }
 
         @Override
@@ -318,4 +317,10 @@ public class LWQWallpaperService extends WallpaperService {
         return new LWQWallpaperEngine();
     }
 
+    @Override
+    public void onDestroy() {
+        Log.v(getClass().getSimpleName(), null, new Throwable());
+        super.onDestroy();
+        LWQApplication.getWallpaperController().discardActiveWallpaper();
+    }
 }
