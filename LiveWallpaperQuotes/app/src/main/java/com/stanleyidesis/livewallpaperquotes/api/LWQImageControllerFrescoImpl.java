@@ -21,12 +21,12 @@ import java.util.concurrent.Executors;
 /**
  * Created by stanleyidesis on 7/28/15.
  */
-public class LWQImageLoaderFrescoImpl implements LWQImageController {
+public class LWQImageControllerFrescoImpl implements LWQImageController {
 
     Map<String, CloseableReference<CloseableImage>> imageCache;
     Executor scheduledExecutor;
 
-    public LWQImageLoaderFrescoImpl() {
+    public LWQImageControllerFrescoImpl() {
         imageCache = new HashMap<>();
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     }

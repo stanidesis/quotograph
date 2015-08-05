@@ -180,15 +180,15 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     @Override
     public void discardActiveWallpaper() {
+        if (defaultBackgroundImage != null) {
+            defaultBackgroundImage.recycle();
+            defaultBackgroundImage = null;
+        }
         if (activeWallpaperLoaded()) {
-            if (defaultBackgroundImage != null) {
-                defaultBackgroundImage.recycle();
-                defaultBackgroundImage = null;
-            }
             LWQApplication.getImageController().clearBitmap(getFullUri());
             activeBackgroundImage = null;
-            activeWallpaper = null;
         }
+        activeWallpaper = null;
     }
 
     String getFullUri() {

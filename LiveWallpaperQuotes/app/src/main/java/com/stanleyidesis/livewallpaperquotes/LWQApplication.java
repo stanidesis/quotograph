@@ -11,7 +11,7 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.LWQImageController;
-import com.stanleyidesis.livewallpaperquotes.api.LWQImageLoaderFrescoImpl;
+import com.stanleyidesis.livewallpaperquotes.api.LWQImageControllerFrescoImpl;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperControllerUnsplashImpl;
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
@@ -35,7 +35,7 @@ public class LWQApplication extends SugarApp {
 
         sApplication = this;
         wallpaperController = new LWQWallpaperControllerUnsplashImpl();
-        imageController = new LWQImageLoaderFrescoImpl();
+        imageController = new LWQImageControllerFrescoImpl();
 
         // Pre-populate database
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);

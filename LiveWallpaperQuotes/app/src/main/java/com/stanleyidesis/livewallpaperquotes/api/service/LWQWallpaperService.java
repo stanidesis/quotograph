@@ -10,17 +10,22 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.service.wallpaper.WallpaperService;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.graphics.Palette;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
+import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
@@ -32,7 +37,7 @@ import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
  */
 public class LWQWallpaperService extends WallpaperService {
 
-    public class LWQWallpaperEngine extends Engine {
+    public class LWQWallpaperEngine extends Engine implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
         private float xOffset;
         private float yOffset;
@@ -43,13 +48,20 @@ public class LWQWallpaperService extends WallpaperService {
         private int format;
         private int width;
         private int height;
+        private GestureDetectorCompat gestureDetectorCompat;
         private Palette palette;
         private Callback<Boolean> callback = new Callback<Boolean>() {
             @Override
             public void onSuccess(Boolean loaded) {
                 if (loaded || LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
                     palette = Palette.from(LWQApplication.getWallpaperController().getBackgroundImage()).generate();
-                    draw(getSurfaceHolder());
+                    final Looper mainLooper = Looper.getMainLooper();
+                    new Handler(mainLooper).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            draw(getSurfaceHolder());
+                        }
+                    });
                 } else {
                     LWQApplication.getWallpaperController().retrieveActiveWallpaper(this);
                 }
@@ -71,6 +83,10 @@ public class LWQWallpaperService extends WallpaperService {
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
             setOffsetNotificationsEnabled(true);
+            if (BuildConfig.DEBUG) {
+                gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
+                gestureDetectorCompat.setOnDoubleTapListener(this);
+            }
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
@@ -132,6 +148,7 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public void onTouchEvent(MotionEvent event) {
             super.onTouchEvent(event);
+            gestureDetectorCompat.onTouchEvent(event);
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
@@ -216,14 +233,18 @@ public class LWQWallpaperService extends WallpaperService {
                 if (textSwatch == null) {
                     textSwatch = palette.getDarkMutedSwatch();
                 }
-                quoteColor = textSwatch.getBodyTextColor();
-                authorColor = textSwatch.getTitleTextColor();
+                if (textSwatch != null) {
+                    quoteColor = textSwatch.getBodyTextColor();
+                    authorColor = textSwatch.getTitleTextColor();
+                }
 
                 Palette.Swatch strokeSwatch = palette.getLightVibrantSwatch();
                 if (strokeSwatch == null) {
                     strokeSwatch = palette.getLightMutedSwatch();
                 }
-                quoteStrokeColor = strokeSwatch.getTitleTextColor();
+                if (strokeSwatch != null) {
+                    quoteStrokeColor = strokeSwatch.getTitleTextColor();
+                }
 
             } else if (backgroundImage != null) {
                 Palette.from(backgroundImage).generate(new Palette.PaletteAsyncListener() {
@@ -308,6 +329,56 @@ public class LWQWallpaperService extends WallpaperService {
                     staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),
                     staticLayout.getSpacingAdd(), true);
             strokeLayout.draw(canvas);
+        }
+
+        /*
+         * Gesture detection
+         */
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            LWQApplication.getWallpaperController().generateNewWallpaper(callback);
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public void onShowPress(MotionEvent e) {
+
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            return false;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            return false;
         }
     }
 
