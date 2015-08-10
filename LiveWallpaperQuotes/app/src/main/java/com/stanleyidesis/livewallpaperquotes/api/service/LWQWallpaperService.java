@@ -165,12 +165,7 @@ public class LWQWallpaperService extends WallpaperService {
             final LWQWallpaperController wallpaperController =
                     LWQApplication.getWallpaperController();
             if (!wallpaperController.activeWallpaperLoaded()) {
-                if (wallpaperController.activeWallpaperExists()) {
-                    wallpaperController.retrieveActiveWallpaper(callback);
-                } else {
-                    // TODO ultimately does not belong here
-                    wallpaperController.generateNewWallpaper(callback);
-                }
+                wallpaperController.retrieveActiveWallpaper(callback);
             }
 
             final Canvas canvas = holder.lockCanvas();
@@ -203,8 +198,6 @@ public class LWQWallpaperService extends WallpaperService {
                 Matrix scaleMatrix = new Matrix();
                 scaleMatrix.postScale(finalScale, finalScale);
                 canvas.drawBitmap(backgroundImage, scaleMatrix, bitmapPaint);
-            } else {
-                // TODO default background image
             }
 
             final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
