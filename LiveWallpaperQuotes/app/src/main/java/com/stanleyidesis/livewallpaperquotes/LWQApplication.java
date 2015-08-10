@@ -5,9 +5,15 @@ import android.content.res.TypedArray;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.orm.SugarApp;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import com.stanleyidesis.livewallpaperquotes.api.LWQImageController;
+import com.stanleyidesis.livewallpaperquotes.api.LWQImageControllerFrescoImpl;
+import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
+import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperControllerUnsplashImpl;
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
@@ -17,9 +23,19 @@ import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
  */
 public class LWQApplication extends SugarApp {
 
+    static LWQApplication sApplication;
+
+    LWQWallpaperController wallpaperController;
+    LWQImageController imageController;
+
     @Override
     public void onCreate() {
         super.onCreate();
+        Fresco.initialize(this);
+
+        sApplication = this;
+        wallpaperController = new LWQWallpaperControllerUnsplashImpl();
+        imageController = new LWQImageControllerFrescoImpl();
 
         // Pre-populate database
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -47,12 +63,35 @@ public class LWQApplication extends SugarApp {
                         defaultAuthor = new Author(defaultCategoryAuthors[j]);
                         defaultAuthor.save();
                     }
-                    new Quote(defaultCategoryQuotes[j], false, defaultAuthor, defaultCategory).save();
+                    new Quote(defaultCategoryQuotes[j], defaultAuthor, defaultCategory).save();
                 }
             }
             defaultCategoryQuoteMap.recycle();
             defaultCategoryAuthorMap.recycle();
             defaultSharedPreferences.edit().putBoolean(getString(R.string.preference_key_first_launch), false).apply();
+            wallpaperController.generateNewWallpaper(new Callback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                    if (!wallpaperController.activeWallpaperLoaded()) {
+                        wallpaperController.retrieveActiveWallpaper(this);
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {}
+            });
         }
+    }
+
+    public static LWQApplication get() {
+        return sApplication;
+    }
+
+    public static LWQWallpaperController getWallpaperController() {
+        return sApplication.wallpaperController;
+    }
+
+    public static LWQImageController getImageController() {
+        return sApplication.imageController;
     }
 }

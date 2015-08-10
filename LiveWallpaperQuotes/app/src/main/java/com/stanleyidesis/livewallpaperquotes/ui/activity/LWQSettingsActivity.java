@@ -1,11 +1,9 @@
 package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
 import android.app.Activity;
-import android.util.Log;
+import android.os.Bundle;
 
-import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
-
-import java.util.Iterator;
+import com.stanleyidesis.livewallpaperquotes.R;
 
 /**
  * Created by stanleyidesis on 7/11/15.
@@ -13,13 +11,13 @@ import java.util.Iterator;
 public class LWQSettingsActivity extends Activity {
 
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_lwq_settings);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        // Test, works
-        final Iterator<Quote> allQuotes = Quote.findAll(Quote.class);
-        while (allQuotes.hasNext()) {
-            final Quote next = allQuotes.next();
-            Log.v(getClass().getSimpleName(), "Found quote: \"" + next.text + "\" by " + next.author.name);
-        }
     }
 }
