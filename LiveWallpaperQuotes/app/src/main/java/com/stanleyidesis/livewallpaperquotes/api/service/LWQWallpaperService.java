@@ -8,6 +8,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +25,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
@@ -41,6 +43,12 @@ public class LWQWallpaperService extends WallpaperService {
 
     public class LWQWallpaperEngine extends Engine implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
+        private static final int TEXT_ALPHA = 0xE5FFFFFF;
+        private static final int STROKE_ALPHA = 0xF2FFFFFF;
+
+        private Typeface quoteTypeFace;
+        private Typeface authorTypeFace;
+
         private float xOffset;
         private float yOffset;
         private float xOffsetStep;
@@ -52,11 +60,13 @@ public class LWQWallpaperService extends WallpaperService {
         private int height;
         private GestureDetectorCompat gestureDetectorCompat;
         private Palette palette;
+        private int swatchIndex;
         private Callback<Boolean> callback = new Callback<Boolean>() {
             @Override
             public void onSuccess(Boolean loaded) {
                 if (loaded || LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
                     palette = Palette.from(LWQApplication.getWallpaperController().getBackgroundImage()).generate();
+                    swatchIndex = -1;
                     final Looper mainLooper = Looper.getMainLooper();
                     new Handler(mainLooper).post(new Runnable() {
                         @Override
@@ -89,6 +99,8 @@ public class LWQWallpaperService extends WallpaperService {
                 gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
                 gestureDetectorCompat.setOnDoubleTapListener(this);
             }
+            quoteTypeFace = Fonts.JOSEFIN_BOLD.load(LWQWallpaperService.this);
+            authorTypeFace = quoteTypeFace;
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
@@ -235,16 +247,16 @@ public class LWQWallpaperService extends WallpaperService {
             int quoteStrokeColor = getResources().getColor(android.R.color.holo_blue_light);
             int authorColor = quoteColor;
             if (palette != null) {
-                final List<Palette.Swatch> swatches = palette.getSwatches();
-                final Palette.Swatch swatch = swatches.get(0);
-                quoteColor = swatch.getBodyTextColor();
-                authorColor = swatch.getTitleTextColor();
-                quoteStrokeColor = swatch.getRgb();
+                final Palette.Swatch swatch = getSwatch();
+                quoteColor = swatch.getRgb();
+                authorColor = swatch.getRgb();
+                quoteStrokeColor = swatch.getTitleTextColor();
             } else if (backgroundImage != null) {
                 Palette.from(backgroundImage).generate(new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
                         LWQWallpaperEngine.this.palette = palette;
+                        LWQWallpaperEngine.this.swatchIndex = -1;
                         draw(getSurfaceHolder());
                     }
                 });
@@ -253,9 +265,9 @@ public class LWQWallpaperService extends WallpaperService {
             // Setup Quote text
             TextPaint quoteTextPaint = new TextPaint();
             quoteTextPaint.setTextAlign(Paint.Align.LEFT);
-            quoteTextPaint.setColor(quoteColor);
+            quoteTextPaint.setColor(quoteColor & TEXT_ALPHA);
             quoteTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-            quoteTextPaint.setTypeface(Fonts.JOSEFIN_BOLD.load(LWQWallpaperService.this));
+            quoteTextPaint.setTypeface(quoteTypeFace);
             quoteTextPaint.setTextSize(145f);
             quoteTextPaint.setStyle(Paint.Style.FILL);
 
@@ -263,9 +275,8 @@ public class LWQWallpaperService extends WallpaperService {
             TextPaint authorTextPaint = new TextPaint(quoteTextPaint);
             authorTextPaint.setTextSize(100f);
             authorTextPaint.setTextAlign(Paint.Align.RIGHT);
-            authorTextPaint.setFlags(authorTextPaint.getFlags() | Paint.FAKE_BOLD_TEXT_FLAG);
-            authorTextPaint.setColor(authorColor);
-            authorTextPaint.setTypeface(Fonts.DAWNING_OF_A_NEW_DAY.load(LWQWallpaperService.this));
+            authorTextPaint.setColor(authorColor & TEXT_ALPHA);
+            authorTextPaint.setTypeface(authorTypeFace);
             String author = getString(R.string.unknown);
             if (wallpaperController.getAuthor() != null && !wallpaperController.getAuthor().isEmpty()) {
                 author = wallpaperController.getAuthor();
@@ -291,11 +302,11 @@ public class LWQWallpaperService extends WallpaperService {
             // Draw the quote centered vertically
             canvas.translate(drawingArea.left, drawingArea.top + centerQuoteOffset);
             quoteLayout.draw(canvas);
-            strokeText(quoteLayout, quoteStrokeColor, 2f, canvas);
+            strokeText(quoteLayout, quoteStrokeColor & STROKE_ALPHA, 3f, canvas);
 
             canvas.translate(drawingArea.width(), quoteLayout.getHeight());
             authorLayout.draw(canvas);
-            strokeText(authorLayout, quoteStrokeColor, 1f, canvas);
+            strokeText(authorLayout, quoteStrokeColor & STROKE_ALPHA, 3f, canvas);
 
             canvas.restore();
             holder.unlockCanvasAndPost(canvas);
@@ -325,12 +336,41 @@ public class LWQWallpaperService extends WallpaperService {
             strokeLayout.draw(canvas);
         }
 
+        Palette.Swatch getSwatch() {
+            swatchIndex++;
+            final List<Palette.Swatch> swatches = palette.getSwatches();
+            if (swatchIndex >= swatches.size()) {
+                swatchIndex = 0;
+            }
+            final Palette.Swatch chosenSwatch = swatches.get(swatchIndex);
+            if (!BuildConfig.DEBUG) {
+                return chosenSwatch;
+            }
+            if (chosenSwatch == palette.getMutedSwatch()) {
+                Toast.makeText(LWQWallpaperService.this, "Muted Swatch", Toast.LENGTH_LONG).show();
+            } else if (chosenSwatch == palette.getVibrantSwatch()) {
+                Toast.makeText(LWQWallpaperService.this, "Vibrant Swatch", Toast.LENGTH_LONG).show();
+            } else if (chosenSwatch == palette.getDarkMutedSwatch()) {
+                Toast.makeText(LWQWallpaperService.this, "Dark Muted Swatch", Toast.LENGTH_LONG).show();
+            } else if (chosenSwatch == palette.getDarkVibrantSwatch()) {
+                Toast.makeText(LWQWallpaperService.this, "Dark Vibrant Swatch", Toast.LENGTH_LONG).show();
+            } else if (chosenSwatch == palette.getLightMutedSwatch()) {
+                Toast.makeText(LWQWallpaperService.this, "Light Muted Swatch", Toast.LENGTH_LONG).show();
+            } else if (chosenSwatch == palette.getLightVibrantSwatch()) {
+                Toast.makeText(LWQWallpaperService.this, "Light Vibrant Swatch", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(LWQWallpaperService.this, "Unknown Swatch", Toast.LENGTH_LONG).show();
+            }
+            return chosenSwatch;
+        }
+
         /*
          * Gesture detection
          */
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
+//            draw(getSurfaceHolder());
             return false;
         }
 
