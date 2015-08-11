@@ -197,7 +197,17 @@ public class LWQWallpaperService extends WallpaperService {
 
                 Matrix scaleMatrix = new Matrix();
                 scaleMatrix.postScale(finalScale, finalScale);
-                canvas.drawBitmap(backgroundImage, scaleMatrix, bitmapPaint);
+
+                // Adjust center
+                final int bitmapFinalWidth = (int)((float) backgroundImage.getWidth() * finalScale);
+                if (bitmapFinalWidth > screenWidth) {
+                    final float dx = -0.5f * (bitmapFinalWidth - screenWidth);
+                    canvas.translate(dx, 0);
+                    canvas.drawBitmap(backgroundImage, scaleMatrix, bitmapPaint);
+                    canvas.translate(-dx, 0);
+                } else {
+                    canvas.drawBitmap(backgroundImage, scaleMatrix, bitmapPaint);
+                }
             }
 
             final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
