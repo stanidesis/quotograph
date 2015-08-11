@@ -13,6 +13,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.renderscript.Allocation;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.service.wallpaper.WallpaperService;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.graphics.Palette;
@@ -195,6 +198,7 @@ public class LWQWallpaperService extends WallpaperService {
 
             final int horizontalPadding = (int) (screenWidth * .07);
             final int verticalPadding = (int) (screenHeight * .07);
+            final int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
 
             final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
             if (backgroundImage != null) {
@@ -220,6 +224,19 @@ public class LWQWallpaperService extends WallpaperService {
                 } else {
                     canvas.drawBitmap(backgroundImage, scaleMatrix, bitmapPaint);
                 }
+                if (currentAPIVersion >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    Bitmap overlay = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
+                    Canvas overlayCanvas = new Canvas(overlay);
+                    overlayCanvas.drawBitmap(backgroundImage, 0, 0, null);
+                    RenderScript renderScript = RenderScript.create(LWQWallpaperService.this);
+                    Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, overlay);
+                    ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
+                    blur.setInput(overlayAllocation);
+                    blur.setRadius(5);
+                    blur.forEach(overlayAllocation);
+                    overlayAllocation.copyTo(overlay);
+                    canvas.drawBitmap(overlay, 0, 0, null);
+                }
             }
 
             final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
@@ -227,7 +244,6 @@ public class LWQWallpaperService extends WallpaperService {
 
             int googleBarOffset = 0;
             // Google Now Search Offset
-            int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
             if (currentAPIVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 // There's a good chance the Google Search Bar is there, I'm going to assume
                 // it is for ICS+ installs, and just offset the top
