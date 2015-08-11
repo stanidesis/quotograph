@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
@@ -202,6 +203,14 @@ public class LWQWallpaperService extends WallpaperService {
 
             final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
             if (backgroundImage != null) {
+                Bitmap drawnBitmap = backgroundImage;
+                float blurRadius = PreferenceManager.getDefaultSharedPreferences(LWQWallpaperService.this).getFloat(getString(R.string.preference_key_blur), 2f);
+                boolean recycleBitmap = false;
+                if (currentAPIVersion >= Build.VERSION_CODES.JELLY_BEAN_MR1 && blurRadius > 0f) {
+                    recycleBitmap = true;
+                    drawnBitmap = blurBitmap(backgroundImage, 5);
+                }
+
                 Paint bitmapPaint = new Paint();
                 bitmapPaint.setAntiAlias(true);
                 bitmapPaint.setFilterBitmap(true);
@@ -215,27 +224,17 @@ public class LWQWallpaperService extends WallpaperService {
                 scaleMatrix.postScale(finalScale, finalScale);
 
                 // Adjust center
-                final int bitmapFinalWidth = (int)((float) backgroundImage.getWidth() * finalScale);
+                final int bitmapFinalWidth = (int)((float) drawnBitmap.getWidth() * finalScale);
                 if (bitmapFinalWidth > screenWidth) {
                     final float dx = -0.5f * (bitmapFinalWidth - screenWidth);
                     canvas.translate(dx, 0);
-                    canvas.drawBitmap(backgroundImage, scaleMatrix, bitmapPaint);
+                    canvas.drawBitmap(drawnBitmap, scaleMatrix, bitmapPaint);
                     canvas.translate(-dx, 0);
                 } else {
-                    canvas.drawBitmap(backgroundImage, scaleMatrix, bitmapPaint);
+                    canvas.drawBitmap(drawnBitmap, scaleMatrix, bitmapPaint);
                 }
-                if (currentAPIVersion >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    Bitmap overlay = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
-                    Canvas overlayCanvas = new Canvas(overlay);
-                    overlayCanvas.drawBitmap(backgroundImage, 0, 0, null);
-                    RenderScript renderScript = RenderScript.create(LWQWallpaperService.this);
-                    Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, overlay);
-                    ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
-                    blur.setInput(overlayAllocation);
-                    blur.setRadius(5);
-                    blur.forEach(overlayAllocation);
-                    overlayAllocation.copyTo(overlay);
-                    canvas.drawBitmap(overlay, 0, 0, null);
+                if (recycleBitmap) {
+                    drawnBitmap.recycle();
                 }
             }
 
@@ -378,6 +377,20 @@ public class LWQWallpaperService extends WallpaperService {
                 Toast.makeText(LWQWallpaperService.this, "Unknown Swatch", Toast.LENGTH_LONG).show();
             }
             return chosenSwatch;
+        }
+
+        Bitmap blurBitmap(Bitmap original, float radius) {
+            Bitmap overlay = Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas overlayCanvas = new Canvas(overlay);
+            overlayCanvas.drawBitmap(original, 0, 0, null);
+            RenderScript renderScript = RenderScript.create(LWQWallpaperService.this);
+            Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, overlay);
+            ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
+            blur.setInput(overlayAllocation);
+            blur.setRadius(radius);
+            blur.forEach(overlayAllocation);
+            overlayAllocation.copyTo(overlay);
+            return overlay;
         }
 
         /*
