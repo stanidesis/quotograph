@@ -208,7 +208,7 @@ public class LWQWallpaperService extends WallpaperService {
                 boolean recycleBitmap = false;
                 if (currentAPIVersion >= Build.VERSION_CODES.JELLY_BEAN_MR1 && blurRadius > 0f) {
                     recycleBitmap = true;
-                    drawnBitmap = blurBitmap(backgroundImage, 5);
+                    drawnBitmap = blurBitmap(backgroundImage, blurRadius);
                 }
 
                 Paint bitmapPaint = new Paint();
