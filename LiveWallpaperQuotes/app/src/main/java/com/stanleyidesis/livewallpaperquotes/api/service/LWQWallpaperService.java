@@ -70,7 +70,7 @@ public class LWQWallpaperService extends WallpaperService {
             public void onSuccess(Boolean loaded) {
                 if (loaded || LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
                     palette = Palette.from(LWQApplication.getWallpaperController().getBackgroundImage()).generate();
-                    swatchIndex = -1;
+                    swatchIndex = 0;
                     final Looper mainLooper = Looper.getMainLooper();
                     new Handler(mainLooper).post(new Runnable() {
                         @Override
@@ -204,7 +204,7 @@ public class LWQWallpaperService extends WallpaperService {
             final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
             if (backgroundImage != null) {
                 Bitmap drawnBitmap = backgroundImage;
-                float blurRadius = PreferenceManager.getDefaultSharedPreferences(LWQWallpaperService.this).getFloat(getString(R.string.preference_key_blur), 2f);
+                float blurRadius = PreferenceManager.getDefaultSharedPreferences(LWQWallpaperService.this).getFloat(getString(R.string.preference_key_blur), 0f);
                 boolean recycleBitmap = false;
                 if (currentAPIVersion >= Build.VERSION_CODES.JELLY_BEAN_MR1 && blurRadius > 0f) {
                     recycleBitmap = true;
@@ -271,7 +271,7 @@ public class LWQWallpaperService extends WallpaperService {
                     @Override
                     public void onGenerated(Palette palette) {
                         LWQWallpaperEngine.this.palette = palette;
-                        LWQWallpaperEngine.this.swatchIndex = -1;
+                        LWQWallpaperEngine.this.swatchIndex = 0;
                         draw(getSurfaceHolder());
                     }
                 });
@@ -351,7 +351,7 @@ public class LWQWallpaperService extends WallpaperService {
             strokeLayout.draw(canvas);
         }
 
-        Palette.Swatch getSwatch() {
+        void changeSwatch() {
             swatchIndex++;
             final List<Palette.Swatch> swatches = palette.getSwatches();
             if (swatchIndex >= swatches.size()) {
@@ -359,7 +359,7 @@ public class LWQWallpaperService extends WallpaperService {
             }
             final Palette.Swatch chosenSwatch = swatches.get(swatchIndex);
             if (!BuildConfig.DEBUG) {
-                return chosenSwatch;
+                return;
             }
             if (chosenSwatch == palette.getMutedSwatch()) {
                 Toast.makeText(LWQWallpaperService.this, "Muted Swatch", Toast.LENGTH_LONG).show();
@@ -376,7 +376,10 @@ public class LWQWallpaperService extends WallpaperService {
             } else {
                 Toast.makeText(LWQWallpaperService.this, "Unknown Swatch", Toast.LENGTH_LONG).show();
             }
-            return chosenSwatch;
+        }
+
+        Palette.Swatch getSwatch() {
+            return palette.getSwatches().get(swatchIndex);
         }
 
         Bitmap blurBitmap(Bitmap original, float radius) {
