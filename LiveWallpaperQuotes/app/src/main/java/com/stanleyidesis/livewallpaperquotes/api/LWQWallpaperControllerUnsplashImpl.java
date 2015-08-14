@@ -8,7 +8,7 @@ import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.db.BackgroundImage;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Wallpaper;
-import com.stanleyidesis.livewallpaperquotes.api.network.LWQUnsplashManager;
+import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         NEW_WALLPAPER;
     }
 
-    LWQUnsplashManager unsplashManager;
+    UnsplashManager unsplashManager;
     Wallpaper activeWallpaper;
     Bitmap activeBackgroundImage;
     Bitmap defaultBackgroundImage;
@@ -36,7 +36,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     Map<RetrievalState, List<Callback<Boolean>>> listeners;
 
     public LWQWallpaperControllerUnsplashImpl() {
-        unsplashManager = new LWQUnsplashManager();
+        unsplashManager = new UnsplashManager();
         listeners = new HashMap<>();
         listeners.put(RetrievalState.ACTIVE_WALLPAPER, new ArrayList<Callback<Boolean>>());
         listeners.put(RetrievalState.NEW_WALLPAPER, new ArrayList<Callback<Boolean>>());
@@ -91,13 +91,13 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
         // TODO query BrainyQuote
         final Quote newQuote = Quote.random();
-        Set<LWQUnsplashManager.Category> categories = new HashSet<>();
-        categories.add(LWQUnsplashManager.Category.NATURE);
-        unsplashManager.getPhotoURLs(1, categories, new Random().nextBoolean(), new Callback<List<LWQUnsplashManager.LWQUnsplashImage>>() {
+        Set<UnsplashManager.UnsplashCategory> categories = new HashSet<>();
+        categories.add(UnsplashManager.UnsplashCategory.NATURE);
+        unsplashManager.getPhotoURLs(1, categories, new Random().nextBoolean(), new Callback<List<UnsplashManager.LWQUnsplashImage>>() {
             @Override
-            public void onSuccess(List<LWQUnsplashManager.LWQUnsplashImage> lwqUnsplashImages) {
+            public void onSuccess(List<UnsplashManager.LWQUnsplashImage> lwqUnsplashImages) {
                 BackgroundImage newBackgroundImage = null;
-                for (LWQUnsplashManager.LWQUnsplashImage unsplashImage : lwqUnsplashImages) {
+                for (UnsplashManager.LWQUnsplashImage unsplashImage : lwqUnsplashImages) {
                     newBackgroundImage = BackgroundImage.findImage(unsplashImage.url);
                     if (newBackgroundImage == null) {
                         newBackgroundImage = new BackgroundImage(unsplashImage.url, BackgroundImage.Source.UNSPLASH);
@@ -193,7 +193,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     String getFullUri() {
         if (activeWallpaper.backgroundImage.source == BackgroundImage.Source.UNSPLASH) {
-            return LWQUnsplashManager.appendJPGFormat(activeWallpaper.backgroundImage.uri);
+            return UnsplashManager.appendJPGFormat(activeWallpaper.backgroundImage.uri);
         }
         return activeWallpaper.backgroundImage.uri;
     }

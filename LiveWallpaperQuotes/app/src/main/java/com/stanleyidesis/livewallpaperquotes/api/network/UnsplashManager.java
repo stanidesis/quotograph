@@ -21,8 +21,8 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * Created by stanleyidesis on 7/28/15.
  */
-public class LWQUnsplashManager {
-    public enum Category {
+public class UnsplashManager {
+    public enum UnsplashCategory {
         BUILDINGS(2),
         FOOD_DRINK(3),
         NATURE(4),
@@ -32,13 +32,13 @@ public class LWQUnsplashManager {
 
         int identifier;
 
-        Category(int identifier) {
+        UnsplashCategory(int identifier) {
             this.identifier = identifier;
         }
 
-        public static Category random() {
-            final int randomIndex = new Random().nextInt(Category.values().length);
-            return Category.values()[randomIndex];
+        public static UnsplashCategory random() {
+            final int randomIndex = new Random().nextInt(UnsplashCategory.values().length);
+            return UnsplashCategory.values()[randomIndex];
         }
     }
 
@@ -46,11 +46,11 @@ public class LWQUnsplashManager {
         return unsplashUri + "?fm=jpg";
     }
 
-    public LWQUnsplashManager() {
+    public UnsplashManager() {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
-    public void getPhotoURLs(final int pageIndex, final Set<Category> categorySet,
+    public void getPhotoURLs(final int pageIndex, final Set<UnsplashCategory> unsplashCategorySet,
                              final boolean featured, final Callback<List<LWQUnsplashImage>> callback) {
         submit(new Runnable() {
             @Override
@@ -58,13 +58,13 @@ public class LWQUnsplashManager {
                 StringBuilder urlBuilder = new StringBuilder(Endpoints.UNSPLASH_URL);
                 urlBuilder.append(String.format(PAGE_PARAM, pageIndex));
                 urlBuilder.append(String.format(FEATURED_PARAM, featured ? 1 : 0));
-                for (Category category : Category.values()) {
-                    urlBuilder.append(String.format(CATEGORY_PARAM, category.identifier, 0));
-                    if (categorySet.contains(category)) {
-                        urlBuilder.append(String.format(CATEGORY_PARAM, category.identifier, 1));
+                for (UnsplashCategory unsplashCategory : UnsplashCategory.values()) {
+                    urlBuilder.append(String.format(CATEGORY_PARAM, unsplashCategory.identifier, 0));
+                    if (unsplashCategorySet.contains(unsplashCategory)) {
+                        urlBuilder.append(String.format(CATEGORY_PARAM, unsplashCategory.identifier, 1));
                     }
                 }
-                Log.v(LWQUnsplashManager.class.getSimpleName(), "URL: " + urlBuilder.toString());
+                Log.v(UnsplashManager.class.getSimpleName(), "URL: " + urlBuilder.toString());
 
                 final Connection connection = Jsoup.connect(urlBuilder.toString());
                 final Connection.Response response;
@@ -76,7 +76,7 @@ public class LWQUnsplashManager {
                     return;
                 }
 
-                Log.v(LWQUnsplashManager.class.getSimpleName(), "Response: " + response.statusMessage());
+                Log.v(UnsplashManager.class.getSimpleName(), "Response: " + response.statusMessage());
 
                 final Document document;
                 try {

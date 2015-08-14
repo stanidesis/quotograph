@@ -1,11 +1,9 @@
-package com.stanleyidesis.livewallpaperquotes.api.db;
+package com.stanleyidesis.livewallpaperquotes.api;
 
-import com.orm.StringUtil;
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
+import com.stanleyidesis.livewallpaperquotes.api.db.Category;
+import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 
-import java.util.Random;
+import java.util.List;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -29,7 +27,7 @@ import java.util.Random;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * BackgroundImage.java
+ * LWQQuoteController.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -38,34 +36,34 @@ import java.util.Random;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 08/01/2015
+ * Date: 07/14/2015
  */
 
-public class BackgroundImage extends SugarRecord<BackgroundImage> {
+public interface LWQQuoteController {
+    /**
+     * Recover all categories available from the quote source.
+     * This method will return newly-recovered categories to the callback.
+     *
+     * Query for existing categories using the Category class.
+     *
+     * @param callback
+     */
+    void fetchCategories(Callback<List<Category>> callback);
 
-    public enum Source {
-        UNSPLASH,
-        USER_PHOTO;
-    }
+    /**
+     * This method recovers new quotes from the source within the given category.
+     * Newly recovered quotes are served back to the caller.
+     *
+     * @param callback
+     */
+    void fetchQuotes(Category category, Callback<List<Quote>> callback);
 
-    public String uri;
-    public Source source;
-
-    public BackgroundImage() {}
-
-    public BackgroundImage(String uri, Source source) {
-        this.uri = uri;
-        this.source = source;
-    }
-
-    public static BackgroundImage findImage(String uri) {
-        return Select.from(BackgroundImage.class).where(Condition.prop("uri").eq(uri)).first();
-    }
-
-    public static final BackgroundImage random() {
-        final long count = Select.from(BackgroundImage.class).count();
-        final int offset = new Random().nextInt((int) count);
-        return BackgroundImage.findWithQuery(BackgroundImage.class,
-                "Select * from " + StringUtil.toSQLName("BackgroundImage") + " LIMIT 1 OFFSET " + offset, null).get(0);
-    }
+    /**
+     * This will look for an unused quote within the database of the matching category.
+     * If not found, it will return null in the callback.
+     *
+     * @param category
+     * @param callback
+     */
+    void fetchUnusedQuote(Category category, Callback<Quote> callback);
 }
