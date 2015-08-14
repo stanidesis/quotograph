@@ -31,6 +31,7 @@ public class LWQAlarmManager {
         enableAlarmReceiver(true);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         AlarmManager alarmManager = (AlarmManager) LWQApplication.get()
