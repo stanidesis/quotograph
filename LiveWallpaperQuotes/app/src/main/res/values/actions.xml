@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_change_wallpaper">com.stanleyidesis.livewallpaperquotes.action.CHANGE_WALLPAPER</string>
+</resources>
