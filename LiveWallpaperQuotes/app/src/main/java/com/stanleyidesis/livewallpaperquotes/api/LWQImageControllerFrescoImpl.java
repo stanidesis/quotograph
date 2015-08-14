@@ -58,6 +58,9 @@ public class LWQImageControllerFrescoImpl implements LWQImageController {
     public synchronized void clearBitmap(String uri) {
         if (isCached(uri)) {
             final CloseableReference<CloseableImage> removedImage = imageCache.remove(uri);
+            Uri fullUri = Uri.parse(uri);
+            Fresco.getImagePipeline().evictFromCache(fullUri);
+            Fresco.getImagePipeline().evictFromMemoryCache(fullUri);
             CloseableReference.closeSafely(removedImage);
         }
     }
