@@ -13,6 +13,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.renderscript.Allocation;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.service.wallpaper.WallpaperService;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.graphics.Palette;
@@ -29,6 +32,7 @@ import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
@@ -66,7 +70,7 @@ public class LWQWallpaperService extends WallpaperService {
             public void onSuccess(Boolean loaded) {
                 if (loaded || LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
                     palette = Palette.from(LWQApplication.getWallpaperController().getBackgroundImage()).generate();
-                    swatchIndex = -1;
+                    swatchIndex = 0;
                     final Looper mainLooper = Looper.getMainLooper();
                     new Handler(mainLooper).post(new Runnable() {
                         @Override
@@ -195,9 +199,18 @@ public class LWQWallpaperService extends WallpaperService {
 
             final int horizontalPadding = (int) (screenWidth * .07);
             final int verticalPadding = (int) (screenHeight * .07);
+            final int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
 
             final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
             if (backgroundImage != null) {
+                Bitmap drawnBitmap = backgroundImage;
+                float blurRadius = LWQPreferences.getBlurPreference();
+                boolean recycleBitmap = false;
+                if (currentAPIVersion >= Build.VERSION_CODES.JELLY_BEAN_MR1 && blurRadius > 0f) {
+                    recycleBitmap = true;
+                    drawnBitmap = blurBitmap(backgroundImage, blurRadius);
+                }
+
                 Paint bitmapPaint = new Paint();
                 bitmapPaint.setAntiAlias(true);
                 bitmapPaint.setFilterBitmap(true);
@@ -211,14 +224,17 @@ public class LWQWallpaperService extends WallpaperService {
                 scaleMatrix.postScale(finalScale, finalScale);
 
                 // Adjust center
-                final int bitmapFinalWidth = (int)((float) backgroundImage.getWidth() * finalScale);
+                final int bitmapFinalWidth = (int)((float) drawnBitmap.getWidth() * finalScale);
                 if (bitmapFinalWidth > screenWidth) {
                     final float dx = -0.5f * (bitmapFinalWidth - screenWidth);
                     canvas.translate(dx, 0);
-                    canvas.drawBitmap(backgroundImage, scaleMatrix, bitmapPaint);
+                    canvas.drawBitmap(drawnBitmap, scaleMatrix, bitmapPaint);
                     canvas.translate(-dx, 0);
                 } else {
-                    canvas.drawBitmap(backgroundImage, scaleMatrix, bitmapPaint);
+                    canvas.drawBitmap(drawnBitmap, scaleMatrix, bitmapPaint);
+                }
+                if (recycleBitmap) {
+                    drawnBitmap.recycle();
                 }
             }
 
@@ -227,7 +243,6 @@ public class LWQWallpaperService extends WallpaperService {
 
             int googleBarOffset = 0;
             // Google Now Search Offset
-            int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
             if (currentAPIVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 // There's a good chance the Google Search Bar is there, I'm going to assume
                 // it is for ICS+ installs, and just offset the top
@@ -256,7 +271,7 @@ public class LWQWallpaperService extends WallpaperService {
                     @Override
                     public void onGenerated(Palette palette) {
                         LWQWallpaperEngine.this.palette = palette;
-                        LWQWallpaperEngine.this.swatchIndex = -1;
+                        LWQWallpaperEngine.this.swatchIndex = 0;
                         draw(getSurfaceHolder());
                     }
                 });
@@ -336,7 +351,7 @@ public class LWQWallpaperService extends WallpaperService {
             strokeLayout.draw(canvas);
         }
 
-        Palette.Swatch getSwatch() {
+        void changeSwatch() {
             swatchIndex++;
             final List<Palette.Swatch> swatches = palette.getSwatches();
             if (swatchIndex >= swatches.size()) {
@@ -344,7 +359,7 @@ public class LWQWallpaperService extends WallpaperService {
             }
             final Palette.Swatch chosenSwatch = swatches.get(swatchIndex);
             if (!BuildConfig.DEBUG) {
-                return chosenSwatch;
+                return;
             }
             if (chosenSwatch == palette.getMutedSwatch()) {
                 Toast.makeText(LWQWallpaperService.this, "Muted Swatch", Toast.LENGTH_LONG).show();
@@ -361,7 +376,24 @@ public class LWQWallpaperService extends WallpaperService {
             } else {
                 Toast.makeText(LWQWallpaperService.this, "Unknown Swatch", Toast.LENGTH_LONG).show();
             }
-            return chosenSwatch;
+        }
+
+        Palette.Swatch getSwatch() {
+            return palette.getSwatches().get(swatchIndex);
+        }
+
+        Bitmap blurBitmap(Bitmap original, float radius) {
+            Bitmap overlay = Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas overlayCanvas = new Canvas(overlay);
+            overlayCanvas.drawBitmap(original, 0, 0, null);
+            RenderScript renderScript = RenderScript.create(LWQWallpaperService.this);
+            Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, overlay);
+            ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
+            blur.setInput(overlayAllocation);
+            blur.setRadius(radius);
+            blur.forEach(overlayAllocation);
+            overlayAllocation.copyTo(overlay);
+            return overlay;
         }
 
         /*
@@ -370,13 +402,18 @@ public class LWQWallpaperService extends WallpaperService {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-//            draw(getSurfaceHolder());
+            if (BuildConfig.DEBUG) {
+                changeSwatch();
+                draw(getSurfaceHolder());
+            }
             return false;
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            LWQApplication.getWallpaperController().generateNewWallpaper(callback);
+            if (BuildConfig.DEBUG) {
+                LWQApplication.getWallpaperController().generateNewWallpaper(callback);
+            }
             return true;
         }
 
