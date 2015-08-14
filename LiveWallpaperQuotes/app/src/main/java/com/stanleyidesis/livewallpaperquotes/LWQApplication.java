@@ -1,8 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes;
 
-import android.content.SharedPreferences;
 import android.content.res.TypedArray;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -38,8 +36,7 @@ public class LWQApplication extends SugarApp {
         imageController = new LWQImageControllerFrescoImpl();
 
         // Pre-populate database
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (defaultSharedPreferences.getBoolean(getString(R.string.preference_key_first_launch), true)) {
+        if (LWQPreferences.isFirstLaunch()) {
             final String[] defaultCategoryArray = getResources().getStringArray(R.array.default_category_titles);
             final TypedArray defaultCategoryQuoteMap = getResources().obtainTypedArray(R.array.default_category_quote_map);
             final TypedArray defaultCategoryAuthorMap = getResources().obtainTypedArray(R.array.default_category_author_map);
@@ -68,7 +65,7 @@ public class LWQApplication extends SugarApp {
             }
             defaultCategoryQuoteMap.recycle();
             defaultCategoryAuthorMap.recycle();
-            defaultSharedPreferences.edit().putBoolean(getString(R.string.preference_key_first_launch), false).apply();
+            LWQPreferences.setFirstLaunch(false);
             wallpaperController.generateNewWallpaper(new Callback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean aBoolean) {

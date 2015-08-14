@@ -13,7 +13,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
@@ -33,6 +32,7 @@ import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
@@ -204,7 +204,7 @@ public class LWQWallpaperService extends WallpaperService {
             final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
             if (backgroundImage != null) {
                 Bitmap drawnBitmap = backgroundImage;
-                float blurRadius = PreferenceManager.getDefaultSharedPreferences(LWQWallpaperService.this).getFloat(getString(R.string.preference_key_blur), 0f);
+                float blurRadius = LWQPreferences.getBlurPreference();
                 boolean recycleBitmap = false;
                 if (currentAPIVersion >= Build.VERSION_CODES.JELLY_BEAN_MR1 && blurRadius > 0f) {
                     recycleBitmap = true;
@@ -402,13 +402,18 @@ public class LWQWallpaperService extends WallpaperService {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-//            draw(getSurfaceHolder());
+            if (BuildConfig.DEBUG) {
+                changeSwatch();
+                draw(getSurfaceHolder());
+            }
             return false;
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            LWQApplication.getWallpaperController().generateNewWallpaper(callback);
+            if (BuildConfig.DEBUG) {
+                LWQApplication.getWallpaperController().generateNewWallpaper(callback);
+            }
             return true;
         }
 
