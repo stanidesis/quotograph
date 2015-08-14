@@ -35,6 +35,7 @@ import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
@@ -99,6 +100,8 @@ public class LWQWallpaperService extends WallpaperService {
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
             setOffsetNotificationsEnabled(true);
+            LWQAlarmManager.cancelRepeatingAlarm();
+            LWQAlarmManager.setRepeatingAlarm();
             if (BuildConfig.DEBUG) {
                 gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
                 gestureDetectorCompat.setOnDoubleTapListener(this);
