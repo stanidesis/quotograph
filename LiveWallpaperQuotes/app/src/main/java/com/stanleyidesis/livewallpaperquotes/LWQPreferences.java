@@ -64,12 +64,4 @@ public class LWQPreferences {
     public static void setFirstLaunch(boolean firstLaunch) {
         sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_first_launch), firstLaunch).apply();
     }
-
-    public static boolean initialCategoriesLoaded() {
-        return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_init_categories_loaded), false);
-    }
-
-    public static void setInitialCategoriesLoaded(boolean loaded) {
-        sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_init_categories_loaded), loaded).apply();
-    }
 }

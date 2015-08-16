@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.db.BackgroundImage;
+import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Wallpaper;
 import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
@@ -76,7 +77,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     }
 
     @Override
-    public synchronized void generateNewWallpaper(Callback<Boolean> callback) {
+    public synchronized void generateNewWallpaper(final Callback<Boolean> callback) {
         if (retrievalState == RetrievalState.NEW_WALLPAPER) {
             listeners.get(RetrievalState.NEW_WALLPAPER).remove(callback);
             listeners.get(RetrievalState.NEW_WALLPAPER).add(callback);
@@ -89,36 +90,51 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         retrievalState = RetrievalState.NEW_WALLPAPER;
         listeners.get(RetrievalState.NEW_WALLPAPER).add(callback);
 
-        // TODO query BrainyQuote
-        final Quote newQuote = Quote.random();
-        Set<UnsplashManager.UnsplashCategory> categories = new HashSet<>();
-        categories.add(UnsplashManager.UnsplashCategory.NATURE);
-        unsplashManager.getPhotoURLs(1, categories, new Random().nextBoolean(), new Callback<List<UnsplashManager.LWQUnsplashImage>>() {
+        Category fromCategory;
+        if (activeWallpaper != null) {
+            fromCategory = activeWallpaper.quote.category;
+        } else {
+            fromCategory = Category.random();
+        }
+        LWQApplication.getQuoteController().fetchUnusedQuote(fromCategory, new Callback<Quote>() {
             @Override
-            public void onSuccess(List<UnsplashManager.LWQUnsplashImage> lwqUnsplashImages) {
-                BackgroundImage newBackgroundImage = null;
-                for (UnsplashManager.LWQUnsplashImage unsplashImage : lwqUnsplashImages) {
-                    newBackgroundImage = BackgroundImage.findImage(unsplashImage.url);
-                    if (newBackgroundImage == null) {
-                        newBackgroundImage = new BackgroundImage(unsplashImage.url, BackgroundImage.Source.UNSPLASH);
-                        newBackgroundImage.save();
-                        break;
-                    } else {
-                        newBackgroundImage = null;
+            public void onSuccess(final Quote quote) {
+                Set<UnsplashManager.UnsplashCategory> categories = new HashSet<>();
+                categories.add(UnsplashManager.UnsplashCategory.NATURE);
+                unsplashManager.getPhotoURLs(1, categories, new Random().nextBoolean(), new Callback<List<UnsplashManager.LWQUnsplashImage>>() {
+                    @Override
+                    public void onSuccess(List<UnsplashManager.LWQUnsplashImage> lwqUnsplashImages) {
+                        BackgroundImage newBackgroundImage = null;
+                        for (UnsplashManager.LWQUnsplashImage unsplashImage : lwqUnsplashImages) {
+                            newBackgroundImage = BackgroundImage.findImage(unsplashImage.url);
+                            if (newBackgroundImage == null) {
+                                newBackgroundImage = new BackgroundImage(unsplashImage.url, BackgroundImage.Source.UNSPLASH);
+                                newBackgroundImage.save();
+                                break;
+                            } else {
+                                newBackgroundImage = null;
+                            }
+                        }
+                        if (newBackgroundImage == null) {
+                            newBackgroundImage = BackgroundImage.random();
+                        }
+                        if (activeWallpaper != null) {
+                            activeWallpaper.active = false;
+                            activeWallpaper.save();
+                        }
+                        discardActiveWallpaper();
+                        activeWallpaper = new Wallpaper(quote, newBackgroundImage, true, System.currentTimeMillis());
+                        activeWallpaper.save();
+                        retrievalState = null;
+                        notifyAndClearListeners(RetrievalState.NEW_WALLPAPER, false);
                     }
-                }
-                if (newBackgroundImage == null) {
-                    newBackgroundImage = BackgroundImage.random();
-                }
-                if (activeWallpaper != null) {
-                    activeWallpaper.active = false;
-                    activeWallpaper.save();
-                }
-                discardActiveWallpaper();
-                activeWallpaper = new Wallpaper(newQuote, newBackgroundImage, true, System.currentTimeMillis());
-                activeWallpaper.save();
-                retrievalState = null;
-                notifyAndClearListeners(RetrievalState.NEW_WALLPAPER, false);
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        retrievalState = null;
+                        notifyAndClearListeners(RetrievalState.NEW_WALLPAPER, errorMessage);
+                    }
+                });
             }
 
             @Override

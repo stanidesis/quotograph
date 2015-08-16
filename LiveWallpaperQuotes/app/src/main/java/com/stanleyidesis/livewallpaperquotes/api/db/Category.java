@@ -5,6 +5,8 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import java.util.Random;
+
 /**
  * Copyright (c) 2015 Stanley Idesis
  *
@@ -61,5 +63,11 @@ public class Category extends SugarRecord<Category> {
                 .where(Condition.prop(StringUtil.toSQLName("name")).eq(name),
                         Condition.prop(StringUtil.toSQLName("source")).eq(source)).count();
         return count > 0;
+    }
+
+    public static Category random() {
+        final long count = Select.from(Category.class).count();
+        final int offset = new Random().nextInt((int) count);
+        return Category.findWithQuery(Category.class, "Select * from Category LIMIT 1 OFFSET " + offset, null).get(0);
     }
 }

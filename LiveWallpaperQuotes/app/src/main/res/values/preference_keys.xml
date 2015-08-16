@@ -2,5 +2,4 @@
 <resources>
     <string name="preference_key_first_launch">com.stanleyidesis.livewallpaperquotes.preference.FIRST_LAUNCH</string>
     <string name="preference_key_blur">com.stanleyidesis.livewallpaperquotes.preference.BLUR</string>
-    <string name="preference_key_init_categories_loaded">com.stanleyidesis.livewallpaperquotes.preference.INITIAL_CATEGORY_LOAD</string>
 </resources>

@@ -2,13 +2,18 @@ package com.stanleyidesis.livewallpaperquotes.api;
 
 import android.util.Log;
 
+import com.orm.StringUtil;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.api.db.Wallpaper;
 import com.stanleyidesis.livewallpaperquotes.api.network.BrainyQuoteManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -46,7 +51,7 @@ import java.util.List;
 
 public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
 
-    static int MAX_PAGE_QUERY = 3;
+    static int MAX_PAGE_QUERY = 40;
 
     BrainyQuoteManager brainyQuoteManager;
 
@@ -124,7 +129,36 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
     }
 
     @Override
-    public void fetchUnusedQuote(Category category, Callback<Quote> callback) {
+    public void fetchUnusedQuote(final Category category, final Callback<Quote> callback) {
+        final List<Wallpaper> allWallpapers = Select.from(Wallpaper.class).list();
+        Condition [] conditions = new Condition[allWallpapers.size() + 1];
+        for (int i = 0; i < allWallpapers.size(); i++) {
+            conditions[i] = Condition.prop("id").notEq(allWallpapers.get(i).quote.getId());
+        }
+        conditions[conditions.length - 1] = Condition.prop(StringUtil.toSQLName("category")).eq(category.getId());
+        final List<Quote> unusedQuotesFromCategory = Select.from(Quote.class).where(conditions).list();
+        if (unusedQuotesFromCategory != null && !unusedQuotesFromCategory.isEmpty()) {
+            callback.onSuccess(unusedQuotesFromCategory.get(new Random().nextInt(unusedQuotesFromCategory.size())));
+        } else if (category.source == Category.Source.BRAINY_QUOTE) {
+            fetchQuotes(category, new Callback<List<Quote>>() {
+                @Override
+                public void onSuccess(List<Quote> quotes) {
+                    if (quotes.isEmpty()) {
+                        // TODO wut?
+                        Log.w(getClass().getSimpleName(), "No new quotes retrieved");
+                        callback.onSuccess(Quote.random());
+                    } else {
+                        callback.onSuccess(quotes.get(new Random().nextInt(quotes.size())));
+                    }
+                }
 
+                @Override
+                public void onError(String errorMessage) {
+                    callback.onError(errorMessage);
+                }
+            });
+        } else {
+            callback.onError("Cannot find unused quote from " + category.source.name());
+        }
     }
 }

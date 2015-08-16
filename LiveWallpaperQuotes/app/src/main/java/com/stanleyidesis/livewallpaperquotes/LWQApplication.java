@@ -7,7 +7,7 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.orm.SugarApp;
 import com.orm.query.Condition;
 import com.orm.query.Select;
-import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import com.stanleyidesis.livewallpaperquotes.api.LWQFirstLaunchTask;
 import com.stanleyidesis.livewallpaperquotes.api.LWQImageController;
 import com.stanleyidesis.livewallpaperquotes.api.LWQImageControllerFrescoImpl;
 import com.stanleyidesis.livewallpaperquotes.api.LWQQuoteController;
@@ -17,9 +17,6 @@ import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperControllerUnsplashI
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
-
-import java.util.List;
-import java.util.Random;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -73,49 +70,11 @@ public class LWQApplication extends SugarApp {
         imageController = new LWQImageControllerFrescoImpl();
         quoteController = new LWQQuoteControllerBrainyQuoteImpl();
 
-        // Pre-populate database
         if (LWQPreferences.isFirstLaunch()) {
-            if (BuildConfig.DEBUG) {
+//            if (BuildConfig.DEBUG) {
 //                populateDefaults();
-            }
-            quoteController.fetchCategories(new Callback<List<Category>>() {
-                @Override
-                public void onSuccess(List<Category> categories) {
-                    LWQPreferences.setInitialCategoriesLoaded(true);
-                    final List<Category> list = Select.from(Category.class).list();
-                    // TODO not random?
-                    final Category randomCategory = list.get(new Random().nextInt(list.size()));
-                    quoteController.fetchQuotes(randomCategory, new Callback<List<Quote>>() {
-                        @Override
-                        public void onSuccess(List<Quote> quotes) {
-                            wallpaperController.generateNewWallpaper(new Callback<Boolean>() {
-                                @Override
-                                public void onSuccess(Boolean aBoolean) {
-                                    if (!wallpaperController.activeWallpaperLoaded()) {
-                                        wallpaperController.retrieveActiveWallpaper(this);
-                                    }
-                                }
-
-                                @Override
-                                public void onError(String errorMessage) {
-                                    Log.e(getClass().getSimpleName(), errorMessage, new Throwable());
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-                            Log.e(getClass().getSimpleName(), errorMessage, new Throwable());
-                        }
-                    });
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    Log.e(getClass().getSimpleName(), errorMessage, new Throwable());
-                }
-            });
-            LWQPreferences.setFirstLaunch(false);
+//            }
+            new LWQFirstLaunchTask().execute();
         }
     }
 
