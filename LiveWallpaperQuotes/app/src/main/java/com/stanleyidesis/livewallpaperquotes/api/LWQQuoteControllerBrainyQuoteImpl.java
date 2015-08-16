@@ -99,27 +99,27 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                     final Object returnObject = brainyQuoteManager.getQuotes(category.name, page);
                     if (returnObject instanceof String) {
                         callback.onError((String) returnObject);
-                    } else {
-                        List<BrainyQuoteManager.BrainyQuote> brainyQuotes = (List<BrainyQuoteManager.BrainyQuote>) returnObject;
-                        for (BrainyQuoteManager.BrainyQuote brainyQuote : brainyQuotes) {
-                            Author author = Author.findAuthor(brainyQuote.author);
-                            if (author == null) {
-                                author = new Author(brainyQuote.author);
-                                author.save();
+                        return;
+                    }
+                    List<BrainyQuoteManager.BrainyQuote> brainyQuotes = (List<BrainyQuoteManager.BrainyQuote>) returnObject;
+                    for (BrainyQuoteManager.BrainyQuote brainyQuote : brainyQuotes) {
+                        Author author = Author.findAuthor(brainyQuote.author);
+                        if (author == null) {
+                            author = new Author(brainyQuote.author);
+                            author.save();
 
-                                Quote newQuote = new Quote(brainyQuote.quote, author, category);
-                                newQuote.save();
-                                recoveredQuotes.add(newQuote);
-                                continue;
-                            }
-                            Quote quote = Quote.find(brainyQuote.quote, author);
-                            if (quote != null) {
-                                continue;
-                            }
-                            quote = new Quote(brainyQuote.quote, author, category);
-                            quote.save();
-                            recoveredQuotes.add(quote);
+                            Quote newQuote = new Quote(brainyQuote.quote, author, category);
+                            newQuote.save();
+                            recoveredQuotes.add(newQuote);
+                            continue;
                         }
+                        Quote quote = Quote.find(brainyQuote.quote, author);
+                        if (quote != null) {
+                            continue;
+                        }
+                        quote = new Quote(brainyQuote.quote, author, category);
+                        quote.save();
+                        recoveredQuotes.add(quote);
                     }
                     page++;
                 }
