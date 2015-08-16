@@ -1,9 +1,9 @@
-package com.stanleyidesis.livewallpaperquotes.api.db;
+package com.stanleyidesis.livewallpaperquotes.api;
 
-import com.orm.StringUtil;
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
+import com.stanleyidesis.livewallpaperquotes.api.db.Category;
+import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+
+import java.util.List;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -27,7 +27,7 @@ import com.orm.query.Select;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Author.java
+ * LWQQuoteController.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -36,20 +36,34 @@ import com.orm.query.Select;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 07/11/2015
+ * Date: 07/14/2015
  */
 
-public class Author extends SugarRecord<Author> {
+public interface LWQQuoteController {
+    /**
+     * Recover all categories available from the quote source.
+     * This method will return newly-recovered categories to the callback.
+     *
+     * Query for existing categories using the Category class.
+     *
+     * @param callback
+     */
+    void fetchCategories(Callback<List<Category>> callback);
 
-    public String name;
+    /**
+     * This method recovers new quotes from the source within the given category.
+     * Newly recovered quotes are served back to the caller.
+     *
+     * @param callback
+     */
+    void fetchQuotes(Category category, Callback<List<Quote>> callback);
 
-    public Author() {}
-
-    public Author(String name) {
-        this.name = name;
-    }
-
-    public static Author findAuthor(String name) {
-        return Select.from(Author.class).where(Condition.prop(StringUtil.toSQLName("name")).eq(name)).first();
-    }
+    /**
+     * This will look for an unused quote within the database of the matching category.
+     * If not found, it will return null in the callback.
+     *
+     * @param category
+     * @param callback
+     */
+    void fetchUnusedQuote(Category category, Callback<Quote> callback);
 }

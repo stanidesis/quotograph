@@ -9,6 +9,18 @@
     <string name="inspirational_quote_2">I can\'t change the direction of the wind, but I can adjust my sails to always reach my destination.</string>
     <string name="inspirational_author_2" translatable="false">Jimmy Dean</string>
     <string name="category_inspirational">Inspirational</string>
+    <string name="category_motivational">Motivational</string>
+    <string name="category_funny">Funny</string>
+    <string name="category_love">Love</string>
+    <string name="category_life">Life</string>
+    <string name="category_success">Success</string>
+    <string name="category_happiness">Happiness</string>
+    <string name="category_wisdom">Wisdom</string>
+    <string name="category_change">Change</string>
+    <string name="category_leadership">Leadership</string>
+    <string name="category_work">Work</string>
+    <string name="category_friendship">Friendship</string>
+    <string name="category_freedom">Freedom</string>
     <string name="inspirational_quote_3">Perfection is not attainable, but if we chase perfection we can catch excellence.</string>
     <string name="inspirational_author_3" translatable="false">Vince Lombardi</string>
     <string name="inspirational_quote_4">If opportunity doesn\'t knock, build a door.</string>
