@@ -10,11 +10,16 @@ import com.orm.query.Select;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.LWQImageController;
 import com.stanleyidesis.livewallpaperquotes.api.LWQImageControllerFrescoImpl;
+import com.stanleyidesis.livewallpaperquotes.api.LWQQuoteController;
+import com.stanleyidesis.livewallpaperquotes.api.LWQQuoteControllerBrainyQuoteImpl;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperControllerUnsplashImpl;
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+
+import java.util.List;
+import java.util.Random;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -56,6 +61,7 @@ public class LWQApplication extends SugarApp {
 
     LWQWallpaperController wallpaperController;
     LWQImageController imageController;
+    LWQQuoteController quoteController;
 
     @Override
     public void onCreate() {
@@ -65,25 +71,51 @@ public class LWQApplication extends SugarApp {
         sApplication = this;
         wallpaperController = new LWQWallpaperControllerUnsplashImpl();
         imageController = new LWQImageControllerFrescoImpl();
+        quoteController = new LWQQuoteControllerBrainyQuoteImpl();
 
         // Pre-populate database
         if (LWQPreferences.isFirstLaunch()) {
             if (BuildConfig.DEBUG) {
-                populateDefaults();
+//                populateDefaults();
             }
-            LWQPreferences.setFirstLaunch(false);
-            wallpaperController.generateNewWallpaper(new Callback<Boolean>() {
+            quoteController.fetchCategories(new Callback<List<Category>>() {
                 @Override
-                public void onSuccess(Boolean aBoolean) {
-                    if (!wallpaperController.activeWallpaperLoaded()) {
-                        wallpaperController.retrieveActiveWallpaper(this);
-                    }
+                public void onSuccess(List<Category> categories) {
+                    LWQPreferences.setInitialCategoriesLoaded(true);
+                    final List<Category> list = Select.from(Category.class).list();
+                    // TODO not random?
+                    final Category randomCategory = list.get(new Random().nextInt(list.size()));
+                    quoteController.fetchQuotes(randomCategory, new Callback<List<Quote>>() {
+                        @Override
+                        public void onSuccess(List<Quote> quotes) {
+                            wallpaperController.generateNewWallpaper(new Callback<Boolean>() {
+                                @Override
+                                public void onSuccess(Boolean aBoolean) {
+                                    if (!wallpaperController.activeWallpaperLoaded()) {
+                                        wallpaperController.retrieveActiveWallpaper(this);
+                                    }
+                                }
+
+                                @Override
+                                public void onError(String errorMessage) {
+                                    Log.e(getClass().getSimpleName(), errorMessage, new Throwable());
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            Log.e(getClass().getSimpleName(), errorMessage, new Throwable());
+                        }
+                    });
                 }
 
                 @Override
                 public void onError(String errorMessage) {
+                    Log.e(getClass().getSimpleName(), errorMessage, new Throwable());
                 }
             });
+            LWQPreferences.setFirstLaunch(false);
         }
     }
 
@@ -99,12 +131,16 @@ public class LWQApplication extends SugarApp {
         return sApplication.imageController;
     }
 
+    public static LWQQuoteController getQuoteController() {
+        return sApplication.quoteController;
+    }
+
     private void populateDefaults() {
         final String[] defaultCategoryArray = getResources().getStringArray(R.array.default_category_titles);
         final TypedArray defaultCategoryQuoteMap = getResources().obtainTypedArray(R.array.default_category_quote_map);
         final TypedArray defaultCategoryAuthorMap = getResources().obtainTypedArray(R.array.default_category_author_map);
         for (int i = 0; i < defaultCategoryArray.length; i++) {
-            Category defaultCategory = new Category(defaultCategoryArray[i]);
+            Category defaultCategory = new Category(defaultCategoryArray[i], Category.Source.DEFAULT);
             defaultCategory.save();
             final int quoteArrayResourceId = defaultCategoryQuoteMap.getResourceId(i, -1);
             final int authorArrayResourceId = defaultCategoryAuthorMap.getResourceId(i, -1);

@@ -1,6 +1,9 @@
 package com.stanleyidesis.livewallpaperquotes.api.db;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -38,6 +41,7 @@ import com.orm.SugarRecord;
 
 public class Category extends SugarRecord<Category> {
     public enum Source {
+        DEFAULT,
         BRAINY_QUOTE,
         USER_QUOTE
     }
@@ -50,5 +54,12 @@ public class Category extends SugarRecord<Category> {
     public Category(String name, Source source) {
         this.name = name;
         this.source = source;
+    }
+
+    public static boolean hasCategory(String name, Source source) {
+        final long count = Select.from(Category.class)
+                .where(Condition.prop(StringUtil.toSQLName("name")).eq(name),
+                        Condition.prop(StringUtil.toSQLName("source")).eq(source)).count();
+        return count > 0;
     }
 }
