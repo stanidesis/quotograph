@@ -11,8 +11,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
@@ -40,6 +38,8 @@ import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Created by stanleyidesis on 7/11/15.
@@ -53,6 +53,8 @@ public class LWQWallpaperService extends WallpaperService {
 
         private Typeface quoteTypeFace;
         private Typeface authorTypeFace;
+
+        private Executor executor;
 
         private float xOffset;
         private float yOffset;
@@ -72,13 +74,7 @@ public class LWQWallpaperService extends WallpaperService {
                 if (loaded || LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
                     palette = Palette.from(LWQApplication.getWallpaperController().getBackgroundImage()).generate();
                     swatchIndex = 0;
-                    final Looper mainLooper = Looper.getMainLooper();
-                    new Handler(mainLooper).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            draw(getSurfaceHolder());
-                        }
-                    });
+                    asyncDraw();
                 } else {
                     LWQApplication.getWallpaperController().retrieveActiveWallpaper(this);
                 }
@@ -108,6 +104,7 @@ public class LWQWallpaperService extends WallpaperService {
             }
             quoteTypeFace = Fonts.JOSEFIN_BOLD.load(LWQWallpaperService.this);
             authorTypeFace = quoteTypeFace;
+            executor = Executors.newSingleThreadExecutor();
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
@@ -162,7 +159,7 @@ public class LWQWallpaperService extends WallpaperService {
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             super.onSurfaceRedrawNeeded(holder);
             Log.v(getClass().getSimpleName(), null, new Throwable());
-            draw(holder);
+            asyncDraw();
         }
 
         @Override
@@ -178,6 +175,19 @@ public class LWQWallpaperService extends WallpaperService {
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
             Log.v(getClass().getSimpleName(), "Visible: " + visible, new Throwable());
+        }
+
+        void asyncDraw() {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        draw(getSurfaceHolder());
+                    } catch (Exception e) {
+                        Log.e(getClass().getSimpleName(), "Failure to draw", e);
+                    }
+                }
+            });
         }
 
         void draw(SurfaceHolder holder) {
@@ -269,15 +279,20 @@ public class LWQWallpaperService extends WallpaperService {
                 quoteColor = swatch.getRgb();
                 authorColor = swatch.getRgb();
                 quoteStrokeColor = swatch.getTitleTextColor();
-            } else if (backgroundImage != null) {
-                Palette.from(backgroundImage).generate(new Palette.PaletteAsyncListener() {
-                    @Override
-                    public void onGenerated(Palette palette) {
-                        LWQWallpaperEngine.this.palette = palette;
-                        LWQWallpaperEngine.this.swatchIndex = 0;
-                        draw(getSurfaceHolder());
-                    }
-                });
+            } else {
+                if (backgroundImage != null) {
+                    Palette.from(backgroundImage).generate(new Palette.PaletteAsyncListener() {
+                        @Override
+                        public void onGenerated(Palette palette) {
+                            LWQWallpaperEngine.this.palette = palette;
+                            LWQWallpaperEngine.this.swatchIndex = 0;
+                            asyncDraw();
+                        }
+                    });
+                }
+                canvas.restore();
+                holder.unlockCanvasAndPost(canvas);
+                return;
             }
 
             // Setup Quote text
@@ -407,7 +422,7 @@ public class LWQWallpaperService extends WallpaperService {
         public boolean onSingleTapConfirmed(MotionEvent e) {
             if (BuildConfig.DEBUG) {
                 changeSwatch();
-                draw(getSurfaceHolder());
+                asyncDraw();
             }
             return false;
         }
