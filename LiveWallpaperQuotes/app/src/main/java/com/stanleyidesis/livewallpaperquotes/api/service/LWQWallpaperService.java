@@ -1,7 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.api.service;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -211,7 +210,7 @@ public class LWQWallpaperService extends WallpaperService {
             final int screenHeight = holder.getSurfaceFrame().height();
 
             final int horizontalPadding = (int) (screenWidth * .07);
-            final int verticalPadding = (int) (screenHeight * .07);
+            final int verticalPadding = (int) (screenHeight * .2);
             final int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
 
             final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
@@ -253,18 +252,6 @@ public class LWQWallpaperService extends WallpaperService {
 
             final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
                     screenWidth - horizontalPadding, screenHeight - verticalPadding);
-
-            int googleBarOffset = 0;
-            // Google Now Search Offset
-            if (currentAPIVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                // There's a good chance the Google Search Bar is there, I'm going to assume
-                // it is for ICS+ installs, and just offset the top
-                final TypedArray styledAttributes = getTheme().obtainStyledAttributes(
-                        new int[] { android.R.attr.actionBarSize });
-                int actionBarSize = (int) styledAttributes.getDimension(0, 0);
-                styledAttributes.recycle();
-                googleBarOffset = actionBarSize;
-            }
 
             /*
             canvas.clipRect(drawingArea, Region.Op.REPLACE);
@@ -326,13 +313,8 @@ public class LWQWallpaperService extends WallpaperService {
             // Correct the quote height, if necessary
             quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight());
 
-            int centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
-            if (drawingArea.top + centerQuoteOffset < googleBarOffset) {
-                quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight() - googleBarOffset);
-                centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
-            }
-
             // Draw the quote centered vertically
+            int centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
             canvas.translate(drawingArea.left, drawingArea.top + centerQuoteOffset);
             quoteLayout.draw(canvas);
             strokeText(quoteLayout, quoteStrokeColor & STROKE_ALPHA, 3f, canvas);
