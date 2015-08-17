@@ -1,7 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.api.service;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -253,18 +252,6 @@ public class LWQWallpaperService extends WallpaperService {
 
             final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
                     screenWidth - horizontalPadding, screenHeight - verticalPadding);
-
-            int googleBarOffset = 0;
-            // Google Now Search Offset
-            if (currentAPIVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                // There's a good chance the Google Search Bar is there, I'm going to assume
-                // it is for ICS+ installs, and just offset the top
-                final TypedArray styledAttributes = getTheme().obtainStyledAttributes(
-                        new int[] { android.R.attr.actionBarSize });
-                int actionBarSize = (int) styledAttributes.getDimension(0, 0);
-                styledAttributes.recycle();
-                googleBarOffset = actionBarSize;
-            }
 
             /*
             canvas.clipRect(drawingArea, Region.Op.REPLACE);
