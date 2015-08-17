@@ -211,7 +211,7 @@ public class LWQWallpaperService extends WallpaperService {
             final int screenHeight = holder.getSurfaceFrame().height();
 
             final int horizontalPadding = (int) (screenWidth * .07);
-            final int verticalPadding = (int) (screenHeight * .07);
+            final int verticalPadding = (int) (screenHeight * .2);
             final int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
 
             final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
@@ -326,13 +326,8 @@ public class LWQWallpaperService extends WallpaperService {
             // Correct the quote height, if necessary
             quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight());
 
-            int centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
-            if (drawingArea.top + centerQuoteOffset < googleBarOffset) {
-                quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight() - googleBarOffset);
-                centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
-            }
-
             // Draw the quote centered vertically
+            int centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
             canvas.translate(drawingArea.left, drawingArea.top + centerQuoteOffset);
             quoteLayout.draw(canvas);
             strokeText(quoteLayout, quoteStrokeColor & STROKE_ALPHA, 3f, canvas);
