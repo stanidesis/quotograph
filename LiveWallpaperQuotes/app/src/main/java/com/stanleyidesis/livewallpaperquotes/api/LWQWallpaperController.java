@@ -42,8 +42,9 @@ public interface LWQWallpaperController {
     /**
      * If no active wallpaper exists, the implementation will generate one
      * @param callback
+     * @param generateIfNecessary supply true if you want the controller to generate a new wallpaper if none is set
      */
-    void retrieveActiveWallpaper(Callback<Boolean> callback);
+    void retrieveActiveWallpaper(Callback<Boolean> callback, boolean generateIfNecessary);
 
     /**
      * This method should cleans up any bitmaps and references which the active wallpaper required.

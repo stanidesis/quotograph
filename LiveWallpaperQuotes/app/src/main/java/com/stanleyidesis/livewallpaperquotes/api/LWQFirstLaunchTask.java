@@ -73,18 +73,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         @Override
         public void onSuccess(List<Quote> quotes) {
             publishProgress(quotes.size() + " quotes fetched");
-            LWQApplication.getWallpaperController().generateNewWallpaper(newWallpaperCallback);
-        }
-
-        @Override
-        public void onError(String errorMessage) {}
-    };
-
-    Callback<Boolean> newWallpaperCallback = new Callback<Boolean>() {
-        @Override
-        public void onSuccess(Boolean aBoolean) {
-            publishProgress("New wallpaper generated");
-            LWQApplication.getWallpaperController().retrieveActiveWallpaper(retrieveWallpaperCallback);
+            LWQApplication.getWallpaperController().retrieveActiveWallpaper(retrieveWallpaperCallback, true);
         }
 
         @Override
@@ -110,7 +99,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
             // Go through everything again
             LWQApplication.getQuoteController().fetchCategories(fetchCategoriesCallback);
         } else {
-            LWQApplication.getWallpaperController().retrieveActiveWallpaper(retrieveWallpaperCallback);
+            LWQApplication.getWallpaperController().retrieveActiveWallpaper(retrieveWallpaperCallback, false);
         }
         return null;
     }

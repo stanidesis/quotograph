@@ -1,5 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.api;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -151,7 +152,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     }
 
     @Override
-    public synchronized void retrieveActiveWallpaper(final Callback<Boolean> callback) {
+    public synchronized void retrieveActiveWallpaper(final Callback<Boolean> callback, final boolean generateIfNecessary) {
         if (retrievalState == RetrievalState.ACTIVE_WALLPAPER) {
             if (!listeners.get(RetrievalState.ACTIVE_WALLPAPER).contains(callback)) {
                 listeners.get(RetrievalState.ACTIVE_WALLPAPER).add(callback);
@@ -167,8 +168,22 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             listeners.get(RetrievalState.ACTIVE_WALLPAPER).add(callback);
         }
         if (!activeWallpaperExists()) {
-            retrievalState = null;
-            notifyAndClearListeners(RetrievalState.ACTIVE_WALLPAPER, "No active wallpaper set");
+            if (generateIfNecessary) {
+                generateNewWallpaper(new Callback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        retrieveActiveWallpaper(callback, false);
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+
+                    }
+                });
+            } else {
+                retrievalState = null;
+                notifyAndClearListeners(RetrievalState.ACTIVE_WALLPAPER, "No active wallpaper set");
+            }
             return;
         } else if (activeWallpaperLoaded()) {
             retrievalState = null;
@@ -215,6 +230,9 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     }
 
     void notifyAndClearListeners(RetrievalState state, boolean loaded) {
+        if (state == RetrievalState.ACTIVE_WALLPAPER) {
+            LWQApplication.get().sendBroadcast(new Intent(LWQApplication.get().getString(R.string.broadcast_new_wallpaper_available)));
+        }
         final List<Callback<Boolean>> callbacks = listeners.get(state);
         for (Callback<Boolean> callback : callbacks) {
             callback.onSuccess(loaded);
