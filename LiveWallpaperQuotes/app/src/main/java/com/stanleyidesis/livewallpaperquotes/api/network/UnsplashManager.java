@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -50,20 +49,14 @@ public class UnsplashManager {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
-    public void getPhotoURLs(final int pageIndex, final Set<UnsplashCategory> unsplashCategorySet,
-                             final boolean featured, final Callback<List<LWQUnsplashImage>> callback) {
+    public void getPhotoURLs(final int pageIndex, final UnsplashCategory unsplashCategory,
+                             final Callback<List<LWQUnsplashImage>> callback) {
         submit(new Runnable() {
             @Override
             public void run() {
-                StringBuilder urlBuilder = new StringBuilder(Endpoints.UNSPLASH_URL);
+                StringBuilder urlBuilder = new StringBuilder(Endpoints.UNSPLASH_SEARCH_URL);
                 urlBuilder.append(String.format(PAGE_PARAM, pageIndex));
-                urlBuilder.append(String.format(FEATURED_PARAM, featured ? 1 : 0));
-                for (UnsplashCategory unsplashCategory : UnsplashCategory.values()) {
-                    urlBuilder.append(String.format(CATEGORY_PARAM, unsplashCategory.identifier, 0));
-                    if (unsplashCategorySet.contains(unsplashCategory)) {
-                        urlBuilder.append(String.format(CATEGORY_PARAM, unsplashCategory.identifier, 1));
-                    }
-                }
+                urlBuilder.append(String.format(KEYWORD_PARAM, unsplashCategory.name().toLowerCase()));
                 Log.v(UnsplashManager.class.getSimpleName(), "URL: " + urlBuilder.toString());
 
                 final Connection connection = Jsoup.connect(urlBuilder.toString());
@@ -106,12 +99,10 @@ public class UnsplashManager {
     }
 
     private interface Endpoints {
-        String UNSPLASH_URL = "https://unsplash.com/filter?";
+        String UNSPLASH_SEARCH_URL= "https://unsplash.com/search?utf8=✓";
     }
 
-    private static final String CATEGORY_PARAM = "category[%d]=%d&";
-    private static final String KEYWORD_PARAM = "search[keyword]=%s&";
-    private static final String FEATURED_PARAM = "scope[featured]=%d&";
+    private static final String KEYWORD_PARAM = "keyword=%s&";
     private static final String PAGE_PARAM = "page=%d&";
 
     private ScheduledExecutorService scheduledExecutorService;

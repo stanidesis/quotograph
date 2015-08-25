@@ -13,11 +13,8 @@ import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
 /**
  * Created by stanleyidesis on 8/1/15.
@@ -99,9 +96,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         LWQApplication.getQuoteController().fetchUnusedQuote(fromCategory, new Callback<Quote>() {
             @Override
             public void onSuccess(final Quote quote) {
-                Set<UnsplashManager.UnsplashCategory> categories = new HashSet<>();
-                categories.add(UnsplashManager.UnsplashCategory.NATURE);
-                unsplashManager.getPhotoURLs(1, categories, new Random().nextBoolean(), new Callback<List<UnsplashManager.LWQUnsplashImage>>() {
+                unsplashManager.getPhotoURLs(1, UnsplashManager.UnsplashCategory.NATURE, new Callback<List<UnsplashManager.LWQUnsplashImage>>() {
                     @Override
                     public void onSuccess(List<UnsplashManager.LWQUnsplashImage> lwqUnsplashImages) {
                         BackgroundImage newBackgroundImage = null;
