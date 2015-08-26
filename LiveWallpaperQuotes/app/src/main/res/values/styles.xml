@@ -1,10 +1,12 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="LWQTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">#FFFFFF</item>
-        <item name="colorPrimaryDark">#DDDDDD</item>
+        <item name="colorPrimaryDark">#00000000</item>
         <item name="colorAccent">#AAAAAA</item>
     </style>
+
+    <style name="LWQSettingsActivityTheme" parent="LWQTheme"></style>
 
 </resources>
