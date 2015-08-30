@@ -36,7 +36,6 @@ import android.preference.PreferenceManager;
  *
  * Date: 08/14/2015
  */
-
 public class LWQPreferences {
     static LWQPreferences sInstance;
     static SharedPreferences sharedPreferences;
@@ -63,5 +62,13 @@ public class LWQPreferences {
 
     public static void setFirstLaunch(boolean firstLaunch) {
         sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_first_launch), firstLaunch).apply();
+    }
+
+    public static String getImageCategoryPreference() {
+        return sharedPreferences.getString(LWQApplication.get().getString(R.string.preference_key_image_category), null);
+    }
+
+    public static void setImageCategoryPreference(String imageCategory) {
+        sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_image_category), imageCategory).apply();
     }
 }

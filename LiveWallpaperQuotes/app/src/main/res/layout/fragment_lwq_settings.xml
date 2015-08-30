@@ -28,7 +28,7 @@
                 app:layout_widthPercent="30%"/>
 
             <Spinner
-                android:id="@+id/app_compat_spinner_fragment_lwq_settings_interval"
+                android:id="@+id/spinner_fragment_lwq_settings_interval"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -61,7 +61,7 @@
                 app:layout_widthPercent="30%"/>
 
             <Spinner
-                android:id="@+id/app_compat_spinner_fragment_lwq_settings_quote_category"
+                android:id="@+id/spinner_fragment_lwq_settings_quote_category"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -92,7 +92,7 @@
                 app:layout_widthPercent="30%"/>
 
             <Spinner
-                android:id="@+id/app_compat_spinner_fragment_lwq_settings_image_category"
+                android:id="@+id/spinner_fragment_lwq_settings_image_category"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -123,7 +123,7 @@
                 app:layout_widthPercent="30%"/>
 
             <SeekBar
-                android:id="@+id/pb_fragment_lwq_settings_blur"
+                android:id="@+id/sb_fragment_lwq_settings_blur"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"

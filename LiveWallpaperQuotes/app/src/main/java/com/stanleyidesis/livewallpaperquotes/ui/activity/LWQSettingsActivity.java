@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
@@ -31,10 +32,42 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * Created by stanleyidesis on 7/11/15.
- */
-public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHolder.Callback {
+ * Copyright (c) 2015 Stanley Idesis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * LWQSettingsActivity.java
+ * @author Stanley Idesis
+ *
+ * From Live-Wallpaper-Quotes
+ * https://github.com/stanidesis/live-wallpaper-quotes
+ *
+ * Please report any issues
+ * https://github.com/stanidesis/live-wallpaper-quotes/issues
+ *
+ * Date: 07/11/2015
+ */
+public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHolder.Callback, LWQSettingsFragment.Delegate {
+
+    View silkScreen;
+    View coordinator;
     ScheduledExecutorService scheduledExecutorService;
     LWQDrawScript drawScript;
     BroadcastReceiver newWallpaperBroadcastReceiver = new BroadcastReceiver() {
@@ -53,6 +86,9 @@ public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHol
         setContentView(R.layout.activity_lwq_settings);
         fullScreenIfPossible();
 
+        silkScreen = findViewById(R.id.view_screen_lwq_settings);
+        coordinator = findViewById(R.id.coordinator_layout_lwq_settings);
+
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surface_lwq_settings);
         surfaceView.getHolder().addCallback(this);
 
@@ -66,6 +102,12 @@ public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHol
         tabLayout.setupWithViewPager(viewPager);
 
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        animateSilkScreen(SilkScreenState.DEFAULT);
     }
 
     @Override
@@ -143,6 +185,31 @@ public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHol
                 }
             }
         });
+    }
+
+    void animateSilkScreen(SilkScreenState state) {
+        silkScreen.animate().alpha(state.screenAlpha).setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+        coordinator.animate().alpha(state.contentAlpha).setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+    }
+
+    // LWQSettingsFragmentDelegate
+
+    @Override
+    public void revealDemo(boolean reveal) {
+        animateSilkScreen(reveal ? SilkScreenState.REVEAL : SilkScreenState.DEFAULT);
+    }
+
+    enum SilkScreenState {
+        DEFAULT(1f, .6f),
+        REVEAL(.2f, 0f);
+
+        float contentAlpha;
+        float screenAlpha;
+
+        SilkScreenState(float contentAlpha, float screenAlpha) {
+            this.contentAlpha = contentAlpha;
+            this.screenAlpha = screenAlpha;
+        }
     }
 
     class PagerAdapter extends FragmentPagerAdapter {

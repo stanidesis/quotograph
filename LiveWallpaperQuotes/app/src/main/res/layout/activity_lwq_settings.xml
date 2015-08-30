@@ -13,11 +13,18 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="false"/>
 
+    <View
+        android:id="@+id/view_screen_lwq_settings"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="false"
+        android:background="@android:color/black"/>
+
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coordinator_layout_lwq_settings"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/semi_transparent"
+        android:background="@android:color/transparent"
         android:fitsSystemWindows="true"
         android:clipToPadding="false">
 
@@ -26,13 +33,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:background="@color/semi_transparent">
+            android:background="@android:color/transparent">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar_lwq_settings"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/semi_transparent"
+                android:background="@android:color/transparent"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:layout_scrollFlags="scroll|enterAlways"/>
 
@@ -40,7 +47,7 @@
                 android:id="@+id/tab_layout_lwq_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/semi_transparent"/>
+                android:background="@android:color/transparent"/>
 
         </android.support.design.widget.AppBarLayout>
 
@@ -48,7 +55,7 @@
             android:id="@+id/viewpager_lwq_settings"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/semi_transparent"
+            android:background="@android:color/transparent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
         <!--<android.support.design.widget.FloatingActionButton-->

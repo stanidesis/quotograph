@@ -18,21 +18,53 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * Created by stanleyidesis on 7/28/15.
+ * Copyright (c) 2015 Stanley Idesis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * UnsplashManager.java
+ * @author Stanley Idesis
+ *
+ * From Live-Wallpaper-Quotes
+ * https://github.com/stanidesis/live-wallpaper-quotes
+ *
+ * Please report any issues
+ * https://github.com/stanidesis/live-wallpaper-quotes/issues
+ *
+ * Date: 07/28/2015
  */
 public class UnsplashManager {
     public enum UnsplashCategory {
-        BUILDINGS(2),
-        FOOD_DRINK(3),
-        NATURE(4),
-        OBJECTS(8),
-        PEOPLE(6),
-        TECHNOLOGY(7);
+        BUILDINGS(2, "Buildings"),
+        FOOD_DRINK(3, "Food and Drink"),
+        NATURE(4, "Nature"),
+        OBJECTS(8, "Objects"),
+        PEOPLE(6, "People"),
+        TECHNOLOGY(7, "Technology");
 
-        int identifier;
+        public int identifier;
+        public String prettyName;
 
-        UnsplashCategory(int identifier) {
+        UnsplashCategory(int identifier, String prettyName) {
             this.identifier = identifier;
+            this.prettyName = prettyName;
         }
 
         public static UnsplashCategory random() {
