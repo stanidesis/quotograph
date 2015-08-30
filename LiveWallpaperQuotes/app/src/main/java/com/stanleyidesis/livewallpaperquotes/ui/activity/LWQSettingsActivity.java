@@ -23,12 +23,19 @@ import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.LWQDrawScript;
+import com.stanleyidesis.livewallpaperquotes.ui.fragment.LWQSettingsFragment;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Created by stanleyidesis on 7/11/15.
  */
 public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHolder.Callback {
 
+    ScheduledExecutorService scheduledExecutorService;
     LWQDrawScript drawScript;
     BroadcastReceiver newWallpaperBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -42,6 +49,7 @@ public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHol
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(android.R.anim.fade_in, 0);
         setContentView(R.layout.activity_lwq_settings);
         fullScreenIfPossible();
 
@@ -55,7 +63,9 @@ public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHol
         viewPager.setAdapter(new PagerAdapter(getSupportFragmentManager()));
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout_lwq_settings);
-//        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setupWithViewPager(viewPager);
+
+        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
@@ -73,21 +83,13 @@ public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHol
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        drawScript = new LWQDrawScript(new Palette.PaletteAsyncListener() {
-            @Override
-            public void onGenerated(Palette palette) {
-                drawScript.draw();
-            }
-        }, holder);
         if (LWQPreferences.isFirstLaunch()) {
             return;
         }
         LWQApplication.getWallpaperController().retrieveActiveWallpaper(new Callback<Boolean>() {
             @Override
             public void onSuccess(Boolean aBoolean) {
-                if (drawScript != null) {
-                    drawScript.draw();
-                }
+                draw();
             }
 
             @Override
@@ -99,10 +101,10 @@ public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHol
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        if (drawScript != null) {
-            drawScript.setSurfaceHolder(holder);
-            drawScript.draw();
+        if (LWQPreferences.isFirstLaunch()) {
+            return;
         }
+        draw();
     }
 
     @Override
@@ -119,20 +121,55 @@ public class LWQSettingsActivity extends AppCompatActivity implements SurfaceHol
         }
     }
 
+    void draw() {
+        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surface_lwq_settings);
+        if (drawScript == null) {
+            drawScript = new LWQDrawScript(new Palette.PaletteAsyncListener() {
+                @Override
+                public void onGenerated(Palette palette) {
+                    draw();
+                }
+            }, surfaceView.getHolder());
+        } else {
+            drawScript.setSurfaceHolder(surfaceView.getHolder());
+        }
+        scheduledExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    drawScript.draw();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     class PagerAdapter extends FragmentPagerAdapter {
+
+        List<Fragment> fragmentList;
 
         public PagerAdapter(FragmentManager fm) {
             super(fm);
+            fragmentList = new ArrayList<>();
+            fragmentList.add(new LWQSettingsFragment());
+            fragmentList.add(new LWQSettingsFragment());
+            fragmentList.add(new LWQSettingsFragment());
         }
 
         @Override
         public Fragment getItem(int position) {
-            return null;
+            return fragmentList.get(position);
         }
 
         @Override
         public int getCount() {
-            return 0;
+            return fragmentList.size();
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return "Settings";
         }
     }
 }

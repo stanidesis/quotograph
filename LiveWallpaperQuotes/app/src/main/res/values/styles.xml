@@ -1,12 +1,19 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="LWQTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.LWQ" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowContentOverlay">@null</item>
         <item name="colorPrimary">#FFFFFF</item>
         <item name="colorPrimaryDark">#00000000</item>
         <item name="colorAccent">#AAAAAA</item>
     </style>
 
-    <style name="LWQSettingsActivityTheme" parent="LWQTheme"></style>
+
+    <style name="Theme.LWQ.Wallpaper" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowShowWallpaper">true</item>
+    </style>
+
+    <style name="Theme.LWQ.SettingsActivity" parent="Theme.LWQ.Wallpaper"></style>
 
 </resources>

@@ -16,7 +16,6 @@ import android.support.v7.graphics.Palette;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
@@ -91,13 +90,8 @@ public class LWQDrawScript {
     public void draw() {
         final LWQWallpaperController wallpaperController =
                 LWQApplication.getWallpaperController();
-        if (!wallpaperController.activeWallpaperLoaded()) {
-            Log.v(getClass().getSimpleName(), "Wallpaper not loaded, cannot draw");
-            return;
-        }
-
-        Context context = LWQApplication.get();
-
+        final Context context = LWQApplication.get();
+        while (surfaceHolder.isCreating()) {}
         final Canvas canvas = surfaceHolder.lockCanvas();
         canvas.drawColor(context.getResources().getColor(android.R.color.white));
         canvas.save();
