@@ -122,22 +122,22 @@ public class LWQWallpaperService extends WallpaperService {
             this.format = format;
             this.width = width;
             this.height = height;
-            this.drawScript.setSurfaceHolder(holder);
+            asyncSetHolder(holder);
             asyncDraw();
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
-            this.drawScript.setSurfaceHolder(holder);
+            asyncSetHolder(holder);
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             super.onSurfaceRedrawNeeded(holder);
-            this.drawScript.setSurfaceHolder(holder);
             Log.v(getClass().getSimpleName(), null, new Throwable());
+            asyncSetHolder(holder);
             asyncDraw();
         }
 
@@ -175,16 +175,29 @@ public class LWQWallpaperService extends WallpaperService {
             });
         }
 
+        void asyncSetHolder(final SurfaceHolder surfaceHolder) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        drawScript.setSurfaceHolder(surfaceHolder);
+                    } catch (Exception e) {
+                        Log.e(getClass().getSimpleName(), "Failure to set SurfaceHolder", e);
+                    }
+                }
+            });
+        }
+
         /*
          * Gesture detection
          */
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            if (BuildConfig.DEBUG) {
-                drawScript.changeSwatch();
-                asyncDraw();
-            }
+//            if (BuildConfig.DEBUG) {
+//                drawScript.changeSwatch();
+//                asyncDraw();
+//            }
             return false;
         }
 
