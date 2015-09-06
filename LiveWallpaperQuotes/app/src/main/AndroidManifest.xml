@@ -18,12 +18,16 @@
 
         <!-- Activities -->
 
-        <activity android:name=".ui.activity.LWQSettingsActivity"
-            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.SettingsActivity">
+        <activity android:name=".ui.activity.LWQActivateActivity"
+            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.activity.LWQSettingsActivity"
+            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper">
         </activity>
 
         <!-- Receivers -->
