@@ -1,6 +1,7 @@
 package com.stanleyidesis.livewallpaperquotes;
 
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
 /**
@@ -70,5 +71,16 @@ public class LWQPreferences {
 
     public static void setImageCategoryPreference(String imageCategory) {
         sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_image_category), imageCategory).apply();
+    }
+
+    public static boolean isAutoPilot() {
+        final Resources resources = LWQApplication.get().getResources();
+        final int autopilotMode = resources.getInteger(R.integer.preference_mode_autopilot);
+        final int mode = sharedPreferences.getInt(resources.getString(R.string.preference_key_mode), autopilotMode);
+        return mode == autopilotMode;
+    }
+
+    public static void setMode(int mode) {
+        sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_mode), mode).apply();
     }
 }
