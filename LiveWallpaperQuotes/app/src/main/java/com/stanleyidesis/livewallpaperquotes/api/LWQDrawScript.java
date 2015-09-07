@@ -27,37 +27,40 @@ import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by stanleyidesis on 8/22/15.
  */
 public class LWQDrawScript {
+
+    static Map<Integer, Palette> paletteCache;
+    static final int TEXT_ALPHA = 0xE5FFFFFF;
+    static final int STROKE_ALPHA = 0xF2FFFFFF;
+    static int swatchIndex;
+    static Typeface quoteTypeFace;
+    static Typeface authorTypeFace;
+
+    static {
+        quoteTypeFace = Fonts.JOSEFIN_BOLD.load(LWQApplication.get());
+        authorTypeFace = quoteTypeFace;
+        paletteCache = new HashMap<>();
+    }
+
     Palette palette;
     Palette.PaletteAsyncListener paletteAsyncListener;
+
     SurfaceHolder surfaceHolder;
-
-
-    private static final int TEXT_ALPHA = 0xE5FFFFFF;
-    private static final int STROKE_ALPHA = 0xF2FFFFFF;
-
-    private Typeface quoteTypeFace;
-    private Typeface authorTypeFace;
-    private int swatchIndex;
 
     public LWQDrawScript(Palette.PaletteAsyncListener paletteAsyncListener, SurfaceHolder surfaceHolder) {
         this.paletteAsyncListener = paletteAsyncListener;
         this.surfaceHolder = surfaceHolder;
-        quoteTypeFace = Fonts.JOSEFIN_BOLD.load(LWQApplication.get());
-        authorTypeFace = quoteTypeFace;
     }
 
     public void setSurfaceHolder(SurfaceHolder surfaceHolder) {
         this.surfaceHolder = surfaceHolder;
-    }
-
-    public void setPaletteAsyncListener(Palette.PaletteAsyncListener paletteAsyncListener) {
-        this.paletteAsyncListener = paletteAsyncListener;
     }
 
     public void changeSwatch() {
@@ -157,25 +160,27 @@ public class LWQDrawScript {
         int quoteColor = context.getResources().getColor(android.R.color.black);
         int quoteStrokeColor = context.getResources().getColor(android.R.color.holo_blue_light);
         int authorColor = quoteColor;
-        if (palette != null) {
-            final Palette.Swatch swatch = getSwatch();
-            quoteColor = swatch.getRgb();
-            authorColor = swatch.getRgb();
-            quoteStrokeColor = swatch.getTitleTextColor();
-        } else {
-            if (backgroundImage != null) {
+        if (backgroundImage != null) {
+            palette = paletteCache.get(backgroundImage.hashCode());
+            if (palette != null) {
+                final Palette.Swatch swatch = getSwatch();
+                quoteColor = swatch.getRgb();
+                authorColor = swatch.getRgb();
+                quoteStrokeColor = swatch.getTitleTextColor();
+            } else {
                 Palette.from(backgroundImage).generate(new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
+                        LWQDrawScript.paletteCache.put(backgroundImage.hashCode(), palette);
                         LWQDrawScript.this.palette = palette;
-                        LWQDrawScript.this.swatchIndex = 0;
+                        LWQDrawScript.swatchIndex = 0;
                         paletteAsyncListener.onGenerated(palette);
                     }
                 });
+                canvas.restore();
+                surfaceHolder.unlockCanvasAndPost(canvas);
+                return;
             }
-            canvas.restore();
-            surfaceHolder.unlockCanvasAndPost(canvas);
-            return;
         }
 
         // Setup Quote text
