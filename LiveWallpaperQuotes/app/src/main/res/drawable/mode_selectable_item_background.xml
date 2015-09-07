@@ -20,7 +20,7 @@
     SOFTWARE.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    circle_button.xml
+    mode_selectable_item_background.xml
     @author Stanley Idesis
 
     From Live-Wallpaper-Quotes
@@ -29,13 +29,29 @@
     Please report any issues
     https://github.com/stanidesis/live-wallpaper-quotes/issues
 
-    Date: 09/05/2015
+    Date: 09/07/2015
 -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="oval">
-            <solid android:color="@color/circle_button" />
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:enterFadeDuration="200"
+    android:exitFadeDuration="200">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#442299"/>
+            <corners android:radius="@dimen/lwq_mode_selectable_item_button_radius"/>
         </shape>
     </item>
-    <item android:drawable="@drawable/selectable_item_background_circle" />
-</layer-list>
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#DD442299"/>
+            <corners android:radius="@dimen/lwq_mode_selectable_item_button_radius"/>
+        </shape>
+    </item>
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#99442299"/>
+            <corners android:radius="@dimen/lwq_mode_selectable_item_button_radius"/>
+        </shape>
+    </item>
+    <item android:drawable="@android:color/transparent" />
+</selector>

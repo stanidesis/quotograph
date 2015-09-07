@@ -2,8 +2,8 @@
 <resources>
     <dimen name="lwq_default_padding">8dp</dimen>
     <dimen name="lwq_default_double_padding">16dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
     <dimen name="lwq_settings_element_min_height">32dp</dimen>
+    <dimen name="lwq_mode_selectable_item_button_radius">25dp</dimen>
     <fraction name="lwq_settings_element_width_percent">80%</fraction>
     <fraction name="lwq_settings_element_margin_top_percent">10%</fraction>
 </resources>

@@ -1,7 +1,9 @@
 package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
 import android.os.Bundle;
+import android.view.View;
 
+import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.ui.fragment.LWQSettingsFragment;
 
@@ -40,11 +42,43 @@ import com.stanleyidesis.livewallpaperquotes.ui.fragment.LWQSettingsFragment;
  */
 public class LWQSettingsActivity extends LWQWallpaperActivity implements LWQSettingsFragment.Delegate {
 
+    View modeButtonContainer;
+    View modeAutopilotButton;
+    View modeCustomButton;
+    View.OnClickListener modeOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            modeAutopilotButton.setSelected(view == modeAutopilotButton);
+            modeCustomButton.setSelected(!modeAutopilotButton.isSelected());
+            int newMode = view == modeAutopilotButton ?
+                    getResources().getInteger(R.integer.preference_mode_autopilot) :
+                    getResources().getInteger(R.integer.preference_mode_custom);
+            LWQPreferences.setMode(newMode);
+        }
+    };
+    View.OnClickListener modeContinueClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         overridePendingTransition(android.R.anim.fade_in, 0);
         setContentView(R.layout.activity_lwq_settings);
+
+        // Setup Mode Selection
+
+        modeButtonContainer = findViewById(R.id.group_lwq_settings_mode_select);
+        modeButtonContainer.findViewById(R.id.button_lwq_settings_mode_continue).setOnClickListener(modeContinueClickListener);
+        modeAutopilotButton = modeButtonContainer.findViewById(R.id.button_lwq_settings_autopilot);
+        modeCustomButton = modeButtonContainer.findViewById(R.id.button_lwq_settings_custom);
+        modeAutopilotButton.setSelected(LWQPreferences.isAutoPilot());
+        modeCustomButton.setSelected(!modeAutopilotButton.isSelected());
+        modeAutopilotButton.setOnClickListener(modeOnClickListener);
+        modeCustomButton.setOnClickListener(modeOnClickListener);
     }
 
     @Override

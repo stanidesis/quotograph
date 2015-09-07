@@ -59,7 +59,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public abstract class LWQWallpaperActivity extends AppCompatActivity implements SurfaceHolder.Callback {
 
     enum SilkScreenState {
-        DEFAULT(1f, .6f),
+        DEFAULT(1f, .7f),
         REVEAL(.2f, 0f);
 
         float contentAlpha;
