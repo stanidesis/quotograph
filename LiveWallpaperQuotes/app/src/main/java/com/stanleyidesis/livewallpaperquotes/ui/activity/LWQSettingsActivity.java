@@ -50,7 +50,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements LWQSett
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        animateSilkScreen(SilkScreenState.DEFAULT);
+        switchToSilkScreen(SilkScreenState.DEFAULT);
     }
 
     // LWQSettingsFragmentDelegate

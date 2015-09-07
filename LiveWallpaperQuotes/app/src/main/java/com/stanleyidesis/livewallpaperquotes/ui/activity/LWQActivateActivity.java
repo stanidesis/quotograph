@@ -1,15 +1,16 @@
 package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
-import android.app.WallpaperInfo;
+import android.animation.ObjectAnimator;
 import android.app.WallpaperManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
+import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.service.LWQWallpaperService;
 
@@ -53,10 +54,14 @@ public class LWQActivateActivity extends LWQWallpaperActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        overridePendingTransition(android.R.anim.fade_in, 0);
         setContentView(R.layout.activity_lwq_activate);
-
+        if (!requiresActivation()) {
+            overridePendingTransition(0, 0);
+            return;
+        }
+        overridePendingTransition(android.R.anim.fade_in, 0);
         activateButton = findViewById(R.id.button_lwq_activate);
+        activateButton.setAlpha(0f);
         activateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,21 +86,27 @@ public class LWQActivateActivity extends LWQWallpaperActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        final WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
-        final WallpaperInfo wallpaperInfo = wallpaperManager.getWallpaperInfo();
-        if (wallpaperInfo == null || !getPackageName().equalsIgnoreCase(wallpaperInfo.getPackageName())) {
-            activateButton.animate().alpha(1f).setDuration(600)
-                    .setInterpolator(new AccelerateDecelerateInterpolator()).start();
-        } else {
-            startActivity(new Intent(this, LWQSettingsActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            finish();
-        }
+        requiresActivation();
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        animateSilkScreen(SilkScreenState.REVEAL);
+        switchToSilkScreen(SilkScreenState.REVEAL);
+        ObjectAnimator activateButtonAnimator = ObjectAnimator.ofFloat(activateButton, "alpha", 0f, 1f);
+        activateButtonAnimator.setStartDelay(1000);
+        activateButtonAnimator.setInterpolator(new LinearInterpolator());
+        activateButtonAnimator.setDuration(400);
+        activateButtonAnimator.start();
+    }
+
+    boolean requiresActivation() {
+        if (LWQApplication.isWallpaperActivated()) {
+            startActivity(new Intent(this, LWQSettingsActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            finish();
+            return false;
+        }
+        return true;
     }
 }

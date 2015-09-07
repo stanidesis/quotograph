@@ -16,7 +16,6 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:background="@drawable/circle_button"
-        android:alpha="0"
         android:textAllCaps="true"
         android:text="@string/activate"
         android:textColor="@android:color/black"

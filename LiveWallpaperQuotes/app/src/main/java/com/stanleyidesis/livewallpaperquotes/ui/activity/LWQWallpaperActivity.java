@@ -1,5 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
+import android.animation.ObjectAnimator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +12,7 @@ import android.support.v7.graphics.Palette;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
@@ -138,14 +139,19 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
+    public void surfaceDestroyed(SurfaceHolder holder) {}
 
+    void switchToSilkScreen(SilkScreenState state) {
+        // TODO switch container?
+        silkScreen.setAlpha(state.screenAlpha);
     }
 
     void animateSilkScreen(SilkScreenState state) {
-        silkScreen.animate().alpha(state.screenAlpha).setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator()).start();
-        // TODO fade out container
-//        coordinator.animate().alpha(state.contentAlpha).setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+        ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), state.screenAlpha);
+        silkScreenAnimator.setDuration(300);
+        silkScreenAnimator.setInterpolator(new LinearInterpolator());
+        silkScreenAnimator.start();
+        // TODO fade out container?
     }
 
     void fullScreenIfPossible() {
