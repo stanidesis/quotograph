@@ -57,4 +57,11 @@
 
     </LinearLayout>
 
+    <include layout="@layout/layout_autopilot_settings"
+        android:id="@+id/group_lwq_settings_autopilot"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_centerInParent="true"
+        app:layout_widthPercent="80%"/>
+
 </android.support.percent.PercentRelativeLayout>
