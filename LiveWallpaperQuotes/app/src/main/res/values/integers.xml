@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="half_hour">1800000</integer>
+    <integer name="one_hour">3600000</integer>
+    <integer name="six_hours">21600000</integer>
+    <integer name="twelve_hours">43200000</integer>
+    <integer name="twenty_four_hours">86400000</integer>
+    <integer name="one_week">604800000</integer>
+</resources>

@@ -12,6 +12,7 @@ import android.widget.Spinner;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
 import java.util.List;
@@ -49,7 +50,7 @@ import java.util.List;
  *
  * Date: 07/11/2015
  */
-public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar.OnSeekBarChangeListener, AdapterView.OnItemSelectedListener {
+public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar.OnSeekBarChangeListener {
 
     enum SettingsState {
         NONE,
@@ -152,10 +153,40 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                 android.R.layout.simple_spinner_item,
                 backgroundCategories);
         imageCategoryAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        Spinner imageCategorySpinner = (Spinner) findViewById(R.id.spinner_lwq_autopilot_settings_image_category);
+        Spinner imageCategorySpinner = (Spinner) autopilotSettingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_image_category);
         imageCategorySpinner.setAdapter(imageCategoryAdapter);
         imageCategorySpinner.setSelection(currentSelection);
-        imageCategorySpinner.setOnItemSelectedListener(this);
+        imageCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
+                LWQPreferences.setImageCategoryPreference(LWQApplication.getWallpaperController().getBackgroundCategories().get(index));
+                // TODO refresh wallpaper
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        Spinner refreshSpinner = (Spinner) autopilotSettingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_interval);
+        final long refreshPreference = LWQPreferences.getRefreshPreference();
+        final int[] refreshValues = getResources().getIntArray(R.array.refresh_preference_values);
+        for (int i = 0; i < refreshValues.length; i++) {
+            if (refreshPreference == refreshValues[i]) {
+                refreshSpinner.setSelection(i);
+                break;
+            }
+        }
+        refreshSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
+                final int[] refreshValues = getResources().getIntArray(R.array.refresh_preference_values);
+                LWQPreferences.setRefreshPreference(refreshValues[index]);
+                LWQAlarmManager.resetAlarm();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
         UIUtils.setViewAndChildrenEnabled(autopilotSettingsContainer, false);
     }
 
@@ -196,19 +227,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             default:
                 return null;
         }
-    }
-
-    // OnItemSelected Listener
-
-    @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
-        LWQPreferences.setImageCategoryPreference(LWQApplication.getWallpaperController().getBackgroundCategories().get(index));
-        // TODO refresh wallpaper
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
-
     }
 
     // SeekBar Listener

@@ -41,4 +41,10 @@
     <string name="default_author">Marilyn Monroe</string>
     <string name="activate">ACTIVATE</string>
     <string name="error_wallpaper_chooser">Couldn\'t launch wallpaper chooser. You can still activate Quotograph by choosing \'Live Wallpapers\' in your home screen wallpaper picker.</string>
+    <string name="period_preference_half_hour">Every 30 Minutes</string>
+    <string name="period_preference_one_hour">Every Hour</string>
+    <string name="period_preference_six_hours">Every Six Hours</string>
+    <string name="period_preference_twelve_hours">Every 12 Hours</string>
+    <string name="period_preference_twenty_four_hours">Every Day</string>
+    <string name="period_preference_one_week">Every Week</string>
 </resources>

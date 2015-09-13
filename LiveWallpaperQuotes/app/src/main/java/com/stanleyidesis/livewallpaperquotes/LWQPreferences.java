@@ -3,6 +3,7 @@ package com.stanleyidesis.livewallpaperquotes;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
+import android.text.format.DateUtils;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -73,6 +74,22 @@ public class LWQPreferences {
         sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_image_category), imageCategory).apply();
     }
 
+    public static String getQuoteCategoryPreference() {
+        return sharedPreferences.getString(LWQApplication.get().getString(R.string.preference_key_quote_category), null);
+    }
+
+    public static void setQuoteCategoryPreference(String quoteCategory) {
+        sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_quote_category), quoteCategory).apply();
+    }
+
+    public static long getRefreshPreference() {
+        return sharedPreferences.getLong(LWQApplication.get().getString(R.string.preference_key_refresh), DateUtils.DAY_IN_MILLIS);
+    }
+
+    public static void setRefreshPreference(long refresh) {
+        sharedPreferences.edit().putLong(LWQApplication.get().getString(R.string.preference_key_refresh), refresh).apply();
+    }
+
     public static boolean isAutoPilot() {
         final Resources resources = LWQApplication.get().getResources();
         final int autopilotMode = resources.getInteger(R.integer.preference_mode_autopilot);
@@ -83,4 +100,5 @@ public class LWQPreferences {
     public static void setMode(int mode) {
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_mode), mode).apply();
     }
+
 }

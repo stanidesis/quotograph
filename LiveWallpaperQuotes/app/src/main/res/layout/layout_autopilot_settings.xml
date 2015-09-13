@@ -24,6 +24,7 @@
 
         <Spinner
             android:id="@+id/spinner_lwq_autopilot_settings_interval"
+            android:entries="@array/refresh_preference_options"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"

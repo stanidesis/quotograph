@@ -6,7 +6,6 @@
         <item name="colorPrimary">#FFFFFF</item>
         <item name="colorPrimaryDark">#00000000</item>
         <item name="colorAccent">#AAAAAA</item>
-        <item name="android:spinnerStyle"></item>
         <item name="android:spinnerItemStyle">@style/Theme.LWQ.TextAppearance.Settings.Category.SpinnerItem</item>
         <item name="android:spinnerDropDownItemStyle">@style/Theme.LWQ.TextAppearance.Settings.Category.SpinnerDropDownItem</item>
     </style>
