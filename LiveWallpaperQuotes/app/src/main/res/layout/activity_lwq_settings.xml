@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:orientation="vertical"
         android:layout_centerInParent="true"
-        app:layout_widthPercent="80%">
+        app:layout_widthPercent="@fraction/lwq_settings_mode_percent_width">
 
         <Button
             android:id="@+id/button_lwq_settings_autopilot"
@@ -62,6 +62,6 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_centerInParent="true"
-        app:layout_widthPercent="80%"/>
+        app:layout_widthPercent="@fraction/lwq_settings_mode_percent_width"/>
 
 </android.support.percent.PercentRelativeLayout>

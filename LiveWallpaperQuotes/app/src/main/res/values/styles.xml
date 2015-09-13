@@ -16,4 +16,9 @@
 
     <style name="Theme.LWQ.Wallpaper" parent="Theme.LWQ.Wallpaper.Base"></style>
 
+    <style name="Theme.LWQ.TextAppearance.Settings.Category" parent="Base.TextAppearance.AppCompat.Headline">
+        <item name="android:gravity">end|center_vertical</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
 </resources>
