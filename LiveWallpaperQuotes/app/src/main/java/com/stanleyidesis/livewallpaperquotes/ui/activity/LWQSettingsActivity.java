@@ -151,7 +151,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         ArrayAdapter<String> imageCategoryAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
                 backgroundCategories);
-        imageCategoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        imageCategoryAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         Spinner imageCategorySpinner = (Spinner) findViewById(R.id.spinner_lwq_autopilot_settings_image_category);
         imageCategorySpinner.setAdapter(imageCategoryAdapter);
         imageCategorySpinner.setSelection(currentSelection);

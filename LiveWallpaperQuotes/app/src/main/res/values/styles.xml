@@ -6,6 +6,9 @@
         <item name="colorPrimary">#FFFFFF</item>
         <item name="colorPrimaryDark">#00000000</item>
         <item name="colorAccent">#AAAAAA</item>
+        <item name="android:spinnerStyle"></item>
+        <item name="android:spinnerItemStyle">@style/Theme.LWQ.TextAppearance.Settings.Category.SpinnerItem</item>
+        <item name="android:spinnerDropDownItemStyle">@style/Theme.LWQ.TextAppearance.Settings.Category.SpinnerDropDownItem</item>
     </style>
 
 
@@ -19,6 +22,16 @@
     <style name="Theme.LWQ.TextAppearance.Settings.Category" parent="Base.TextAppearance.AppCompat.Headline">
         <item name="android:gravity">end|center_vertical</item>
         <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="Theme.LWQ.TextAppearance.Settings.Category.SpinnerItem" parent="@style/Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:textColor">#442299</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Theme.LWQ.TextAppearance.Settings.Category.SpinnerDropDownItem" parent="@style/Widget.AppCompat.ListView.DropDown">
+        <item name="android:textColor">#442299</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
 </resources>
