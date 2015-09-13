@@ -12,6 +12,7 @@ import android.widget.Spinner;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
 import java.util.List;
 
@@ -128,6 +129,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         modeCustomButton.setSelected(!modeAutopilotButton.isSelected());
         modeAutopilotButton.setOnClickListener(modeOnClickListener);
         modeCustomButton.setOnClickListener(modeOnClickListener);
+        UIUtils.setViewAndChildrenEnabled(modeSelectionContainer, false);
     }
 
     void setupAutopilotSettings() {
@@ -154,6 +156,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         imageCategorySpinner.setAdapter(imageCategoryAdapter);
         imageCategorySpinner.setSelection(currentSelection);
         imageCategorySpinner.setOnItemSelectedListener(this);
+        UIUtils.setViewAndChildrenEnabled(autopilotSettingsContainer, false);
     }
 
     void animateToState(final SettingsState newState) {
@@ -166,13 +169,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                 final View newContainer = containerForState(newState);
                 final View currentContainer = containerForState(currentState);
                 if (newContainer != null) {
-                    newContainer.setEnabled(true);
+                    UIUtils.setViewAndChildrenEnabled(newContainer, true);
                     final Animator enterAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.enter_from_right);
                     enterAnimator.setTarget(newContainer);
                     enterAnimator.start();
                 }
                 if (currentContainer != null) {
-                    currentContainer.setEnabled(false);
+                    UIUtils.setViewAndChildrenEnabled(currentContainer, false);
                     final Animator exitAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.exit_to_left);
                     exitAnimator.setTarget(currentContainer);
                     exitAnimator.start();
