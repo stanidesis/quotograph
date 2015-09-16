@@ -136,7 +136,8 @@
         android:minHeight="@dimen/lwq_settings_element_min_height"
         android:layout_below="@id/rl_lwq_autopilot_settings_blur"
         android:layout_centerHorizontal="true"
-        app:layout_marginTopPercent="@fraction/lwq_settings_element_margin_top_percent">
+        app:layout_marginTopPercent="@fraction/lwq_settings_element_margin_top_percent"
+        android:layout_alignWithParentIfMissing="false">
 
         <TextView
             style="@style/Theme.LWQ.TextAppearance.Settings.Category"

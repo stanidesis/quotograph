@@ -10,6 +10,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.os.Looper;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
@@ -17,7 +18,7 @@ import android.support.v7.graphics.Palette;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.view.Display;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -43,6 +44,9 @@ public class LWQDrawScript {
     static int swatchIndex;
     static Typeface quoteTypeFace;
     static Typeface authorTypeFace;
+    static Bitmap cachedBackground;
+    static int cachedBackgroundHashCode;
+    static int cachedBlur;
 
     static {
         quoteTypeFace = Fonts.JOSEFIN_BOLD.load(LWQApplication.get());
@@ -51,12 +55,9 @@ public class LWQDrawScript {
     }
 
     Palette palette;
-    Palette.PaletteAsyncListener paletteAsyncListener;
-
     SurfaceHolder surfaceHolder;
 
-    public LWQDrawScript(Palette.PaletteAsyncListener paletteAsyncListener, SurfaceHolder surfaceHolder) {
-        this.paletteAsyncListener = paletteAsyncListener;
+    public LWQDrawScript(SurfaceHolder surfaceHolder) {
         this.surfaceHolder = surfaceHolder;
     }
 
@@ -92,98 +93,63 @@ public class LWQDrawScript {
     }
 
     public void draw() {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            Log.e(getClass().getSimpleName(), "Executing draw() on UI thread, switch to a background thread.", new Throwable());
+            return;
+        }
         final LWQWallpaperController wallpaperController =
                 LWQApplication.getWallpaperController();
         final Context context = LWQApplication.get();
         while (surfaceHolder.isCreating()) {}
-        final Canvas canvas = surfaceHolder.lockCanvas();
-        canvas.drawColor(context.getResources().getColor(android.R.color.white));
-        canvas.save();
 
         // Get screen width/height
         final Rect surfaceFrame = surfaceHolder.getSurfaceFrame();
-        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        final Display defaultDisplay = windowManager.getDefaultDisplay();
         final Point size = new Point();
-        defaultDisplay.getSize(size);
+        ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
         final int screenWidth = size.x;
         final int screenHeight = surfaceHolder.getSurfaceFrame().height();
-
-        final int horizontalPadding = (int) (screenWidth * .07);
-        final int verticalPadding = (int) (screenHeight * .2);
-        final int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
-
         final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
-        if (backgroundImage != null) {
-            Bitmap drawnBitmap = backgroundImage;
-            float blurRadius = LWQPreferences.getBlurPreference();
-            boolean recycleBitmap = false;
-            if (currentAPIVersion >= Build.VERSION_CODES.JELLY_BEAN_MR1 && blurRadius > 0f) {
-                recycleBitmap = true;
-                drawnBitmap = blurBitmap(backgroundImage, blurRadius);
-            }
-
-            Paint bitmapPaint = new Paint();
-            bitmapPaint.setAntiAlias(true);
-            bitmapPaint.setFilterBitmap(true);
-            bitmapPaint.setDither(true);
-
-            float scaleY = (float) surfaceFrame.height() / (float) backgroundImage.getHeight();
-            float scaleX = (float) surfaceFrame.width() / (float) backgroundImage.getWidth();
-            float finalScale = Math.max(scaleX, scaleY);
-
-            Matrix scaleMatrix = new Matrix();
-            scaleMatrix.postScale(finalScale, finalScale);
-
-            // Adjust center
-            final int bitmapFinalWidth = (int)((float) drawnBitmap.getWidth() * finalScale);
-            if (bitmapFinalWidth > screenWidth) {
-                final float dx = -0.5f * (bitmapFinalWidth - screenWidth);
-                canvas.translate(dx, 0);
-                canvas.drawBitmap(drawnBitmap, scaleMatrix, bitmapPaint);
-                canvas.translate(-dx, 0);
-            } else {
-                canvas.drawBitmap(drawnBitmap, scaleMatrix, bitmapPaint);
-            }
-            if (recycleBitmap) {
-                drawnBitmap.recycle();
-            }
+        if (backgroundImage == null) {
+            return;
+        }
+        palette = paletteCache.get(backgroundImage.hashCode());
+        if (palette == null) {
+            LWQDrawScript.paletteCache.clear();
+            palette = Palette.from(backgroundImage).generate();
+            LWQDrawScript.paletteCache.put(backgroundImage.hashCode(), palette);
+            LWQDrawScript.swatchIndex = 0;
         }
 
-        final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
-                screenWidth - horizontalPadding, screenHeight - verticalPadding);
+        final Canvas canvas = surfaceHolder.lockCanvas();
+        canvas.save();
 
-        final int dimPreference = LWQPreferences.getDimPreference();
-        if (dimPreference > 0) {
-            int alpha = (int) Math.floor(255f * (dimPreference / 100f));
-            canvas.drawColor(Color.argb(alpha, 0, 0, 0));
-        }
-
-        int quoteColor = context.getResources().getColor(android.R.color.black);
-        int quoteStrokeColor = context.getResources().getColor(android.R.color.holo_blue_light);
-        int authorColor = quoteColor;
-        if (backgroundImage != null) {
-            palette = paletteCache.get(backgroundImage.hashCode());
-            if (palette != null) {
-                final Palette.Swatch swatch = getSwatch();
-                quoteColor = swatch.getRgb();
-                authorColor = swatch.getRgb();
-                quoteStrokeColor = swatch.getTitleTextColor();
-            } else {
-                Palette.from(backgroundImage).generate(new Palette.PaletteAsyncListener() {
-                    @Override
-                    public void onGenerated(Palette palette) {
-                        LWQDrawScript.paletteCache.put(backgroundImage.hashCode(), palette);
-                        LWQDrawScript.this.palette = palette;
-                        LWQDrawScript.swatchIndex = 0;
-                        paletteAsyncListener.onGenerated(palette);
-                    }
-                });
-                canvas.restore();
-                surfaceHolder.unlockCanvasAndPost(canvas);
-                return;
+        final int blurPreference = LWQPreferences.getBlurPreference();
+        // Determine cache validity
+        if (cachedBackground == null || cachedBlur != blurPreference ||
+                backgroundImage.hashCode() != cachedBackgroundHashCode) {
+            if (cachedBackground != null && cachedBackground != backgroundImage) {
+                cachedBackground.recycle();
             }
+            cachedBackgroundHashCode = backgroundImage.hashCode();
+            cachedBackground = generateBitmap(blurPreference, backgroundImage);
+            cachedBlur = blurPreference;
         }
+        drawBitmap(canvas, screenWidth, surfaceFrame, cachedBackground);
+        drawDimmer(canvas, LWQPreferences.getDimPreference());
+        drawText(canvas, screenWidth, screenHeight);
+
+        canvas.restore();
+        surfaceHolder.unlockCanvasAndPost(canvas);
+    }
+
+    private void drawText(Canvas canvas, int screenWidth, int screenHeight) {
+        Context context = LWQApplication.get();
+        final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
+
+        final Palette.Swatch swatch = getSwatch();
+        int quoteColor = swatch.getRgb();
+        int authorColor = swatch.getRgb();
+        int quoteStrokeColor = swatch.getTitleTextColor();
 
         // Setup Quote text
         TextPaint quoteTextPaint = new TextPaint();
@@ -208,6 +174,12 @@ public class LWQDrawScript {
         if (wallpaperController.getQuote() != null && !wallpaperController.getQuote().isEmpty()) {
             quote = wallpaperController.getQuote();
         }
+
+        final int horizontalPadding = (int) (screenWidth * .07);
+        final int verticalPadding = (int) (screenHeight * .2);
+        final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
+                screenWidth - horizontalPadding, screenHeight - verticalPadding);
+
         StaticLayout quoteLayout = new StaticLayout(quote.toUpperCase(), quoteTextPaint,
                 drawingArea.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
         StaticLayout authorLayout = new StaticLayout(author, authorTextPaint,
@@ -225,9 +197,48 @@ public class LWQDrawScript {
         canvas.translate(drawingArea.width(), quoteLayout.getHeight());
         authorLayout.draw(canvas);
         strokeText(authorLayout, quoteStrokeColor & STROKE_ALPHA, 3f, canvas);
+    }
 
-        canvas.restore();
-        surfaceHolder.unlockCanvasAndPost(canvas);
+    void drawDimmer(Canvas canvas, int dimPreference) {
+        if (dimPreference > 0) {
+            int alpha = (int) Math.floor(255f * (dimPreference / 100f));
+            canvas.drawColor(Color.argb(alpha, 0, 0, 0));
+        }
+    }
+
+    Bitmap generateBitmap(int blurRadius, Bitmap backgroundImage) {
+        Bitmap drawnBitmap = backgroundImage;
+        boolean recycleBitmap = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && blurRadius > 0f) {
+            recycleBitmap = true;
+            drawnBitmap = blurBitmap(backgroundImage, blurRadius);
+        }
+        return drawnBitmap;
+    }
+
+    void drawBitmap(Canvas canvas, int screenWidth, Rect surfaceFrame, Bitmap bitmapToDraw) {
+        Paint bitmapPaint = new Paint();
+        bitmapPaint.setAntiAlias(true);
+        bitmapPaint.setFilterBitmap(true);
+        bitmapPaint.setDither(true);
+
+        float scaleY = (float) surfaceFrame.height() / (float) bitmapToDraw.getHeight();
+        float scaleX = (float) surfaceFrame.width() / (float) bitmapToDraw.getWidth();
+        float finalScale = Math.max(scaleX, scaleY);
+
+        Matrix scaleMatrix = new Matrix();
+        scaleMatrix.postScale(finalScale, finalScale);
+
+        // Adjust center
+        final int bitmapFinalWidth = (int)((float) bitmapToDraw.getWidth() * finalScale);
+        if (bitmapFinalWidth > screenWidth) {
+            final float dx = -0.5f * (bitmapFinalWidth - screenWidth);
+            canvas.translate(dx, 0);
+            canvas.drawBitmap(bitmapToDraw, scaleMatrix, bitmapPaint);
+            canvas.translate(-dx, 0);
+        } else {
+            canvas.drawBitmap(bitmapToDraw, scaleMatrix, bitmapPaint);
+        }
     }
 
     StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight) {
@@ -255,6 +266,32 @@ public class LWQDrawScript {
     }
 
     Bitmap blurBitmap(Bitmap original, float radius) {
+        final long start = System.currentTimeMillis();
+
+        RenderScript renderScript = RenderScript.create(LWQApplication.get());
+        Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, original);
+
+        ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
+        blur.setRadius(radius);
+        blur.setInput(overlayAllocation);
+
+        Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
+        Allocation outAllocation = Allocation.createFromBitmap(renderScript, original);
+        blur.forEach(outAllocation);
+        outAllocation.copyTo(result);
+
+        overlayAllocation.destroy();
+        outAllocation.destroy();
+        renderScript.destroy();
+
+        final long end = System.currentTimeMillis();
+        Log.e("TIMING", "Blurring consumed " + (end - start) + " millis");
+        return result;
+    }
+
+    Bitmap blurBitmap2(Bitmap original, float radius) {
+        final long start = System.currentTimeMillis();
+
         Bitmap overlay = Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas overlayCanvas = new Canvas(overlay);
         overlayCanvas.drawBitmap(original, 0, 0, null);
@@ -265,6 +302,10 @@ public class LWQDrawScript {
         blur.setRadius(radius);
         blur.forEach(overlayAllocation);
         overlayAllocation.copyTo(overlay);
+        renderScript.destroy();
+
+        final long end = System.currentTimeMillis();
+        Log.e("TIMING", "Blurring consumed " + (end - start) + " millis");
         return overlay;
     }
 

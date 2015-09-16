@@ -2,7 +2,6 @@ package com.stanleyidesis.livewallpaperquotes.api;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
@@ -61,7 +60,6 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     UnsplashManager unsplashManager;
     Wallpaper activeWallpaper;
     Bitmap activeBackgroundImage;
-    Bitmap defaultBackgroundImage;
     RetrievalState retrievalState;
     Map<RetrievalState, List<Callback<Boolean>>> listeners;
 
@@ -77,7 +75,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         if (activeWallpaper != null) {
             return activeWallpaper.quote.text;
         }
-        return LWQApplication.get().getString(R.string.default_quote);
+        return "";
     }
 
     @Override
@@ -85,18 +83,11 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         if (activeWallpaper != null) {
             return activeWallpaper.quote.author.name;
         }
-        return LWQApplication.get().getString(R.string.default_author);
+        return "";
     }
 
     @Override
     public Bitmap getBackgroundImage() {
-        if (activeBackgroundImage == null) {
-            if (defaultBackgroundImage == null) {
-                defaultBackgroundImage = BitmapFactory.decodeResource(LWQApplication.get().getResources(),
-                        R.drawable.default_background);
-            }
-            return defaultBackgroundImage;
-        }
         return activeBackgroundImage;
     }
 
@@ -237,10 +228,6 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     @Override
     public void discardActiveWallpaper() {
-        if (defaultBackgroundImage != null) {
-            defaultBackgroundImage.recycle();
-            defaultBackgroundImage = null;
-        }
         if (activeWallpaperLoaded()) {
             LWQApplication.getImageController().clearBitmap(getFullUri());
             activeBackgroundImage = null;

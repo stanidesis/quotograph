@@ -50,12 +50,12 @@ public class LWQPreferences {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(LWQApplication.get());
     }
 
-    public static float getBlurPreference() {
-        return sharedPreferences.getFloat(LWQApplication.get().getString(R.string.preference_key_blur), 0f);
+    public static int getBlurPreference() {
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_blur), 0);
     }
 
-    public static void setBlurPreference(float blurPreference) {
-        sharedPreferences.edit().putFloat(LWQApplication.get().getString(R.string.preference_key_blur), blurPreference).apply();
+    public static void setBlurPreference(int blurPreference) {
+        sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_blur), blurPreference).apply();
     }
 
     public static int getDimPreference() {

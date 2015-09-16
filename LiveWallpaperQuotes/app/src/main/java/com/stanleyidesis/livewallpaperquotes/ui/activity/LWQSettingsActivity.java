@@ -2,6 +2,7 @@ package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -136,9 +137,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     void setupAutopilotSettings() {
         autopilotSettingsContainer = findViewById(R.id.group_lwq_settings_autopilot);
         autopilotSettingsContainer.setAlpha(0f);
-        SeekBar blurBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_blur);
-        blurBar.setProgress((int) LWQPreferences.getBlurPreference());
-        blurBar.setOnSeekBarChangeListener(this);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            autopilotSettingsContainer.findViewById(R.id.rl_lwq_autopilot_settings_blur).setVisibility(View.GONE);
+        } else {
+            SeekBar blurBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_blur);
+            blurBar.setProgress(LWQPreferences.getBlurPreference());
+            blurBar.setOnSeekBarChangeListener(this);
+        }
 
         SeekBar dimBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_dim);
         dimBar.setProgress(LWQPreferences.getDimPreference());

@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.graphics.Palette;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -78,9 +77,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     BroadcastReceiver newWallpaperBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (drawScript != null) {
-                drawScript.draw();
-            }
+            draw();
         }
     };
 
@@ -176,12 +173,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
 
     void draw() {
         if (drawScript == null) {
-            drawScript = new LWQDrawScript(new Palette.PaletteAsyncListener() {
-                @Override
-                public void onGenerated(Palette palette) {
-                    draw();
-                }
-            }, surfaceView.getHolder());
+            drawScript = new LWQDrawScript(surfaceView.getHolder());
         } else {
             drawScript.setSurfaceHolder(surfaceView.getHolder());
         }

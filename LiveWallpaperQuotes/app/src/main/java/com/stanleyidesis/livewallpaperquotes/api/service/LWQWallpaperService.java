@@ -66,12 +66,7 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
-            drawScript = new LWQDrawScript(new Palette.PaletteAsyncListener() {
-                @Override
-                public void onGenerated(Palette palette) {
-                    asyncDraw();
-                }
-            }, surfaceHolder);
+            drawScript = new LWQDrawScript(surfaceHolder);
             setOffsetNotificationsEnabled(true);
             // TODO better place for this? Maybe not.
             LWQAlarmManager.resetAlarm();
