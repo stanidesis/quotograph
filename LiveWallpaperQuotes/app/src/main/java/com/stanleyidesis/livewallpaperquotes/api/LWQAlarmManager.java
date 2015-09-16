@@ -43,13 +43,13 @@ public class LWQAlarmManager {
         calendar.set(Calendar.MILLISECOND, 0);
         if (refreshPreference == refreshOptions[0] || refreshPreference == refreshOptions[1]) {
             // Every 30 Minutes or Hour
-            calendar.add(Calendar.HOUR_OF_DAY, 1);
+            calendar.add(Calendar.HOUR, 1);
         } else if (refreshPreference == refreshOptions[2]) {
             // Every Six Hours
-            calendar.add(Calendar.HOUR_OF_DAY, 6);
+            calendar.add(Calendar.HOUR, 6);
         } else if (refreshPreference == refreshOptions[3]) {
             // Every 12 Hours
-            calendar.add(Calendar.HOUR_OF_DAY, 12);
+            calendar.add(Calendar.HOUR, 12);
         } else if (refreshPreference == refreshOptions[4]) {
             // Every Day
             calendar.add(Calendar.DAY_OF_YEAR, 1);

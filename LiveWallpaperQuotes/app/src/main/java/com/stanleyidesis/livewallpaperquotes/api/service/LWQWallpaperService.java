@@ -73,8 +73,8 @@ public class LWQWallpaperService extends WallpaperService {
                 }
             }, surfaceHolder);
             setOffsetNotificationsEnabled(true);
-            LWQAlarmManager.cancelRepeatingAlarm();
-            LWQAlarmManager.setRepeatingAlarm();
+            // TODO better place for this? Maybe not.
+            LWQAlarmManager.resetAlarm();
             if (BuildConfig.DEBUG) {
                 gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
                 gestureDetectorCompat.setOnDoubleTapListener(this);
