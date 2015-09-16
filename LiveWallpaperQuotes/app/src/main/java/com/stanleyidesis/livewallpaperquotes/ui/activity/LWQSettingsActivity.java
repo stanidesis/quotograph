@@ -107,7 +107,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        switchToSilkScreen(SilkScreenState.DEFAULT);
+        switchToSilkScreen(SilkScreenState.DEFAULT, null);
         animateToState(SettingsState.MODE_SELECTION);
     }
 
@@ -239,12 +239,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        animateSilkScreen(SilkScreenState.REVEAL);
+        animateSilkScreen(SilkScreenState.REVEAL, containerForState(currentState));
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        animateSilkScreen(SilkScreenState.DEFAULT);
+        animateSilkScreen(SilkScreenState.DEFAULT, containerForState(currentState));
     }
 
 }

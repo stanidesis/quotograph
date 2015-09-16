@@ -60,7 +60,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
 
     enum SilkScreenState {
         DEFAULT(1f, .7f),
-        REVEAL(.2f, 0f);
+        REVEAL(.1f, 0f);
 
         float contentAlpha;
         float screenAlpha;
@@ -142,16 +142,27 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     public void surfaceDestroyed(SurfaceHolder holder) {}
 
     void switchToSilkScreen(SilkScreenState state) {
-        // TODO switch container?
-        silkScreen.setAlpha(state.screenAlpha);
+        switchToSilkScreen(state, null);
     }
 
-    void animateSilkScreen(SilkScreenState state) {
+    void switchToSilkScreen(SilkScreenState state, View content) {
+        silkScreen.setAlpha(state.screenAlpha);
+        if (content != null) {
+            content.setAlpha(state.contentAlpha);
+        }
+    }
+    
+    void animateSilkScreen(SilkScreenState state, View content) {
         ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), state.screenAlpha);
         silkScreenAnimator.setDuration(300);
         silkScreenAnimator.setInterpolator(new LinearInterpolator());
         silkScreenAnimator.start();
-        // TODO fade out container?
+        if (content != null) {
+            ObjectAnimator contentAnimator = ObjectAnimator.ofFloat(content, "alpha", content.getAlpha(), state.contentAlpha);
+            contentAnimator.setDuration(300);
+            contentAnimator.setInterpolator(new LinearInterpolator());
+            contentAnimator.start();
+        }
     }
 
     void fullScreenIfPossible() {
