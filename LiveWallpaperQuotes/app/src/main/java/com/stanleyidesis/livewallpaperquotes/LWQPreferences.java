@@ -58,6 +58,14 @@ public class LWQPreferences {
         sharedPreferences.edit().putFloat(LWQApplication.get().getString(R.string.preference_key_blur), blurPreference).apply();
     }
 
+    public static int getDimPreference() {
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_dim), 0);
+    }
+
+    public static void setDimPreference(int dimPreference) {
+        sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_dim), dimPreference).apply();
+    }
+
     public static boolean isFirstLaunch() {
         return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_first_launch), true);
     }

@@ -3,6 +3,7 @@ package com.stanleyidesis.livewallpaperquotes.api;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
@@ -152,10 +153,11 @@ public class LWQDrawScript {
         final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
                 screenWidth - horizontalPadding, screenHeight - verticalPadding);
 
-            /*
-            canvas.clipRect(drawingArea, Region.Op.REPLACE);
-            canvas.drawColor(getResources().getColor(android.R.color.darker_gray));
-            */
+        final int dimPreference = LWQPreferences.getDimPreference();
+        if (dimPreference > 0) {
+            int alpha = (int) Math.floor(255f * (dimPreference / 100f));
+            canvas.drawColor(Color.argb(alpha, 0, 0, 0));
+        }
 
         int quoteColor = context.getResources().getColor(android.R.color.black);
         int quoteStrokeColor = context.getResources().getColor(android.R.color.holo_blue_light);

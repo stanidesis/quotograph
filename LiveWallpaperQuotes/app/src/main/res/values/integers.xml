@@ -6,4 +6,5 @@
     <integer name="twelve_hours">43200000</integer>
     <integer name="twenty_four_hours">86400000</integer>
     <integer name="one_week">604800000</integer>
+    <integer name="max_dim_value">90</integer>
 </resources>

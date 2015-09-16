@@ -151,7 +151,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
             content.setAlpha(state.contentAlpha);
         }
     }
-    
+
     void animateSilkScreen(SilkScreenState state, View content) {
         ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), state.screenAlpha);
         silkScreenAnimator.setDuration(300);

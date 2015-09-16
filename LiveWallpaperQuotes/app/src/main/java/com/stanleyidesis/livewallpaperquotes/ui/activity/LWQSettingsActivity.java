@@ -137,8 +137,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         autopilotSettingsContainer = findViewById(R.id.group_lwq_settings_autopilot);
         autopilotSettingsContainer.setAlpha(0f);
         SeekBar blurBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_blur);
-        blurBar.setOnSeekBarChangeListener(this);
         blurBar.setProgress((int) LWQPreferences.getBlurPreference());
+        blurBar.setOnSeekBarChangeListener(this);
+
+        SeekBar dimBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_dim);
+        dimBar.setProgress(LWQPreferences.getDimPreference());
+        dimBar.setOnSeekBarChangeListener(this);
 
         final List<String> backgroundCategories = LWQApplication.getWallpaperController().getBackgroundCategories();
         final String imageCategoryPreference = LWQPreferences.getImageCategoryPreference();
@@ -233,8 +237,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int value, boolean b) {
-        LWQPreferences.setBlurPreference(value);
-        // TODO refresh wallpaper
+        if (seekBar.getId() == R.id.sb_lwq_autopilot_settings_blur) {
+            LWQPreferences.setBlurPreference(value);
+        } else {
+            LWQPreferences.setDimPreference(value);
+        }
+        draw();
     }
 
     @Override
