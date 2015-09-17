@@ -34,7 +34,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <stroke android:color="#5533AA" android:width="4sp"/>
+            <stroke android:color="@color/palette_400" android:width="4sp"/>
             <corners android:radius="@dimen/lwq_mode_selectable_item_button_radius"/>
         </shape>
     </item>

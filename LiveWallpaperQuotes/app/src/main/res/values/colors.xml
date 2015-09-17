@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="semi_transparent">#DD000000</color>
-    <color name="circle_button">#DDFFFFFF</color>
+    <color name="circle_button">@color/palette_50</color>
+
+    <color name="palette_50">#EDE7F6</color>
+    <color name="palette_100">#D1C4E9</color>
+    <color name="palette_200">#B39DDB</color>
+    <color name="palette_300">#9575CD</color>
+    <color name="palette_400">#7E57C2</color>
+    <color name="palette_500">#673AB7</color>
+    <color name="palette_600">#5E35B1</color>
+    <color name="palette_700">#512DA8</color>
+    <color name="palette_800">#4527A0</color>
+    <color name="palette_900">#311B92</color>
+    <color name="palette_A100">#B388FF</color>
+    <color name="palette_A200">#7C4DFF</color>
+    <color name="palette_A400">#651FFF</color>
+    <color name="palette_A700">#6200EA</color>
 </resources>
