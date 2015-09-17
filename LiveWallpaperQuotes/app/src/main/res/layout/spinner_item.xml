@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Theme.LWQ.TextAppearance.Settings.Category"
+    android:id="@android:id/title"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="start"
+    android:textColor="@color/palette_400"
+    android:paddingLeft="14dp"
+    android:paddingRight="14dp"
+    android:paddingStart="14dp"/>

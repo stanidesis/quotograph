@@ -1,8 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.stanleyidesis.livewallpaperquotes">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <application android:allowBackup="true" android:label="@string/app_name"
-        android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme"
+        android:icon="@mipmap/ic_launcher" android:theme="@style/Theme.LWQ"
         android:name=".LWQApplication">
 
         <!-- Sugar ORM Meta Data -->
@@ -14,13 +18,27 @@
 
         <!-- Activities -->
 
-        <activity android:name=".ui.activity.LWQSettingsActivity"
-            android:launchMode="singleInstance">
+        <activity android:name=".ui.activity.LWQActivateActivity"
+            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity android:name=".ui.activity.LWQSettingsActivity"
+            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper">
+        </activity>
+
+        <!-- Receivers -->
+
+        <receiver android:name=".api.receiver.LWQReceiver" android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.REBOOT"/>
+                <action android:name="com.stanleyidesis.livewallpaperquotes.action.CHANGE_WALLPAPER"/>
+            </intent-filter>
+        </receiver>
 
         <!-- Services -->
 
@@ -34,6 +52,8 @@
             <meta-data android:name="android.service.wallpaper"
                 android:resource="@xml/meta"/>
         </service>
+
+        <service android:name=".api.service.LWQUpdateService"/>
 
     </application>
 
