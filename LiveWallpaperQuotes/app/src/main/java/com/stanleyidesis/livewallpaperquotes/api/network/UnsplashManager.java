@@ -71,6 +71,15 @@ public class UnsplashManager {
             final int randomIndex = new Random().nextInt(UnsplashCategory.values().length);
             return UnsplashCategory.values()[randomIndex];
         }
+
+        public static UnsplashCategory fromName(String name) {
+            for (UnsplashCategory unsplashCategory : UnsplashCategory.values()) {
+                if (unsplashCategory.name().equalsIgnoreCase(name) || unsplashCategory.prettyName.equalsIgnoreCase(name)) {
+                    return unsplashCategory;
+                }
+            }
+            return null;
+        }
     }
 
     public static String appendJPGFormat(String unsplashUri) {

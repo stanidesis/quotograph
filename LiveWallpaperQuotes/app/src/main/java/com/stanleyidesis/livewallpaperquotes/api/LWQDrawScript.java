@@ -283,7 +283,7 @@ public class LWQDrawScript {
         renderScript.destroy();
         return result;
     }
-    
+
     Palette.Swatch getSwatch() {
         return palette.getSwatches().get(swatchIndex);
     }

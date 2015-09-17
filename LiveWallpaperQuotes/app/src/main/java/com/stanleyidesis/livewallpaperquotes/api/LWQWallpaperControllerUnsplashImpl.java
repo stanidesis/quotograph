@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.db.BackgroundImage;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
@@ -110,16 +111,23 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         retrievalState = RetrievalState.NEW_WALLPAPER;
         listeners.get(RetrievalState.NEW_WALLPAPER).add(callback);
 
-        Category fromCategory;
-        if (activeWallpaper != null) {
-            fromCategory = activeWallpaper.quote.category;
+        Category fromCategory = Category.random();
+        if (LWQPreferences.isAutoPilot()) {
+            final String quoteCategoryPreference = LWQPreferences.getQuoteCategoryPreference();
+            if (quoteCategoryPreference == null) {
+                fromCategory = Category.random();
+            } else {
+                fromCategory = Category.findWithName(quoteCategoryPreference);
+            }
         } else {
-            fromCategory = Category.random();
+            // TODO
         }
         LWQApplication.getQuoteController().fetchUnusedQuote(fromCategory, new Callback<Quote>() {
             @Override
             public void onSuccess(final Quote quote) {
-                unsplashManager.getPhotoURLs(1, UnsplashManager.UnsplashCategory.NATURE, new Callback<List<UnsplashManager.LWQUnsplashImage>>() {
+                final UnsplashManager.UnsplashCategory unsplashCategory =
+                        UnsplashManager.UnsplashCategory.fromName(LWQPreferences.getImageCategoryPreference());
+                unsplashManager.getPhotoURLs(1, unsplashCategory, new Callback<List<UnsplashManager.LWQUnsplashImage>>() {
                     @Override
                     public void onSuccess(List<UnsplashManager.LWQUnsplashImage> lwqUnsplashImages) {
                         BackgroundImage newBackgroundImage = null;

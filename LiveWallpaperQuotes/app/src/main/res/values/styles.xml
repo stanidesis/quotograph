@@ -32,6 +32,10 @@
     <style name="Theme.LWQ.TextAppearance.Settings.Category.SpinnerDropDownItem" parent="@style/Widget.AppCompat.ListView.DropDown">
         <item name="android:textColor">@color/palette_500</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="Theme.LWQ.SeekBar">

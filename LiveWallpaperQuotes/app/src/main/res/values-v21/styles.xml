@@ -13,13 +13,4 @@
         <item name="android:textColor">@color/palette_50</item>
     </style>
 
-    <style name="Theme.LWQ.TextAppearance.Settings.Category.SpinnerItem" parent="@style/Widget.AppCompat.TextView.SpinnerItem">
-        <item name="android:textColor">#442299</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-
-    <style name="Theme.LWQ.TextAppearance.Settings.Category.SpinnerDropDownItem" parent="@style/Widget.AppCompat.ListView.DropDown">
-        <item name="android:textColor">#442299</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
 </resources>

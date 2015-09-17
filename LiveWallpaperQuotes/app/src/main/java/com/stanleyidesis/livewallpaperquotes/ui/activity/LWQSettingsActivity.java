@@ -14,8 +14,11 @@ import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
+import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -160,9 +163,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             }
         }
         ArrayAdapter<String> imageCategoryAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item,
+                R.layout.spinner_item,
                 backgroundCategories);
-        imageCategoryAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        imageCategoryAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
         Spinner imageCategorySpinner = (Spinner) autopilotSettingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_image_category);
         imageCategorySpinner.setAdapter(imageCategoryAdapter);
         imageCategorySpinner.setSelection(currentSelection);
@@ -174,10 +177,17 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
         });
 
+        final String [] refreshPreferenceOptions = getResources().getStringArray(R.array.refresh_preference_options);
+        ArrayAdapter<String> refreshOptionsAdapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item,
+                refreshPreferenceOptions);
+        refreshOptionsAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
         Spinner refreshSpinner = (Spinner) autopilotSettingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_interval);
+        refreshSpinner.setAdapter(refreshOptionsAdapter);
         final long refreshPreference = LWQPreferences.getRefreshPreference();
         final int[] refreshValues = getResources().getIntArray(R.array.refresh_preference_values);
         for (int i = 0; i < refreshValues.length; i++) {
@@ -195,8 +205,46 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             }
 
             @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+
+        final List<Category> categories = Category.listAll(Category.class);
+        Collections.sort(categories, new Comparator<Category>() {
+            @Override
+            public int compare(Category categoryA, Category categoryB) {
+                return categoryA.name.compareTo(categoryB.name);
+            }
+        });
+        final String quoteCategoryPreference = LWQPreferences.getQuoteCategoryPreference();
+        int selectedQuoteCategory = 0;
+        final String [] quoteCategoryNames = new String[categories.size()];
+        for (int i = 0; i < categories.size(); i++) {
+            quoteCategoryNames[i] = categories.get(i).name;
+            if (quoteCategoryNames[i].equalsIgnoreCase(quoteCategoryPreference)) {
+                selectedQuoteCategory = i;
+            }
+        }
+
+        ArrayAdapter<String> quoteCategoriesAdapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item,
+                quoteCategoryNames);
+        quoteCategoriesAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
+        Spinner quoteCategorySpinner = (Spinner) autopilotSettingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_quote_category);
+        quoteCategorySpinner.setAdapter(quoteCategoriesAdapter);
+        quoteCategorySpinner.setSelection(selectedQuoteCategory);
+        quoteCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
+                LWQPreferences.setQuoteCategoryPreference(quoteCategoryNames[index]);
+                // TODO update
+            }
+
+            @Override
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
+
         UIUtils.setViewAndChildrenEnabled(autopilotSettingsContainer, false);
     }
 
