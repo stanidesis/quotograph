@@ -266,8 +266,6 @@ public class LWQDrawScript {
     }
 
     Bitmap blurBitmap(Bitmap original, float radius) {
-        final long start = System.currentTimeMillis();
-
         RenderScript renderScript = RenderScript.create(LWQApplication.get());
         Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, original);
 
@@ -283,32 +281,9 @@ public class LWQDrawScript {
         overlayAllocation.destroy();
         outAllocation.destroy();
         renderScript.destroy();
-
-        final long end = System.currentTimeMillis();
-        Log.e("TIMING", "Blurring consumed " + (end - start) + " millis");
         return result;
     }
-
-    Bitmap blurBitmap2(Bitmap original, float radius) {
-        final long start = System.currentTimeMillis();
-
-        Bitmap overlay = Bitmap.createBitmap(original.getWidth(), original.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas overlayCanvas = new Canvas(overlay);
-        overlayCanvas.drawBitmap(original, 0, 0, null);
-        RenderScript renderScript = RenderScript.create(LWQApplication.get());
-        Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, overlay);
-        ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
-        blur.setInput(overlayAllocation);
-        blur.setRadius(radius);
-        blur.forEach(overlayAllocation);
-        overlayAllocation.copyTo(overlay);
-        renderScript.destroy();
-
-        final long end = System.currentTimeMillis();
-        Log.e("TIMING", "Blurring consumed " + (end - start) + " millis");
-        return overlay;
-    }
-
+    
     Palette.Swatch getSwatch() {
         return palette.getSwatches().get(swatchIndex);
     }
