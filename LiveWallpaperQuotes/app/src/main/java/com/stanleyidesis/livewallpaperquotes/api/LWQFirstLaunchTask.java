@@ -7,9 +7,9 @@ import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
 
 import java.util.List;
-import java.util.Random;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -58,9 +58,10 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
                     return;
                 }
             }
-            // TODO not random?
-            final Category randomCategory = categories.get(new Random().nextInt(categories.size()));
-            LWQApplication.getQuoteController().fetchQuotes(randomCategory, fetchQuotesCallback);
+            // TODO not first?
+            final Category initialCategory = categories.get(0);
+            LWQPreferences.setQuoteCategoryPreference(initialCategory.name);
+            LWQApplication.getQuoteController().fetchQuotes(initialCategory, fetchQuotesCallback);
         }
 
         @Override
@@ -73,6 +74,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         @Override
         public void onSuccess(List<Quote> quotes) {
             publishProgress(quotes.size() + " quotes fetched");
+            LWQPreferences.setImageCategoryPreference(UnsplashManager.UnsplashCategory.NATURE.sqlName());
             LWQApplication.getWallpaperController().retrieveActiveWallpaper(retrieveWallpaperCallback, true);
         }
 

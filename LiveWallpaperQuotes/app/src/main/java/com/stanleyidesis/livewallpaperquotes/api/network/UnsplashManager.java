@@ -2,6 +2,7 @@ package com.stanleyidesis.livewallpaperquotes.api.network;
 
 import android.util.Log;
 
+import com.orm.StringUtil;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
 
 import org.jsoup.Connection;
@@ -67,6 +68,10 @@ public class UnsplashManager {
             this.prettyName = prettyName;
         }
 
+        public String sqlName() {
+            return StringUtil.toSQLName(name());
+        }
+
         public static UnsplashCategory random() {
             final int randomIndex = new Random().nextInt(UnsplashCategory.values().length);
             return UnsplashCategory.values()[randomIndex];
@@ -78,7 +83,9 @@ public class UnsplashManager {
                     return unsplashCategory;
                 }
             }
-            return null;
+            Log.e(UnsplashCategory.class.getSimpleName(), "Defaulting to Nature category", new Throwable());
+            // Defaults to nature if not found
+            return NATURE;
         }
     }
 
