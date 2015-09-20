@@ -1,23 +1,311 @@
 package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
-import android.app.Activity;
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.SeekBar;
+import android.widget.Spinner;
 
+import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
+import com.stanleyidesis.livewallpaperquotes.api.db.Category;
+import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
- * Created by stanleyidesis on 7/11/15.
+ * Copyright (c) 2015 Stanley Idesis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * LWQSettingsActivity.java
+ * @author Stanley Idesis
+ *
+ * From Live-Wallpaper-Quotes
+ * https://github.com/stanidesis/live-wallpaper-quotes
+ *
+ * Please report any issues
+ * https://github.com/stanidesis/live-wallpaper-quotes/issues
+ *
+ * Date: 07/11/2015
  */
-public class LWQSettingsActivity extends Activity {
+public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar.OnSeekBarChangeListener {
+
+    enum SettingsState {
+        NONE,
+        MODE_SELECTION,
+        AUTOPILOT_SETTINGS,
+        CUSTOM_SETTINGS;
+    }
+
+    SettingsState currentState;
+
+    // Mode Selection Views
+    View modeSelectionContainer;
+    View modeAutopilotButton;
+    View modeCustomButton;
+    View.OnClickListener modeOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            modeAutopilotButton.setSelected(view == modeAutopilotButton);
+            modeCustomButton.setSelected(!modeAutopilotButton.isSelected());
+            int newMode = view == modeAutopilotButton ?
+                    getResources().getInteger(R.integer.preference_mode_autopilot) :
+                    getResources().getInteger(R.integer.preference_mode_custom);
+            LWQPreferences.setMode(newMode);
+        }
+    };
+    View.OnClickListener modeContinueClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (LWQPreferences.isAutoPilot()) {
+                animateToState(SettingsState.AUTOPILOT_SETTINGS);
+            } else {
+                // TODO
+                animateToState(SettingsState.NONE);
+            }
+        }
+    };
+
+    // Autopilot Views
+    View autopilotSettingsContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(android.R.anim.fade_in, 0);
         setContentView(R.layout.activity_lwq_settings);
+        currentState = SettingsState.NONE;
+
+        // Setup Mode Selection
+        setupModeSelection();
+        // Setup Autopilot Stuff
+        setupAutopilotSettings();
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        switchToSilkScreen(SilkScreenState.DEFAULT, null);
+        animateToState(SettingsState.MODE_SELECTION);
     }
+
+    @Override
+    public void onBackPressed() {
+        if (currentState != SettingsState.MODE_SELECTION) {
+            animateToState(SettingsState.MODE_SELECTION);
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    void setupModeSelection() {
+        modeSelectionContainer = findViewById(R.id.group_lwq_settings_mode_select);
+        modeSelectionContainer.setAlpha(0f);
+        modeSelectionContainer.findViewById(R.id.button_lwq_settings_mode_continue).setOnClickListener(modeContinueClickListener);
+        modeAutopilotButton = modeSelectionContainer.findViewById(R.id.button_lwq_settings_autopilot);
+        modeCustomButton = modeSelectionContainer.findViewById(R.id.button_lwq_settings_custom);
+        modeAutopilotButton.setSelected(LWQPreferences.isAutoPilot());
+        modeCustomButton.setSelected(!modeAutopilotButton.isSelected());
+        modeAutopilotButton.setOnClickListener(modeOnClickListener);
+        modeCustomButton.setOnClickListener(modeOnClickListener);
+        UIUtils.setViewAndChildrenEnabled(modeSelectionContainer, false);
+    }
+
+    void setupAutopilotSettings() {
+        autopilotSettingsContainer = findViewById(R.id.group_lwq_settings_autopilot);
+        autopilotSettingsContainer.setAlpha(0f);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            autopilotSettingsContainer.findViewById(R.id.rl_lwq_autopilot_settings_blur).setVisibility(View.GONE);
+        } else {
+            SeekBar blurBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_blur);
+            blurBar.setProgress(LWQPreferences.getBlurPreference());
+            blurBar.setOnSeekBarChangeListener(this);
+        }
+
+        SeekBar dimBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_dim);
+        dimBar.setProgress(LWQPreferences.getDimPreference());
+        dimBar.setOnSeekBarChangeListener(this);
+
+        final List<String> backgroundCategories = LWQApplication.getWallpaperController().getBackgroundCategories();
+        final String imageCategoryPreference = LWQPreferences.getImageCategoryPreference();
+        int currentSelection = 0;
+        for (String category : backgroundCategories) {
+            if (category.equalsIgnoreCase(imageCategoryPreference)) {
+                currentSelection = backgroundCategories.indexOf(category);
+                break;
+            }
+        }
+        ArrayAdapter<String> imageCategoryAdapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item,
+                backgroundCategories);
+        imageCategoryAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
+        Spinner imageCategorySpinner = (Spinner) autopilotSettingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_image_category);
+        imageCategorySpinner.setAdapter(imageCategoryAdapter);
+        imageCategorySpinner.setSelection(currentSelection);
+        imageCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
+                LWQPreferences.setImageCategoryPreference(LWQApplication.getWallpaperController().getBackgroundCategories().get(index));
+                // TODO toast or the slidy thingy from the bottom that says LWQ will apply settings to your next wallpaper
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+
+        final String [] refreshPreferenceOptions = getResources().getStringArray(R.array.refresh_preference_options);
+        ArrayAdapter<String> refreshOptionsAdapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item,
+                refreshPreferenceOptions);
+        refreshOptionsAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
+        Spinner refreshSpinner = (Spinner) autopilotSettingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_interval);
+        refreshSpinner.setAdapter(refreshOptionsAdapter);
+        final long refreshPreference = LWQPreferences.getRefreshPreference();
+        final int[] refreshValues = getResources().getIntArray(R.array.refresh_preference_values);
+        for (int i = 0; i < refreshValues.length; i++) {
+            if (refreshPreference == refreshValues[i]) {
+                refreshSpinner.setSelection(i);
+                break;
+            }
+        }
+        refreshSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
+                final int[] refreshValues = getResources().getIntArray(R.array.refresh_preference_values);
+                LWQPreferences.setRefreshPreference(refreshValues[index]);
+                LWQAlarmManager.resetAlarm();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+
+        final List<Category> categories = Category.listAll(Category.class);
+        Collections.sort(categories, new Comparator<Category>() {
+            @Override
+            public int compare(Category categoryA, Category categoryB) {
+                return categoryA.name.compareTo(categoryB.name);
+            }
+        });
+        final String quoteCategoryPreference = LWQPreferences.getQuoteCategoryPreference();
+        int selectedQuoteCategory = 0;
+        final String [] quoteCategoryNames = new String[categories.size()];
+        for (int i = 0; i < categories.size(); i++) {
+            quoteCategoryNames[i] = categories.get(i).name;
+            if (quoteCategoryNames[i].equalsIgnoreCase(quoteCategoryPreference)) {
+                selectedQuoteCategory = i;
+            }
+        }
+
+        ArrayAdapter<String> quoteCategoriesAdapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item,
+                quoteCategoryNames);
+        quoteCategoriesAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
+        Spinner quoteCategorySpinner = (Spinner) autopilotSettingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_quote_category);
+        quoteCategorySpinner.setAdapter(quoteCategoriesAdapter);
+        quoteCategorySpinner.setSelection(selectedQuoteCategory);
+        quoteCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
+                LWQPreferences.setQuoteCategoryPreference(quoteCategoryNames[index]);
+                // TODO toast or the slidy thingy from the bottom that says LWQ will apply settings to your next wallpaper
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        UIUtils.setViewAndChildrenEnabled(autopilotSettingsContainer, false);
+    }
+
+    void animateToState(final SettingsState newState) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (currentState == newState) {
+                    return;
+                }
+                final View newContainer = containerForState(newState);
+                final View currentContainer = containerForState(currentState);
+                if (newContainer != null) {
+                    UIUtils.setViewAndChildrenEnabled(newContainer, true);
+                    final Animator enterAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.enter_from_right);
+                    enterAnimator.setTarget(newContainer);
+                    enterAnimator.start();
+                }
+                if (currentContainer != null) {
+                    UIUtils.setViewAndChildrenEnabled(currentContainer, false);
+                    final Animator exitAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.exit_to_left);
+                    exitAnimator.setTarget(currentContainer);
+                    exitAnimator.start();
+                }
+                currentState = newState;
+            }
+        });
+    }
+
+    View containerForState(SettingsState settingsState) {
+        switch (settingsState) {
+            case NONE:
+                return null;
+            case MODE_SELECTION:
+                return modeSelectionContainer;
+            case AUTOPILOT_SETTINGS:
+                return autopilotSettingsContainer;
+            default:
+                return null;
+        }
+    }
+
+    // SeekBar Listener
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int value, boolean b) {
+        if (seekBar.getId() == R.id.sb_lwq_autopilot_settings_blur) {
+            LWQPreferences.setBlurPreference(value);
+        } else {
+            LWQPreferences.setDimPreference(value);
+        }
+        draw();
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        animateSilkScreen(SilkScreenState.REVEAL, containerForState(currentState));
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        animateSilkScreen(SilkScreenState.DEFAULT, containerForState(currentState));
+    }
+
 }

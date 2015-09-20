@@ -1,5 +1,7 @@
 package com.stanleyidesis.livewallpaperquotes;
 
+import android.app.WallpaperInfo;
+import android.app.WallpaperManager;
 import android.content.res.TypedArray;
 import android.util.Log;
 
@@ -92,6 +94,12 @@ public class LWQApplication extends SugarApp {
 
     public static LWQQuoteController getQuoteController() {
         return sApplication.quoteController;
+    }
+
+    public static boolean isWallpaperActivated() {
+        final WallpaperManager wallpaperManager = WallpaperManager.getInstance(sApplication);
+        final WallpaperInfo wallpaperInfo = wallpaperManager.getWallpaperInfo();
+        return wallpaperInfo != null && sApplication.getPackageName().equalsIgnoreCase(wallpaperInfo.getPackageName());
     }
 
     private void populateDefaults() {

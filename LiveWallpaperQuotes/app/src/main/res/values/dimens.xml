@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="lwq_default_padding">8dp</dimen>
+    <dimen name="lwq_default_double_padding">16dp</dimen>
+    <dimen name="lwq_settings_element_min_height">32dp</dimen>
+    <dimen name="lwq_mode_selectable_item_button_radius">25dp</dimen>
+    <fraction name="lwq_settings_element_width_percent">80%</fraction>
+    <fraction name="lwq_settings_element_margin_top_percent">5%</fraction>
+    <fraction name="lwq_settings_element_category_percent_width">35%</fraction>
+    <fraction name="lwq_settings_element_interface_percent_width">65%</fraction>
+    <fraction name="lwq_settings_mode_percent_width">85%</fraction>
+</resources>

@@ -1,7 +1,9 @@
 package com.stanleyidesis.livewallpaperquotes;
 
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
+import android.text.format.DateUtils;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -36,7 +38,6 @@ import android.preference.PreferenceManager;
  *
  * Date: 08/14/2015
  */
-
 public class LWQPreferences {
     static LWQPreferences sInstance;
     static SharedPreferences sharedPreferences;
@@ -49,12 +50,20 @@ public class LWQPreferences {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(LWQApplication.get());
     }
 
-    public static float getBlurPreference() {
-        return sharedPreferences.getFloat(LWQApplication.get().getString(R.string.preference_key_blur), 0f);
+    public static int getBlurPreference() {
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_blur), 0);
     }
 
-    public static void setBlurPreference(float blurPreference) {
-        sharedPreferences.edit().putFloat(LWQApplication.get().getString(R.string.preference_key_blur), blurPreference).apply();
+    public static void setBlurPreference(int blurPreference) {
+        sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_blur), blurPreference).apply();
+    }
+
+    public static int getDimPreference() {
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_dim), 0);
+    }
+
+    public static void setDimPreference(int dimPreference) {
+        sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_dim), dimPreference).apply();
     }
 
     public static boolean isFirstLaunch() {
@@ -64,4 +73,40 @@ public class LWQPreferences {
     public static void setFirstLaunch(boolean firstLaunch) {
         sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_first_launch), firstLaunch).apply();
     }
+
+    public static String getImageCategoryPreference() {
+        return sharedPreferences.getString(LWQApplication.get().getString(R.string.preference_key_image_category), null);
+    }
+
+    public static void setImageCategoryPreference(String imageCategory) {
+        sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_image_category), imageCategory).apply();
+    }
+
+    public static String getQuoteCategoryPreference() {
+        return sharedPreferences.getString(LWQApplication.get().getString(R.string.preference_key_quote_category), null);
+    }
+
+    public static void setQuoteCategoryPreference(String quoteCategory) {
+        sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_quote_category), quoteCategory).apply();
+    }
+
+    public static long getRefreshPreference() {
+        return sharedPreferences.getLong(LWQApplication.get().getString(R.string.preference_key_refresh), DateUtils.DAY_IN_MILLIS);
+    }
+
+    public static void setRefreshPreference(long refresh) {
+        sharedPreferences.edit().putLong(LWQApplication.get().getString(R.string.preference_key_refresh), refresh).apply();
+    }
+
+    public static boolean isAutoPilot() {
+        final Resources resources = LWQApplication.get().getResources();
+        final int autopilotMode = resources.getInteger(R.integer.preference_mode_autopilot);
+        final int mode = sharedPreferences.getInt(resources.getString(R.string.preference_key_mode), autopilotMode);
+        return mode == autopilotMode;
+    }
+
+    public static void setMode(int mode) {
+        sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_mode), mode).apply();
+    }
+
 }

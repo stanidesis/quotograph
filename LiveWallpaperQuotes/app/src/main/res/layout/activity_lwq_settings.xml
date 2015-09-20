@@ -1,7 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.percent.PercentRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:fitsSystemWindows="false"
+    android:clipToPadding="false">
 
-</LinearLayout>
+    <include layout="@layout/layout_wallpaper"/>
+
+    <LinearLayout
+        android:id="@+id/group_lwq_settings_mode_select"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        app:layout_widthPercent="@fraction/lwq_settings_mode_percent_width">
+
+        <Button
+            android:id="@+id/button_lwq_settings_autopilot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:text="autopilot"
+            android:textAllCaps="true"
+            android:textSize="35sp"
+            android:textColor="@color/palette_50"
+            android:fontFamily="sans-serif-condensed"
+            android:padding="20dp"
+            android:background="@drawable/mode_selectable_item_button"/>
+
+        <Button
+            android:id="@+id/button_lwq_settings_custom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:text="custom"
+            android:textAllCaps="true"
+            android:textSize="35sp"
+            android:textColor="@color/palette_50"
+            android:fontFamily="sans-serif-condensed"
+            android:padding="20dp"
+            android:background="@drawable/mode_selectable_item_button"
+            android:layout_marginTop="20dp"/>
+
+        <Button
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:id="@+id/button_lwq_settings_mode_continue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:gravity="end|center_vertical"
+            android:layout_marginTop="10dp"
+            android:textSize="20sp"
+            android:text="continue"
+            android:textAllCaps="true"
+            android:textColor="@color/palette_100"
+            android:fontFamily="sans-serif-condensed"/>
+
+    </LinearLayout>
+
+    <include layout="@layout/layout_autopilot_settings"
+        android:id="@+id/group_lwq_settings_autopilot"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_centerInParent="true"
+        app:layout_widthPercent="@fraction/lwq_settings_mode_percent_width"/>
+
+</android.support.percent.PercentRelativeLayout>

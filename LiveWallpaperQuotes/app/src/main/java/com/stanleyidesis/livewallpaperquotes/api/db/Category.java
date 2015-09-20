@@ -70,4 +70,8 @@ public class Category extends SugarRecord<Category> {
         final int offset = new Random().nextInt((int) count);
         return Category.findWithQuery(Category.class, "Select * from Category LIMIT 1 OFFSET " + offset, null).get(0);
     }
+
+    public static Category findWithName(String name) {
+        return Select.from(Category.class).where(Condition.prop(StringUtil.toSQLName("name")).eq(name)).first();
+    }
 }
