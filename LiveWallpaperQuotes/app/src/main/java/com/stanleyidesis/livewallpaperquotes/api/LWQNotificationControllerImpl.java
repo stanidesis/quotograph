@@ -98,6 +98,12 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
         notificationBuilder.setContentIntent(PendingIntent.getActivity(LWQApplication.get(), 0, mainIntent, 0));
 
+        // Add Share Action
+        Intent shareIntent = new Intent(LWQApplication.get().getString(R.string.action_share));
+        final PendingIntent shareBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, shareIntent, 0);
+        final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.mipmap.ic_share_white, "Share", shareBroadcast).build();
+        notificationBuilder.addAction(shareAction);
+
         NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notificationBuilder.build());
 
