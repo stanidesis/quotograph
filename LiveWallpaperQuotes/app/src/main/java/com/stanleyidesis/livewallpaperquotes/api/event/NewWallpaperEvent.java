@@ -1,13 +1,4 @@
-package com.stanleyidesis.livewallpaperquotes.api.service;
-
-import android.app.IntentService;
-import android.content.Intent;
-
-import com.stanleyidesis.livewallpaperquotes.LWQApplication;
-import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
-import com.stanleyidesis.livewallpaperquotes.api.receiver.LWQReceiver;
-
-import de.greenrobot.event.EventBus;
+package com.stanleyidesis.livewallpaperquotes.api.event;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -31,7 +22,7 @@ import de.greenrobot.event.EventBus;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQUpdateService.java
+ * NewWallpaperEvent.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -40,40 +31,24 @@ import de.greenrobot.event.EventBus;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 08/14/2015
+ * Date: 09/20/2015
  */
-public class LWQUpdateService extends IntentService {
+public class NewWallpaperEvent extends FailableEvent {
 
-    Intent intent;
-
-    public LWQUpdateService() {
-        super("LWQUpdateService");
+    public static NewWallpaperEvent newWallpaper(boolean loaded) {
+        return new NewWallpaperEvent(loaded);
     }
 
-    @Override
-    public void onCreate() {
-        EventBus.getDefault().register(this);
-        super.onCreate();
+    public static NewWallpaperEvent newWallpaperFailed(String errorMessage, Throwable throwable) {
+        final NewWallpaperEvent newWallpaperEvent = new NewWallpaperEvent(false);
+        newWallpaperEvent.errorMessage = errorMessage;
+        newWallpaperEvent.throwable = throwable;
+        return newWallpaperEvent;
     }
 
-    @Override
-    protected void onHandleIntent(final Intent intent) {
-        this.intent = intent;
-        LWQApplication.getWallpaperController().generateNewWallpaper();
-    }
+    public boolean loaded;
 
-    @Override
-    public void onDestroy() {
-        EventBus.getDefault().unregister(this);
-        super.onDestroy();
-    }
-
-    public void onEvent(NewWallpaperEvent newWallpaperEvent) {
-        if (newWallpaperEvent.didFail()) {
-            // TODO retry stuff?
-            LWQReceiver.completeWakefulIntent(intent);
-        } else if (newWallpaperEvent.loaded) {
-            LWQReceiver.completeWakefulIntent(intent);
-        }
+    NewWallpaperEvent(boolean loaded) {
+        this.loaded = loaded;
     }
 }

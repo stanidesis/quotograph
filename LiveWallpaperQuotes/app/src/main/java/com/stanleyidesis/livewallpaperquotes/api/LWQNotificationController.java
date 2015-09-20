@@ -36,5 +36,10 @@ package com.stanleyidesis.livewallpaperquotes.api;
  * Date: 09/19/2015
  */
 public interface LWQNotificationController {
+    /**
+     * Manually post a new Wallpaper notification if so desired.
+     * The controller should also subscribe to the EventBus, posting
+     * a new Wallpaper notification when appropriate.
+     */
     void postNewWallpaperNotification();
 }

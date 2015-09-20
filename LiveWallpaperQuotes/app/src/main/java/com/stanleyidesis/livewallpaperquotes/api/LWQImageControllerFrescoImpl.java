@@ -97,7 +97,7 @@ public class LWQImageControllerFrescoImpl implements LWQImageController {
                     }
                 }
             } else {
-                callback.onError("Failed to recover the image");
+                callback.onError("Failed to recover the image", null);
             }
         }
 
@@ -106,9 +106,9 @@ public class LWQImageControllerFrescoImpl implements LWQImageController {
             final Throwable failureCause = dataSource.getFailureCause();
             if (failureCause != null) {
                 failureCause.printStackTrace();
-                callback.onError(failureCause.getMessage());
+                callback.onError(failureCause.getMessage(), failureCause);
             } else {
-                callback.onError("Unknown");
+                callback.onError("Unknown", null);
             }
         }
     }

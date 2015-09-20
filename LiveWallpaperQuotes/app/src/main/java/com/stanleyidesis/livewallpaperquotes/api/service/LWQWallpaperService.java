@@ -3,7 +3,6 @@ package com.stanleyidesis.livewallpaperquotes.api.service;
 import android.os.Bundle;
 import android.service.wallpaper.WallpaperService;
 import android.support.v4.view.GestureDetectorCompat;
-import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -11,13 +10,17 @@ import android.view.SurfaceHolder;
 
 import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
-import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
 import com.stanleyidesis.livewallpaperquotes.api.LWQDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
+import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by stanleyidesis on 7/11/15.
@@ -29,33 +32,7 @@ public class LWQWallpaperService extends WallpaperService {
         private LWQDrawScript drawScript;
         private Executor executor;
 
-        private float xOffset;
-        private float yOffset;
-        private float xOffsetStep;
-        private float yOffsetStep;
-        private int xPixelOffset;
-        private int yPixelOffset;
-        private int format;
-        private int width;
-        private int height;
         private GestureDetectorCompat gestureDetectorCompat;
-        private Palette palette;
-        private int swatchIndex;
-        private Callback<Boolean> callback = new Callback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean loaded) {
-                if (loaded || LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
-                    asyncDraw();
-                } else {
-                    LWQApplication.getWallpaperController().retrieveActiveWallpaper(this, false);
-                }
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                Log.e(LWQWallpaperEngine.class.getSimpleName(), errorMessage);
-            }
-        };
 
         @Override
         public Bundle onCommand(String action, int x, int y, int z, Bundle extras, boolean resultRequested) {
@@ -67,7 +44,7 @@ public class LWQWallpaperService extends WallpaperService {
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
             drawScript = new LWQDrawScript(surfaceHolder);
-            setOffsetNotificationsEnabled(true);
+            // setOffsetNotificationsEnabled(true);
             // TODO better place for this? Maybe not.
             LWQAlarmManager.resetAlarm();
             if (BuildConfig.DEBUG) {
@@ -75,6 +52,7 @@ public class LWQWallpaperService extends WallpaperService {
                 gestureDetectorCompat.setOnDoubleTapListener(this);
             }
             executor = Executors.newSingleThreadExecutor();
+            EventBus.getDefault().register(this);
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
@@ -87,6 +65,7 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public void onDestroy() {
             super.onDestroy();
+            EventBus.getDefault().unregister(this);
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
@@ -94,12 +73,6 @@ public class LWQWallpaperService extends WallpaperService {
         public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep, float yOffsetStep, int xPixelOffset, int yPixelOffset) {
             super.onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixelOffset, yPixelOffset);
             Log.v(getClass().getSimpleName(), null, new Throwable());
-            this.xOffset = xOffset;
-            this.yOffset = yOffset;
-            this.xOffsetStep = xOffsetStep;
-            this.yOffsetStep = yOffsetStep;
-            this.xPixelOffset = xPixelOffset;
-            this.yPixelOffset = yPixelOffset;
             /*
             Log.v(getClass().getSimpleName(), "xOffset: " + xOffset);
             Log.v(getClass().getSimpleName(), "yOffset: " + yOffset);
@@ -114,9 +87,6 @@ public class LWQWallpaperService extends WallpaperService {
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
             Log.v(getClass().getSimpleName(), null, new Throwable());
-            this.format = format;
-            this.width = width;
-            this.height = height;
             asyncSetHolder(holder);
             asyncDraw();
         }
@@ -151,6 +121,21 @@ public class LWQWallpaperService extends WallpaperService {
             Log.v(getClass().getSimpleName(), "Visible: " + visible, new Throwable());
         }
 
+        public void onEvent(NewWallpaperEvent newWallpaperEvent) {
+            if (newWallpaperEvent.loaded) {
+                asyncDraw();
+            } else if (!newWallpaperEvent.didFail()){
+                LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+            }
+        }
+
+        public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
+            if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_blur ||
+                    preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_dim) {
+                asyncDraw();
+            }
+        }
+
         void asyncDraw() {
             executor.execute(new Runnable() {
                 @Override
@@ -159,7 +144,7 @@ public class LWQWallpaperService extends WallpaperService {
                         final LWQWallpaperController wallpaperController =
                                 LWQApplication.getWallpaperController();
                         if (!wallpaperController.activeWallpaperLoaded()) {
-                            wallpaperController.retrieveActiveWallpaper(callback, false);
+                            wallpaperController.retrieveActiveWallpaper();
                             return;
                         }
                         drawScript.draw();
@@ -199,7 +184,7 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             if (BuildConfig.DEBUG) {
-                LWQApplication.getWallpaperController().generateNewWallpaper(callback);
+                LWQApplication.getWallpaperController().generateNewWallpaper();
             }
             return true;
         }

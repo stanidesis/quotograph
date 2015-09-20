@@ -1,10 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
 import android.animation.ObjectAnimator;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,13 +10,15 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
-import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.LWQDrawScript;
+import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -74,12 +72,6 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     SurfaceView surfaceView;
     View silkScreen;
     LWQDrawScript drawScript;
-    BroadcastReceiver newWallpaperBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            draw();
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,39 +89,27 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        IntentFilter intentFilter = new IntentFilter(getString(R.string.broadcast_new_wallpaper_available));
-        registerReceiver(newWallpaperBroadcastReceiver, intentFilter);
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(newWallpaperBroadcastReceiver);
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        if (LWQPreferences.isFirstLaunch()) {
-            return;
+        if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
+            LWQApplication.getWallpaperController().retrieveActiveWallpaper();
         }
-        LWQApplication.getWallpaperController().retrieveActiveWallpaper(new Callback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-                draw();
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-
-            }
-        }, true);
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        if (LWQPreferences.isFirstLaunch()) {
+        if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
             return;
         }
         draw();
@@ -137,6 +117,19 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {}
+
+    public void onEvent(NewWallpaperEvent newWallpaperEvent) {
+        if (newWallpaperEvent.loaded) {
+            draw();
+        }
+    }
+
+    public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
+        if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_blur ||
+                preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_dim) {
+            draw();
+        }
+    }
 
     void switchToSilkScreen(SilkScreenState state) {
         switchToSilkScreen(state, null);

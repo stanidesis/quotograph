@@ -77,8 +77,8 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
             }
 
             @Override
-            public void onError(String errorMessage) {
-                callback.onError(errorMessage);
+            public void onError(String errorMessage, Throwable throwable) {
+                callback.onError(errorMessage, throwable);
             }
         });
     }
@@ -87,7 +87,7 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
     public void fetchQuotes(final Category category, final Callback<List<Quote>> callback) {
         if (category.source != Category.Source.BRAINY_QUOTE) {
             Log.w(getClass().getSimpleName(), "Cannot fetch quotes for categories not found in BrainyQuote");
-            callback.onError("Required BrainyQuote category");
+            callback.onError("Required BrainyQuote category", null);
             return;
         }
         new Thread(new Runnable() {
@@ -98,7 +98,7 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                 while (page <= MAX_PAGE_QUERY && recoveredQuotes.size() == 0) {
                     final Object returnObject = brainyQuoteManager.getQuotes(category.name, page);
                     if (returnObject instanceof String) {
-                        callback.onError((String) returnObject);
+                        callback.onError((String) returnObject, null);
                         return;
                     }
                     List<BrainyQuoteManager.BrainyQuote> brainyQuotes = (List<BrainyQuoteManager.BrainyQuote>) returnObject;
@@ -153,12 +153,13 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                 }
 
                 @Override
-                public void onError(String errorMessage) {
-                    callback.onError(errorMessage);
+                public void onError(String errorMessage, Throwable throwable) {
+                    callback.onError(errorMessage, throwable);
                 }
             });
         } else {
-            callback.onError("Cannot find unused quote from " + category.source.name());
+            // It's not an error, just no return.
+            callback.onSuccess(Quote.random());
         }
     }
 }

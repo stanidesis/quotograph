@@ -5,6 +5,10 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
+import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
+
+import de.greenrobot.event.EventBus;
+
 /**
  * Copyright (c) 2015 Stanley Idesis
  *
@@ -56,6 +60,7 @@ public class LWQPreferences {
 
     public static void setBlurPreference(int blurPreference) {
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_blur), blurPreference).apply();
+        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_blur, blurPreference));
     }
 
     public static int getDimPreference() {
@@ -64,6 +69,7 @@ public class LWQPreferences {
 
     public static void setDimPreference(int dimPreference) {
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_dim), dimPreference).apply();
+        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_dim, dimPreference));
     }
 
     public static boolean isFirstLaunch() {
@@ -80,6 +86,7 @@ public class LWQPreferences {
 
     public static void setImageCategoryPreference(String imageCategory) {
         sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_image_category), imageCategory).apply();
+        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_image_category, imageCategory));
     }
 
     public static String getQuoteCategoryPreference() {
@@ -88,6 +95,7 @@ public class LWQPreferences {
 
     public static void setQuoteCategoryPreference(String quoteCategory) {
         sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_quote_category), quoteCategory).apply();
+        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_quote_category, quoteCategory));
     }
 
     public static long getRefreshPreference() {
@@ -96,6 +104,7 @@ public class LWQPreferences {
 
     public static void setRefreshPreference(long refresh) {
         sharedPreferences.edit().putLong(LWQApplication.get().getString(R.string.preference_key_refresh), refresh).apply();
+        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_refresh, refresh));
     }
 
     public static boolean isAutoPilot() {
@@ -107,6 +116,7 @@ public class LWQPreferences {
 
     public static void setMode(int mode) {
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_mode), mode).apply();
+        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_mode, mode));
     }
 
 }
