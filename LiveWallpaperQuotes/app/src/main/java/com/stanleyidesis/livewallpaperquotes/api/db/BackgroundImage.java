@@ -5,7 +5,6 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -52,33 +51,34 @@ public class BackgroundImage extends SugarRecord<BackgroundImage> {
     public String uri;
     public Source source;
     public String category;
+    public boolean used;
 
     public BackgroundImage() {}
 
-    public BackgroundImage(String uri, Source source, String category) {
+    public BackgroundImage(String uri, Source source, String category, boolean used) {
         this.uri = uri;
         this.source = source;
         this.category = category;
+        this.used = used;
     }
 
     public static BackgroundImage findImage(String uri) {
         return Select.from(BackgroundImage.class).where(Condition.prop("uri").eq(uri)).first();
     }
 
-    public static BackgroundImage random() {
+    public static BackgroundImage randomFromSource(Source source) {
         final long count = Select.from(BackgroundImage.class).count();
         final int offset = new Random().nextInt((int) count);
         return BackgroundImage.findWithQuery(BackgroundImage.class,
-                "Select * from " + StringUtil.toSQLName("BackgroundImage") + " LIMIT 1 OFFSET " + offset, null).get(0);
+                "Select * from " + StringUtil.toSQLName("BackgroundImage")
+                        + " WHERE " + StringUtil.toSQLName("source")
+                        + " = \'" + source + "\' LIMIT 1 OFFSET " + offset, null).get(0);
     }
 
     public static BackgroundImage unusedFromCategory(String category) {
-        final List<Wallpaper> allWallpapers = Select.from(Wallpaper.class).list();
-        Condition [] conditions = new Condition[allWallpapers.size() + 1];
-        for (int i = 0; i < allWallpapers.size(); i++) {
-            conditions[i] = Condition.prop("id").notEq(allWallpapers.get(i).backgroundImage.getId());
-        }
-        conditions[conditions.length - 1] = Condition.prop(StringUtil.toSQLName("category")).eq(category);
+        Condition [] conditions = new Condition[2];
+        conditions[0] = Condition.prop(StringUtil.toSQLName("category")).eq(category);
+        conditions[1] = Condition.prop(StringUtil.toSQLName("used")).eq(false);
         return Select.from(BackgroundImage.class).where(conditions).first();
     }
 }

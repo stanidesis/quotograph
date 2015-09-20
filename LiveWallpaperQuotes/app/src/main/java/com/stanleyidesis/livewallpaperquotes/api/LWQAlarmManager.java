@@ -64,7 +64,7 @@ public class LWQAlarmManager {
                 .getSystemService(Context.ALARM_SERVICE);
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
                 calendar.getTimeInMillis(), refreshPreference, getPendingIntent());
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG && false) {
             final Date date = new Date();
             date.setTime(calendar.getTimeInMillis());
             final String format = SimpleDateFormat.getDateTimeInstance().format(date);

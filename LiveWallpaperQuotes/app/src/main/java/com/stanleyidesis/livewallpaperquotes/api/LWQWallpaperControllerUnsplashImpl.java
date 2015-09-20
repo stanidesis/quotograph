@@ -135,6 +135,8 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 discardActiveWallpaper();
                 activeWallpaper = new Wallpaper(newQuote, newBackgroundImage, true, System.currentTimeMillis());
                 activeWallpaper.save();
+                newBackgroundImage.used = true;
+                newBackgroundImage.save();
                 retrievalState = null;
                 notifyAndClearListeners(RetrievalState.NEW_WALLPAPER, false);
             }
@@ -156,7 +158,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                         }
                         // Failed to find an unused image :(
                         Log.w(getClass().getSimpleName(), "Failed to find an unused image, going with a random one");
-                        finishUp(quote, BackgroundImage.random());
+                        finishUp(quote, BackgroundImage.randomFromSource(BackgroundImage.Source.UNSPLASH));
                     }
 
                     @Override
@@ -303,7 +305,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                             BackgroundImage existingBackgroundImage = BackgroundImage.findImage(unsplashImage.url);
                             if (existingBackgroundImage == null) {
                                 final BackgroundImage newBackgroundImage = new BackgroundImage(unsplashImage.url,
-                                        BackgroundImage.Source.UNSPLASH, category.sqlName());
+                                        BackgroundImage.Source.UNSPLASH, category.sqlName(), false);
                                 newBackgroundImage.save();
                                 newBackgroundImages.add(newBackgroundImage);
                             }

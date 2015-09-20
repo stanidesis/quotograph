@@ -173,7 +173,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
                 LWQPreferences.setImageCategoryPreference(LWQApplication.getWallpaperController().getBackgroundCategories().get(index));
-                // TODO refresh wallpaper
+                // TODO toast or the slidy thingy from the bottom that says LWQ will apply settings to your next wallpaper
             }
 
             @Override
@@ -205,8 +205,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
 
 
@@ -238,7 +237,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
                 LWQPreferences.setQuoteCategoryPreference(quoteCategoryNames[index]);
-                // TODO update
+                // TODO toast or the slidy thingy from the bottom that says LWQ will apply settings to your next wallpaper
             }
 
             @Override

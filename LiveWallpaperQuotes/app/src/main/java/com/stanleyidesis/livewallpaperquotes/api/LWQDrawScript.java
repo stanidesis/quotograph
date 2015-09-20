@@ -102,16 +102,16 @@ public class LWQDrawScript {
         final Context context = LWQApplication.get();
         while (surfaceHolder.isCreating()) {}
 
+        final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
+        if (backgroundImage == null) {
+            return;
+        }
         // Get screen width/height
         final Rect surfaceFrame = surfaceHolder.getSurfaceFrame();
         final Point size = new Point();
         ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
         final int screenWidth = size.x;
-        final int screenHeight = surfaceHolder.getSurfaceFrame().height();
-        final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
-        if (backgroundImage == null) {
-            return;
-        }
+        final int screenHeight = surfaceFrame.height();
         palette = paletteCache.get(backgroundImage.hashCode());
         if (palette == null) {
             LWQDrawScript.paletteCache.clear();
@@ -208,9 +208,7 @@ public class LWQDrawScript {
 
     Bitmap generateBitmap(int blurRadius, Bitmap backgroundImage) {
         Bitmap drawnBitmap = backgroundImage;
-        boolean recycleBitmap = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && blurRadius > 0f) {
-            recycleBitmap = true;
             drawnBitmap = blurBitmap(backgroundImage, blurRadius);
         }
         return drawnBitmap;
@@ -231,14 +229,14 @@ public class LWQDrawScript {
 
         // Adjust center
         final int bitmapFinalWidth = (int)((float) bitmapToDraw.getWidth() * finalScale);
-        if (bitmapFinalWidth > screenWidth) {
-            final float dx = -0.5f * (bitmapFinalWidth - screenWidth);
-            canvas.translate(dx, 0);
+        if (bitmapFinalWidth <= screenWidth) {
             canvas.drawBitmap(bitmapToDraw, scaleMatrix, bitmapPaint);
-            canvas.translate(-dx, 0);
-        } else {
-            canvas.drawBitmap(bitmapToDraw, scaleMatrix, bitmapPaint);
+            return;
         }
+        final float dx = -0.5f * (bitmapFinalWidth - screenWidth);
+        canvas.translate(dx, 0);
+        canvas.drawBitmap(bitmapToDraw, scaleMatrix, bitmapPaint);
+        canvas.translate(-dx, 0);
     }
 
     StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight) {
