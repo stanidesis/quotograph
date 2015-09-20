@@ -3,9 +3,12 @@ package com.stanleyidesis.livewallpaperquotes.api.receiver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
+import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.api.service.LWQUpdateService;
 
@@ -65,6 +68,10 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
             final Intent chooser = Intent.createChooser(sharingIntent, context.getResources().getString(R.string.share_using));
             chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(chooser);
+        } else if (context.getString(R.string.action_disable_refresh).equals(intent.getAction())) {
+            LWQPreferences.setRefreshPreference(context.getResources().getInteger(R.integer.dont_refresh));
+            LWQAlarmManager.cancelRepeatingAlarm();
+            Toast.makeText(context, R.string.toast_disable_refresh, Toast.LENGTH_LONG).show();
         }
     }
 }

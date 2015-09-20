@@ -74,7 +74,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
 
         // Establish basic options
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(LWQApplication.get());
-        notificationBuilder.setAutoCancel(false);
+        notificationBuilder.setAutoCancel(true);
         notificationBuilder.setCategory(Notification.CATEGORY_SERVICE);
         notificationBuilder.setContentInfo(wallpaperController.getAuthor());
         notificationBuilder.setContentTitle(LWQApplication.get().getString(R.string.new_quotograph));
@@ -101,8 +101,16 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         // Add Share Action
         Intent shareIntent = new Intent(LWQApplication.get().getString(R.string.action_share));
         final PendingIntent shareBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, shareIntent, 0);
-        final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.mipmap.ic_share_white, "Share", shareBroadcast).build();
+        final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.mipmap.ic_share_white,
+                LWQApplication.get().getString(R.string.share), shareBroadcast).build();
         notificationBuilder.addAction(shareAction);
+
+        // Add Save/Keep Wallpaper
+        Intent disableRefreshIntent = new Intent(LWQApplication.get().getString(R.string.action_disable_refresh));
+        final PendingIntent disableBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, disableRefreshIntent, 0);
+        final NotificationCompat.Action disableRefreshAction = new NotificationCompat.Action.Builder(R.mipmap.ic_bookmark_border_white,
+                LWQApplication.get().getString(R.string.bookmark), disableBroadcast).build();
+        notificationBuilder.addAction(disableRefreshAction);
 
         NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notificationBuilder.build());
