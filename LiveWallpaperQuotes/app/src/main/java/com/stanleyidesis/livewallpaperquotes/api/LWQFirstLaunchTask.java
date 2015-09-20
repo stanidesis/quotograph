@@ -59,7 +59,13 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
                 }
             }
             // TODO not first?
-            final Category initialCategory = categories.get(0);
+            Category initialCategory = categories.get(0);
+            for (Category category : categories) {
+                if ("inspirational".equalsIgnoreCase(category.name)) {
+                    initialCategory = category;
+                    break;
+                }
+            }
             LWQPreferences.setQuoteCategoryPreference(initialCategory.name);
             LWQApplication.getQuoteController().fetchQuotes(initialCategory, fetchQuotesCallback);
         }
