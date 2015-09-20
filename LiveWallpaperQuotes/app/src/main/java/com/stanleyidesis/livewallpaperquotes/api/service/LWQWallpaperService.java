@@ -1,36 +1,34 @@
 package com.stanleyidesis.livewallpaperquotes.api.service;
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.graphics.Region;
-import android.os.Build;
 import android.os.Bundle;
 import android.service.wallpaper.WallpaperService;
-import android.text.Layout;
-import android.text.StaticLayout;
-import android.text.TextPaint;
+import android.support.v4.view.GestureDetectorCompat;
+import android.support.v7.graphics.Palette;
 import android.util.Log;
-import android.view.Display;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.WindowManager;
 
-import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
-import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
+import com.stanleyidesis.livewallpaperquotes.BuildConfig;
+import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
+import com.stanleyidesis.livewallpaperquotes.api.LWQDrawScript;
+import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Created by stanleyidesis on 7/11/15.
  */
 public class LWQWallpaperService extends WallpaperService {
 
-    public class LWQWallpaperEngine extends Engine {
+    public class LWQWallpaperEngine extends Engine implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
-        private Quote activeQuote;
+        private LWQDrawScript drawScript;
+        private Executor executor;
+
         private float xOffset;
         private float yOffset;
         private float xOffsetStep;
@@ -40,6 +38,24 @@ public class LWQWallpaperService extends WallpaperService {
         private int format;
         private int width;
         private int height;
+        private GestureDetectorCompat gestureDetectorCompat;
+        private Palette palette;
+        private int swatchIndex;
+        private Callback<Boolean> callback = new Callback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean loaded) {
+                if (loaded || LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
+                    asyncDraw();
+                } else {
+                    LWQApplication.getWallpaperController().retrieveActiveWallpaper(this, false);
+                }
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                Log.e(LWQWallpaperEngine.class.getSimpleName(), errorMessage);
+            }
+        };
 
         @Override
         public Bundle onCommand(String action, int x, int y, int z, Bundle extras, boolean resultRequested) {
@@ -50,17 +66,16 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
+            drawScript = new LWQDrawScript(surfaceHolder);
             setOffsetNotificationsEnabled(true);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
-            activeQuote = Quote.active();
-            if (activeQuote == null) {
-                activeQuote = Quote.random();
-                Log.v(getClass().getSimpleName(), "Active quote recovered: " + activeQuote);
-//                activeQuote.active = true;
-//                activeQuote.save();
-            } else {
-                Log.v(getClass().getSimpleName(), "Active quote found: " + activeQuote);
+            // TODO better place for this? Maybe not.
+            LWQAlarmManager.resetAlarm();
+            if (BuildConfig.DEBUG) {
+                gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
+                gestureDetectorCompat.setOnDoubleTapListener(this);
             }
+            executor = Executors.newSingleThreadExecutor();
+            Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
         @Override
@@ -85,6 +100,14 @@ public class LWQWallpaperService extends WallpaperService {
             this.yOffsetStep = yOffsetStep;
             this.xPixelOffset = xPixelOffset;
             this.yPixelOffset = yPixelOffset;
+            /*
+            Log.v(getClass().getSimpleName(), "xOffset: " + xOffset);
+            Log.v(getClass().getSimpleName(), "yOffset: " + yOffset);
+            Log.v(getClass().getSimpleName(), "xOffsetStep: " + xOffsetStep);
+            Log.v(getClass().getSimpleName(), "yOffsetStep: " + yOffsetStep);
+            Log.v(getClass().getSimpleName(), "xPixelOffset: " + xPixelOffset);
+            Log.v(getClass().getSimpleName(), "yPixelOffset: " + yPixelOffset);
+            */
         }
 
         @Override
@@ -94,11 +117,14 @@ public class LWQWallpaperService extends WallpaperService {
             this.format = format;
             this.width = width;
             this.height = height;
+            asyncSetHolder(holder);
+            asyncDraw();
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
+            asyncSetHolder(holder);
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
@@ -106,117 +132,112 @@ public class LWQWallpaperService extends WallpaperService {
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             super.onSurfaceRedrawNeeded(holder);
             Log.v(getClass().getSimpleName(), null, new Throwable());
-            draw(holder);
+            asyncSetHolder(holder);
+            asyncDraw();
         }
 
         @Override
         public void onTouchEvent(MotionEvent event) {
             super.onTouchEvent(event);
+            if (gestureDetectorCompat != null) {
+                gestureDetectorCompat.onTouchEvent(event);
+            }
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
+            Log.v(getClass().getSimpleName(), "Visible: " + visible, new Throwable());
         }
 
-        void draw(SurfaceHolder holder) {
-            final Canvas canvas = holder.lockCanvas();
-            canvas.drawColor(getResources().getColor(android.R.color.white));
-            canvas.save();
+        void asyncDraw() {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final LWQWallpaperController wallpaperController =
+                                LWQApplication.getWallpaperController();
+                        if (!wallpaperController.activeWallpaperLoaded()) {
+                            wallpaperController.retrieveActiveWallpaper(callback, false);
+                            return;
+                        }
+                        drawScript.draw();
+                    } catch (Exception e) {
+                        Log.e(getClass().getSimpleName(), "Failure to draw", e);
+                    }
+                }
+            });
+        }
 
-            // Get screen width/height
-            WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-            final Display defaultDisplay = windowManager.getDefaultDisplay();
-            final Point size = new Point();
-            defaultDisplay.getSize(size);
-            final int screenWidth = size.x;
-            final int screenHeight = size.y;
+        void asyncSetHolder(final SurfaceHolder surfaceHolder) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        drawScript.setSurfaceHolder(surfaceHolder);
+                    } catch (Exception e) {
+                        Log.e(getClass().getSimpleName(), "Failure to set SurfaceHolder", e);
+                    }
+                }
+            });
+        }
 
-            final int desiredMinimumHeight = getDesiredMinimumHeight();
-            final int desiredMinimumWidth = getDesiredMinimumWidth();
+        /*
+         * Gesture detection
+         */
 
-            final int maxQuoteWidth = Math.min(screenWidth, desiredMinimumWidth);
-            final int maxQuoteHeight = Math.max(screenHeight, desiredMinimumHeight);
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+//            if (BuildConfig.DEBUG) {
+//                drawScript.changeSwatch();
+//                asyncDraw();
+//            }
+            return false;
+        }
 
-            final int horizontalPadding = (int) (maxQuoteWidth * .07);
-            final int verticalPadding = (int) (maxQuoteHeight * .07);
-
-            Rect clipRect = new Rect(horizontalPadding, verticalPadding, maxQuoteWidth - horizontalPadding, maxQuoteHeight - verticalPadding);
-
-            // Google Now Search Offset
-            int currentAPIVersion = android.os.Build.VERSION.SDK_INT;
-            if (currentAPIVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                // There's a good chance the Google Search Bar is there, I'm going to assume
-                // it is for ICS+ installs, and just offset the top
-                final TypedArray styledAttributes = getTheme().obtainStyledAttributes(
-                        new int[] { android.R.attr.actionBarSize });
-                int actionBarSize = (int) styledAttributes.getDimension(0, 0);
-                styledAttributes.recycle();
-                clipRect.top += actionBarSize;
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            if (BuildConfig.DEBUG) {
+                LWQApplication.getWallpaperController().generateNewWallpaper(callback);
             }
-
-            canvas.clipRect(clipRect, Region.Op.REPLACE);
-
-            // Test clip
-//            canvas.drawColor(getResources().getColor(android.R.color.holo_orange_light));
-
-            // TODO use Palette class's swatch abilities to get title/text colors see: https://www.bignerdranch.com/blog/extracting-colors-to-a-palette-with-android-lollipop/
-            TextPaint textPaint = new TextPaint();
-            textPaint.setTextAlign(Paint.Align.LEFT);
-            textPaint.setColor(getResources().getColor(android.R.color.black));
-            textPaint.setFlags(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-            textPaint.setTypeface(Fonts.JOSEFIN_LIGHT.load(LWQWallpaperService.this));
-            textPaint.setTextSize(145f);
-            textPaint.setStyle(Paint.Style.FILL);
-
-            StaticLayout staticLayout = new StaticLayout(activeQuote.text.toUpperCase(), textPaint,
-                    clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
-            canvas.translate(clipRect.left, clipRect.top);
-            staticLayout = correctFontSize(staticLayout, clipRect.height() - verticalPadding);
-            staticLayout.draw(canvas);
-
-            final float quoteHeight = staticLayout.getHeight();
-            textPaint.setTextSize(100f);
-            textPaint.setTextAlign(Paint.Align.RIGHT);
-            textPaint.setTypeface(Fonts.DAWNING_OF_A_NEW_DAY.load(LWQWallpaperService.this));
-            String author = getString(R.string.unknown);
-            if (activeQuote.author != null && activeQuote.author.name != null && !activeQuote.author.name.isEmpty()) {
-                author = activeQuote.author.name;
-            }
-            staticLayout = new StaticLayout(author, textPaint,
-                    clipRect.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
-            canvas.translate(clipRect.width(), quoteHeight);
-            staticLayout.draw(canvas);
-
-            canvas.restore();
-            holder.unlockCanvasAndPost(canvas);
+            return true;
         }
 
-        StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight) {
-            final TextPaint textPaint = staticLayout.getPaint();
-            while (staticLayout.getHeight() > maxHeight) {
-                textPaint.setTextSize(textPaint.getTextSize() * .95f);
-                staticLayout = new StaticLayout(staticLayout.getText(), textPaint,
-                        staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),
-                        staticLayout.getSpacingAdd(), true);
-            }
-            return staticLayout;
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent e) {
+            return false;
         }
 
-        void strokeText(StaticLayout staticLayout, Canvas canvas) {
-            TextPaint strokePaint = new TextPaint(staticLayout.getPaint());
-            strokePaint.setColor(getResources().getColor(android.R.color.holo_orange_light));
-            strokePaint.setStyle(Paint.Style.STROKE);
-            strokePaint.setStrokeWidth(5f);
-            strokePaint.setStrokeJoin(Paint.Join.MITER);
-            StaticLayout strokeLayout = new StaticLayout(staticLayout.getText(), strokePaint,
-                    staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),
-                    staticLayout.getSpacingAdd(), true);
-            strokeLayout.draw(canvas);
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return false;
         }
 
+        @Override
+        public void onShowPress(MotionEvent e) {
+
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            return false;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            return false;
+        }
     }
 
     @Override
@@ -224,4 +245,10 @@ public class LWQWallpaperService extends WallpaperService {
         return new LWQWallpaperEngine();
     }
 
+    @Override
+    public void onDestroy() {
+        Log.v(getClass().getSimpleName(), null, new Throwable());
+        super.onDestroy();
+        LWQApplication.getWallpaperController().discardActiveWallpaper();
+    }
 }
