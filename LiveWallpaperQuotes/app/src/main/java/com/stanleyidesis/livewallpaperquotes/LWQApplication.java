@@ -12,6 +12,8 @@ import com.orm.query.Select;
 import com.stanleyidesis.livewallpaperquotes.api.LWQFirstLaunchTask;
 import com.stanleyidesis.livewallpaperquotes.api.LWQImageController;
 import com.stanleyidesis.livewallpaperquotes.api.LWQImageControllerFrescoImpl;
+import com.stanleyidesis.livewallpaperquotes.api.LWQNotificationController;
+import com.stanleyidesis.livewallpaperquotes.api.LWQNotificationControllerImpl;
 import com.stanleyidesis.livewallpaperquotes.api.LWQQuoteController;
 import com.stanleyidesis.livewallpaperquotes.api.LWQQuoteControllerBrainyQuoteImpl;
 import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
@@ -53,7 +55,6 @@ import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
  *
  * Date: 07/11/2015
  */
-
 public class LWQApplication extends SugarApp {
 
     static LWQApplication sApplication;
@@ -61,6 +62,7 @@ public class LWQApplication extends SugarApp {
     LWQWallpaperController wallpaperController;
     LWQImageController imageController;
     LWQQuoteController quoteController;
+    LWQNotificationController notificationController;
 
     @Override
     public void onCreate() {
@@ -71,6 +73,7 @@ public class LWQApplication extends SugarApp {
         wallpaperController = new LWQWallpaperControllerUnsplashImpl();
         imageController = new LWQImageControllerFrescoImpl();
         quoteController = new LWQQuoteControllerBrainyQuoteImpl();
+        notificationController = new LWQNotificationControllerImpl();
 
         if (LWQPreferences.isFirstLaunch()) {
 //            if (BuildConfig.DEBUG) {
@@ -94,6 +97,10 @@ public class LWQApplication extends SugarApp {
 
     public static LWQQuoteController getQuoteController() {
         return sApplication.quoteController;
+    }
+
+    public static LWQNotificationController getNotificationController() {
+        return sApplication.notificationController;
     }
 
     public static boolean isWallpaperActivated() {
