@@ -109,22 +109,14 @@ public class UnsplashManager {
 
                 final Connection connection = Jsoup.connect(urlBuilder.toString());
                 final Connection.Response response;
-                try {
-                    response = connection.execute();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    callback.onError(e.getMessage());
-                    return;
-                }
-
-                Log.v(UnsplashManager.class.getSimpleName(), "Response: " + response.statusMessage());
-
                 final Document document;
                 try {
+                    response = connection.execute();
+                    Log.v(UnsplashManager.class.getSimpleName(), "Response: " + response.statusMessage());
                     document = response.parse();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    callback.onError(e.getMessage());
+                    callback.onError(e.getMessage(), e);
                     return;
                 }
 

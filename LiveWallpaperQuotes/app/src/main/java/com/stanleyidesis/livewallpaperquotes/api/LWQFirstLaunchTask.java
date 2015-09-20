@@ -7,9 +7,13 @@ import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.api.event.FirstLaunchTaskEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
 
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -44,7 +48,6 @@ import java.util.List;
  *
  * Date: 08/15/2015
  */
-
 public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
 
     Callback<List<Category>> fetchCategoriesCallback = new Callback<List<Category>>() {
@@ -71,8 +74,8 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         }
 
         @Override
-        public void onError(String errorMessage) {
-            publishProgress(errorMessage);
+        public void onError(String errorMessage, Throwable throwable) {
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(errorMessage, throwable));
         }
     };
 
@@ -81,23 +84,20 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         public void onSuccess(List<Quote> quotes) {
             publishProgress(quotes.size() + " quotes fetched");
             LWQPreferences.setImageCategoryPreference(UnsplashManager.UnsplashCategory.NATURE.sqlName());
-            LWQApplication.getWallpaperController().retrieveActiveWallpaper(retrieveWallpaperCallback, true);
+            LWQApplication.getWallpaperController().generateNewWallpaper();
         }
 
         @Override
-        public void onError(String errorMessage) {}
-    };
-
-    Callback<Boolean> retrieveWallpaperCallback = new Callback<Boolean>() {
-        @Override
-        public void onSuccess(Boolean aBoolean) {
-            publishProgress("New wallpaper retrieved");
-            LWQPreferences.setFirstLaunch(false);
+        public void onError(String errorMessage, Throwable throwable) {
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(errorMessage, throwable));
         }
-
-        @Override
-        public void onError(String errorMessage) {}
     };
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        EventBus.getDefault().register(this);
+    }
 
     @Override
     protected Void doInBackground(Void... params) {
@@ -107,8 +107,25 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
             // Go through everything again
             LWQApplication.getQuoteController().fetchCategories(fetchCategoriesCallback);
         } else {
-            LWQApplication.getWallpaperController().retrieveActiveWallpaper(retrieveWallpaperCallback, false);
+            LWQApplication.getWallpaperController().retrieveActiveWallpaper();
         }
         return null;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        EventBus.getDefault().unregister(this);
+        super.finalize();
+    }
+
+    public void onEvent(NewWallpaperEvent newWallpaperEvent) {
+        if (newWallpaperEvent.loaded) {
+            LWQPreferences.setFirstLaunch(false);
+            EventBus.getDefault().post(FirstLaunchTaskEvent.successful());
+        } else if (newWallpaperEvent.didFail()) {
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(
+                    newWallpaperEvent.getErrorMessage(),
+                    newWallpaperEvent.getThrowable()));
+        }
     }
 }

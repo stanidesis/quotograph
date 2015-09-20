@@ -59,10 +59,9 @@ public interface LWQWallpaperController {
     boolean activeWallpaperLoaded();
 
     /**
-     * Generates a new wallpaper, stores it as active and notifies the caller when loaded
-     * @param callback
+     * Generates a new wallpaper, stores it as active and notifies the EventBus when completed
      */
-    void generateNewWallpaper(Callback<Boolean> callback);
+    void generateNewWallpaper();
 
     /**
      * This method should return false if LWQ is not the active wallpaper or this is a fresh install.
@@ -72,11 +71,10 @@ public interface LWQWallpaperController {
     boolean activeWallpaperExists();
 
     /**
-     * If no active wallpaper exists, the implementation will generate one
-     * @param callback
-     * @param generateIfNecessary supply true if you want the controller to generate a new wallpaper if none is set
+     * Retrieves the active wallpaper into mem cache. Only returns `true` if it begins to load the
+     * active wallpaper.
      */
-    void retrieveActiveWallpaper(Callback<Boolean> callback, boolean generateIfNecessary);
+    boolean retrieveActiveWallpaper();
 
     /**
      * This method should cleans up any bitmaps and references which the active wallpaper required.

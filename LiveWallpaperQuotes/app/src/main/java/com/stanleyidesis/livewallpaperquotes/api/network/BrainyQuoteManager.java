@@ -89,20 +89,13 @@ public class BrainyQuoteManager {
             public void run() {
                 final Connection connection = Jsoup.connect(Endpoints.BRAINY_QUOTE_TOPICS);
                 final Connection.Response response;
-                try {
-                    response = connection.execute();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    callback.onError(e.getMessage());
-                    return;
-                }
-
                 final Document document;
                 try {
+                    response = connection.execute();
                     document = response.parse();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    callback.onError(e.getMessage());
+                    callback.onError(e.getMessage(), e);
                     return;
                 }
 
@@ -172,7 +165,7 @@ public class BrainyQuoteManager {
             public void run() {
                 final Object returnObject = getQuotes(topicDisplayName, pageIndex);
                 if (returnObject instanceof String) {
-                    callback.onError((String) returnObject);
+                    callback.onError((String) returnObject, null);
                 } else {
                     callback.onSuccess((List<BrainyQuote>) returnObject);
                 }

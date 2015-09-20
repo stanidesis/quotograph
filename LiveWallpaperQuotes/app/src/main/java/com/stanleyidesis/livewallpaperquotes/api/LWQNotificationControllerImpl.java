@@ -12,7 +12,10 @@ import android.view.WindowManager;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.activity.LWQActivateActivity;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by stanleyidesis on 9/19/15.
@@ -52,7 +55,7 @@ import com.stanleyidesis.livewallpaperquotes.ui.activity.LWQActivateActivity;
 public class LWQNotificationControllerImpl implements LWQNotificationController {
 
     public LWQNotificationControllerImpl() {
-
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -116,5 +119,17 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationManager.notify(1, notificationBuilder.build());
 
         notificationBitmap.recycle();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        EventBus.getDefault().unregister(this);
+        super.finalize();
+    }
+
+    public void onEvent(NewWallpaperEvent newWallpaperEvent) {
+        if (newWallpaperEvent.loaded) {
+            postNewWallpaperNotification();
+        }
     }
 }
