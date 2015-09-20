@@ -100,5 +100,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
 
         NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notificationBuilder.build());
+
+        notificationBitmap.recycle();
     }
 }
