@@ -37,6 +37,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.REBOOT"/>
                 <action android:name="com.stanleyidesis.livewallpaperquotes.action.CHANGE_WALLPAPER"/>
+                <action android:name="com.stanleyidesis.livewallpaperquotes.action.SHARE"/>
             </intent-filter>
         </receiver>
 

@@ -46,4 +46,5 @@
     <string name="period_preference_twenty_four_hours">Every Day</string>
     <string name="period_preference_one_week">Every Week</string>
     <string name="new_quotograph">New Quotograph</string>
+    <string name="share_using">Share with…</string>
 </resources>
