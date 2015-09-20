@@ -294,7 +294,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         }
     }
 
+    @Override
     public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
+        super.onEvent(preferenceUpdateEvent);
         if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_refresh) {
             updateRefreshSpinner();
         }
