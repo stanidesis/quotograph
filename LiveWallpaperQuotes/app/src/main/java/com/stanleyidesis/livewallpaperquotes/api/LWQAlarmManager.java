@@ -36,25 +36,29 @@ public class LWQAlarmManager {
         enableAlarmReceiver(true);
         final long refreshPreference = LWQPreferences.getRefreshPreference();
         final int[] refreshOptions = LWQApplication.get().getResources().getIntArray(R.array.refresh_preference_values);
+        if (refreshPreference == refreshOptions[0]) {
+            // Disabled
+            return;
+        }
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        if (refreshPreference == refreshOptions[0] || refreshPreference == refreshOptions[1]) {
+        if (refreshPreference == refreshOptions[1] || refreshPreference == refreshOptions[2]) {
             // Every 30 Minutes or Hour
             calendar.add(Calendar.HOUR, 1);
-        } else if (refreshPreference == refreshOptions[2]) {
+        } else if (refreshPreference == refreshOptions[3]) {
             // Every Six Hours
             calendar.add(Calendar.HOUR, 6);
-        } else if (refreshPreference == refreshOptions[3]) {
+        } else if (refreshPreference == refreshOptions[4]) {
             // Every 12 Hours
             calendar.add(Calendar.HOUR, 12);
-        } else if (refreshPreference == refreshOptions[4]) {
+        } else if (refreshPreference == refreshOptions[5]) {
             // Every Day
             calendar.add(Calendar.DAY_OF_YEAR, 1);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
-        } else if (refreshPreference == refreshOptions[5]) {
+        } else if (refreshPreference == refreshOptions[6]) {
             // Every Week
             while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
                 calendar.add(Calendar.DAY_OF_YEAR, 1);

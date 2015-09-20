@@ -3,4 +3,5 @@
     <string name="action_change_wallpaper">com.stanleyidesis.livewallpaperquotes.action.CHANGE_WALLPAPER</string>
     <string name="broadcast_new_wallpaper_available">com.stanleyidesis.livewallpaperquotes.broadcast.NEW_WALLPAPER_AVAILABLE</string>
     <string name="action_share">com.stanleyidesis.livewallpaperquotes.action.SHARE</string>
+    <string name="action_disable_refresh">com.stanleyidesis.livewallpaperquotes.action.DISABLE_REFRESH</string>
 </resources>
