@@ -50,5 +50,6 @@
     <string name="share_using">Share with…</string>
     <string name="toast_disable_refresh">Refreshing disabled. To re-enable, go to settings.</string>
     <string name="share">Share</string>
-    <string name="bookmark">Bookmark</string>
+    <string name="keep">Keep</string>
+    <string name="save_to_disk">Save to Disk</string>
 </resources>

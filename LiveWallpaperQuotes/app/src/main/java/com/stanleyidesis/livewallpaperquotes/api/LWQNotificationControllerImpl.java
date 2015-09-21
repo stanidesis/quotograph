@@ -112,8 +112,15 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         Intent disableRefreshIntent = new Intent(LWQApplication.get().getString(R.string.action_disable_refresh));
         final PendingIntent disableBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, disableRefreshIntent, 0);
         final NotificationCompat.Action disableRefreshAction = new NotificationCompat.Action.Builder(R.mipmap.ic_bookmark_border_white,
-                LWQApplication.get().getString(R.string.bookmark), disableBroadcast).build();
+                LWQApplication.get().getString(R.string.keep), disableBroadcast).build();
         notificationBuilder.addAction(disableRefreshAction);
+
+        // Add save to disk
+        Intent saveToDiskIntent = new Intent(LWQApplication.get().getString(R.string.action_save));
+        final PendingIntent saveToDiskBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, saveToDiskIntent, 0);
+        final NotificationCompat.Action saveToDiskAction = new NotificationCompat.Action.Builder(R.mipmap.ic_save_white,
+                LWQApplication.get().getString(R.string.save_to_disk), saveToDiskBroadcast).build();
+        notificationBuilder.addAction(saveToDiskAction);
 
         NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notificationBuilder.build());

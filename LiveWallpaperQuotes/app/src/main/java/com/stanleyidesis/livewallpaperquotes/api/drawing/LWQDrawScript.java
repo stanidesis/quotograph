@@ -1,4 +1,4 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.drawing;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -19,7 +19,6 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
-import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -27,6 +26,7 @@ import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 
 import java.util.HashMap;
@@ -66,7 +66,7 @@ import java.util.Map;
  *
  * Date: 08/22/2015
  */
-public class LWQDrawScript {
+public abstract class LWQDrawScript {
 
     static Map<Integer, Palette> paletteCache;
     static final int TEXT_ALPHA = 0xE5FFFFFF;
@@ -85,15 +85,22 @@ public class LWQDrawScript {
     }
 
     Palette palette;
-    SurfaceHolder surfaceHolder;
 
-    public LWQDrawScript(SurfaceHolder surfaceHolder) {
-        this.surfaceHolder = surfaceHolder;
-    }
+    /**
+     * @return a Canvas, ready to draw
+     */
+    protected abstract Canvas reserveCanvas();
 
-    public void setSurfaceHolder(SurfaceHolder surfaceHolder) {
-        this.surfaceHolder = surfaceHolder;
-    }
+    /**
+     * Release the canvas when ready
+     * @param canvas
+     */
+    protected abstract void releaseCanvas(Canvas canvas);
+
+    /**
+     * @return a Rect that represents the full Surface size
+     */
+    protected abstract Rect surfaceRect();
 
     public void changeSwatch() {
         swatchIndex++;
@@ -130,14 +137,12 @@ public class LWQDrawScript {
         final LWQWallpaperController wallpaperController =
                 LWQApplication.getWallpaperController();
         final Context context = LWQApplication.get();
-        while (surfaceHolder.isCreating()) {}
-
         final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
         if (backgroundImage == null) {
             return;
         }
         // Get screen width/height
-        final Rect surfaceFrame = surfaceHolder.getSurfaceFrame();
+        final Rect surfaceFrame = surfaceRect();
         final Point size = new Point();
         ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
         final int screenWidth = size.x;
@@ -150,7 +155,7 @@ public class LWQDrawScript {
             LWQDrawScript.swatchIndex = 0;
         }
 
-        final Canvas canvas = surfaceHolder.lockCanvas();
+        final Canvas canvas = reserveCanvas();
         canvas.save();
 
         final int blurPreference = LWQPreferences.getBlurPreference();
@@ -169,7 +174,7 @@ public class LWQDrawScript {
         drawText(canvas, screenWidth, screenHeight);
 
         canvas.restore();
-        surfaceHolder.unlockCanvasAndPost(canvas);
+        releaseCanvas(canvas);
     }
 
     private void drawText(Canvas canvas, int screenWidth, int screenHeight) {
