@@ -1,4 +1,4 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -12,6 +12,7 @@ import com.facebook.imagepipeline.image.CloseableBitmap;
 import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
 
 import java.util.HashMap;
 import java.util.Map;

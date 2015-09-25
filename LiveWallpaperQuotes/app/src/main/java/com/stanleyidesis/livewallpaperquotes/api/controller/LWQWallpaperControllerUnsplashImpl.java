@@ -1,10 +1,11 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.db.BackgroundImage;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;

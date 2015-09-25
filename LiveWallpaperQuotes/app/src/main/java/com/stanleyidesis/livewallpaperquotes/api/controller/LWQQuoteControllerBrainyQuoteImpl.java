@@ -1,10 +1,11 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import android.util.Log;
 
 import com.orm.StringUtil;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;

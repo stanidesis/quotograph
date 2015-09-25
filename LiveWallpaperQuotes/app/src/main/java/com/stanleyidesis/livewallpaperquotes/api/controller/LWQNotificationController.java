@@ -1,4 +1,4 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 /**
  * Created by stanleyidesis on 9/19/15.

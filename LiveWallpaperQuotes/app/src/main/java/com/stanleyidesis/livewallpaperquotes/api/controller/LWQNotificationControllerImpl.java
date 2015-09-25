@@ -1,4 +1,4 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import android.app.Notification;
 import android.app.NotificationManager;

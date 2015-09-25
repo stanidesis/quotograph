@@ -1,4 +1,4 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -51,7 +51,7 @@ import java.util.Date;
  *
  * Date: 08/14/2015
  */
-public class LWQAlarmManager {
+public class LWQAlarmController {
     public static void setTestRepeatingAlarm() {
         enableAlarmReceiver(true);
         Calendar calendar = Calendar.getInstance();

@@ -11,8 +11,8 @@ import android.view.SurfaceHolder;
 import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
-import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
+import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
+import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
@@ -46,7 +46,7 @@ public class LWQWallpaperService extends WallpaperService {
             drawScript = new LWQSurfaceHolderDrawScript(surfaceHolder);
             // setOffsetNotificationsEnabled(true);
             // TODO better place for this? Maybe not.
-            LWQAlarmManager.resetAlarm();
+            LWQAlarmController.resetAlarm();
             if (BuildConfig.DEBUG) {
                 gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
                 gestureDetectorCompat.setOnDoubleTapListener(this);

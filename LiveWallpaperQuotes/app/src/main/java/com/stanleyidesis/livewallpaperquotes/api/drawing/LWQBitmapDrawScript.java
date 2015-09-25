@@ -1,13 +1,11 @@
 package com.stanleyidesis.livewallpaperquotes.api.drawing;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.view.WindowManager;
 
-import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -48,9 +46,8 @@ public class LWQBitmapDrawScript extends LWQDrawScript {
     Canvas canvas;
 
     public LWQBitmapDrawScript() {
-        final Point size = new Point();
-        ((WindowManager) LWQApplication.get().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
-        bitmap = Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888);
+        final Point realScreenSize = UIUtils.getRealScreenSize();
+        bitmap = Bitmap.createBitmap(realScreenSize.x, realScreenSize.y, Bitmap.Config.ARGB_8888);
         canvas = new Canvas(bitmap);
     }
 

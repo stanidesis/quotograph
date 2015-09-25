@@ -1,7 +1,6 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
 
-import com.stanleyidesis.livewallpaperquotes.api.db.Category;
-import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import android.graphics.Bitmap;
 
 import java.util.List;
 
@@ -27,7 +26,7 @@ import java.util.List;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQQuoteController.java
+ * LWQWallpaperController.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -36,34 +35,54 @@ import java.util.List;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 07/14/2015
+ * Date: 08/01/2015
  */
-
-public interface LWQQuoteController {
+public interface LWQWallpaperController {
     /**
-     * Recover all categories available from the quote source.
-     * This method will return newly-recovered categories to the callback.
-     *
-     * Query for existing categories using the Category class.
-     *
-     * @param callback
+     * @return the unformatted quote text
      */
-    void fetchCategories(Callback<List<Category>> callback);
+    String getQuote();
 
     /**
-     * This method recovers new quotes from the source within the given category.
-     * Newly recovered quotes are served back to the caller.
-     *
-     * @param callback
+     * @return the quote's author
      */
-    void fetchQuotes(Category category, Callback<List<Quote>> callback);
+    String getAuthor();
 
     /**
-     * This will look for an unused quote within the database of the matching category.
-     * If not found, it will return null in the callback.
-     *
-     * @param category
-     * @param callback
+     * @return the background image Bitmap
      */
-    void fetchUnusedQuote(Category category, Callback<Quote> callback);
+    Bitmap getBackgroundImage();
+
+    /**
+     * @return true if the active wallpaper is accessible now
+     */
+    boolean activeWallpaperLoaded();
+
+    /**
+     * Generates a new wallpaper, stores it as active and notifies the EventBus when completed
+     */
+    void generateNewWallpaper();
+
+    /**
+     * This method should return false if LWQ is not the active wallpaper or this is a fresh install.
+     *
+     * @return true if the application has an active wallpaper (Quote + Background image)
+     */
+    boolean activeWallpaperExists();
+
+    /**
+     * Retrieves the active wallpaper into mem cache. Only returns `true` if it begins to load the
+     * active wallpaper.
+     */
+    boolean retrieveActiveWallpaper();
+
+    /**
+     * This method should cleans up any bitmaps and references which the active wallpaper required.
+     */
+    void discardActiveWallpaper();
+
+    /**
+     * @return the available categories from which the user may choose their background, if applicable
+     */
+    List<String> getBackgroundCategories();
 }

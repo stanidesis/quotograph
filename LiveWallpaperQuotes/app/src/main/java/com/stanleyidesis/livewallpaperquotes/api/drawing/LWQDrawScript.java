@@ -19,15 +19,15 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
+import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
+import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -143,10 +143,9 @@ public abstract class LWQDrawScript {
         }
         // Get screen width/height
         final Rect surfaceFrame = surfaceRect();
-        final Point size = new Point();
-        ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
-        final int screenWidth = size.x;
-        final int screenHeight = surfaceFrame.height();
+        final Point realScreenSize = UIUtils.getRealScreenSize();
+        final int screenWidth = realScreenSize.x;
+        final int screenHeight = realScreenSize.y;
         palette = paletteCache.get(backgroundImage.hashCode());
         if (palette == null) {
             LWQDrawScript.paletteCache.clear();

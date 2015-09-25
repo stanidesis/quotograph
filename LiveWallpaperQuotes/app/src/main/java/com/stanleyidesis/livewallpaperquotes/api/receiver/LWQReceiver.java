@@ -13,8 +13,8 @@ import android.widget.Toast;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
-import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
+import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
+import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQBitmapDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.service.LWQUpdateService;
 
@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager.setRepeatingAlarm;
+import static com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController.setRepeatingAlarm;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -83,7 +83,7 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
             context.startActivity(chooser);
         } else if (context.getString(R.string.action_disable_refresh).equals(intent.getAction())) {
             LWQPreferences.setRefreshPreference(context.getResources().getInteger(R.integer.dont_refresh));
-            LWQAlarmManager.cancelRepeatingAlarm();
+            LWQAlarmController.cancelRepeatingAlarm();
             Toast.makeText(context, R.string.toast_disable_refresh, Toast.LENGTH_LONG).show();
         } else if (context.getString(R.string.action_save).equals(intent.getAction())) {
             new Thread(new Runnable() {

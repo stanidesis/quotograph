@@ -1,6 +1,8 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import android.graphics.Bitmap;
+
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
 
 /**
  * Created by stanleyidesis on 8/2/15.
