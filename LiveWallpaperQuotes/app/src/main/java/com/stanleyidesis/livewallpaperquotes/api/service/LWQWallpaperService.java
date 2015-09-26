@@ -124,8 +124,6 @@ public class LWQWallpaperService extends WallpaperService {
         public void onEvent(NewWallpaperEvent newWallpaperEvent) {
             if (newWallpaperEvent.loaded) {
                 asyncDraw();
-            } else if (!newWallpaperEvent.didFail()){
-                LWQApplication.getWallpaperController().retrieveActiveWallpaper();
             }
         }
 
