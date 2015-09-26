@@ -66,7 +66,7 @@ public class LWQSurfaceHolderDrawScript extends LWQDrawScript {
 
     @Override
     protected Rect surfaceRect() {
-        while (surfaceHolder.isCreating()) {}
+        waitToCreate();
         return surfaceHolder.getSurfaceFrame();
     }
 }
