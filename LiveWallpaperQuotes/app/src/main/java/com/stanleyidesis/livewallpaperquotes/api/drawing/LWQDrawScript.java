@@ -242,7 +242,7 @@ public abstract class LWQDrawScript {
 
     Bitmap generateBitmap(int blurRadius, Bitmap backgroundImage) {
         Bitmap drawnBitmap = backgroundImage;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && blurRadius > 0f) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN && blurRadius > 0f) {
             drawnBitmap = blurBitmap(backgroundImage, blurRadius);
         }
         return drawnBitmap;
