@@ -1,5 +1,7 @@
 package com.stanleyidesis.livewallpaperquotes.api.service;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.service.wallpaper.WallpaperService;
 import android.support.v4.view.GestureDetectorCompat;
@@ -10,6 +12,7 @@ import android.view.SurfaceHolder;
 
 import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
@@ -181,8 +184,10 @@ public class LWQWallpaperService extends WallpaperService {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            if (BuildConfig.DEBUG) {
-                LWQApplication.getWallpaperController().generateNewWallpaper();
+            if (LWQPreferences.isDoubleTapEnabled()) {
+                final PackageManager packageManager = getPackageManager();
+                final Intent launchIntentForPackage = packageManager.getLaunchIntentForPackage(getPackageName());
+                startActivity(launchIntentForPackage);
             }
             return true;
         }

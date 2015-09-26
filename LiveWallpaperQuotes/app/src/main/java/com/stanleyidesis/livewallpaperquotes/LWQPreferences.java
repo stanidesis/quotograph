@@ -121,4 +121,12 @@ public class LWQPreferences {
         EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_mode, mode));
     }
 
+    public static boolean isDoubleTapEnabled() {
+        return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_double_tap_to_launch), true);
+    }
+
+    public static void setDoubleTapEnabled(boolean enabled) {
+        sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_double_tap_to_launch), enabled).apply();
+    }
+
 }

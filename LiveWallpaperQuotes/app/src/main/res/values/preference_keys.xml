@@ -7,4 +7,5 @@
     <string name="preference_key_mode">com.stanleyidesis.livewallpaperquotes.preference.MODE</string>
     <string name="preference_key_refresh">com.stanleyidesis.livewallpaperquotes.preference.REFRESH</string>
     <string name="preference_key_quote_category">com.stanleyidesis.livewallpaperquotes.preference.QUOTE_CATEGORY</string>
+    <string name="preference_key_double_tap_to_launch">com.stanleyidesis.livewallpaperquotes.preference.DOUBLE_TAP</string>
 </resources>
