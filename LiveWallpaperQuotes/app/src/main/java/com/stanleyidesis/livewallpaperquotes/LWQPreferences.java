@@ -55,7 +55,8 @@ public class LWQPreferences {
     }
 
     public static int getBlurPreference() {
-        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_blur), 0);
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_blur),
+                LWQApplication.get().getResources().getInteger(R.integer.preference_default_blur));
     }
 
     public static void setBlurPreference(int blurPreference) {
@@ -64,7 +65,8 @@ public class LWQPreferences {
     }
 
     public static int getDimPreference() {
-        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_dim), 0);
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_dim),
+                LWQApplication.get().getResources().getInteger(R.integer.preference_default_dim));
     }
 
     public static void setDimPreference(int dimPreference) {
