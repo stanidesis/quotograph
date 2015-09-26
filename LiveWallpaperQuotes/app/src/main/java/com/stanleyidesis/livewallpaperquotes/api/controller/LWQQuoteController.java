@@ -1,8 +1,12 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
+
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import com.stanleyidesis.livewallpaperquotes.api.db.Category;
+import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+
+import java.util.List;
 
 /**
- * Created by stanleyidesis on 9/19/15.
- *//**
  * Copyright (c) 2015 Stanley Idesis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,7 +28,7 @@ package com.stanleyidesis.livewallpaperquotes.api;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQNotificationController.java
+ * LWQQuoteController.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -33,13 +37,34 @@ package com.stanleyidesis.livewallpaperquotes.api;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 09/19/2015
+ * Date: 07/14/2015
  */
-public interface LWQNotificationController {
+
+public interface LWQQuoteController {
     /**
-     * Manually post a new Wallpaper notification if so desired.
-     * The controller should also subscribe to the EventBus, posting
-     * a new Wallpaper notification when appropriate.
+     * Recover all categories available from the quote source.
+     * This method will return newly-recovered categories to the callback.
+     *
+     * Query for existing categories using the Category class.
+     *
+     * @param callback
      */
-    void postNewWallpaperNotification();
+    void fetchCategories(Callback<List<Category>> callback);
+
+    /**
+     * This method recovers new quotes from the source within the given category.
+     * Newly recovered quotes are served back to the caller.
+     *
+     * @param callback
+     */
+    void fetchQuotes(Category category, Callback<List<Quote>> callback);
+
+    /**
+     * This will look for an unused quote within the database of the matching category.
+     * If not found, it will return null in the callback.
+     *
+     * @param category
+     * @param callback
+     */
+    void fetchUnusedQuote(Category category, Callback<Quote> callback);
 }

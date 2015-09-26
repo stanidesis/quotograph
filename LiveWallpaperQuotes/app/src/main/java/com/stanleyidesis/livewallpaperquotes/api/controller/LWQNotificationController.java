@@ -1,8 +1,10 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.controller;
 
-import android.graphics.Bitmap;
+/**
+ * Created by stanleyidesis on 9/19/15.
+ */
 
-import java.util.List;
+import android.net.Uri;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -26,7 +28,7 @@ import java.util.List;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQWallpaperController.java
+ * LWQNotificationController.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -35,54 +37,28 @@ import java.util.List;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 08/01/2015
+ * Date: 09/19/2015
  */
-public interface LWQWallpaperController {
+public interface LWQNotificationController {
     /**
-     * @return the unformatted quote text
+     * Manually post a new Wallpaper notification if so desired.
+     * The controller should also subscribe to the EventBus, posting
+     * a new Wallpaper notification when appropriate.
      */
-    String getQuote();
+    void postNewWallpaperNotification();
 
     /**
-     * @return the quote's author
-     */
-    String getAuthor();
-
-    /**
-     * @return the background image Bitmap
-     */
-    Bitmap getBackgroundImage();
-
-    /**
-     * @return true if the active wallpaper is accessible now
-     */
-    boolean activeWallpaperLoaded();
-
-    /**
-     * Generates a new wallpaper, stores it as active and notifies the EventBus when completed
-     */
-    void generateNewWallpaper();
-
-    /**
-     * This method should return false if LWQ is not the active wallpaper or this is a fresh install.
+     * Present a notification which shows the saved image. Clicking
+     * it should let the user view the picture, it should also feature a
+     * share action that presents a chooser.
      *
-     * @return true if the application has an active wallpaper (Quote + Background image)
+     * @param filePath
+     * @param imageUri
      */
-    boolean activeWallpaperExists();
+    void postSavedWallpaperReadyNotification(Uri filePath, Uri imageUri);
 
     /**
-     * Retrieves the active wallpaper into mem cache. Only returns `true` if it begins to load the
-     * active wallpaper.
+     * If saving the wallpaper fails, notify the user that something went wrong.
      */
-    boolean retrieveActiveWallpaper();
-
-    /**
-     * This method should cleans up any bitmaps and references which the active wallpaper required.
-     */
-    void discardActiveWallpaper();
-
-    /**
-     * @return the available categories from which the user may choose their background, if applicable
-     */
-    List<String> getBackgroundCategories();
+    void postWallpaperSaveFailureNotification();
 }

@@ -50,5 +50,12 @@
     <string name="share_using">Share with…</string>
     <string name="toast_disable_refresh">Refreshing disabled. To re-enable, go to settings.</string>
     <string name="share">Share</string>
-    <string name="bookmark">Bookmark</string>
+    <string name="keep">Keep</string>
+    <string name="save_to_disk">Save to Disk</string>
+    <string name="saving_quotograph">Saving Quotograph as image…</string>
+    <string name="notification_title_save_image">Quotograph Saved</string>
+    <string name="notification_content_save_image">We saved your Quotograph as an image. Click here to view.</string>
+    <string name="view_using">View with…</string>
+    <string name="notification_title_save_failed">Failed to save Quotograph</string>
+    <string name="notification_content_save_failed">Click here to retry.</string>
 </resources>

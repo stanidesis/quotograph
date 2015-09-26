@@ -11,9 +11,9 @@ import android.view.SurfaceHolder;
 import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
-import com.stanleyidesis.livewallpaperquotes.api.LWQDrawScript;
-import com.stanleyidesis.livewallpaperquotes.api.LWQWallpaperController;
+import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
+import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
+import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 
@@ -29,7 +29,7 @@ public class LWQWallpaperService extends WallpaperService {
 
     public class LWQWallpaperEngine extends Engine implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
-        private LWQDrawScript drawScript;
+        private LWQSurfaceHolderDrawScript drawScript;
         private Executor executor;
 
         private GestureDetectorCompat gestureDetectorCompat;
@@ -43,10 +43,10 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
-            drawScript = new LWQDrawScript(surfaceHolder);
+            drawScript = new LWQSurfaceHolderDrawScript(surfaceHolder);
             // setOffsetNotificationsEnabled(true);
             // TODO better place for this? Maybe not.
-            LWQAlarmManager.resetAlarm();
+            LWQAlarmController.resetAlarm();
             if (BuildConfig.DEBUG) {
                 gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
                 gestureDetectorCompat.setOnDoubleTapListener(this);

@@ -1,9 +1,8 @@
-package com.stanleyidesis.livewallpaperquotes.api;
+package com.stanleyidesis.livewallpaperquotes.api.drawing;
 
-import com.stanleyidesis.livewallpaperquotes.api.db.Category;
-import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
-
-import java.util.List;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.view.SurfaceHolder;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -27,7 +26,7 @@ import java.util.List;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQQuoteController.java
+ * LWQSurfaceHolderDrawScript.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -36,34 +35,38 @@ import java.util.List;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 07/14/2015
+ * Date: 09/20/2015
  */
+public class LWQSurfaceHolderDrawScript extends LWQDrawScript {
 
-public interface LWQQuoteController {
-    /**
-     * Recover all categories available from the quote source.
-     * This method will return newly-recovered categories to the callback.
-     *
-     * Query for existing categories using the Category class.
-     *
-     * @param callback
-     */
-    void fetchCategories(Callback<List<Category>> callback);
+    SurfaceHolder surfaceHolder;
 
-    /**
-     * This method recovers new quotes from the source within the given category.
-     * Newly recovered quotes are served back to the caller.
-     *
-     * @param callback
-     */
-    void fetchQuotes(Category category, Callback<List<Quote>> callback);
+    public LWQSurfaceHolderDrawScript(SurfaceHolder surfaceHolder) {
+        this.surfaceHolder = surfaceHolder;
+    }
 
-    /**
-     * This will look for an unused quote within the database of the matching category.
-     * If not found, it will return null in the callback.
-     *
-     * @param category
-     * @param callback
-     */
-    void fetchUnusedQuote(Category category, Callback<Quote> callback);
+    public void setSurfaceHolder(SurfaceHolder surfaceHolder) {
+        this.surfaceHolder = surfaceHolder;
+    }
+
+    void waitToCreate() {
+        while (surfaceHolder.isCreating()) {}
+    }
+
+    @Override
+    protected Canvas reserveCanvas() {
+        waitToCreate();
+        return surfaceHolder.lockCanvas();
+    }
+
+    @Override
+    protected void releaseCanvas(Canvas canvas) {
+        surfaceHolder.unlockCanvasAndPost(canvas);
+    }
+
+    @Override
+    protected Rect surfaceRect() {
+        waitToCreate();
+        return surfaceHolder.getSurfaceFrame();
+    }
 }

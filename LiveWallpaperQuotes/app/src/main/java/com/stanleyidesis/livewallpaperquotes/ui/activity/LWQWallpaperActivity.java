@@ -11,7 +11,7 @@ import android.view.animation.LinearInterpolator;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.LWQDrawScript;
+import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 
@@ -69,9 +69,9 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     }
 
     ScheduledExecutorService scheduledExecutorService;
+    LWQSurfaceHolderDrawScript drawScript;
     SurfaceView surfaceView;
     View silkScreen;
-    LWQDrawScript drawScript;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,7 +166,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
 
     void draw() {
         if (drawScript == null) {
-            drawScript = new LWQDrawScript(surfaceView.getHolder());
+            drawScript = new LWQSurfaceHolderDrawScript(surfaceView.getHolder());
         } else {
             drawScript.setSurfaceHolder(surfaceView.getHolder());
         }

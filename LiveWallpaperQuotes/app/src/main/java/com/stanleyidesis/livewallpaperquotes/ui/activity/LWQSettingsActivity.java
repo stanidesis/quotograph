@@ -13,7 +13,7 @@ import android.widget.Spinner;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.LWQAlarmManager;
+import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
@@ -194,7 +194,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
                 final int[] refreshValues = getResources().getIntArray(R.array.refresh_preference_values);
                 LWQPreferences.setRefreshPreference(refreshValues[index]);
-                LWQAlarmManager.resetAlarm();
+                LWQAlarmController.resetAlarm();
             }
 
             @Override
