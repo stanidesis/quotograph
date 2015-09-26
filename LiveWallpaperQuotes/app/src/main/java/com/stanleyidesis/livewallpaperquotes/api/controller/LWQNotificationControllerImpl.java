@@ -205,7 +205,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
     }
 
     public void onEvent(NewWallpaperEvent newWallpaperEvent) {
-        if (newWallpaperEvent.loaded) {
+        if (newWallpaperEvent.loaded && LWQApplication.isWallpaperActivated()) {
             postNewWallpaperNotification();
         }
     }

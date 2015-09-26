@@ -142,7 +142,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         autopilotSettingsContainer = findViewById(R.id.group_lwq_settings_autopilot);
         autopilotSettingsContainer.setAlpha(0f);
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             autopilotSettingsContainer.findViewById(R.id.rl_lwq_autopilot_settings_blur).setVisibility(View.GONE);
         } else {
             SeekBar blurBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_blur);
