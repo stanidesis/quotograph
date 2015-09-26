@@ -2,7 +2,11 @@ package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 /**
  * Created by stanleyidesis on 9/19/15.
- *//**
+ */
+
+import android.net.Uri;
+
+/**
  * Copyright (c) 2015 Stanley Idesis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -42,4 +46,19 @@ public interface LWQNotificationController {
      * a new Wallpaper notification when appropriate.
      */
     void postNewWallpaperNotification();
+
+    /**
+     * Present a notification which shows the saved image. Clicking
+     * it should let the user view the picture, it should also feature a
+     * share action that presents a chooser.
+     *
+     * @param filePath
+     * @param imageUri
+     */
+    void postSavedWallpaperReadyNotification(Uri filePath, Uri imageUri);
+
+    /**
+     * If saving the wallpaper fails, notify the user that something went wrong.
+     */
+    void postWallpaperSaveFailureNotification();
 }

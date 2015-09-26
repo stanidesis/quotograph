@@ -2,28 +2,16 @@ package com.stanleyidesis.livewallpaperquotes.api.receiver;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.media.MediaScannerConnection;
-import android.net.Uri;
-import android.os.Environment;
 import android.support.v4.content.WakefulBroadcastReceiver;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.LWQSaveWallpaperImageTask;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
-import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQBitmapDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.service.LWQUpdateService;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import static com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController.setRepeatingAlarm;
 
@@ -86,85 +74,7 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
             LWQAlarmController.cancelRepeatingAlarm();
             Toast.makeText(context, R.string.toast_disable_refresh, Toast.LENGTH_LONG).show();
         } else if (context.getString(R.string.action_save).equals(intent.getAction())) {
-            new Thread(new Runnable() {
-
-                public File getPhotoStorageDir(String albumName) {
-                    // Get the directory for the user's public pictures directory.
-                    File file = new File(Environment.getExternalStoragePublicDirectory(
-                            Environment.DIRECTORY_PICTURES), albumName);
-                    if (!file.mkdirs()) {
-                        Log.e(getClass().getSimpleName(), "Directory not created");
-                    }
-                    return file;
-                }
-
-                /* Checks if external storage is available for read and write */
-                public boolean isExternalStorageWritable() {
-                    String state = Environment.getExternalStorageState();
-                    if (Environment.MEDIA_MOUNTED.equals(state)) {
-                        return true;
-                    }
-                    return false;
-                }
-
-                void failed() {
-
-                }
-
-                void success(Uri imageUri) {
-                    // TODO notification
-                    Intent imageViewIntent = new Intent(Intent.ACTION_VIEW);
-                    imageViewIntent.setDataAndType(imageUri, "image/*");
-                    final Intent chooser = Intent.createChooser(imageViewIntent, "View with…");
-                    chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(chooser);
-                }
-
-                @Override
-                public void run() {
-                    if (!isExternalStorageWritable()) {
-                        // TODO error
-                        return;
-                    }
-                    final File photosDirectory = Environment.getExternalStoragePublicDirectory(
-                            Environment.DIRECTORY_PICTURES);
-                    if (photosDirectory == null) {
-                        // TODO error
-                        return;
-                    }
-                    if (!photosDirectory.exists()) {
-                        photosDirectory.mkdir();
-                    }
-                    String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmm").format(new Date());
-                    File wallpaperFile = new File(photosDirectory.getPath() + File.separator
-                            + timeStamp + ".png");
-                    LWQBitmapDrawScript drawScript = new LWQBitmapDrawScript();
-                    drawScript.draw();
-                    final Bitmap bitmapToSave = drawScript.getBitmap();
-                    try {
-                        wallpaperFile.createNewFile();
-                        FileOutputStream fos = new FileOutputStream(wallpaperFile);
-                        bitmapToSave.compress(Bitmap.CompressFormat.PNG, 0, fos);
-                        fos.close();
-                        MediaScannerConnection.scanFile(LWQApplication.get(),
-                                new String[]{wallpaperFile.toString()}, null,
-                                new MediaScannerConnection.OnScanCompletedListener() {
-                                    public void onScanCompleted(String path, Uri uri) {
-                                        Log.i("ExternalStorage", "Scanned " + path + ":");
-                                        Log.i("ExternalStorage", "-> uri=" + uri);
-                                        success(uri);
-                                    }
-                                });
-//                        success(Uri.parse("file://" + wallpaperFile.getCanonicalPath()));
-                    } catch (FileNotFoundException e) {
-                        Log.d(getClass().getSimpleName(), "File not found: " + e.getMessage());
-                    } catch (IOException e) {
-                        Log.d(getClass().getSimpleName(), "Error accessing file: " + e.getMessage());
-                    } finally {
-                        drawScript.finish();
-                    }
-                }
-            }).start();
+            new LWQSaveWallpaperImageTask().execute();
         }
     }
 }

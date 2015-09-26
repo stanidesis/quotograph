@@ -6,14 +6,19 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Point;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
-import android.view.WindowManager;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
+import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 import com.stanleyidesis.livewallpaperquotes.ui.activity.LWQActivateActivity;
+
+import java.io.File;
 
 import de.greenrobot.event.EventBus;
 
@@ -54,6 +59,9 @@ import de.greenrobot.event.EventBus;
  */
 public class LWQNotificationControllerImpl implements LWQNotificationController {
 
+    static int REQUEST_CODE_SHARE = 0xA;
+    static int REQUEST_CODE_VIEW = 0xB;
+
     public LWQNotificationControllerImpl() {
         EventBus.getDefault().register(this);
     }
@@ -66,14 +74,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         if (backgroundImage == null) {
             return;
         }
-        final Point size = new Point();
-        ((WindowManager) LWQApplication.get().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(size);
-        int screenWidth = size.x;
-        int maxBitmapDim = (int) (screenWidth * .3f);
-        // Calculate center
-        int topLeftX = (backgroundImage.getWidth() / 2) - (maxBitmapDim / 2);
-        int topLeftY = (backgroundImage.getHeight() / 2) - (maxBitmapDim / 2);
-        final Bitmap notificationBitmap = Bitmap.createBitmap(backgroundImage, topLeftX, topLeftY, maxBitmapDim, maxBitmapDim);
+        final Bitmap notificationBitmap = chopToCenterSquare(backgroundImage);
 
         // Establish basic options
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(LWQApplication.get());
@@ -85,7 +86,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setLargeIcon(notificationBitmap);
         notificationBuilder.setOngoing(false);
         notificationBuilder.setShowWhen(false);
-        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher); // TODO
         notificationBuilder.setTicker(String.format("New quote from %s", wallpaperController.getAuthor()));
         notificationBuilder.setWhen(System.currentTimeMillis());
 
@@ -129,6 +130,75 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
     }
 
     @Override
+    public void postSavedWallpaperReadyNotification(Uri filePath, Uri imageUri) {
+        final Bitmap savedImage = BitmapFactory.decodeFile(filePath.getPath());
+        final Bitmap notificationBitmap = chopToCenterSquare(savedImage);
+        savedImage.recycle();
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(LWQApplication.get());
+        notificationBuilder.setAutoCancel(true);
+        notificationBuilder.setCategory(Notification.CATEGORY_SERVICE);
+        notificationBuilder.setContentTitle(LWQApplication.get().getString(R.string.notification_title_save_image));
+        notificationBuilder.setContentText(LWQApplication.get().getString(R.string.notification_content_save_image));
+        notificationBuilder.setLargeIcon(notificationBitmap);
+        notificationBuilder.setOngoing(false);
+        notificationBuilder.setShowWhen(false);
+        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher); // TODO
+        notificationBuilder.setTicker(LWQApplication.get().getString(R.string.notification_title_save_image));
+        notificationBuilder.setWhen(System.currentTimeMillis());
+
+        NotificationCompat.BigPictureStyle bigPictureStyle = new NotificationCompat.BigPictureStyle();
+        bigPictureStyle.bigPicture(notificationBitmap);
+        bigPictureStyle.bigLargeIcon(notificationBitmap);
+
+        notificationBuilder.setStyle(bigPictureStyle);
+
+        // Set content Intent
+        final Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+        viewIntent.setDataAndType(imageUri, "image/*");
+        final Intent viewChooser = Intent.createChooser(viewIntent, LWQApplication.get().getString(R.string.view_using));
+        final PendingIntent viewActivity = PendingIntent.getActivity(LWQApplication.get(),
+                REQUEST_CODE_VIEW, viewChooser, PendingIntent.FLAG_UPDATE_CURRENT);
+        notificationBuilder.setContentIntent(viewActivity);
+
+        // Add Share Action
+        final Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("image/*");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath.getPath())));
+        final Intent shareChooser = Intent.createChooser(shareIntent, LWQApplication.get().getString(R.string.share_using));
+        final PendingIntent shareActivity = PendingIntent.getActivity(LWQApplication.get(),
+                REQUEST_CODE_SHARE, shareChooser, PendingIntent.FLAG_UPDATE_CURRENT);
+        final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.mipmap.ic_share_white,
+                LWQApplication.get().getString(R.string.share), shareActivity).build();
+        notificationBuilder.addAction(shareAction);
+
+        NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(2, notificationBuilder.build());
+        notificationBitmap.recycle();
+    }
+
+    @Override
+    public void postWallpaperSaveFailureNotification() {
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(LWQApplication.get());
+        notificationBuilder.setAutoCancel(true);
+        notificationBuilder.setCategory(Notification.CATEGORY_ERROR);
+        notificationBuilder.setContentTitle(LWQApplication.get().getString(R.string.notification_title_save_failed));
+        notificationBuilder.setContentText(LWQApplication.get().getString(R.string.notification_content_save_failed));
+        notificationBuilder.setOngoing(false);
+        notificationBuilder.setShowWhen(false);
+        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher); // TODO
+        notificationBuilder.setTicker(String.format(LWQApplication.get().getString(R.string.notification_title_save_failed)));
+        notificationBuilder.setWhen(System.currentTimeMillis());
+
+        Intent saveToDiskIntent = new Intent(LWQApplication.get().getString(R.string.action_save));
+        final PendingIntent saveToDiskBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, saveToDiskIntent, 0);
+        notificationBuilder.setContentIntent(saveToDiskBroadcast);
+
+        NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(3, notificationBuilder.build());
+    }
+
+    @Override
     protected void finalize() throws Throwable {
         EventBus.getDefault().unregister(this);
         super.finalize();
@@ -138,5 +208,21 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         if (newWallpaperEvent.loaded) {
             postNewWallpaperNotification();
         }
+    }
+
+    private Bitmap chopToCenterSquare(Bitmap original) {
+        int squareDim = Math.min(original.getWidth(), original.getHeight());
+        int squareYCoord = (int) (original.getHeight() / 2.0) - (int) (squareDim / 2.0);
+        int squareXCoord = (int) (original.getWidth() / 2.0) - (int) (squareDim / 2.0);
+
+        final Point size = UIUtils.getRealScreenSize();
+        int screenWidth = Math.min(size.x, size.y);
+        int maxBitmapDim = (int) (screenWidth * .3f);
+        // Calculate center
+        float scale = ((float) maxBitmapDim) / ((float) squareDim);
+        Matrix matrix = new Matrix();
+        matrix.setScale(scale, scale);
+        return Bitmap.createBitmap(original, squareXCoord, squareYCoord,
+                squareDim, squareDim, matrix, true);
     }
 }
