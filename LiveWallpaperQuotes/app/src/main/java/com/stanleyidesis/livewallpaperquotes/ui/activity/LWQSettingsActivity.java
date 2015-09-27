@@ -2,11 +2,15 @@ package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 
@@ -59,42 +63,26 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
 
     enum SettingsState {
         NONE,
-        MODE_SELECTION,
-        AUTOPILOT_SETTINGS,
-        CUSTOM_SETTINGS;
+        ADJUSTABLE_SETTINGS,
+        AUTOPILOT_SETTINGS;
     }
 
     SettingsState currentState;
+    boolean controlsVisible = true;
 
-    // Mode Selection Views
-    View modeSelectionContainer;
-    View modeAutopilotButton;
-    View modeCustomButton;
-    View.OnClickListener modeOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            modeAutopilotButton.setSelected(view == modeAutopilotButton);
-            modeCustomButton.setSelected(!modeAutopilotButton.isSelected());
-            int newMode = view == modeAutopilotButton ?
-                    getResources().getInteger(R.integer.preference_mode_autopilot) :
-                    getResources().getInteger(R.integer.preference_mode_custom);
-            LWQPreferences.setMode(newMode);
-        }
-    };
-    View.OnClickListener modeContinueClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            if (LWQPreferences.isAutoPilot()) {
-                animateToState(SettingsState.AUTOPILOT_SETTINGS);
-            } else {
-                // TODO
-                animateToState(SettingsState.NONE);
-            }
-        }
-    };
-
+    // ProgressBar
+    ProgressBar progressBar;
     // Autopilot Views
     View autopilotSettingsContainer;
+    // Adjustable Views
+    View adjustableSettingsContainer;
+    // Wallpaper Actions
+    View wallpaperActionsContainer;
+    View shareButton;
+    View saveButton;
+    View adjustButton;
+    View skipButton;
+    View settingsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,56 +91,33 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         setContentView(R.layout.activity_lwq_settings);
         currentState = SettingsState.NONE;
 
-        // Setup Mode Selection
-        setupModeSelection();
-        // Setup Autopilot Stuff
+        // Setup Autopilot stuff
         setupAutopilotSettings();
+        // Setup Adjustable stuff
+        setupAdjustableSettings();
+        // Setup Wallpaper actions
+        setupWallpaperViews();
+        // Setup progress bar
+        setupProgressBar();
+        // Setup touch to dismiss
+        setupTouchToDismiss();
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        switchToSilkScreen(SilkScreenState.DEFAULT, null);
-        animateToState(SettingsState.MODE_SELECTION);
+        switchToSilkScreen(SilkScreenState.REVEAL, null);
+        animateControls(true);
     }
 
     @Override
     public void onBackPressed() {
-        if (currentState != SettingsState.MODE_SELECTION) {
-            animateToState(SettingsState.MODE_SELECTION);
-            return;
-        }
         super.onBackPressed();
-    }
-
-    void setupModeSelection() {
-        modeSelectionContainer = findViewById(R.id.group_lwq_settings_mode_select);
-        modeSelectionContainer.setAlpha(0f);
-        modeSelectionContainer.findViewById(R.id.button_lwq_settings_mode_continue).setOnClickListener(modeContinueClickListener);
-        modeAutopilotButton = modeSelectionContainer.findViewById(R.id.button_lwq_settings_autopilot);
-        modeCustomButton = modeSelectionContainer.findViewById(R.id.button_lwq_settings_custom);
-        modeAutopilotButton.setSelected(LWQPreferences.isAutoPilot());
-        modeCustomButton.setSelected(!modeAutopilotButton.isSelected());
-        modeAutopilotButton.setOnClickListener(modeOnClickListener);
-        modeCustomButton.setOnClickListener(modeOnClickListener);
-        UIUtils.setViewAndChildrenEnabled(modeSelectionContainer, false);
     }
 
     void setupAutopilotSettings() {
         autopilotSettingsContainer = findViewById(R.id.group_lwq_settings_autopilot);
         autopilotSettingsContainer.setAlpha(0f);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            autopilotSettingsContainer.findViewById(R.id.rl_lwq_autopilot_settings_blur).setVisibility(View.GONE);
-        } else {
-            SeekBar blurBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_blur);
-            blurBar.setProgress(LWQPreferences.getBlurPreference());
-            blurBar.setOnSeekBarChangeListener(this);
-        }
-
-        SeekBar dimBar = (SeekBar) autopilotSettingsContainer.findViewById(R.id.sb_lwq_autopilot_settings_dim);
-        dimBar.setProgress(LWQPreferences.getDimPreference());
-        dimBar.setOnSeekBarChangeListener(this);
 
         final List<String> backgroundCategories = LWQApplication.getWallpaperController().getBackgroundCategories();
         final String imageCategoryPreference = LWQPreferences.getImageCategoryPreference();
@@ -255,6 +220,76 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         refreshSpinner.setOnItemSelectedListener(onItemSelectedListener);
     }
 
+    void setupAdjustableSettings() {
+        adjustableSettingsContainer = findViewById(R.id.group_lwq_settings_adjustable);
+        adjustableSettingsContainer.setAlpha(0f);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            adjustableSettingsContainer.findViewById(R.id.rl_lwq_adjustable_settings_blur).setVisibility(View.GONE);
+        } else {
+            SeekBar blurBar = (SeekBar) adjustableSettingsContainer.findViewById(R.id.sb_lwq_adjustable_settings_blur);
+            blurBar.setProgress(LWQPreferences.getBlurPreference());
+            blurBar.setOnSeekBarChangeListener(this);
+        }
+
+        SeekBar dimBar = (SeekBar) adjustableSettingsContainer.findViewById(R.id.sb_lwq_adjustable_settings_dim);
+        dimBar.setProgress(LWQPreferences.getDimPreference());
+        dimBar.setOnSeekBarChangeListener(this);
+        UIUtils.setViewAndChildrenEnabled(adjustableSettingsContainer, false);
+    }
+
+    void setupWallpaperViews() {
+        wallpaperActionsContainer = findViewById(R.id.group_lwq_settings_wallpaper_actions);
+        shareButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_share);
+        saveButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_save);
+        adjustButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_adjust);
+        skipButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_skip);
+        settingsButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_settings);
+    }
+
+    void setupProgressBar() {
+        progressBar = (ProgressBar) findViewById(R.id.pb_lwq_settings);
+        progressBar.setAlpha(0f);
+    }
+
+    void setupTouchToDismiss() {
+        findViewById(android.R.id.content).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                animateSilkScreen(silkScreenState.flip(), containerForState(currentState));
+                animateControls(controlsVisible);
+            }
+        });
+    }
+
+    void animateControls(boolean dismiss) {
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(generateAnimator(shareButton, dismiss, 0),
+                generateAnimator(saveButton, dismiss, 15),
+                generateAnimator(adjustButton, dismiss, 30),
+                generateAnimator(skipButton, dismiss, 45),
+                generateAnimator(settingsButton, dismiss, 60));
+        animatorSet.start();
+        controlsVisible = !dismiss;
+    }
+
+    AnimatorSet generateAnimator(View target, boolean dismiss, long startDelay) {
+        float [] fadeIn = new float[] {0f, 1f};
+        float [] fadeOut = new float[] {1f, 0f};
+        final ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(target, "alpha", dismiss ? fadeOut : fadeIn);
+        alphaAnimator.setDuration(240);
+        alphaAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        final ObjectAnimator translationAnimator = ObjectAnimator.ofFloat(target, "translationY", dismiss ? (target.getHeight() * 2f) : 0f);
+        translationAnimator.setDuration(240);
+        translationAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.setStartDelay(startDelay);
+        animatorSet.playTogether(alphaAnimator, translationAnimator);
+        return animatorSet;
+    }
+
     void animateToState(final SettingsState newState) {
         runOnUiThread(new Runnable() {
             @Override
@@ -285,10 +320,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         switch (settingsState) {
             case NONE:
                 return null;
-            case MODE_SELECTION:
-                return modeSelectionContainer;
             case AUTOPILOT_SETTINGS:
                 return autopilotSettingsContainer;
+            case ADJUSTABLE_SETTINGS:
+                return adjustableSettingsContainer;
             default:
                 return null;
         }
@@ -306,7 +341,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int value, boolean b) {
-        if (seekBar.getId() == R.id.sb_lwq_autopilot_settings_blur) {
+        if (seekBar.getId() == R.id.sb_lwq_adjustable_settings_blur) {
             LWQPreferences.setBlurPreference(value);
         } else {
             LWQPreferences.setDimPreference(value);

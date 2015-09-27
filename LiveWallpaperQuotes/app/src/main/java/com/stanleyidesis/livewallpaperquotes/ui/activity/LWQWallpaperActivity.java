@@ -66,11 +66,19 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
             this.contentAlpha = contentAlpha;
             this.screenAlpha = screenAlpha;
         }
+
+        SilkScreenState flip() {
+            if (this == DEFAULT) {
+                return REVEAL;
+            }
+            return DEFAULT;
+        }
     }
 
     ScheduledExecutorService scheduledExecutorService;
     LWQSurfaceHolderDrawScript drawScript;
     SurfaceView surfaceView;
+    SilkScreenState silkScreenState;
     View silkScreen;
 
     @Override
@@ -140,6 +148,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
         if (content != null) {
             content.setAlpha(state.contentAlpha);
         }
+        silkScreenState = state;
     }
 
     void animateSilkScreen(SilkScreenState state, View content) {
@@ -153,6 +162,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
             contentAnimator.setInterpolator(new LinearInterpolator());
             contentAnimator.start();
         }
+        silkScreenState = state;
     }
 
     void fullScreenIfPossible() {
