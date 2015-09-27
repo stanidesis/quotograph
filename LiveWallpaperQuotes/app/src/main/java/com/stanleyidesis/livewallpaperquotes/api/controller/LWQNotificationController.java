@@ -48,6 +48,11 @@ public interface LWQNotificationController {
     void postNewWallpaperNotification();
 
     /**
+     * If present, dismiss the current New wallpaper notification
+     */
+    void dismissNewWallpaperNotification();
+
+    /**
      * Present a notification which shows the saved image. Clicking
      * it should let the user view the picture, it should also feature a
      * share action that presents a chooser.

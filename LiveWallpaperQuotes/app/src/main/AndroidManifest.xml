@@ -40,7 +40,6 @@
                 <action android:name="com.stanleyidesis.livewallpaperquotes.action.CHANGE_WALLPAPER"/>
                 <action android:name="com.stanleyidesis.livewallpaperquotes.action.SHARE"/>
                 <action android:name="com.stanleyidesis.livewallpaperquotes.action.SAVE"/>
-                <action android:name="com.stanleyidesis.livewallpaperquotes.action.DISABLE_REFRESH"/>
             </intent-filter>
         </receiver>
 
