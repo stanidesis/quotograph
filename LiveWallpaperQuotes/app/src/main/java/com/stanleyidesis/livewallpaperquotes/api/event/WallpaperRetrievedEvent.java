@@ -22,7 +22,7 @@ package com.stanleyidesis.livewallpaperquotes.api.event;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * FirstLaunchTaskEvent.java
+ * WallpaperRetrievedEvent.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -31,26 +31,20 @@ package com.stanleyidesis.livewallpaperquotes.api.event;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 09/20/2015
+ * Date: 09/27/2015
  */
-public class FirstLaunchTaskEvent extends FailableEvent {
+public class WallpaperRetrievedEvent extends FailableEvent {
 
-    public static FirstLaunchTaskEvent success() {
-        return new FirstLaunchTaskEvent();
-    }
-
-    public static FirstLaunchTaskEvent failed(String errorMessage, Throwable throwable) {
-        final FirstLaunchTaskEvent failure = success();
-        failure.success = false;
+    public static WallpaperRetrievedEvent failure(String errorMessage, Throwable throwable) {
+        final WallpaperRetrievedEvent failure = new WallpaperRetrievedEvent();
         failure.errorMessage = errorMessage;
         failure.throwable = throwable;
         return failure;
     }
 
-    boolean success;
-
-    FirstLaunchTaskEvent() {
-        success = true;
+    public static WallpaperRetrievedEvent success() {
+        return new WallpaperRetrievedEvent();
     }
 
+    WallpaperRetrievedEvent() {}
 }

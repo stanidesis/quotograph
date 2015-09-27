@@ -2,7 +2,6 @@ package com.stanleyidesis.livewallpaperquotes.api.service;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
 import android.service.wallpaper.WallpaperService;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
@@ -10,15 +9,14 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
-import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
-import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperRetrievedEvent;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -26,7 +24,37 @@ import java.util.concurrent.Executors;
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by stanleyidesis on 7/11/15.
+ * Copyright (c) 2015 Stanley Idesis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * LWQWallpaperService.java
+ * @author Stanley Idesis
+ *
+ * From Live-Wallpaper-Quotes
+ * https://github.com/stanidesis/live-wallpaper-quotes
+ *
+ * Please report any issues
+ * https://github.com/stanidesis/live-wallpaper-quotes/issues
+ *
+ * Date: 07/11/2015
  */
 public class LWQWallpaperService extends WallpaperService {
 
@@ -38,58 +66,25 @@ public class LWQWallpaperService extends WallpaperService {
         private GestureDetectorCompat gestureDetectorCompat;
 
         @Override
-        public Bundle onCommand(String action, int x, int y, int z, Bundle extras, boolean resultRequested) {
-            Log.v(getClass().getSimpleName(), null, new Throwable());
-            return super.onCommand(action, x, y, z, extras, resultRequested);
-        }
-
-        @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
             drawScript = new LWQSurfaceHolderDrawScript(surfaceHolder);
-            // setOffsetNotificationsEnabled(true);
-            // TODO better place for this? Maybe not.
             LWQAlarmController.resetAlarm();
-            if (BuildConfig.DEBUG) {
-                gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
-                gestureDetectorCompat.setOnDoubleTapListener(this);
-            }
+            gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
+            gestureDetectorCompat.setOnDoubleTapListener(this);
             executor = Executors.newSingleThreadExecutor();
             EventBus.getDefault().register(this);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
-        }
-
-        @Override
-        public void onDesiredSizeChanged(int desiredWidth, int desiredHeight) {
-            super.onDesiredSizeChanged(desiredWidth, desiredHeight);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
             EventBus.getDefault().unregister(this);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
-        }
-
-        @Override
-        public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep, float yOffsetStep, int xPixelOffset, int yPixelOffset) {
-            super.onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixelOffset, yPixelOffset);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
-            /*
-            Log.v(getClass().getSimpleName(), "xOffset: " + xOffset);
-            Log.v(getClass().getSimpleName(), "yOffset: " + yOffset);
-            Log.v(getClass().getSimpleName(), "xOffsetStep: " + xOffsetStep);
-            Log.v(getClass().getSimpleName(), "yOffsetStep: " + yOffsetStep);
-            Log.v(getClass().getSimpleName(), "xPixelOffset: " + xPixelOffset);
-            Log.v(getClass().getSimpleName(), "yPixelOffset: " + yPixelOffset);
-            */
         }
 
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
             asyncSetHolder(holder);
             asyncDraw();
         }
@@ -98,13 +93,11 @@ public class LWQWallpaperService extends WallpaperService {
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
             asyncSetHolder(holder);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             super.onSurfaceRedrawNeeded(holder);
-            Log.v(getClass().getSimpleName(), null, new Throwable());
             asyncSetHolder(holder);
             asyncDraw();
         }
@@ -118,16 +111,11 @@ public class LWQWallpaperService extends WallpaperService {
             Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
-        @Override
-        public void onVisibilityChanged(boolean visible) {
-            super.onVisibilityChanged(visible);
-            Log.v(getClass().getSimpleName(), "Visible: " + visible, new Throwable());
-        }
-
-        public void onEvent(NewWallpaperEvent newWallpaperEvent) {
-            if (newWallpaperEvent.loaded) {
-                asyncDraw();
+        public void onEvent(WallpaperRetrievedEvent wallpaperRetrievedEvent) {
+            if (wallpaperRetrievedEvent.didFail()) {
+                return;
             }
+            asyncDraw();
         }
 
         public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
@@ -175,10 +163,6 @@ public class LWQWallpaperService extends WallpaperService {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-//            if (BuildConfig.DEBUG) {
-//                drawScript.changeSwatch();
-//                asyncDraw();
-//            }
             return false;
         }
 
@@ -235,7 +219,6 @@ public class LWQWallpaperService extends WallpaperService {
 
     @Override
     public void onDestroy() {
-        Log.v(getClass().getSimpleName(), null, new Throwable());
         super.onDestroy();
         LWQApplication.getWallpaperController().discardActiveWallpaper();
     }

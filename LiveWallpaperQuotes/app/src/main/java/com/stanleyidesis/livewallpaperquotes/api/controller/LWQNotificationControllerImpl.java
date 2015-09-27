@@ -16,6 +16,7 @@ import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperRetrievedEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 import com.stanleyidesis.livewallpaperquotes.ui.activity.LWQActivateActivity;
 
@@ -60,6 +61,8 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
 
     static int REQUEST_CODE_SHARE = 0xA;
     static int REQUEST_CODE_VIEW = 0xB;
+
+    boolean newWallpaperIncoming = false;
 
     public LWQNotificationControllerImpl() {
         EventBus.getDefault().register(this);
@@ -204,8 +207,13 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
     }
 
     public void onEvent(NewWallpaperEvent newWallpaperEvent) {
-        if (newWallpaperEvent.loaded && LWQApplication.isWallpaperActivated()) {
+        newWallpaperIncoming = !newWallpaperEvent.didFail();
+    }
+
+    public void onEvent(WallpaperRetrievedEvent wallpaperRetrievedEvent) {
+        if (!wallpaperRetrievedEvent.didFail() && newWallpaperIncoming) {
             postNewWallpaperNotification();
+            newWallpaperIncoming = false;
         }
     }
 

@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperRetrievedEvent;
 import com.stanleyidesis.livewallpaperquotes.api.receiver.LWQReceiver;
 
 import de.greenrobot.event.EventBus;
@@ -72,8 +73,14 @@ public class LWQUpdateService extends IntentService {
         if (newWallpaperEvent.didFail()) {
             // TODO retry stuff?
             LWQReceiver.completeWakefulIntent(intent);
-        } else if (newWallpaperEvent.loaded) {
-            LWQReceiver.completeWakefulIntent(intent);
         }
     }
+
+    public void onEvent(WallpaperRetrievedEvent wallpaperRetrievedEvent) {
+        if (wallpaperRetrievedEvent.didFail()) {
+            // TODO retry stuff?
+        }
+        LWQReceiver.completeWakefulIntent(intent);
+    }
+
 }

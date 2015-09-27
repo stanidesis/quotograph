@@ -12,8 +12,8 @@ import android.view.animation.LinearInterpolator;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
-import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperRetrievedEvent;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -126,10 +126,11 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {}
 
-    public void onEvent(NewWallpaperEvent newWallpaperEvent) {
-        if (newWallpaperEvent.loaded) {
-            draw();
+    public void onEvent(WallpaperRetrievedEvent wallpaperRetrievedEvent) {
+        if (wallpaperRetrievedEvent.didFail()) {
+            return;
         }
+        draw();
     }
 
     public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {

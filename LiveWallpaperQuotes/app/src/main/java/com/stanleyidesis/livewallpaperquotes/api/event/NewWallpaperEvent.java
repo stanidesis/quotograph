@@ -35,20 +35,16 @@ package com.stanleyidesis.livewallpaperquotes.api.event;
  */
 public class NewWallpaperEvent extends FailableEvent {
 
-    public static NewWallpaperEvent newWallpaper(boolean loaded) {
-        return new NewWallpaperEvent(loaded);
+    public static NewWallpaperEvent success() {
+        return new NewWallpaperEvent();
     }
 
-    public static NewWallpaperEvent newWallpaperFailed(String errorMessage, Throwable throwable) {
-        final NewWallpaperEvent newWallpaperEvent = new NewWallpaperEvent(false);
+    public static NewWallpaperEvent failure(String errorMessage, Throwable throwable) {
+        final NewWallpaperEvent newWallpaperEvent = new NewWallpaperEvent();
         newWallpaperEvent.errorMessage = errorMessage;
         newWallpaperEvent.throwable = throwable;
         return newWallpaperEvent;
     }
 
-    public boolean loaded;
-
-    NewWallpaperEvent(boolean loaded) {
-        this.loaded = loaded;
-    }
+    NewWallpaperEvent() {}
 }

@@ -11,6 +11,7 @@ import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Wallpaper;
 import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperRetrievedEvent;
 import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
 
 import java.util.ArrayList;
@@ -128,7 +129,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 newBackgroundImage.used = true;
                 newBackgroundImage.save();
                 retrievalState = RetrievalState.NONE;
-                notifyListeners(false);
+                notifyNewWallpaper();
                 retrieveActiveWallpaper();
             }
 
@@ -155,7 +156,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                     @Override
                     public void onError(String errorMessage, Throwable throwable) {
                         retrievalState = RetrievalState.NONE;
-                        notifyListeners(errorMessage, throwable);
+                        notifyNewWallpaper(errorMessage, throwable);
                     }
                 }).start();
             }
@@ -163,7 +164,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             @Override
             public void onError(String errorMessage, Throwable throwable) {
                 retrievalState = RetrievalState.NONE;
-                notifyListeners(errorMessage, throwable);
+                notifyNewWallpaper(errorMessage, throwable);
             }
         });
     }
@@ -177,12 +178,12 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     public synchronized boolean retrieveActiveWallpaper() {
         if (!activeWallpaperExists()) {
             retrievalState = RetrievalState.NONE;
-            notifyListeners("No Wallpaper active", null);
+            notifyWallpaperLoaded("No Wallpaper active", null);
             return false;
         }
         if (activeWallpaperLoaded()) {
             retrievalState = RetrievalState.NONE;
-            notifyListeners(true);
+            notifyWallpaperLoaded();
             return false;
         }
         if (activeWallpaper == null) {
@@ -193,13 +194,13 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             public void onSuccess(Bitmap bitmap) {
                 activeBackgroundImage = bitmap;
                 retrievalState = RetrievalState.NONE;
-                notifyListeners(bitmap != null);
+                notifyWallpaperLoaded();
             }
 
             @Override
             public void onError(String errorMessage, Throwable throwable) {
                 retrievalState = RetrievalState.NONE;
-                notifyListeners(errorMessage, throwable);
+                notifyWallpaperLoaded(errorMessage, throwable);
             }
         });
         return true;
@@ -231,12 +232,20 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         return activeWallpaper.backgroundImage.uri;
     }
 
-    void notifyListeners(boolean loaded) {
-        EventBus.getDefault().post(NewWallpaperEvent.newWallpaper(loaded));
+    void notifyNewWallpaper(String errorMessage, Throwable throwable) {
+        EventBus.getDefault().post(NewWallpaperEvent.failure(errorMessage, throwable));
     }
 
-    void notifyListeners(String errorMessage, Throwable throwable) {
-        EventBus.getDefault().post(NewWallpaperEvent.newWallpaperFailed(errorMessage, throwable));
+    void notifyNewWallpaper() {
+        EventBus.getDefault().post(NewWallpaperEvent.success());
+    }
+
+    void notifyWallpaperLoaded() {
+        EventBus.getDefault().post(WallpaperRetrievedEvent.success());
+    }
+
+    void notifyWallpaperLoaded(String errorMessage, Throwable throwable) {
+        EventBus.getDefault().post(WallpaperRetrievedEvent.failure(errorMessage, throwable));
     }
 
     class UnsplashRetryableRequest {
