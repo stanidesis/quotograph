@@ -21,6 +21,7 @@ import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
+import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
@@ -101,6 +102,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             });
         }
     };
+
+    Animator saveRotationAnimator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -299,6 +302,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                 sendBroadcast(new Intent(getString(R.string.action_share)));
             }
         });
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                progressBar.animate().alpha(1f).setDuration(150).
+                        setInterpolator(new AccelerateDecelerateInterpolator()).start();
+                if (saveRotationAnimator != null) {
+                    saveRotationAnimator.cancel();
+                }
+                saveRotationAnimator = AnimatorInflater.
+                        loadAnimator(LWQSettingsActivity.this, R.animator.progress_rotation);
+                saveRotationAnimator.setTarget(saveButton);
+                saveRotationAnimator.start();
+                saveButton.setEnabled(false);
+                sendBroadcast(new Intent(getString(R.string.action_save)));
+            }
+        });
     }
 
     void setupProgressBar() {
@@ -395,6 +414,21 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_refresh) {
             updateRefreshSpinner();
         }
+    }
+
+    public void onEvent(ImageSaveEvent imageSaveEvent) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.animate().alpha(0f).setDuration(150)
+                        .setInterpolator(new AccelerateDecelerateInterpolator()).start();
+                if (saveRotationAnimator != null) {
+                    saveRotationAnimator.end();
+                    saveRotationAnimator = null;
+                }
+                saveButton.setEnabled(true);
+            }
+        });
     }
 
     // SeekBar Listener

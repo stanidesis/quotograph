@@ -14,6 +14,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 import com.stanleyidesis.livewallpaperquotes.ui.activity.LWQActivateActivity;
@@ -23,8 +24,6 @@ import java.io.File;
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by stanleyidesis on 9/19/15.
- *//**
  * Copyright (c) 2015 Stanley Idesis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -207,6 +206,14 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
     public void onEvent(NewWallpaperEvent newWallpaperEvent) {
         if (newWallpaperEvent.loaded && LWQApplication.isWallpaperActivated()) {
             postNewWallpaperNotification();
+        }
+    }
+
+    public void onEvent(ImageSaveEvent imageSaveEvent) {
+        if (imageSaveEvent.didFail()) {
+            postWallpaperSaveFailureNotification();
+        } else {
+            postSavedWallpaperReadyNotification(imageSaveEvent.getFileUri(), imageSaveEvent.getContentUri());
         }
     }
 

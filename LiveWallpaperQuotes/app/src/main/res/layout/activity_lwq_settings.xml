@@ -46,9 +46,10 @@
         android:id="@+id/pb_lwq_settings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
         android:indeterminate="true"
-        android:indeterminateOnly="true"/>
+        android:indeterminateOnly="true"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
 
     <!--LinearLayout
         android:id="@+id/group_lwq_settings_mode_select"
