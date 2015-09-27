@@ -10,7 +10,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Build;
-import android.os.Looper;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
@@ -25,6 +24,7 @@ import com.stanleyidesis.livewallpaperquotes.BuildConfig;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.ui.Fonts;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
@@ -32,6 +32,8 @@ import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -68,6 +70,7 @@ import java.util.Map;
  */
 public abstract class LWQDrawScript {
 
+    static ExecutorService executorService;
     static Map<Integer, Palette> paletteCache;
     static final int TEXT_ALPHA = 0xE5FFFFFF;
     static final int STROKE_ALPHA = 0xF2FFFFFF;
@@ -79,6 +82,7 @@ public abstract class LWQDrawScript {
     static int cachedBlur;
 
     static {
+        executorService = Executors.newSingleThreadScheduledExecutor();
         quoteTypeFace = Fonts.JOSEFIN_BOLD.load(LWQApplication.get());
         authorTypeFace = quoteTypeFace;
         paletteCache = new HashMap<>();
@@ -129,14 +133,29 @@ public abstract class LWQDrawScript {
         }
     }
 
-    public void draw() {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            Log.e(getClass().getSimpleName(), "Executing draw() on UI thread, switch to a background thread.", new Throwable());
-            return;
-        }
+    public void requestDraw(final Callback<Boolean> callback) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    draw();
+                    if (callback != null) {
+                        callback.onSuccess(true);
+                    }
+                } catch (Exception e) {
+                    Log.e(getClass().getSimpleName(), e.getLocalizedMessage(), e);
+                }
+            }
+        });
+    }
+
+    public void requestDraw() {
+        requestDraw(null);
+    }
+
+    void draw() {
         final LWQWallpaperController wallpaperController =
                 LWQApplication.getWallpaperController();
-        final Context context = LWQApplication.get();
         final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
         if (backgroundImage == null) {
             return;
@@ -176,7 +195,7 @@ public abstract class LWQDrawScript {
         releaseCanvas(canvas);
     }
 
-    private void drawText(Canvas canvas, int screenWidth, int screenHeight) {
+    void drawText(Canvas canvas, int screenWidth, int screenHeight) {
         Context context = LWQApplication.get();
         final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
 

@@ -23,6 +23,7 @@ import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
 import java.util.Collections;
@@ -104,6 +105,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     };
 
     Animator saveRotationAnimator;
+    Animator skipRotationAnimator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +129,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        switchToSilkScreen(SilkScreenState.REVEAL, null);
+        switchToSilkScreen(SilkScreenState.REVEALED, null);
         revealControlsTimer = new Timer();
         revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 3);
     }
@@ -275,7 +277,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         adjustButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                adjustButton.setSelected(currentState != SettingsState.ADJUSTABLE_SETTINGS);
+                setActionSelected(currentState == SettingsState.ADJUSTABLE_SETTINGS ? null : adjustButton);
                 if (adjustButton.isSelected()) {
                     settingsButton.setSelected(false);
                     animateToState(SettingsState.ADJUSTABLE_SETTINGS);
@@ -287,7 +289,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                settingsButton.setSelected(currentState != SettingsState.AUTOPILOT_SETTINGS);
+                setActionSelected(currentState == SettingsState.AUTOPILOT_SETTINGS ? null : settingsButton);
                 if (settingsButton.isSelected()) {
                     adjustButton.setSelected(false);
                     animateToState(SettingsState.AUTOPILOT_SETTINGS);
@@ -318,6 +320,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                 sendBroadcast(new Intent(getString(R.string.action_save)));
             }
         });
+        skipButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setActionSelected(null);
+                animateToState(SettingsState.NONE);
+                LWQApplication.getWallpaperController().generateNewWallpaper();
+            }
+        });
     }
 
     void setupProgressBar() {
@@ -332,13 +342,23 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                 if (revealControlsTimerTask.scheduledExecutionTime() > 0) {
                     revealControlsTimerTask.cancel();
                 }
-                animateSilkScreen(silkScreenState.flip(), null);
+                animateSilkScreen(silkScreenState.flip());
                 animateToState(SettingsState.NONE);
                 animateControls(controlsVisible);
                 settingsButton.setSelected(false);
                 adjustButton.setSelected(false);
             }
         });
+    }
+
+    void setActionSelected(View actionButton) {
+        View [] actionButtons = new View[] {shareButton, saveButton, adjustButton, skipButton, settingsButton};
+        for (View view : actionButtons) {
+            view.setSelected(false);
+        }
+        if (actionButton != null) {
+            actionButton.setSelected(true);
+        }
     }
 
     void animateControls(boolean dismiss) {
@@ -379,16 +399,16 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                 final View newContainer = containerForState(newState);
                 final View currentContainer = containerForState(currentState);
                 if (newContainer != null) {
-                    UIUtils.setViewAndChildrenEnabled(newContainer, true);
                     final Animator enterAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.enter_from_right);
                     enterAnimator.setTarget(newContainer);
                     enterAnimator.start();
+                    UIUtils.setViewAndChildrenEnabled(newContainer, true);
                 }
                 if (currentContainer != null) {
-                    UIUtils.setViewAndChildrenEnabled(currentContainer, false);
                     final Animator exitAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.exit_to_left);
                     exitAnimator.setTarget(currentContainer);
                     exitAnimator.start();
+                    UIUtils.setViewAndChildrenEnabled(currentContainer, false);
                 }
                 currentState = newState;
             }
@@ -406,6 +426,16 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
             default:
                 return null;
         }
+    }
+
+    @Override
+    void didFinishDrawing() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                animateSilkScreen(SilkScreenState.DEFAULT);
+            }
+        });
     }
 
     @Override
@@ -436,6 +466,48 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         });
     }
 
+    @Override
+    public void onEvent(final WallpaperEvent wallpaperEvent) {
+        super.onEvent(wallpaperEvent);
+        if ((wallpaperEvent.getStatus() == WallpaperEvent.Status.GENERATING_NEW_WALLPAPER
+                || wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVING_WALLPAPER)
+                && skipRotationAnimator == null && !wallpaperEvent.didFail()) {
+            // If it's already animating, we don't go in here
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    UIUtils.setViewAndChildrenEnabled(findViewById(android.R.id.content), false);
+                    animateSilkScreen(SilkScreenState.HIDDEN);
+                    progressBar.animate().alpha(1f).setDuration(150).
+                            setInterpolator(new AccelerateDecelerateInterpolator()).start();
+                    skipRotationAnimator = AnimatorInflater.
+                            loadAnimator(LWQSettingsActivity.this, R.animator.progress_rotation);
+                    skipRotationAnimator.setTarget(skipButton);
+                    skipRotationAnimator.start();
+                    skipButton.setEnabled(false);
+                }
+            });
+        } else if (wallpaperEvent.didFail() || wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    UIUtils.setViewAndChildrenEnabled(findViewById(android.R.id.content), true);
+                    UIUtils.setViewAndChildrenEnabled(containerForState(SettingsState.ADJUSTABLE_SETTINGS), false);
+                    UIUtils.setViewAndChildrenEnabled(containerForState(SettingsState.AUTOPILOT_SETTINGS), false);
+                    progressBar.animate().alpha(0f).setDuration(150)
+                            .setInterpolator(new AccelerateDecelerateInterpolator()).start();
+                    if (skipRotationAnimator != null) {
+                        skipRotationAnimator.end();
+                        skipRotationAnimator = null;
+                    }
+                    if (wallpaperEvent.didFail()) {
+                        animateSilkScreen(SilkScreenState.DEFAULT);
+                    }
+                }
+            });
+        }
+    }
+
     // SeekBar Listener
 
     @Override
@@ -449,7 +521,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        animateSilkScreen(SilkScreenState.REVEAL, containerForState(currentState));
+        animateSilkScreen(SilkScreenState.REVEALED, containerForState(currentState));
     }
 
     @Override

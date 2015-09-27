@@ -22,7 +22,7 @@ package com.stanleyidesis.livewallpaperquotes.api.event;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * NewWallpaperEvent.java
+ * WallpaperEvent.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -31,20 +31,36 @@ package com.stanleyidesis.livewallpaperquotes.api.event;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 09/20/2015
+ * Date: 09/27/2015
  */
-public class NewWallpaperEvent extends FailableEvent {
+public class WallpaperEvent extends FailableEvent {
 
-    public static NewWallpaperEvent success() {
-        return new NewWallpaperEvent();
+    public enum Status {
+        GENERATING_NEW_WALLPAPER,
+        GENERATED_NEW_WALLPAPER,
+        RETRIEVING_WALLPAPER,
+        RETRIEVED_WALLPAPER
     }
 
-    public static NewWallpaperEvent failure(String errorMessage, Throwable throwable) {
-        final NewWallpaperEvent newWallpaperEvent = new NewWallpaperEvent();
-        newWallpaperEvent.errorMessage = errorMessage;
-        newWallpaperEvent.throwable = throwable;
-        return newWallpaperEvent;
+    public static WallpaperEvent withStatus(Status status) {
+        return new WallpaperEvent(status);
     }
 
-    NewWallpaperEvent() {}
+    public static WallpaperEvent failedWithStatus(Status status, String errorMessage, Throwable throwable) {
+        final WallpaperEvent wallpaperEvent = new WallpaperEvent(status);
+        wallpaperEvent.errorMessage = errorMessage;
+        wallpaperEvent.throwable = throwable;
+        return wallpaperEvent;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    Status status;
+
+    WallpaperEvent(Status status) {
+        this.status = status;
+    }
+
 }

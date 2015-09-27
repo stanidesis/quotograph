@@ -5,7 +5,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
@@ -88,38 +87,40 @@ public class LWQSaveWallpaperImageTask extends AsyncTask<Void, Void, Boolean> {
         }
         boolean succeeded = true;
         String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmmss").format(new Date());
-        File wallpaperFile = new File(photosDirectory.getPath() + File.separator
+        final File wallpaperFile = new File(photosDirectory.getPath() + File.separator
                 + timeStamp + ".png");
-        LWQBitmapDrawScript drawScript = new LWQBitmapDrawScript();
-        drawScript.draw();
-        final Bitmap bitmapToSave = drawScript.getBitmap();
-        try {
-            if (!wallpaperFile.createNewFile()) {
-                EventBus.getDefault().post(ImageSaveEvent.failure("Failed to create new file", null));
-                drawScript.finish();
-                return false;
+        final LWQBitmapDrawScript drawScript = new LWQBitmapDrawScript();
+        drawScript.requestDraw(new Callback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                final Bitmap bitmapToSave = drawScript.getBitmap();
+                try {
+                    if (!wallpaperFile.createNewFile()) {
+                        EventBus.getDefault().post(ImageSaveEvent.failure("Failed to create new file", null));
+                        drawScript.finish();
+                    }
+                    FileOutputStream fos = new FileOutputStream(wallpaperFile);
+                    bitmapToSave.compress(Bitmap.CompressFormat.PNG, 0, fos);
+                    fos.close();
+                    MediaScannerConnection.scanFile(LWQApplication.get(),
+                            new String[]{wallpaperFile.toString()}, null,
+                            new MediaScannerConnection.OnScanCompletedListener() {
+                                public void onScanCompleted(String path, Uri uri) {
+                                    EventBus.getDefault().post(ImageSaveEvent.success(Uri.parse(path), uri));
+                                }
+                            });
+                } catch (FileNotFoundException e) {
+                    EventBus.getDefault().post(ImageSaveEvent.failure(e.getMessage(), e));
+                } catch (IOException e) {
+                    EventBus.getDefault().post(ImageSaveEvent.failure(e.getMessage(), e));
+                } finally {
+                    drawScript.finish();
+                }
             }
-            FileOutputStream fos = new FileOutputStream(wallpaperFile);
-            bitmapToSave.compress(Bitmap.CompressFormat.PNG, 0, fos);
-            fos.close();
-            MediaScannerConnection.scanFile(LWQApplication.get(),
-                    new String[]{wallpaperFile.toString()}, null,
-                    new MediaScannerConnection.OnScanCompletedListener() {
-                        public void onScanCompleted(String path, Uri uri) {
-                            Log.i("ExternalStorage", "Scanned " + path + ":");
-                            Log.i("ExternalStorage", "-> uri=" + uri);
-                            EventBus.getDefault().post(ImageSaveEvent.success(Uri.parse(path), uri));
-                        }
-                    });
-        } catch (FileNotFoundException e) {
-            EventBus.getDefault().post(ImageSaveEvent.failure(e.getMessage(), e));
-            succeeded = false;
-        } catch (IOException e) {
-            EventBus.getDefault().post(ImageSaveEvent.failure(e.getMessage(), e));
-            succeeded = false;
-        } finally {
-            drawScript.finish();
-        }
+
+            @Override
+            public void onError(String errorMessage, Throwable throwable) {}
+        });
         return succeeded;
     }
 }

@@ -8,8 +8,7 @@ import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.event.FirstLaunchTaskEvent;
-import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
-import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperRetrievedEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
 
 import java.util.List;
@@ -119,20 +118,12 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         super.finalize();
     }
 
-    public void onEvent(NewWallpaperEvent newWallpaperEvent) {
-        if (newWallpaperEvent.didFail()) {
+    public void onEvent(WallpaperEvent wallpaperEvent) {
+        if (wallpaperEvent.didFail()) {
             EventBus.getDefault().post(FirstLaunchTaskEvent.failed(
-                    newWallpaperEvent.getErrorMessage(),
-                    newWallpaperEvent.getThrowable()));
-        }
-    }
-
-    public void onEvent(WallpaperRetrievedEvent wallpaperRetrievedEvent) {
-        if (wallpaperRetrievedEvent.didFail()) {
-            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(
-                    wallpaperRetrievedEvent.getErrorMessage(),
-                    wallpaperRetrievedEvent.getThrowable()));
-        } else {
+                    wallpaperEvent.getErrorMessage(),
+                    wallpaperEvent.getThrowable()));
+        } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             LWQPreferences.setFirstLaunch(false);
             EventBus.getDefault().post(FirstLaunchTaskEvent.success());
         }

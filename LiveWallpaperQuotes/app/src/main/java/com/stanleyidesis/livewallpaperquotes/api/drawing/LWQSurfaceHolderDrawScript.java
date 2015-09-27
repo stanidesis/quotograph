@@ -45,8 +45,13 @@ public class LWQSurfaceHolderDrawScript extends LWQDrawScript {
         this.surfaceHolder = surfaceHolder;
     }
 
-    public void setSurfaceHolder(SurfaceHolder surfaceHolder) {
-        this.surfaceHolder = surfaceHolder;
+    public void setSurfaceHolder(final SurfaceHolder surfaceHolder) {
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                LWQSurfaceHolderDrawScript.this.surfaceHolder = surfaceHolder;
+            }
+        });
     }
 
     void waitToCreate() {

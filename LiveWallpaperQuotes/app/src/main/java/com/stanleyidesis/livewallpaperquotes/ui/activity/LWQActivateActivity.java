@@ -92,7 +92,7 @@ public class LWQActivateActivity extends LWQWallpaperActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        switchToSilkScreen(SilkScreenState.REVEAL);
+        switchToSilkScreen(SilkScreenState.REVEALED);
         ObjectAnimator activateButtonAnimator = ObjectAnimator.ofFloat(activateButton, "alpha", 0f, 1f);
         activateButtonAnimator.setStartDelay(1000);
         activateButtonAnimator.setInterpolator(new LinearInterpolator());

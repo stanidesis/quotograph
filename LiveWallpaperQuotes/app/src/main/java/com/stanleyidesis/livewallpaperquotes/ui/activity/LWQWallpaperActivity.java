@@ -11,12 +11,10 @@ import android.view.animation.LinearInterpolator;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
-import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperRetrievedEvent;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 
 import de.greenrobot.event.EventBus;
 
@@ -57,7 +55,8 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
 
     enum SilkScreenState {
         DEFAULT(1f, .7f),
-        REVEAL(1f, 0f);
+        REVEALED(1f, 0f),
+        HIDDEN(1f, 1f);
 
         float contentAlpha;
         float screenAlpha;
@@ -69,13 +68,12 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
 
         SilkScreenState flip() {
             if (this == DEFAULT) {
-                return REVEAL;
+                return REVEALED;
             }
             return DEFAULT;
         }
     }
 
-    ScheduledExecutorService scheduledExecutorService;
     LWQSurfaceHolderDrawScript drawScript;
     SurfaceView surfaceView;
     SilkScreenState silkScreenState;
@@ -93,7 +91,6 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
         silkScreen = findViewById(R.id.view_screen_lwq_wallpaper);
         surfaceView = (SurfaceView) findViewById(R.id.surface_lwq_wallpaper);
         surfaceView.getHolder().addCallback(this);
-        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
@@ -126,11 +123,13 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {}
 
-    public void onEvent(WallpaperRetrievedEvent wallpaperRetrievedEvent) {
-        if (wallpaperRetrievedEvent.didFail()) {
+    public void onEvent(WallpaperEvent wallpaperEvent) {
+        if (wallpaperEvent.didFail()) {
             return;
         }
-        draw();
+        if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+            draw();
+        }
     }
 
     public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
@@ -138,6 +137,10 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
                 preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_dim) {
             draw();
         }
+    }
+
+    void didFinishDrawing() {
+        // Nothing for now
     }
 
     void switchToSilkScreen(SilkScreenState state) {
@@ -150,6 +153,10 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
             content.setAlpha(state.contentAlpha);
         }
         silkScreenState = state;
+    }
+
+    void animateSilkScreen(SilkScreenState state) {
+        animateSilkScreen(state, null);
     }
 
     void animateSilkScreen(SilkScreenState state, View content) {
@@ -181,15 +188,14 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
         } else {
             drawScript.setSurfaceHolder(surfaceView.getHolder());
         }
-        scheduledExecutorService.execute(new Runnable() {
+        drawScript.requestDraw(new Callback<Boolean>() {
             @Override
-            public void run() {
-                try {
-                    drawScript.draw();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            public void onSuccess(Boolean aBoolean) {
+                didFinishDrawing();
             }
+
+            @Override
+            public void onError(String errorMessage, Throwable throwable) {}
         });
     }
 }

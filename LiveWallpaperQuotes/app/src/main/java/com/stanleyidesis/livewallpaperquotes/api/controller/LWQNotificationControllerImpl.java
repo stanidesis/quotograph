@@ -15,8 +15,7 @@ import android.support.v4.app.NotificationCompat;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
-import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
-import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperRetrievedEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 import com.stanleyidesis.livewallpaperquotes.ui.activity.LWQActivateActivity;
 
@@ -206,14 +205,14 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         super.finalize();
     }
 
-    public void onEvent(NewWallpaperEvent newWallpaperEvent) {
-        newWallpaperIncoming = !newWallpaperEvent.didFail();
-    }
-
-    public void onEvent(WallpaperRetrievedEvent wallpaperRetrievedEvent) {
-        if (!wallpaperRetrievedEvent.didFail() && newWallpaperIncoming) {
-            postNewWallpaperNotification();
-            newWallpaperIncoming = false;
+    public void onEvent(WallpaperEvent wallpaperEvent) {
+        if (wallpaperEvent.getStatus() == WallpaperEvent.Status.GENERATED_NEW_WALLPAPER) {
+            newWallpaperIncoming = !wallpaperEvent.didFail();
+        } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+            if (!wallpaperEvent.didFail() && newWallpaperIncoming) {
+                postNewWallpaperNotification();
+                newWallpaperIncoming = false;
+            }
         }
     }
 

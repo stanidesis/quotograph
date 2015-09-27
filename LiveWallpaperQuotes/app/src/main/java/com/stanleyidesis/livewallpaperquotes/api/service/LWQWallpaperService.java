@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.service.wallpaper.WallpaperService;
 import android.support.v4.view.GestureDetectorCompat;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -13,13 +12,9 @@ import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
-import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
-import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperRetrievedEvent;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 
 import de.greenrobot.event.EventBus;
 
@@ -60,10 +55,8 @@ public class LWQWallpaperService extends WallpaperService {
 
     public class LWQWallpaperEngine extends Engine implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
-        private LWQSurfaceHolderDrawScript drawScript;
-        private Executor executor;
-
-        private GestureDetectorCompat gestureDetectorCompat;
+        LWQSurfaceHolderDrawScript drawScript;
+        GestureDetectorCompat gestureDetectorCompat;
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
@@ -72,7 +65,6 @@ public class LWQWallpaperService extends WallpaperService {
             LWQAlarmController.resetAlarm();
             gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
             gestureDetectorCompat.setOnDoubleTapListener(this);
-            executor = Executors.newSingleThreadExecutor();
             EventBus.getDefault().register(this);
         }
 
@@ -85,21 +77,21 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
-            asyncSetHolder(holder);
-            asyncDraw();
+            drawScript.setSurfaceHolder(holder);
+            drawScript.requestDraw();
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
-            asyncSetHolder(holder);
+            drawScript.setSurfaceHolder(holder);
         }
 
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             super.onSurfaceRedrawNeeded(holder);
-            asyncSetHolder(holder);
-            asyncDraw();
+            drawScript.setSurfaceHolder(holder);
+            drawScript.requestDraw();
         }
 
         @Override
@@ -108,53 +100,22 @@ public class LWQWallpaperService extends WallpaperService {
             if (gestureDetectorCompat != null) {
                 gestureDetectorCompat.onTouchEvent(event);
             }
-            Log.v(getClass().getSimpleName(), null, new Throwable());
         }
 
-        public void onEvent(WallpaperRetrievedEvent wallpaperRetrievedEvent) {
-            if (wallpaperRetrievedEvent.didFail()) {
+        public void onEvent(WallpaperEvent wallpaperEvent) {
+            if (wallpaperEvent.didFail()) {
                 return;
             }
-            asyncDraw();
+            if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+                drawScript.requestDraw();
+            }
         }
 
         public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
             if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_blur ||
                     preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_dim) {
-                asyncDraw();
+                drawScript.requestDraw();
             }
-        }
-
-        void asyncDraw() {
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        final LWQWallpaperController wallpaperController =
-                                LWQApplication.getWallpaperController();
-                        if (!wallpaperController.activeWallpaperLoaded()) {
-                            wallpaperController.retrieveActiveWallpaper();
-                            return;
-                        }
-                        drawScript.draw();
-                    } catch (Exception e) {
-                        Log.e(getClass().getSimpleName(), "Failure to draw", e);
-                    }
-                }
-            });
-        }
-
-        void asyncSetHolder(final SurfaceHolder surfaceHolder) {
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        drawScript.setSurfaceHolder(surfaceHolder);
-                    } catch (Exception e) {
-                        Log.e(getClass().getSimpleName(), "Failure to set SurfaceHolder", e);
-                    }
-                }
-            });
         }
 
         /*
