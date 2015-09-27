@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateUtils;
@@ -71,7 +72,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     }
 
     SettingsState currentState;
-    boolean controlsVisible = true;
+    boolean controlsVisible = false;
 
     // ProgressBar
     ProgressBar progressBar;
@@ -292,6 +293,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                 }
             }
         });
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendBroadcast(new Intent(getString(R.string.action_share)));
+            }
+        });
     }
 
     void setupProgressBar() {
@@ -306,8 +313,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                 if (revealControlsTimerTask.scheduledExecutionTime() > 0) {
                     revealControlsTimerTask.cancel();
                 }
-                animateSilkScreen(silkScreenState.flip(), containerForState(currentState));
+                animateSilkScreen(silkScreenState.flip(), null);
+                animateToState(SettingsState.NONE);
                 animateControls(controlsVisible);
+                settingsButton.setSelected(false);
+                adjustButton.setSelected(false);
             }
         });
     }
@@ -354,14 +364,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                     final Animator enterAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.enter_from_right);
                     enterAnimator.setTarget(newContainer);
                     enterAnimator.start();
-//                    generateAnimator(newContainer, false, 20).start();
                 }
                 if (currentContainer != null) {
                     UIUtils.setViewAndChildrenEnabled(currentContainer, false);
                     final Animator exitAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.exit_to_left);
                     exitAnimator.setTarget(currentContainer);
                     exitAnimator.start();
-//                    generateAnimator(currentContainer, true, 0).start();
                 }
                 currentState = newState;
             }
