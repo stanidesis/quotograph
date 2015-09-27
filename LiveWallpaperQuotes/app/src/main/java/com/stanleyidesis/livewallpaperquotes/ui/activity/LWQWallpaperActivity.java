@@ -57,7 +57,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
 
     enum SilkScreenState {
         DEFAULT(1f, .7f),
-        REVEAL(.1f, 0f);
+        REVEAL(1f, 0f);
 
         float contentAlpha;
         float screenAlpha;

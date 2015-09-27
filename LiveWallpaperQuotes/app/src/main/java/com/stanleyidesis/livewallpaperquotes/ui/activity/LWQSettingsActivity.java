@@ -6,6 +6,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AdapterView;
@@ -25,6 +26,8 @@ import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -84,6 +87,20 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     View skipButton;
     View settingsButton;
 
+    Timer revealControlsTimer;
+    TimerTask revealControlsTimerTask = new TimerTask() {
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    animateControls(false);
+                    animateSilkScreen(SilkScreenState.DEFAULT, containerForState(currentState));
+                }
+            });
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,7 +113,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         // Setup Adjustable stuff
         setupAdjustableSettings();
         // Setup Wallpaper actions
-        setupWallpaperViews();
+        setupWallpaperActions();
         // Setup progress bar
         setupProgressBar();
         // Setup touch to dismiss
@@ -107,7 +124,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         switchToSilkScreen(SilkScreenState.REVEAL, null);
-        animateControls(true);
+        revealControlsTimer = new Timer();
+        revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 3);
     }
 
     @Override
@@ -238,13 +256,42 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         UIUtils.setViewAndChildrenEnabled(adjustableSettingsContainer, false);
     }
 
-    void setupWallpaperViews() {
+    void setupWallpaperActions() {
         wallpaperActionsContainer = findViewById(R.id.group_lwq_settings_wallpaper_actions);
         shareButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_share);
         saveButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_save);
         adjustButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_adjust);
         skipButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_skip);
         settingsButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_settings);
+        View [] buttons = new View[] {shareButton, saveButton, adjustButton, skipButton, settingsButton};
+        for (View button : buttons) {
+            button.setAlpha(0f);
+            button.setTranslationY(button.getHeight() * 2f);
+        }
+        adjustButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                adjustButton.setSelected(currentState != SettingsState.ADJUSTABLE_SETTINGS);
+                if (adjustButton.isSelected()) {
+                    settingsButton.setSelected(false);
+                    animateToState(SettingsState.ADJUSTABLE_SETTINGS);
+                } else {
+                    animateToState(SettingsState.NONE);
+                }
+            }
+        });
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                settingsButton.setSelected(currentState != SettingsState.AUTOPILOT_SETTINGS);
+                if (settingsButton.isSelected()) {
+                    adjustButton.setSelected(false);
+                    animateToState(SettingsState.AUTOPILOT_SETTINGS);
+                } else {
+                    animateToState(SettingsState.NONE);
+                }
+            }
+        });
     }
 
     void setupProgressBar() {
@@ -256,6 +303,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         findViewById(android.R.id.content).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (revealControlsTimerTask.scheduledExecutionTime() > 0) {
+                    revealControlsTimerTask.cancel();
+                }
                 animateSilkScreen(silkScreenState.flip(), containerForState(currentState));
                 animateControls(controlsVisible);
             }
@@ -304,12 +354,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                     final Animator enterAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.enter_from_right);
                     enterAnimator.setTarget(newContainer);
                     enterAnimator.start();
+//                    generateAnimator(newContainer, false, 20).start();
                 }
                 if (currentContainer != null) {
                     UIUtils.setViewAndChildrenEnabled(currentContainer, false);
                     final Animator exitAnimator = AnimatorInflater.loadAnimator(LWQSettingsActivity.this, R.animator.exit_to_left);
                     exitAnimator.setTarget(currentContainer);
                     exitAnimator.start();
+//                    generateAnimator(currentContainer, true, 0).start();
                 }
                 currentState = newState;
             }
