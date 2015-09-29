@@ -54,23 +54,14 @@ import de.greenrobot.event.EventBus;
 public abstract class LWQWallpaperActivity extends AppCompatActivity implements SurfaceHolder.Callback {
 
     enum SilkScreenState {
-        DEFAULT(1f, .7f),
-        REVEALED(1f, 0f),
-        HIDDEN(1f, 1f);
+        OBSCURED(.7f),
+        REVEALED(0f),
+        HIDDEN(1f);
 
-        float contentAlpha;
         float screenAlpha;
 
-        SilkScreenState(float contentAlpha, float screenAlpha) {
-            this.contentAlpha = contentAlpha;
+        SilkScreenState(float screenAlpha) {
             this.screenAlpha = screenAlpha;
-        }
-
-        SilkScreenState flip() {
-            if (this == DEFAULT) {
-                return REVEALED;
-            }
-            return DEFAULT;
         }
     }
 
@@ -91,6 +82,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
         silkScreen = findViewById(R.id.view_screen_lwq_wallpaper);
         surfaceView = (SurfaceView) findViewById(R.id.surface_lwq_wallpaper);
         surfaceView.getHolder().addCallback(this);
+        animateSilkScreen(SilkScreenState.HIDDEN);
     }
 
     @Override
@@ -144,33 +136,17 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     }
 
     void switchToSilkScreen(SilkScreenState state) {
-        switchToSilkScreen(state, null);
-    }
-
-    void switchToSilkScreen(SilkScreenState state, View content) {
         silkScreen.setAlpha(state.screenAlpha);
-        if (content != null) {
-            content.setAlpha(state.contentAlpha);
-        }
         silkScreenState = state;
     }
 
-    void animateSilkScreen(SilkScreenState state) {
-        animateSilkScreen(state, null);
-    }
-
-    void animateSilkScreen(SilkScreenState state, View content) {
+    long animateSilkScreen(SilkScreenState state) {
         ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), state.screenAlpha);
         silkScreenAnimator.setDuration(300);
         silkScreenAnimator.setInterpolator(new LinearInterpolator());
         silkScreenAnimator.start();
-        if (content != null) {
-            ObjectAnimator contentAnimator = ObjectAnimator.ofFloat(content, "alpha", content.getAlpha(), state.contentAlpha);
-            contentAnimator.setDuration(300);
-            contentAnimator.setInterpolator(new LinearInterpolator());
-            contentAnimator.start();
-        }
         silkScreenState = state;
+        return 300;
     }
 
     void fullScreenIfPossible() {
