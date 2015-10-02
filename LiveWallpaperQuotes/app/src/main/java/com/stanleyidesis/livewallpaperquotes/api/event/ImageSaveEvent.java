@@ -1,5 +1,7 @@
 package com.stanleyidesis.livewallpaperquotes.api.event;
 
+import android.net.Uri;
+
 /**
  * Copyright (c) 2015 Stanley Idesis
  *
@@ -22,7 +24,7 @@ package com.stanleyidesis.livewallpaperquotes.api.event;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * NewWallpaperEvent.java
+ * ImageSaveEvent.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -31,24 +33,36 @@ package com.stanleyidesis.livewallpaperquotes.api.event;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 09/20/2015
+ * Date: 09/26/2015
  */
-public class NewWallpaperEvent extends FailableEvent {
+public class ImageSaveEvent extends FailableEvent {
 
-    public static NewWallpaperEvent newWallpaper(boolean loaded) {
-        return new NewWallpaperEvent(loaded);
+    public static ImageSaveEvent success(Uri fileUri, Uri contentUri) {
+        return new ImageSaveEvent(fileUri, contentUri);
     }
 
-    public static NewWallpaperEvent newWallpaperFailed(String errorMessage, Throwable throwable) {
-        final NewWallpaperEvent newWallpaperEvent = new NewWallpaperEvent(false);
-        newWallpaperEvent.errorMessage = errorMessage;
-        newWallpaperEvent.throwable = throwable;
-        return newWallpaperEvent;
+    public static ImageSaveEvent failure(String errorMessage, Throwable throwable) {
+        return new ImageSaveEvent(errorMessage, throwable);
     }
 
-    public boolean loaded;
+    Uri fileUri;
+    Uri contentUri;
 
-    NewWallpaperEvent(boolean loaded) {
-        this.loaded = loaded;
+    ImageSaveEvent(String errorMessage, Throwable throwable) {
+        this.errorMessage = errorMessage;
+        this.throwable = throwable;
+    }
+
+    ImageSaveEvent(Uri fileUri, Uri contentUri) {
+        this.fileUri = fileUri;
+        this.contentUri = contentUri;
+    }
+
+    public Uri getFileUri() {
+        return fileUri;
+    }
+
+    public Uri getContentUri() {
+        return contentUri;
     }
 }

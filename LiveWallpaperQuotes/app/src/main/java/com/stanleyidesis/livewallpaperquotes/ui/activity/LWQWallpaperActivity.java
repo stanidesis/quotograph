@@ -11,12 +11,10 @@ import android.view.animation.LinearInterpolator;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
-import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 
 import de.greenrobot.event.EventBus;
 
@@ -56,21 +54,20 @@ import de.greenrobot.event.EventBus;
 public abstract class LWQWallpaperActivity extends AppCompatActivity implements SurfaceHolder.Callback {
 
     enum SilkScreenState {
-        DEFAULT(1f, .7f),
-        REVEAL(.1f, 0f);
+        OBSCURED(.7f),
+        REVEALED(0f),
+        HIDDEN(1f);
 
-        float contentAlpha;
         float screenAlpha;
 
-        SilkScreenState(float contentAlpha, float screenAlpha) {
-            this.contentAlpha = contentAlpha;
+        SilkScreenState(float screenAlpha) {
             this.screenAlpha = screenAlpha;
         }
     }
 
-    ScheduledExecutorService scheduledExecutorService;
     LWQSurfaceHolderDrawScript drawScript;
     SurfaceView surfaceView;
+    SilkScreenState silkScreenState;
     View silkScreen;
 
     @Override
@@ -85,7 +82,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
         silkScreen = findViewById(R.id.view_screen_lwq_wallpaper);
         surfaceView = (SurfaceView) findViewById(R.id.surface_lwq_wallpaper);
         surfaceView.getHolder().addCallback(this);
-        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        animateSilkScreen(SilkScreenState.HIDDEN);
     }
 
     @Override
@@ -118,8 +115,11 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {}
 
-    public void onEvent(NewWallpaperEvent newWallpaperEvent) {
-        if (newWallpaperEvent.loaded) {
+    public void onEvent(WallpaperEvent wallpaperEvent) {
+        if (wallpaperEvent.didFail()) {
+            return;
+        }
+        if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             draw();
         }
     }
@@ -131,28 +131,22 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
         }
     }
 
+    void didFinishDrawing() {
+        // Nothing for now
+    }
+
     void switchToSilkScreen(SilkScreenState state) {
-        switchToSilkScreen(state, null);
-    }
-
-    void switchToSilkScreen(SilkScreenState state, View content) {
         silkScreen.setAlpha(state.screenAlpha);
-        if (content != null) {
-            content.setAlpha(state.contentAlpha);
-        }
+        silkScreenState = state;
     }
 
-    void animateSilkScreen(SilkScreenState state, View content) {
+    long animateSilkScreen(SilkScreenState state) {
         ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), state.screenAlpha);
         silkScreenAnimator.setDuration(300);
         silkScreenAnimator.setInterpolator(new LinearInterpolator());
         silkScreenAnimator.start();
-        if (content != null) {
-            ObjectAnimator contentAnimator = ObjectAnimator.ofFloat(content, "alpha", content.getAlpha(), state.contentAlpha);
-            contentAnimator.setDuration(300);
-            contentAnimator.setInterpolator(new LinearInterpolator());
-            contentAnimator.start();
-        }
+        silkScreenState = state;
+        return 300;
     }
 
     void fullScreenIfPossible() {
@@ -170,15 +164,14 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
         } else {
             drawScript.setSurfaceHolder(surfaceView.getHolder());
         }
-        scheduledExecutorService.execute(new Runnable() {
+        drawScript.requestDraw(new Callback<Boolean>() {
             @Override
-            public void run() {
-                try {
-                    drawScript.draw();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            public void onSuccess(Boolean aBoolean) {
+                didFinishDrawing();
             }
+
+            @Override
+            public void onError(String errorMessage, Throwable throwable) {}
         });
     }
 }

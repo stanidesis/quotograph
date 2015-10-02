@@ -35,12 +35,12 @@ package com.stanleyidesis.livewallpaperquotes.api.event;
  */
 public class FirstLaunchTaskEvent extends FailableEvent {
 
-    public static FirstLaunchTaskEvent successful() {
+    public static FirstLaunchTaskEvent success() {
         return new FirstLaunchTaskEvent();
     }
 
     public static FirstLaunchTaskEvent failed(String errorMessage, Throwable throwable) {
-        final FirstLaunchTaskEvent failure = successful();
+        final FirstLaunchTaskEvent failure = success();
         failure.success = false;
         failure.errorMessage = errorMessage;
         failure.throwable = throwable;

@@ -1,8 +1,4 @@
-package com.stanleyidesis.livewallpaperquotes.api.drawing;
-
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.view.SurfaceHolder;
+package com.stanleyidesis.livewallpaperquotes.api.event;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -26,7 +22,7 @@ import android.view.SurfaceHolder;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQSurfaceHolderDrawScript.java
+ * WallpaperEvent.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -35,43 +31,36 @@ import android.view.SurfaceHolder;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 09/20/2015
+ * Date: 09/27/2015
  */
-public class LWQSurfaceHolderDrawScript extends LWQDrawScript {
+public class WallpaperEvent extends FailableEvent {
 
-    SurfaceHolder surfaceHolder;
-
-    public LWQSurfaceHolderDrawScript(SurfaceHolder surfaceHolder) {
-        this.surfaceHolder = surfaceHolder;
+    public enum Status {
+        GENERATING_NEW_WALLPAPER,
+        GENERATED_NEW_WALLPAPER,
+        RETRIEVING_WALLPAPER,
+        RETRIEVED_WALLPAPER
     }
 
-    public void setSurfaceHolder(final SurfaceHolder surfaceHolder) {
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                LWQSurfaceHolderDrawScript.this.surfaceHolder = surfaceHolder;
-            }
-        });
+    public static WallpaperEvent withStatus(Status status) {
+        return new WallpaperEvent(status);
     }
 
-    void waitToCreate() {
-        while (surfaceHolder.isCreating()) {}
+    public static WallpaperEvent failedWithStatus(Status status, String errorMessage, Throwable throwable) {
+        final WallpaperEvent wallpaperEvent = new WallpaperEvent(status);
+        wallpaperEvent.errorMessage = errorMessage;
+        wallpaperEvent.throwable = throwable;
+        return wallpaperEvent;
     }
 
-    @Override
-    protected Canvas reserveCanvas() {
-        waitToCreate();
-        return surfaceHolder.lockCanvas();
+    public Status getStatus() {
+        return status;
     }
 
-    @Override
-    protected void releaseCanvas(Canvas canvas) {
-        surfaceHolder.unlockCanvasAndPost(canvas);
+    Status status;
+
+    WallpaperEvent(Status status) {
+        this.status = status;
     }
 
-    @Override
-    protected Rect surfaceRect() {
-        waitToCreate();
-        return surfaceHolder.getSurfaceFrame();
-    }
 }

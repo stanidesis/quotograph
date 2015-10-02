@@ -19,7 +19,7 @@
 
         <!-- Activities -->
 
-        <activity android:name=".ui.activity.LWQActivateActivity"
+        <activity android:name=".ui.activity.LWQActivateActivity" android:screenOrientation="sensorPortrait"
             android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.activity.LWQSettingsActivity"
+        <activity android:name=".ui.activity.LWQSettingsActivity" android:screenOrientation="sensorPortrait"
             android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper">
         </activity>
 
@@ -40,7 +40,6 @@
                 <action android:name="com.stanleyidesis.livewallpaperquotes.action.CHANGE_WALLPAPER"/>
                 <action android:name="com.stanleyidesis.livewallpaperquotes.action.SHARE"/>
                 <action android:name="com.stanleyidesis.livewallpaperquotes.action.SAVE"/>
-                <action android:name="com.stanleyidesis.livewallpaperquotes.action.DISABLE_REFRESH"/>
             </intent-filter>
         </receiver>
 

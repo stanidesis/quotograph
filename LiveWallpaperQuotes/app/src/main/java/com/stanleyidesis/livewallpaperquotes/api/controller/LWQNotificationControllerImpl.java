@@ -14,7 +14,8 @@ import android.support.v4.app.NotificationCompat;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.event.NewWallpaperEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 import com.stanleyidesis.livewallpaperquotes.ui.activity.LWQActivateActivity;
 
@@ -23,8 +24,6 @@ import java.io.File;
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by stanleyidesis on 9/19/15.
- *//**
  * Copyright (c) 2015 Stanley Idesis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -61,6 +60,8 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
 
     static int REQUEST_CODE_SHARE = 0xA;
     static int REQUEST_CODE_VIEW = 0xB;
+
+    boolean newWallpaperIncoming = false;
 
     public LWQNotificationControllerImpl() {
         EventBus.getDefault().register(this);
@@ -109,13 +110,6 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
                 LWQApplication.get().getString(R.string.share), shareBroadcast).build();
         notificationBuilder.addAction(shareAction);
 
-        // Add Save/Keep Wallpaper
-        Intent disableRefreshIntent = new Intent(LWQApplication.get().getString(R.string.action_disable_refresh));
-        final PendingIntent disableBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, disableRefreshIntent, 0);
-        final NotificationCompat.Action disableRefreshAction = new NotificationCompat.Action.Builder(R.mipmap.ic_bookmark_border_white,
-                LWQApplication.get().getString(R.string.keep), disableBroadcast).build();
-        notificationBuilder.addAction(disableRefreshAction);
-
         // Add save to disk
         Intent saveToDiskIntent = new Intent(LWQApplication.get().getString(R.string.action_save));
         final PendingIntent saveToDiskBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, saveToDiskIntent, 0);
@@ -123,10 +117,23 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
                 LWQApplication.get().getString(R.string.save_to_disk), saveToDiskBroadcast).build();
         notificationBuilder.addAction(saveToDiskAction);
 
+        // Add Skip Action
+        Intent skipIntent = new Intent(LWQApplication.get().getString(R.string.action_change_wallpaper));
+        final PendingIntent skipBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, skipIntent, 0);
+        final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.mipmap.ic_skip_next_white,
+                LWQApplication.get().getString(R.string.skip), skipBroadcast).build();
+        notificationBuilder.addAction(skipAction);
+
         NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notificationBuilder.build());
 
         notificationBitmap.recycle();
+    }
+
+    @Override
+    public void dismissNewWallpaperNotification() {
+        NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(1);
     }
 
     @Override
@@ -173,7 +180,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.addAction(shareAction);
 
         NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(2, notificationBuilder.build());
+        notificationManager.notify(savedImage.hashCode(), notificationBuilder.build());
         notificationBitmap.recycle();
     }
 
@@ -204,9 +211,22 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         super.finalize();
     }
 
-    public void onEvent(NewWallpaperEvent newWallpaperEvent) {
-        if (newWallpaperEvent.loaded && LWQApplication.isWallpaperActivated()) {
-            postNewWallpaperNotification();
+    public void onEvent(WallpaperEvent wallpaperEvent) {
+        if (wallpaperEvent.getStatus() == WallpaperEvent.Status.GENERATED_NEW_WALLPAPER) {
+            newWallpaperIncoming = !wallpaperEvent.didFail();
+        } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+            if (!wallpaperEvent.didFail() && newWallpaperIncoming) {
+                postNewWallpaperNotification();
+                newWallpaperIncoming = false;
+            }
+        }
+    }
+
+    public void onEvent(ImageSaveEvent imageSaveEvent) {
+        if (imageSaveEvent.didFail()) {
+            postWallpaperSaveFailureNotification();
+        } else {
+            postSavedWallpaperReadyNotification(imageSaveEvent.getFileUri(), imageSaveEvent.getContentUri());
         }
     }
 

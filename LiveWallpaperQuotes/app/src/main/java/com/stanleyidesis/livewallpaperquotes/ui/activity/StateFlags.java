@@ -1,8 +1,4 @@
-package com.stanleyidesis.livewallpaperquotes.api.drawing;
-
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.view.SurfaceHolder;
+package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -26,7 +22,7 @@ import android.view.SurfaceHolder;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQSurfaceHolderDrawScript.java
+ * StateFlags.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -35,43 +31,16 @@ import android.view.SurfaceHolder;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 09/20/2015
+ * Date: 10/01/2015
  */
-public class LWQSurfaceHolderDrawScript extends LWQDrawScript {
-
-    SurfaceHolder surfaceHolder;
-
-    public LWQSurfaceHolderDrawScript(SurfaceHolder surfaceHolder) {
-        this.surfaceHolder = surfaceHolder;
-    }
-
-    public void setSurfaceHolder(final SurfaceHolder surfaceHolder) {
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                LWQSurfaceHolderDrawScript.this.surfaceHolder = surfaceHolder;
-            }
-        });
-    }
-
-    void waitToCreate() {
-        while (surfaceHolder.isCreating()) {}
-    }
-
-    @Override
-    protected Canvas reserveCanvas() {
-        waitToCreate();
-        return surfaceHolder.lockCanvas();
-    }
-
-    @Override
-    protected void releaseCanvas(Canvas canvas) {
-        surfaceHolder.unlockCanvasAndPost(canvas);
-    }
-
-    @Override
-    protected Rect surfaceRect() {
-        waitToCreate();
-        return surfaceHolder.getSurfaceFrame();
-    }
+public interface StateFlags {
+    int FLAG_NO_CHANGE = -1;
+    int FLAG_REVEAL = 1;
+    int FLAG_HIDE = 2;
+    int FLAG_ROTATE = 4;
+    int FLAG_NO_ROTATE = 8;
+    int FLAG_ENABLE = 16;
+    int FLAG_DISABLE = 32;
+    int FLAG_SELECTED = 64;
+    int FLAG_UNSELECTED = 128;
 }
