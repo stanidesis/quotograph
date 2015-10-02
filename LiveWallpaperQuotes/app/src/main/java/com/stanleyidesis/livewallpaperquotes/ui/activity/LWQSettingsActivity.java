@@ -69,115 +69,20 @@ import java.util.concurrent.LinkedBlockingDeque;
  *
  * Date: 07/11/2015
  */
-public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar.OnSeekBarChangeListener {
+public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFlags, SeekBar.OnSeekBarChangeListener {
 
-    // Flags
-    final static int FLAG_NO_CHANGE   = -1;
-    final static int FLAG_REVEAL      = 1;
-    final static int FLAG_HIDE        = 2;
-    final static int FLAG_ROTATE      = 4;
-    final static int FLAG_NO_ROTATE   = 8;
-    final static int FLAG_ENABLE      = 16;
-    final static int FLAG_DISABLE     = 32;
-    final static int FLAG_SELECTED    = 64;
-    final static int FLAG_UNSELECTED  = 128;
+    static class ActivityState {
 
-    enum ActivityState {
-        INITIAL(SilkScreenState.HIDDEN,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_HIDE),
-        REVEAL_CONTROLS(SilkScreenState.OBSCURED,
-                FLAG_REVEAL | FLAG_ENABLE,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_ENABLE | FLAG_UNSELECTED,
-                FLAG_ENABLE | FLAG_UNSELECTED,
-                FLAG_ENABLE | FLAG_UNSELECTED,
-                FLAG_ENABLE | FLAG_UNSELECTED,
-                FLAG_ENABLE | FLAG_UNSELECTED,
-                FLAG_ENABLE),
-        REVEAL_WALLPAPER(SilkScreenState.REVEALED,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_DISABLE | FLAG_UNSELECTED,
-                FLAG_HIDE),
-        REVEAL_ADJUSTMENTS(SilkScreenState.OBSCURED,
-                FLAG_REVEAL | FLAG_ENABLE,
-                FLAG_REVEAL | FLAG_ENABLE,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_NO_CHANGE,
-                FLAG_NO_CHANGE,
-                FLAG_SELECTED,
-                FLAG_NO_CHANGE,
-                FLAG_UNSELECTED,
-                FLAG_NO_CHANGE),
-        REVEAL_SETTINGS(SilkScreenState.OBSCURED,
-                FLAG_NO_CHANGE,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_REVEAL | FLAG_ENABLE,
-                FLAG_NO_CHANGE,
-                FLAG_NO_CHANGE,
-                FLAG_UNSELECTED,
-                FLAG_NO_CHANGE,
-                FLAG_SELECTED,
-                FLAG_NO_CHANGE),
-        REVEAL_WALLPAPER_EDIT_MODE(SilkScreenState.REVEALED,
-                FLAG_HIDE | FLAG_DISABLE,
-                FLAG_NO_CHANGE,
-                FLAG_NO_CHANGE,
-                FLAG_NO_CHANGE,
-                FLAG_NO_CHANGE,
-                FLAG_NO_CHANGE,
-                FLAG_NO_CHANGE,
-                FLAG_NO_CHANGE,
-                FLAG_NO_CHANGE);
-//        SAVE_TO_DISK,
-//        SKIP;
-
-        ActivityState(SilkScreenState silkScreenState,
-                      int controlFlags,
-                      int adjustableSettingsFlags,
-                      int settingsFlags,
-                      int actionShareFlags,
-                      int actionSaveFlags,
-                      int actionAdjustFlags,
-                      int actionSkipFlags,
-                      int actionSettingsFlags,
-                      int progressBarFlags) {
-            this.silkScreenState = silkScreenState;
-            this.controlFlags = controlFlags;
-            this.adjustableSettingsFlags = adjustableSettingsFlags;
-            this.settingsFlags = settingsFlags;
-            this.actionShareFlags = actionShareFlags;
-            this.actionSaveFlags = actionSaveFlags;
-            this.actionAdjustFlags = actionAdjustFlags;
-            this.actionSkipFlags = actionSkipFlags;
-            this.actionSettingsFlags = actionSettingsFlags;
-            this.progressBarFlags = progressBarFlags;
-        }
-
-        SilkScreenState silkScreenState;
-        int controlFlags;
-        int adjustableSettingsFlags;
-        int settingsFlags;
-        int actionShareFlags;
-        int actionSaveFlags;
-        int actionAdjustFlags;
-        int actionSkipFlags;
-        int actionSettingsFlags;
-        int progressBarFlags;
+        LWQWallpaperActivity.SilkScreenState silkScreenState = null;
+        int controlFlags = FLAG_NO_CHANGE;
+        int adjustableSettingsFlags = FLAG_NO_CHANGE;
+        int settingsFlags = FLAG_NO_CHANGE;
+        int actionShareFlags = FLAG_NO_CHANGE;
+        int actionSaveFlags = FLAG_NO_CHANGE;
+        int actionAdjustFlags = FLAG_NO_CHANGE;
+        int actionSkipFlags = FLAG_NO_CHANGE;
+        int actionSettingsFlags = FLAG_NO_CHANGE;
+        int progressBarFlags = FLAG_NO_CHANGE;
 
         boolean controlFlagSet(int compareWith) {
             return (controlFlags & compareWith) > 0;
@@ -193,6 +98,164 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
 
         boolean progressBarFlagsSet(int compareWith) {
             return (progressBarFlags & compareWith) > 0;
+        }
+
+    }
+
+    static class Builder {
+
+        ActivityState activityState;
+
+        ActivityState build() {
+            return activityState;
+        }
+
+        private Builder() {
+            activityState = new ActivityState();
+        }
+
+        Builder setSilkScreenState(LWQWallpaperActivity.SilkScreenState silkScreenState) {
+            activityState.silkScreenState = silkScreenState;
+            return this;
+        }
+
+        Builder setControlFlags(int flags) {
+            activityState.controlFlags = flags;
+            return this;
+        }
+
+        Builder setAdjustableSettingsFlags(int flags) {
+            activityState.adjustableSettingsFlags = flags;
+            return this;
+        }
+
+        Builder setSettingsFlags(int flags) {
+            activityState.settingsFlags = flags;
+            return this;
+        }
+
+        Builder setActionShareFlags(int flags) {
+            activityState.actionShareFlags = flags;
+            return this;
+        }
+
+        Builder setActionSaveFlags(int flags) {
+            activityState.actionSaveFlags = flags;
+            return this;
+        }
+
+        Builder setActionAdjustFlags(int flags) {
+            activityState.actionAdjustFlags = flags;
+            return this;
+        }
+
+        Builder setActionSkipFlags(int flags) {
+            activityState.actionSkipFlags = flags;
+            return this;
+        }
+
+        Builder setActionSettingsFlags(int flags) {
+            activityState.actionSettingsFlags = flags;
+            return this;
+        }
+
+        Builder setProgressBarFlags(int flags) {
+            activityState.progressBarFlags = flags;
+            return this;
+        }
+
+        static ActivityState buildInitialState() {
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.HIDDEN)
+                    .setControlFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setAdjustableSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setActionAdjustFlags(FLAG_UNSELECTED)
+                    .setActionSettingsFlags(FLAG_UNSELECTED)
+                    .setProgressBarFlags(FLAG_HIDE).build();
+        }
+
+        static ActivityState buildRevealControls() {
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.OBSCURED)
+                    .setControlFlags(FLAG_REVEAL | FLAG_ENABLE)
+                    .setAdjustableSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .build();
+        }
+
+        static ActivityState buildRevealWallpaper() {
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.REVEALED)
+                    .setControlFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setAdjustableSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setActionAdjustFlags(FLAG_UNSELECTED)
+                    .setActionSettingsFlags(FLAG_UNSELECTED)
+                    .build();
+        }
+
+        static ActivityState buildRevealAdjustments() {
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.OBSCURED)
+                    .setControlFlags(FLAG_REVEAL | FLAG_ENABLE)
+                    .setAdjustableSettingsFlags(FLAG_REVEAL | FLAG_ENABLE)
+                    .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setActionAdjustFlags(FLAG_SELECTED)
+                    .setActionSettingsFlags(FLAG_UNSELECTED)
+                    .build();
+        }
+
+        static ActivityState buildRevealSettings() {
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.OBSCURED)
+                    .setAdjustableSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setSettingsFlags(FLAG_REVEAL | FLAG_ENABLE)
+                    .setActionAdjustFlags(FLAG_UNSELECTED)
+                    .setActionSettingsFlags(FLAG_SELECTED)
+                    .build();
+        }
+
+        static ActivityState buildRevealWallpaperEditMode() {
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.REVEALED)
+                    .setControlFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .build();
+        }
+
+        static ActivityState buildRevealSaveToDisk() {
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.OBSCURED)
+                    .setActionSaveFlags(FLAG_DISABLE | FLAG_ROTATE)
+                    .setActionSkipFlags(FLAG_DISABLE)
+                    .setProgressBarFlags(FLAG_REVEAL)
+                    .build();
+        }
+
+        static ActivityState buildSaveToDiskComplete() {
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.OBSCURED)
+                    .setActionSaveFlags(FLAG_ENABLE | FLAG_NO_ROTATE)
+                    .setActionSkipFlags(FLAG_ENABLE)
+                    .setProgressBarFlags(FLAG_HIDE)
+                    .build();
+        }
+
+        static ActivityState buildRevealSkip() {
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.HIDDEN)
+                    .setActionSaveFlags(FLAG_DISABLE)
+                    .setActionSkipFlags(FLAG_DISABLE | FLAG_ROTATE)
+                    .setProgressBarFlags(FLAG_REVEAL)
+                    .build();
+        }
+
+        static ActivityState buildRevealSkipCompleted() {
+            final ActivityState activityState = buildRevealWallpaper();
+            activityState.actionSaveFlags = FLAG_ENABLE;
+            activityState.actionSkipFlags = FLAG_ENABLE | FLAG_NO_ROTATE;
+            activityState.progressBarFlags = FLAG_HIDE;
+            return activityState;
         }
     }
 
@@ -404,6 +467,17 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         }
     };
 
+    ActivityState initialState = Builder.buildInitialState();
+    ActivityState revealControlsState = Builder.buildRevealControls();
+    ActivityState revealAdjustmentsState = Builder.buildRevealAdjustments();
+    ActivityState revealSaveToDiskState = Builder.buildRevealSaveToDisk();
+    ActivityState revealSaveToDiskCompletedState = Builder.buildSaveToDiskComplete();
+    ActivityState revealSettingsState = Builder.buildRevealSettings();
+    ActivityState revealSkipState = Builder.buildRevealSkip();
+    ActivityState revealSkipCompletedState = Builder.buildRevealSkipCompleted();
+    ActivityState revealWallpaperState = Builder.buildRevealWallpaper();
+    ActivityState revealWallpaperEditModeState  = Builder.buildRevealWallpaperEditMode();
+
     // Current ActivityState
     ActivityState activityState = null;
     // State Queue
@@ -415,7 +489,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     TimerTask revealControlsTimerTask = new TimerTask() {
         @Override
         public void run() {
-            changeState(ActivityState.REVEAL_CONTROLS);
+            changeState(revealControlsState);
         }
     };
 
@@ -454,7 +528,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        changeState(ActivityState.INITIAL);
+        if (LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
+            changeState(revealWallpaperState);
+        } else {
+            changeState(initialState);
+        }
     }
 
     @Override
@@ -590,7 +668,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
 
     void setupWallpaperActions() {
         wallpaperActionsContainer = findViewById(R.id.group_lwq_settings_wallpaper_actions);
-        wallpaperActionsContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_ENABLE);
+        wallpaperActionsContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
+        wallpaperActionsContainer.setEnabled(false);
         shareButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_share);
         saveButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_save);
         adjustButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_adjust);
@@ -605,26 +684,24 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         adjustButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO
-                if (activityState != ActivityState.REVEAL_ADJUSTMENTS) {
+                if (activityState != revealAdjustmentsState) {
                     view.setSelected(true);
-                    changeState(ActivityState.REVEAL_ADJUSTMENTS);
+                    changeState(revealAdjustmentsState);
                 } else {
                     view.setSelected(false);
-                    changeState(ActivityState.REVEAL_CONTROLS);
+                    changeState(revealControlsState);
                 }
             }
         });
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO
-                if (activityState != ActivityState.REVEAL_SETTINGS) {
+                if (activityState != revealSettingsState) {
                     view.setSelected(true);
-                    changeState(ActivityState.REVEAL_SETTINGS);
+                    changeState(revealSettingsState);
                 } else {
                     view.setSelected(false);
-                    changeState(ActivityState.REVEAL_CONTROLS);
+                    changeState(revealControlsState);
                 }
             }
         });
@@ -637,14 +714,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO
+                changeState(revealSaveToDiskState);
                 sendBroadcast(new Intent(getString(R.string.action_save)));
             }
         });
         skipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO
+                changeState(revealSkipState);
                 LWQApplication.getWallpaperController().generateNewWallpaper();
             }
         });
@@ -663,11 +740,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
                 if (revealControlsTimerTask.scheduledExecutionTime() > 0) {
                     revealControlsTimerTask.cancel();
                 }
-                // TODO
-                if (activityState == ActivityState.REVEAL_WALLPAPER) {
-                    changeState(ActivityState.REVEAL_CONTROLS);
+                if (activityState == revealWallpaperState) {
+                    changeState(revealControlsState);
                 } else {
-                    changeState(ActivityState.REVEAL_WALLPAPER);
+                    changeState(revealWallpaperState);
                 }
             }
         });
@@ -727,9 +803,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
 
     @Override
     void didFinishDrawing() {
-        // TODO
-        if (activityState == ActivityState.INITIAL) {
-            changeState(ActivityState.REVEAL_WALLPAPER);
+        if (activityState == initialState) {
+            changeState(revealWallpaperState);
+        } else if (activityState == revealSkipState) {
+            changeState(revealSkipCompletedState);
+        }
+        if (revealControlsTimer == null) {
             revealControlsTimer = new Timer();
             revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 3);
         }
@@ -749,13 +828,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
     }
 
     public void onEvent(ImageSaveEvent imageSaveEvent) {
-        // TODO
+        changeState(revealSaveToDiskCompletedState);
     }
 
     @Override
     public void onEvent(final WallpaperEvent wallpaperEvent) {
         super.onEvent(wallpaperEvent);
-        // TODO
+        if (!wallpaperEvent.didFail() && wallpaperEvent.getStatus() != WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+            changeState(revealSkipState);
+        }
     }
 
     // SeekBar Listener
@@ -771,14 +852,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements SeekBar
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        // TODO
-        changeState(ActivityState.REVEAL_WALLPAPER_EDIT_MODE);
+        changeState(revealWallpaperEditModeState);
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        // TODO
-        changeState(ActivityState.REVEAL_ADJUSTMENTS);
+        changeState(revealAdjustmentsState);
     }
 
 }
