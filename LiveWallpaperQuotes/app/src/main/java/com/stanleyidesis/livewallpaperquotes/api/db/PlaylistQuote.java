@@ -1,11 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-
-import java.util.Random;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -29,7 +24,7 @@ import java.util.Random;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Category.java
+ * PlaylistQuote.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -38,38 +33,16 @@ import java.util.Random;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 07/11/2015
+ * Date: 10/03/2015
  */
-public class Category extends SugarRecord<Category> {
-    public enum Source {
-        DEFAULT,
-        BRAINY_QUOTE;
-    }
+public class PlaylistQuote extends SugarRecord<PlaylistQuote> {
+    public Playlist playlist;
+    public Quote quote;
 
-    public String name;
-    public Source source;
+    public PlaylistQuote() {}
 
-    public Category() {}
-
-    public Category(String name, Source source) {
-        this.name = name;
-        this.source = source;
-    }
-
-    public static boolean hasCategory(String name, Source source) {
-        final long count = Select.from(Category.class)
-                .where(Condition.prop(StringUtil.toSQLName("name")).eq(name),
-                        Condition.prop(StringUtil.toSQLName("source")).eq(source)).count();
-        return count > 0;
-    }
-
-    public static Category random() {
-        final long count = Select.from(Category.class).count();
-        final int offset = new Random().nextInt((int) count);
-        return Category.findWithQuery(Category.class, "Select * from Category LIMIT 1 OFFSET " + offset, null).get(0);
-    }
-
-    public static Category findWithName(String name) {
-        return Select.from(Category.class).where(Condition.prop(StringUtil.toSQLName("name")).eq(name)).first();
+    public PlaylistQuote(Playlist playlist, Quote quote) {
+        this.playlist = playlist;
+        this.quote = quote;
     }
 }

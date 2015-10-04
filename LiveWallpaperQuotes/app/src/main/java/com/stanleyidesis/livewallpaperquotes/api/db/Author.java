@@ -42,11 +42,13 @@ import com.orm.query.Select;
 public class Author extends SugarRecord<Author> {
 
     public String name;
+    public boolean userGenerated;
 
     public Author() {}
 
-    public Author(String name) {
+    public Author(String name, boolean userGenerated) {
         this.name = name;
+        this.userGenerated = userGenerated;
     }
 
     public static Author findAuthor(String name) {

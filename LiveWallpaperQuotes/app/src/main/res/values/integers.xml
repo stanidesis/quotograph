@@ -10,8 +10,6 @@
     <integer name="max_dim_value">90</integer>
 
     <!-- Preference Related -->
-    <integer name="preference_mode_autopilot">0</integer>
-    <integer name="preference_mode_custom">1</integer>
     <integer name="preference_default_dim">50</integer>
     <integer name="preference_default_blur">5</integer>
 </resources>

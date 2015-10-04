@@ -14,7 +14,6 @@ import com.stanleyidesis.livewallpaperquotes.api.network.BrainyQuoteManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -85,7 +84,7 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
     }
 
     @Override
-    public void fetchQuotes(final Category category, final Callback<List<Quote>> callback) {
+    public void fetchNewQuotes(final Category category, final Callback<List<Quote>> callback) {
         if (category.source != Category.Source.BRAINY_QUOTE) {
             Log.w(getClass().getSimpleName(), "Cannot fetch quotes for categories not found in BrainyQuote");
             callback.onError("Required BrainyQuote category", null);
@@ -105,16 +104,13 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                     List<BrainyQuoteManager.BrainyQuote> brainyQuotes = (List<BrainyQuoteManager.BrainyQuote>) returnObject;
                     for (BrainyQuoteManager.BrainyQuote brainyQuote : brainyQuotes) {
                         Author author = Author.findAuthor(brainyQuote.author);
+                        Quote quote = null;
                         if (author == null) {
-                            author = new Author(brainyQuote.author);
+                            author = new Author(brainyQuote.author, false);
                             author.save();
-
-                            Quote newQuote = new Quote(brainyQuote.quote, author, category);
-                            newQuote.save();
-                            recoveredQuotes.add(newQuote);
-                            continue;
+                        } else {
+                            quote = Quote.find(brainyQuote.quote, author);
                         }
-                        Quote quote = Quote.find(brainyQuote.quote, author);
                         if (quote != null) {
                             continue;
                         }
@@ -130,7 +126,7 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
     }
 
     @Override
-    public void fetchUnusedQuote(final Category category, final Callback<Quote> callback) {
+    public void fetchUnusedQuotes(final Category category, final Callback<List<Quote>> callback) {
         final List<Wallpaper> allWallpapers = Select.from(Wallpaper.class).list();
         Condition [] conditions = new Condition[allWallpapers.size() + 1];
         for (int i = 0; i < allWallpapers.size(); i++) {
@@ -139,18 +135,12 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
         conditions[conditions.length - 1] = Condition.prop(StringUtil.toSQLName("category")).eq(category.getId());
         final List<Quote> unusedQuotesFromCategory = Select.from(Quote.class).where(conditions).list();
         if (unusedQuotesFromCategory != null && !unusedQuotesFromCategory.isEmpty()) {
-            callback.onSuccess(unusedQuotesFromCategory.get(new Random().nextInt(unusedQuotesFromCategory.size())));
+            callback.onSuccess(unusedQuotesFromCategory);
         } else if (category.source == Category.Source.BRAINY_QUOTE) {
-            fetchQuotes(category, new Callback<List<Quote>>() {
+            fetchNewQuotes(category, new Callback<List<Quote>>() {
                 @Override
                 public void onSuccess(List<Quote> quotes) {
-                    if (quotes.isEmpty()) {
-                        // TODO wut?
-                        Log.w(getClass().getSimpleName(), "No new quotes retrieved");
-                        callback.onSuccess(Quote.random());
-                    } else {
-                        callback.onSuccess(quotes.get(new Random().nextInt(quotes.size())));
-                    }
+                    callback.onSuccess(quotes);
                 }
 
                 @Override
@@ -160,7 +150,49 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
             });
         } else {
             // It's not an error, just no return.
-            callback.onSuccess(Quote.random());
+            callback.onSuccess(new ArrayList<Quote>());
         }
+    }
+
+    @Override
+    public void fetchUnusedQuotesBy(final Author author, final Callback<List<Quote>> callback) {
+        final List<Wallpaper> allWallpapers = Select.from(Wallpaper.class).list();
+        Condition [] conditions = new Condition[allWallpapers.size() + 1];
+        for (int i = 0; i < allWallpapers.size(); i++) {
+            conditions[i] = Condition.prop("id").notEq(allWallpapers.get(i).quote.author.getId());
+        }
+        conditions[conditions.length - 1] = Condition.prop(StringUtil.toSQLName("author")).eq(author.getId());
+        final List<Quote> unusedQuotesFromAuthor = Select.from(Quote.class).where(conditions).list();
+        if (unusedQuotesFromAuthor != null && !unusedQuotesFromAuthor.isEmpty()) {
+            callback.onSuccess(unusedQuotesFromAuthor);
+            return;
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int page = 1;
+                List<Quote> recoveredQuotes = new ArrayList<>();
+                while (page <= MAX_PAGE_QUERY && recoveredQuotes.size() == 0) {
+                    final Object returnObject = brainyQuoteManager.getQuotesBy(author.name, page);
+                    if (returnObject instanceof String) {
+                        callback.onError((String) returnObject, null);
+                        return;
+                    }
+                    List<BrainyQuoteManager.BrainyQuote> brainyQuotes = (List<BrainyQuoteManager.BrainyQuote>) returnObject;
+                    for (BrainyQuoteManager.BrainyQuote brainyQuote : brainyQuotes) {
+                        Quote quote = Quote.find(brainyQuote.quote, author);
+                        if (quote != null) {
+                            continue;
+                        }
+                        // TODO one-to-many relationships would allow us to record the category(ies) from the result
+                        quote = new Quote(brainyQuote.quote, author, null);
+                        quote.save();
+                        recoveredQuotes.add(quote);
+                    }
+                    page++;
+                }
+                callback.onSuccess(recoveredQuotes);
+            }
+        }).start();
     }
 }

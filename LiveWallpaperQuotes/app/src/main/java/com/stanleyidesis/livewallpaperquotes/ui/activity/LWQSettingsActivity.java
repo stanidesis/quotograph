@@ -20,14 +20,11 @@ import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
-import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -570,8 +567,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
 
         final String [] refreshPreferenceOptions = getResources().getStringArray(R.array.refresh_preference_options);
@@ -593,42 +589,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
         updateRefreshSpinner();
-
-        final List<Category> categories = Category.listAll(Category.class);
-        Collections.sort(categories, new Comparator<Category>() {
-            @Override
-            public int compare(Category categoryA, Category categoryB) {
-                return categoryA.name.compareTo(categoryB.name);
-            }
-        });
-        final String quoteCategoryPreference = LWQPreferences.getQuoteCategoryPreference();
-        int selectedQuoteCategory = 0;
-        final String [] quoteCategoryNames = new String[categories.size()];
-        for (int i = 0; i < categories.size(); i++) {
-            quoteCategoryNames[i] = categories.get(i).name;
-            if (quoteCategoryNames[i].equalsIgnoreCase(quoteCategoryPreference)) {
-                selectedQuoteCategory = i;
-            }
-        }
-
-        ArrayAdapter<String> quoteCategoriesAdapter = new ArrayAdapter<>(this,
-                R.layout.spinner_item,
-                quoteCategoryNames);
-        quoteCategoriesAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
-        Spinner quoteCategorySpinner = (Spinner) settingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_quote_category);
-        quoteCategorySpinner.setAdapter(quoteCategoriesAdapter);
-        quoteCategorySpinner.setSelection(selectedQuoteCategory);
-        quoteCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
-                LWQPreferences.setQuoteCategoryPreference(quoteCategoryNames[index]);
-                // TODO toast or the slidy thingy from the bottom that says LWQ will apply settings to your next wallpaper
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
-        });
-
         UIUtils.setViewAndChildrenEnabled(settingsContainer, false);
     }
 

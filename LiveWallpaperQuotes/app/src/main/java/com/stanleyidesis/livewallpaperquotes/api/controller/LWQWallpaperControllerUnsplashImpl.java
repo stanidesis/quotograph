@@ -5,8 +5,10 @@ import android.graphics.Bitmap;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.BackgroundImage;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
+import com.stanleyidesis.livewallpaperquotes.api.db.Playlist;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Wallpaper;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
@@ -15,6 +17,7 @@ import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -65,6 +68,59 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     Bitmap activeBackgroundImage;
     RetrievalState retrievalState;
 
+    Callback<List<Quote>> generateNewWallpaperCallback = new Callback<List<Quote>>() {
+
+        void finishUp(List<Quote> newQuotes, BackgroundImage newBackgroundImage) {
+            Quote newQuote = newQuotes.get(new Random().nextInt(newQuotes.size()));
+            if (activeWallpaper != null) {
+                activeWallpaper.active = false;
+                activeWallpaper.save();
+            }
+            discardActiveWallpaper();
+            activeWallpaper = new Wallpaper(newQuote, newBackgroundImage, true, System.currentTimeMillis());
+            activeWallpaper.save();
+            newBackgroundImage.used = true;
+            newBackgroundImage.save();
+            retrievalState = RetrievalState.NONE;
+            notifyWallpaper(WallpaperEvent.Status.GENERATED_NEW_WALLPAPER);
+            retrieveActiveWallpaper();
+        }
+
+        @Override
+        public void onSuccess(final List<Quote> newQuotes) {
+            final UnsplashManager.UnsplashCategory unsplashCategory =
+                    UnsplashManager.UnsplashCategory.fromName(LWQPreferences.getImageCategoryPreference());
+            final BackgroundImage backgroundImage = BackgroundImage.unusedFromCategory(unsplashCategory.sqlName());
+            if (backgroundImage != null) {
+                finishUp(newQuotes, backgroundImage);
+                return;
+            }
+            new UnsplashRetryableRequest(unsplashCategory, 3, 1, new Callback<List<BackgroundImage>>() {
+                @Override
+                public void onSuccess(List<BackgroundImage> backgroundImages) {
+                    if (backgroundImages.size() > 0) {
+                        finishUp(newQuotes, backgroundImages.get(0));
+                        return;
+                    }
+                    // Failed to find an unused image :(
+                    finishUp(newQuotes, BackgroundImage.randomFromSource(BackgroundImage.Source.UNSPLASH));
+                }
+
+                @Override
+                public void onError(String errorMessage, Throwable throwable) {
+                    retrievalState = RetrievalState.NONE;
+                    notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
+                }
+            }).start();
+        }
+
+        @Override
+        public void onError(String errorMessage, Throwable throwable) {
+            retrievalState = RetrievalState.NONE;
+            notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
+        }
+    };
+
     public LWQWallpaperControllerUnsplashImpl() {
         unsplashManager = new UnsplashManager();
         retrievalState = RetrievalState.NONE;
@@ -103,69 +159,58 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         }
         notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER);
         retrievalState = RetrievalState.NEW_WALLPAPER;
-        Category fromCategory;
-        if (LWQPreferences.isAutoPilot()) {
-            final String quoteCategoryPreference = LWQPreferences.getQuoteCategoryPreference();
-            if (quoteCategoryPreference == null) {
-                fromCategory = Category.random();
-            } else {
-                fromCategory = Category.findWithName(quoteCategoryPreference);
-            }
+        final Playlist activePlaylist = Playlist.active();
+        final List<Category> categoriesInPlaylist = activePlaylist.categories();
+        final List<Author> authorsInPlaylist = activePlaylist.authors();
+        final List<Quote> quotesInPlaylist = activePlaylist.quotes();
+        final List<List<?>> options = new ArrayList<>();
+        if (categoriesInPlaylist.size() > 0) {options.add(categoriesInPlaylist);}
+        if (authorsInPlaylist.size() > 0) {options.add(authorsInPlaylist);}
+        if (quotesInPlaylist.size() > 0) {options.add(quotesInPlaylist);}
+        final List<?> playlistSource = options.get(new Random().nextInt(options.size()));
+        final Object playlistObject = playlistSource.get(new Random().nextInt(playlistSource.size()));
+
+        if (playlistObject instanceof Category) {
+            LWQApplication.getQuoteController().fetchUnusedQuotes((Category) playlistObject, new Callback<List<Quote>>() {
+                @Override
+                public void onSuccess(List<Quote> quotes) {
+                    if (quotes.size() > 0) {
+                        generateNewWallpaperCallback.onSuccess(quotes);
+                    } else {
+                        // No new Quotes found
+                        generateNewWallpaperCallback.onSuccess(Quote.allFromCategory((Category) playlistObject));
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage, Throwable throwable) {
+                    retrievalState = RetrievalState.NONE;
+                    notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
+                }
+            });
+        } else if (playlistObject instanceof Author) {
+            LWQApplication.getQuoteController().fetchUnusedQuotesBy((Author) playlistObject, new Callback<List<Quote>>() {
+                @Override
+                public void onSuccess(List<Quote> quotes) {
+                    if (quotes.size() > 0) {
+                        generateNewWallpaperCallback.onSuccess(quotes);
+                    } else {
+                        // No new Quotes found
+                        generateNewWallpaperCallback.onSuccess(Quote.allFromAuthor((Author) playlistObject));
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage, Throwable throwable) {
+                    retrievalState = RetrievalState.NONE;
+                    notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
+                }
+            });
+        } else if (playlistObject instanceof Quote) {
+            generateNewWallpaperCallback.onSuccess(quotesInPlaylist);
         } else {
-            // TODO
-            fromCategory = Category.random();
+            // TODO Playlist is empty?
         }
-        LWQApplication.getQuoteController().fetchUnusedQuote(fromCategory, new Callback<Quote>() {
-
-            void finishUp(Quote newQuote, BackgroundImage newBackgroundImage) {
-                if (activeWallpaper != null) {
-                    activeWallpaper.active = false;
-                    activeWallpaper.save();
-                }
-                discardActiveWallpaper();
-                activeWallpaper = new Wallpaper(newQuote, newBackgroundImage, true, System.currentTimeMillis());
-                activeWallpaper.save();
-                newBackgroundImage.used = true;
-                newBackgroundImage.save();
-                retrievalState = RetrievalState.NONE;
-                notifyWallpaper(WallpaperEvent.Status.GENERATED_NEW_WALLPAPER);
-                retrieveActiveWallpaper();
-            }
-
-            @Override
-            public void onSuccess(final Quote quote) {
-                final UnsplashManager.UnsplashCategory unsplashCategory =
-                        UnsplashManager.UnsplashCategory.fromName(LWQPreferences.getImageCategoryPreference());
-                final BackgroundImage backgroundImage = BackgroundImage.unusedFromCategory(unsplashCategory.sqlName());
-                if (backgroundImage != null) {
-                    finishUp(quote, backgroundImage);
-                    return;
-                }
-                new UnsplashRetryableRequest(unsplashCategory, 3, 1, new Callback<List<BackgroundImage>>() {
-                    @Override
-                    public void onSuccess(List<BackgroundImage> backgroundImages) {
-                        if (backgroundImages.size() > 0) {
-                            finishUp(quote, backgroundImages.get(0));
-                            return;
-                        }
-                        // Failed to find an unused image :(
-                        finishUp(quote, BackgroundImage.randomFromSource(BackgroundImage.Source.UNSPLASH));
-                    }
-
-                    @Override
-                    public void onError(String errorMessage, Throwable throwable) {
-                        retrievalState = RetrievalState.NONE;
-                        notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
-                    }
-                }).start();
-            }
-
-            @Override
-            public void onError(String errorMessage, Throwable throwable) {
-                retrievalState = RetrievalState.NONE;
-                notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
-            }
-        });
     }
 
     @Override

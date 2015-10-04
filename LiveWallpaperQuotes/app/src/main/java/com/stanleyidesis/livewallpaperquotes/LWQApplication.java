@@ -130,7 +130,7 @@ public class LWQApplication extends SugarApp {
             for (int j = 0; j < defaultCategoryQuotes.length; j++) {
                 Author defaultAuthor = Select.from(Author.class).where(Condition.prop("name").eq(defaultCategoryAuthors[j])).first();
                 if (defaultAuthor == null) {
-                    defaultAuthor = new Author(defaultCategoryAuthors[j]);
+                    defaultAuthor = new Author(defaultCategoryAuthors[j], false);
                     defaultAuthor.save();
                 }
                 new Quote(defaultCategoryQuotes[j], defaultAuthor, defaultCategory).save();

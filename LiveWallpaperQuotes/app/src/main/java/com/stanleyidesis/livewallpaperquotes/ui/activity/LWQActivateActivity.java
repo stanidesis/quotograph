@@ -100,6 +100,11 @@ public class LWQActivateActivity extends LWQWallpaperActivity {
         activateButtonAnimator.start();
     }
 
+    @Override
+    void didFinishDrawing() {
+        switchToSilkScreen(SilkScreenState.REVEALED);
+    }
+
     boolean requiresActivation() {
         if (LWQApplication.isWallpaperActivated()) {
             startActivity(new Intent(this, LWQSettingsActivity.class)

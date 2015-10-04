@@ -56,6 +56,8 @@ public class BrainyQuoteManager {
         String BRAINY_QUOTE_TOPICS = "https://www.brainyquote.com/quotes/topics.html";
         String BRAINY_QUOTE_TOPIC_PAGE_1 = "https://www.brainyquote.com/quotes/topics/%s.html";
         String BRAINY_QUOTE_TOPIC_PAGE_NUMBER = "https://www.brainyquote.com/quotes/topics/%s%d.html";
+        String BRAINY_QUOTE_AUTHOR_PAGE_1 = "https://www.brainyquote.com/quotes/authors/%s/%s.html";
+        String BRAINY_QUOTE_AUTHOR_PAGE_NUMBER = "https://www.brainyquote.com/quotes/authors/%s/%s_%d.html";
     }
 
     private ScheduledExecutorService scheduledExecutorService;
@@ -77,6 +79,13 @@ public class BrainyQuoteManager {
         final String cleanedUp = topicDisplayName.replaceAll("[^a-zA-Z0-9]", "");
         final String lowerCase = cleanedUp.toLowerCase();
         return "topic_" + lowerCase;
+    }
+
+    private String convertAuthorToURLName(String authorDisplayName) {
+        final String maxLength = authorDisplayName.substring(0, Math.min(authorDisplayName.length(), 25));
+        final String noPunctuation = maxLength.replaceAll("[,.'-]", "");
+        final String underscores = noPunctuation.replaceAll(" ", "_");
+        return underscores.toLowerCase();
     }
 
     public BrainyQuoteManager() {
@@ -125,7 +134,40 @@ public class BrainyQuoteManager {
         } else {
             finalUrl = String.format(baseUrl, urlTopicName);
         }
-        final Connection connection = Jsoup.connect(finalUrl);
+        return parseForQuotes(finalUrl);
+    }
+
+    public Object getQuotesBy(String authorDisplayName, int pageIndex) {
+        final String urlAuthorName = convertAuthorToURLName(authorDisplayName);
+        String baseUrl = pageIndex > 1 ?
+                Endpoints.BRAINY_QUOTE_AUTHOR_PAGE_NUMBER
+                : Endpoints.BRAINY_QUOTE_AUTHOR_PAGE_1;
+        String finalUrl;
+        if (pageIndex > 1) {
+            finalUrl = String.format(baseUrl, urlAuthorName.substring(0, 1), urlAuthorName, pageIndex);
+        } else {
+            finalUrl = String.format(baseUrl, urlAuthorName.substring(0, 1), urlAuthorName);
+        }
+        return parseForQuotes(finalUrl);
+    }
+
+    public void getQuotesAsync(final String topicDisplayName,
+                          final int pageIndex, final Callback<List<BrainyQuote>> callback) {
+        submit(new Runnable() {
+            @Override
+            public void run() {
+                final Object returnObject = getQuotes(topicDisplayName, pageIndex);
+                if (returnObject instanceof String) {
+                    callback.onError((String) returnObject, null);
+                } else {
+                    callback.onSuccess((List<BrainyQuote>) returnObject);
+                }
+            }
+        });
+    }
+
+    private Object parseForQuotes(String url) {
+        final Connection connection = Jsoup.connect(url);
         final Connection.Response response;
         try {
             response = connection.execute();
@@ -145,32 +187,16 @@ public class BrainyQuoteManager {
         List<BrainyQuote> brainyQuotes = new ArrayList<>();
         final Elements elements = document.select("div.boxyPaddingBig");
         for (final Element quoteAndAuthor : elements) {
-            final Elements possibleQuote = quoteAndAuthor.select("a[href^=\"/quotes/quotes\"]");
-            final Elements possibleAuthor = quoteAndAuthor.select("a[href^=\"/quotes/authors\"]");
-            if (possibleQuote == null || possibleAuthor == null || possibleQuote.isEmpty() || possibleAuthor.isEmpty()) {
+            final Elements links = quoteAndAuthor.select("a");
+            if (links == null || links.size() != 2) {
                 continue;
             }
             BrainyQuote brainyQuote = new BrainyQuote();
-            brainyQuote.quote = possibleQuote.text().replace("\"", "");
-            brainyQuote.author = possibleAuthor.text();
+            brainyQuote.quote = links.get(0).text().replace("\"", "");
+            brainyQuote.author = links.get(1).text();
             brainyQuotes.add(brainyQuote);
         }
         return brainyQuotes;
-    }
-
-    public void getQuotesAsync(final String topicDisplayName,
-                          final int pageIndex, final Callback<List<BrainyQuote>> callback) {
-        submit(new Runnable() {
-            @Override
-            public void run() {
-                final Object returnObject = getQuotes(topicDisplayName, pageIndex);
-                if (returnObject instanceof String) {
-                    callback.onError((String) returnObject, null);
-                } else {
-                    callback.onSuccess((List<BrainyQuote>) returnObject);
-                }
-            }
-        });
     }
 
     public class BrainyTopic {

@@ -1,6 +1,7 @@
 package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 
@@ -57,14 +58,23 @@ public interface LWQQuoteController {
      *
      * @param callback
      */
-    void fetchQuotes(Category category, Callback<List<Quote>> callback);
+    void fetchNewQuotes(Category category, Callback<List<Quote>> callback);
 
     /**
-     * This will look for an unused quote within the database of the matching category.
-     * If not found, it will return null in the callback.
+     * This will look for unused quotes within the database of the matching category.
+     * If not found, it will attempt to fetch additional quotes.
      *
      * @param category
      * @param callback
      */
-    void fetchUnusedQuote(Category category, Callback<Quote> callback);
+    void fetchUnusedQuotes(Category category, Callback<List<Quote>> callback);
+
+    /**
+     * Find unused Quotes written by the given author. If one is not found locally, attempt
+     * to find unused quotes online
+     *
+     * @param author
+     * @param callback
+     */
+    void fetchUnusedQuotesBy(Author author, Callback<List<Quote>> callback);
 }

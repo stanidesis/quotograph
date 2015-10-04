@@ -66,6 +66,7 @@ public class BackgroundImage extends SugarRecord<BackgroundImage> {
         return Select.from(BackgroundImage.class).where(Condition.prop("uri").eq(uri)).first();
     }
 
+    // TODO this is busted for multiple sources
     public static BackgroundImage randomFromSource(Source source) {
         final long count = Select.from(BackgroundImage.class).count();
         final int offset = new Random().nextInt((int) count);
@@ -78,7 +79,7 @@ public class BackgroundImage extends SugarRecord<BackgroundImage> {
     public static BackgroundImage unusedFromCategory(String category) {
         Condition [] conditions = new Condition[2];
         conditions[0] = Condition.prop(StringUtil.toSQLName("category")).eq(category);
-        conditions[1] = Condition.prop(StringUtil.toSQLName("used")).eq(false);
+        conditions[1] = Condition.prop(StringUtil.toSQLName("used")).eq("0");
         return Select.from(BackgroundImage.class).where(conditions).first();
     }
 }
