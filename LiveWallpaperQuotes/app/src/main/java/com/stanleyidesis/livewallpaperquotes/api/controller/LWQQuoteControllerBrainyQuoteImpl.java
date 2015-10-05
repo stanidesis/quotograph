@@ -184,8 +184,12 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                         if (quote != null) {
                             continue;
                         }
-                        // TODO one-to-many relationships would allow us to record the category(ies) from the result
-                        quote = new Quote(brainyQuote.quote, author, null);
+                        Category category = Category.findWithName(brainyQuote.category);
+                        if (category == null) {
+                            category = new Category(brainyQuote.category, Category.Source.BRAINY_QUOTE);
+                            category.save();
+                        }
+                        quote = new Quote(brainyQuote.quote, author, category);
                         quote.save();
                         recoveredQuotes.add(quote);
                     }
