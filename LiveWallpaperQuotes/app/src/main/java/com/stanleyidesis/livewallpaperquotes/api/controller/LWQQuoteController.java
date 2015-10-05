@@ -61,6 +61,14 @@ public interface LWQQuoteController {
     void fetchNewQuotes(Category category, Callback<List<Quote>> callback);
 
     /**
+     * Use the string query to search for quotes online.
+     *
+     * @param searchQuery
+     * @param callback
+     */
+    void fetchQuotes(String searchQuery, Callback<List<Object>> callback);
+
+    /**
      * This will look for unused quotes within the database of the matching category.
      * If not found, it will attempt to fetch additional quotes.
      *

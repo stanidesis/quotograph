@@ -66,10 +66,10 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
             public void onSuccess(List<BrainyQuoteManager.BrainyTopic> brainyTopics) {
                 List<Category> newCategories = new ArrayList<>();
                 for (BrainyQuoteManager.BrainyTopic brainyTopic : brainyTopics) {
-                    if (Category.hasCategory(brainyTopic.displayName, Category.Source.BRAINY_QUOTE)) {
+                    if (Category.hasCategory(brainyTopic.name, Category.Source.BRAINY_QUOTE)) {
                         continue;
                     }
-                    Category newCategory = new Category(brainyTopic.displayName, Category.Source.BRAINY_QUOTE);
+                    Category newCategory = new Category(brainyTopic.name, Category.Source.BRAINY_QUOTE);
                     newCategory.save();
                     newCategories.add(newCategory);
                 }
@@ -103,10 +103,10 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                     }
                     List<BrainyQuoteManager.BrainyQuote> brainyQuotes = (List<BrainyQuoteManager.BrainyQuote>) returnObject;
                     for (BrainyQuoteManager.BrainyQuote brainyQuote : brainyQuotes) {
-                        Author author = Author.findAuthor(brainyQuote.author);
+                        Author author = Author.findAuthor(brainyQuote.author.name);
                         Quote quote = null;
                         if (author == null) {
-                            author = new Author(brainyQuote.author, false);
+                            author = new Author(brainyQuote.author.name, false);
                             author.save();
                         } else {
                             quote = Quote.find(brainyQuote.quote, author);
@@ -184,9 +184,9 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                         if (quote != null) {
                             continue;
                         }
-                        Category category = Category.findWithName(brainyQuote.category);
+                        Category category = Category.findWithName(brainyQuote.topic.name);
                         if (category == null) {
-                            category = new Category(brainyQuote.category, Category.Source.BRAINY_QUOTE);
+                            category = new Category(brainyQuote.topic.name, Category.Source.BRAINY_QUOTE);
                             category.save();
                         }
                         quote = new Quote(brainyQuote.quote, author, category);
@@ -196,6 +196,64 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                     page++;
                 }
                 callback.onSuccess(recoveredQuotes);
+            }
+        }).start();
+    }
+
+    @Override
+    public void fetchQuotes(final String searchQuery, final Callback<List<Object>> callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Object returnObject = brainyQuoteManager.searchForQuotes(searchQuery);
+                if (returnObject instanceof String) {
+                    callback.onError((String) returnObject, null);
+                    return;
+                }
+                List<Object> recoveredObjects = new ArrayList<>();
+                List<Object> brainyResults = (List<Object>) returnObject;
+                for (Object brainyResult : brainyResults) {
+                    if (brainyResult instanceof BrainyQuoteManager.BrainyQuote) {
+                       BrainyQuoteManager.BrainyQuote brainyQuote = (BrainyQuoteManager.BrainyQuote) brainyResult;
+                        Category category = null;
+                        if (brainyQuote.topic != null) {
+                            category = Category.findWithName(brainyQuote.topic.name);
+                            if (category == null) {
+                                category = new Category(brainyQuote.topic.name, Category.Source.BRAINY_QUOTE);
+                                category.save();
+                            }
+                        }
+                        Author author = Author.findAuthor(brainyQuote.author.name);
+                        if (author == null) {
+                            author = new Author(brainyQuote.author.name, false);
+                            author.save();
+                        }
+                        Quote quote = Quote.find(brainyQuote.quote, author);
+                        if (quote == null) {
+                            quote = new Quote(brainyQuote.quote, author, category);
+                            quote.save();
+                        }
+                        recoveredObjects.add(quote);
+                    } else if (brainyResult instanceof BrainyQuoteManager.BrainyAuthor) {
+                        BrainyQuoteManager.BrainyAuthor brainyAuthor = (BrainyQuoteManager.BrainyAuthor) brainyResult;
+                        Author author = Author.findAuthor(brainyAuthor.name);
+                        if (author == null) {
+                            author = new Author(brainyAuthor.name, false);
+                            author.save();
+                        }
+                        recoveredObjects.add(author);
+                    } else if (brainyResult instanceof BrainyQuoteManager.BrainyTopic) {
+                        BrainyQuoteManager.BrainyTopic brainyTopic = (BrainyQuoteManager.BrainyTopic) brainyResult;
+                        Category category = Category.findWithName(brainyTopic.name);
+                        if (category == null) {
+                            // Unlikely
+                            category = new Category(brainyTopic.name, Category.Source.BRAINY_QUOTE);
+                            category.save();
+                        }
+                        recoveredObjects.add(category);
+                    }
+                }
+                callback.onSuccess(recoveredObjects);
             }
         }).start();
     }

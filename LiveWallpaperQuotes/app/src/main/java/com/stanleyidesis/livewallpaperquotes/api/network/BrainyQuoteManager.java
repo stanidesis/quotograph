@@ -11,6 +11,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -58,6 +60,7 @@ public class BrainyQuoteManager {
         String BRAINY_QUOTE_TOPIC_PAGE_NUMBER = "https://www.brainyquote.com/quotes/topics/%s%d.html";
         String BRAINY_QUOTE_AUTHOR_PAGE_1 = "https://www.brainyquote.com/quotes/authors/%s/%s.html";
         String BRAINY_QUOTE_AUTHOR_PAGE_NUMBER = "https://www.brainyquote.com/quotes/authors/%s/%s_%d.html";
+        String BRAINY_QUOTE_SEARCH_QUERY = "https://www.brainyquote.com/search_results.html?q=%s";
     }
 
     private ScheduledExecutorService scheduledExecutorService;
@@ -111,11 +114,7 @@ public class BrainyQuoteManager {
                 List<BrainyTopic> topics = new ArrayList<>();
                 final Elements elements = document.select("a[href^=/quotes/topics/]");
                 for (Element element : elements) {
-                    BrainyTopic brainyTopic = new BrainyTopic();
-                    brainyTopic.displayName = element.text();
-
-                    final String href = element.attr("href");
-                    brainyTopic.urlShortName = href.substring(href.lastIndexOf('/') + 1);
+                    BrainyTopic brainyTopic = new BrainyTopic(element.text());
                     topics.add(brainyTopic);
                 }
                 callback.onSuccess(topics);
@@ -134,7 +133,11 @@ public class BrainyQuoteManager {
         } else {
             finalUrl = String.format(baseUrl, urlTopicName);
         }
-        return parseForQuotes(finalUrl);
+        final Object o = parseDocument(finalUrl);
+        if (o instanceof String) {
+            return o;
+        }
+        return parseForQuotes((Document) o);
     }
 
     public Object getQuotesBy(String authorDisplayName, int pageIndex) {
@@ -148,10 +151,38 @@ public class BrainyQuoteManager {
         } else {
             finalUrl = String.format(baseUrl, urlAuthorName.substring(0, 1), urlAuthorName);
         }
-        return parseForQuotes(finalUrl);
+        final Object o = parseDocument(finalUrl);
+        if (o instanceof String) {
+            return o;
+        }
+        return parseForQuotes((Document) o);
     }
 
-    private Object parseForQuotes(String url) {
+    public Object searchForQuotes(String searchQuery) {
+        String escapedQuery = null;
+        try {
+            escapedQuery = URLEncoder.encode(searchQuery, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return e.getLocalizedMessage();
+        }
+        String finalUrl = String.format(Endpoints.BRAINY_QUOTE_SEARCH_QUERY, escapedQuery);
+        final Object o = parseDocument(finalUrl);
+        if (o instanceof String) {
+            return o;
+        }
+        Document document = (Document) o;
+        final List<BrainyQuote> brainyQuotes = parseForQuotes(document);
+        final List<BrainyAuthor> brainyAuthors = parseForAuthors(document);
+        final List<BrainyTopic> brainyTopics = parseForTopics(document);
+        final List<Object> result = new ArrayList<>();
+        result.addAll(brainyTopics);
+        result.addAll(brainyAuthors);
+        result.addAll(brainyQuotes);
+        return result;
+    }
+
+    private Object parseDocument(String url) {
         final Connection connection = Jsoup.connect(url);
         final Connection.Response response;
         try {
@@ -168,39 +199,85 @@ public class BrainyQuoteManager {
             e.printStackTrace();
             return e.getLocalizedMessage();
         }
+        return document;
+    }
 
+    private List<BrainyQuote> parseForQuotes(Document document) {
         List<BrainyQuote> brainyQuotes = new ArrayList<>();
         final Elements elements = document.select(".boxy");
         for (final Element quoteAuthorCategories : elements) {
             final Elements quotes = quoteAuthorCategories.select("span.bqQuoteLink > a");
-            if (quotes == null || quotes.size() == 0) {
+            if (quotes == null || quotes.isEmpty()) {
                 continue;
             }
             final Elements authors = quoteAuthorCategories.select("div.bq-aut > a");
-            if (authors == null || authors.size() == 0) {
+            if (authors == null || authors.isEmpty()) {
                 continue;
             }
             BrainyQuote brainyQuote = new BrainyQuote();
             brainyQuote.quote = quotes.get(0).text().replace("\"", "");
-            brainyQuote.author = authors.get(0).text();
+            brainyQuote.author = new BrainyAuthor(authors.get(0).text());
             brainyQuotes.add(brainyQuote);
             final Elements category = quoteAuthorCategories.select("a[href^=/quotes/topics]");
-            if (category == null || category.size() == 0) {
+            if (category == null || category.isEmpty()) {
                 continue;
             }
-            brainyQuote.category = category.get(0).text();
+            brainyQuote.topic = new BrainyTopic(category.get(0).text());
         }
         return brainyQuotes;
     }
 
+    private List<BrainyAuthor> parseForAuthors(Document document) {
+        List<BrainyAuthor> brainyAuthors = new ArrayList<>();
+        final Elements elements = document.select("a[href^=/quotes/authors]");
+        if (elements == null || elements.isEmpty()) {
+            return brainyAuthors;
+        }
+        for (Element authorElement : elements) {
+            brainyAuthors.add(new BrainyAuthor(authorElement.text()));
+        }
+        return brainyAuthors;
+    }
+
+    private List<BrainyTopic> parseForTopics(Document document) {
+        List<BrainyTopic> brainyTopics = new ArrayList<>();
+        final Elements elements = document.select("div.bqLn > a[href^=/quotes/topics/topic_]");
+        if (elements == null || elements.isEmpty()) {
+            return brainyTopics;
+        }
+        for (Element topicElement : elements) {
+            brainyTopics.add(new BrainyTopic(topicElement.text()));
+        }
+        return brainyTopics;
+    }
+
     public class BrainyTopic {
-        public String displayName;
-        public String urlShortName;
+        public String name;
+
+        BrainyTopic(String name) {
+            this.name = name;
+        }
+    }
+
+    public class BrainyAuthor {
+        public String name;
+
+        BrainyAuthor(String name) {
+            this.name = name;
+        }
     }
 
     public class BrainyQuote {
-        public String author;
         public String quote;
-        public String category;
+        public BrainyAuthor author;
+        public BrainyTopic topic;
+
+        BrainyQuote() {}
+
+        BrainyQuote(String quote, BrainyAuthor author, BrainyTopic topic) {
+            this.quote = quote;
+            this.author = author;
+            this.topic = topic;
+        }
     }
 }
