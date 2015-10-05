@@ -206,6 +206,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         static ActivityState buildRevealSettings() {
             final Builder builder = new Builder();
             return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.OBSCURED)
+                    .setControlFlags(FLAG_REVEAL | FLAG_ENABLE)
                     .setAdjustableSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
                     .setSettingsFlags(FLAG_REVEAL | FLAG_ENABLE)
                     .setActionAdjustFlags(FLAG_UNSELECTED)
@@ -311,33 +312,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
                     });
                 }
                 wallpaperActionsContainer.setTag(R.id.view_tag_flags, nextActivityState.controlFlags);
-            }
-
-            // Adjustable Settings flags
-            int adjustableSettingsFlags = (int) adjustableSettingsContainer.getTag(R.id.view_tag_flags);
-            if (nextActivityState.adjustableSettingsFlags != adjustableSettingsFlags && nextActivityState.adjustableSettingsFlags != FLAG_NO_CHANGE) {
-                // Enable/disable
-                if (nextActivityState.adjustableSettingsFlagSet(FLAG_DISABLE) || nextActivityState.adjustableSettingsFlagSet(FLAG_ENABLE)) {
-                    final boolean enable = nextActivityState.adjustableSettingsFlagSet(FLAG_ENABLE);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            UIUtils.setViewAndChildrenEnabled(adjustableSettingsContainer, enable);
-                        }
-                    });
-                }
-                // Reveal/Hide
-                if (nextActivityState.adjustableSettingsFlagSet(FLAG_HIDE) || nextActivityState.adjustableSettingsFlagSet(FLAG_REVEAL)) {
-                    final boolean dismiss = nextActivityState.adjustableSettingsFlagSet(FLAG_HIDE);
-                    longestAnimation = Math.max(longestAnimation, dismiss ? 300l : 600l); // TODO HAX
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            animateSettingsContainer(adjustableSettingsContainer, dismiss);
-                        }
-                    });
-                }
-                adjustableSettingsContainer.setTag(R.id.view_tag_flags, nextActivityState.adjustableSettingsFlags);
             }
 
             // Settings flags
@@ -466,7 +440,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
 
     ActivityState initialState = Builder.buildInitialState();
     ActivityState revealControlsState = Builder.buildRevealControls();
-    ActivityState revealAdjustmentsState = Builder.buildRevealAdjustments();
     ActivityState revealSaveToDiskState = Builder.buildRevealSaveToDisk();
     ActivityState revealSaveToDiskCompletedState = Builder.buildSaveToDiskComplete();
     ActivityState revealSettingsState = Builder.buildRevealSettings();
@@ -494,8 +467,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
     ProgressBar progressBar;
     // Autopilot Views
     View settingsContainer;
-    // Adjustable Views
-    View adjustableSettingsContainer;
     // Wallpaper Actions
     View wallpaperActionsContainer;
     View shareButton;
@@ -510,10 +481,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         overridePendingTransition(android.R.anim.fade_in, 0);
         setContentView(R.layout.activity_lwq_settings);
 
-        // Setup Autopilot stuff
-        setupAutopilotSettings();
-        // Setup Adjustable stuff
-        setupAdjustableSettings();
+        // Setup settings
+        setupSettings();
         // Setup Wallpaper actions
         setupWallpaperActions();
         // Setup progress bar
@@ -537,7 +506,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         super.onBackPressed();
     }
 
-    void setupAutopilotSettings() {
+    void setupSettings() {
         settingsContainer = findViewById(R.id.group_lwq_settings_autopilot);
         settingsContainer.setAlpha(0f);
         settingsContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
@@ -589,6 +558,20 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
         updateRefreshSpinner();
+
+        // Blur
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            settingsContainer.findViewById(R.id.rl_lwq_settings_blur).setVisibility(View.GONE);
+        } else {
+            SeekBar blurBar = (SeekBar) settingsContainer.findViewById(R.id.sb_lwq_settings_blur);
+            blurBar.setProgress(LWQPreferences.getBlurPreference());
+            blurBar.setOnSeekBarChangeListener(this);
+        }
+
+        // Dim
+        SeekBar dimBar = (SeekBar) settingsContainer.findViewById(R.id.sb_lwq_settings_dim);
+        dimBar.setProgress(LWQPreferences.getDimPreference());
+        dimBar.setOnSeekBarChangeListener(this);
         UIUtils.setViewAndChildrenEnabled(settingsContainer, false);
     }
 
@@ -605,25 +588,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
             }
         }
         refreshSpinner.setOnItemSelectedListener(onItemSelectedListener);
-    }
-
-    void setupAdjustableSettings() {
-        adjustableSettingsContainer = findViewById(R.id.group_lwq_settings_adjustable);
-        adjustableSettingsContainer.setAlpha(0f);
-        adjustableSettingsContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_ENABLE);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            adjustableSettingsContainer.findViewById(R.id.rl_lwq_adjustable_settings_blur).setVisibility(View.GONE);
-        } else {
-            SeekBar blurBar = (SeekBar) adjustableSettingsContainer.findViewById(R.id.sb_lwq_adjustable_settings_blur);
-            blurBar.setProgress(LWQPreferences.getBlurPreference());
-            blurBar.setOnSeekBarChangeListener(this);
-        }
-
-        SeekBar dimBar = (SeekBar) adjustableSettingsContainer.findViewById(R.id.sb_lwq_adjustable_settings_dim);
-        dimBar.setProgress(LWQPreferences.getDimPreference());
-        dimBar.setOnSeekBarChangeListener(this);
-        UIUtils.setViewAndChildrenEnabled(adjustableSettingsContainer, false);
     }
 
     void setupWallpaperActions() {
@@ -644,13 +608,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         adjustButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (activityState != revealAdjustmentsState) {
-                    view.setSelected(true);
-                    changeState(revealAdjustmentsState);
-                } else {
-                    view.setSelected(false);
-                    changeState(revealControlsState);
-                }
+                // TODO
+//                if (activityState != revealAdjustmentsState) {
+//                    view.setSelected(true);
+//                    changeState(revealAdjustmentsState);
+//                } else {
+//                    view.setSelected(false);
+//                    changeState(revealControlsState);
+//                }
             }
         });
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -803,7 +768,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int value, boolean b) {
-        if (seekBar.getId() == R.id.sb_lwq_adjustable_settings_blur) {
+        if (seekBar.getId() == R.id.sb_lwq_settings_blur) {
             LWQPreferences.setBlurPreference(value);
         } else {
             LWQPreferences.setDimPreference(value);
@@ -817,7 +782,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        changeState(revealAdjustmentsState);
+        changeState(revealSettingsState);
     }
 
 }
