@@ -34,9 +34,9 @@
 <android.support.percent.PercentRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:fitsSystemWindows="true"
     android:clipToPadding="false"
     android:clipChildren="false">
 
@@ -61,7 +61,7 @@
         android:id="@+id/btn_wallpaper_actions_adjust"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/selectable_adjust_button"
+        android:src="@drawable/selectable_playlist_button"
         android:background="@android:color/transparent"
         android:layout_toRightOf="@id/btn_wallpaper_actions_save"
         app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>

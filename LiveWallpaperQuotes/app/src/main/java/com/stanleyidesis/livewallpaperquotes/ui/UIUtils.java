@@ -1,11 +1,16 @@
 package com.stanleyidesis.livewallpaperquotes.ui;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -86,5 +91,36 @@ public class UIUtils {
             }
         }
         return new Point(widthPixels, heightPixels);
+    }
+
+    public static int getNavBarHeight(Context context) {
+        int result = 0;
+        boolean hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey();
+        boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+
+        if(!hasMenuKey && !hasBackKey) {
+            //The device has a navigation bar
+            Resources resources = context.getResources();
+
+            int orientation = resources.getConfiguration().orientation;
+            int resourceId;
+            if (isTablet(context)){
+                resourceId = resources.getIdentifier(orientation == Configuration.ORIENTATION_PORTRAIT ? "navigation_bar_height" : "navigation_bar_height_landscape", "dimen", "android");
+            }  else {
+                resourceId = resources.getIdentifier(orientation == Configuration.ORIENTATION_PORTRAIT ? "navigation_bar_height" : "navigation_bar_width", "dimen", "android");
+            }
+
+            if (resourceId > 0) {
+                return resources.getDimensionPixelSize(resourceId);
+            }
+        }
+        return result;
+    }
+
+
+    private static boolean isTablet(Context context) {
+        return (context.getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 }

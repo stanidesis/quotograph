@@ -20,7 +20,7 @@
     SOFTWARE.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    selectable_adjust_button.xml
+    layout_playlist.xml
     @author Stanley Idesis
 
     From Live-Wallpaper-Quotes
@@ -29,17 +29,37 @@
     Please report any issues
     https://github.com/stanidesis/live-wallpaper-quotes/issues
 
-    Date: 09/26/2015
+    Date: 10/04/2015
 -->
+<android.support.percent.PercentRelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clickable="false">
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:enterFadeDuration="100"
-    android:exitFadeDuration="100">
-    <item android:state_selected="true">
-        <bitmap android:src="@mipmap/ic_brightness_6_white" android:alpha=".8"/>
-    </item>
-    <item android:state_pressed="true">
-        <bitmap android:src="@mipmap/ic_brightness_6_white" android:alpha=".7"/>
-    </item>
-    <item android:drawable="@mipmap/ic_brightness_6_white" />
-</selector>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_playlist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:clickable="false"
+        android:fitsSystemWindows="true"
+        android:clipToPadding="false"
+        android:fadingEdge="vertical"
+        android:fadingEdgeLength="10dp"
+        android:fadeScrollbars="true"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_playlist_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:src="@mipmap/ic_add_white"
+        android:fitsSystemWindows="true"
+        app:backgroundTint="@color/palette_500"
+        app:layout_marginPercent="5%"/>
+
+</android.support.percent.PercentRelativeLayout>

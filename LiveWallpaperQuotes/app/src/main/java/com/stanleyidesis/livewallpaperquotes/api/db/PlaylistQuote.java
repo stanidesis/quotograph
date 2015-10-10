@@ -1,6 +1,11 @@
 package com.stanleyidesis.livewallpaperquotes.api.db;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
+import com.orm.query.Condition;
+import com.orm.query.Select;
+
+import java.util.List;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -44,5 +49,9 @@ public class PlaylistQuote extends SugarRecord<PlaylistQuote> {
     public PlaylistQuote(Playlist playlist, Quote quote) {
         this.playlist = playlist;
         this.quote = quote;
+    }
+
+    public static List<PlaylistQuote> forPlaylist(Playlist playlist) {
+        return Select.from(PlaylistQuote.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId())).list();
     }
 }

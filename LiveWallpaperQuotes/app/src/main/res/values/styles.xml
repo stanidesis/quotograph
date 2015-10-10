@@ -4,7 +4,7 @@
     <style name="Theme.LWQ" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="colorPrimary">#FFFFFF</item>
-        <item name="colorPrimaryDark">#00000000</item>
+        <item name="colorPrimaryDark">#00FFFFFF</item>
         <item name="colorAccent">#AAAAAA</item>
         <item name="android:spinnerItemStyle">@style/Theme.LWQ.TextAppearance.Settings.Category.SpinnerItem</item>
         <item name="android:spinnerDropDownItemStyle">@style/Theme.LWQ.TextAppearance.Settings.Category.SpinnerDropDownItem</item>
