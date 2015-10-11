@@ -78,4 +78,24 @@
         android:layout_width="match_parent"
         android:layout_alignParentBottom="true"/>
 
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:fitsSystemWindows="true"
+        android:layout_above="@+id/group_lwq_settings_wallpaper_actions"
+        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"
+        app:layout_marginBottomPercent="3%">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_lwq_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_add_white"
+            app:backgroundTint="@color/palette_A100"/>
+
+    </FrameLayout>
+
 </android.support.percent.PercentRelativeLayout>

@@ -2,18 +2,20 @@ package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -80,9 +82,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         int controlFlags = FLAG_NO_CHANGE;
         int settingsFlags = FLAG_NO_CHANGE;
         int playlistFlags = FLAG_NO_CHANGE;
+        int FABFlags = FLAG_NO_CHANGE;
         int actionShareFlags = FLAG_NO_CHANGE;
         int actionSaveFlags = FLAG_NO_CHANGE;
-        int actionAdjustFlags = FLAG_NO_CHANGE;
+        int actionPlaylistFlags = FLAG_NO_CHANGE;
         int actionSkipFlags = FLAG_NO_CHANGE;
         int actionSettingsFlags = FLAG_NO_CHANGE;
         int progressBarFlags = FLAG_NO_CHANGE;
@@ -93,6 +96,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
 
         boolean playlistFlagSet(int compareWith) {
             return (playlistFlags & compareWith) > 0;
+        }
+
+        boolean FABFlagSet(int compareWith) {
+            return (FABFlags & compareWith) > 0;
         }
 
         boolean settingsFlagSet(int compareWith) {
@@ -132,6 +139,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
             return this;
         }
 
+        Builder setFABFlags(int flags) {
+            activityState.FABFlags = flags;
+            return this;
+        }
+
         Builder setSettingsFlags(int flags) {
             activityState.settingsFlags = flags;
             return this;
@@ -147,8 +159,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
             return this;
         }
 
-        Builder setActionAdjustFlags(int flags) {
-            activityState.actionAdjustFlags = flags;
+        Builder setActionPlaylistFlags(int flags) {
+            activityState.actionPlaylistFlags = flags;
             return this;
         }
 
@@ -173,7 +185,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
                     .setControlFlags(FLAG_HIDE | FLAG_DISABLE)
                     .setPlaylistFlags(FLAG_HIDE | FLAG_DISABLE)
                     .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
-                    .setActionAdjustFlags(FLAG_UNSELECTED)
+                    .setFABFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setActionPlaylistFlags(FLAG_UNSELECTED)
                     .setActionSettingsFlags(FLAG_UNSELECTED)
                     .setProgressBarFlags(FLAG_HIDE).build();
         }
@@ -184,6 +197,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
                     .setControlFlags(FLAG_REVEAL | FLAG_ENABLE)
                     .setPlaylistFlags(FLAG_HIDE | FLAG_DISABLE)
                     .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setFABFlags(FLAG_HIDE | FLAG_DISABLE)
                     .build();
         }
 
@@ -192,8 +206,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
             return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.REVEALED)
                     .setControlFlags(FLAG_HIDE | FLAG_DISABLE)
                     .setPlaylistFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setFABFlags(FLAG_HIDE | FLAG_DISABLE)
                     .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
-                    .setActionAdjustFlags(FLAG_UNSELECTED)
+                    .setActionPlaylistFlags(FLAG_UNSELECTED)
                     .setActionSettingsFlags(FLAG_UNSELECTED)
                     .build();
         }
@@ -201,10 +216,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         static ActivityState buildRevealPlaylist() {
             final Builder builder = new Builder();
             return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.OBSCURED)
-                    .setControlFlags(FLAG_REVEAL | FLAG_ENABLE)
                     .setPlaylistFlags(FLAG_REVEAL | FLAG_ENABLE)
+                    .setFABFlags(FLAG_REVEAL | FLAG_ENABLE)
                     .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
-                    .setActionAdjustFlags(FLAG_SELECTED)
+                    .setActionPlaylistFlags(FLAG_SELECTED)
                     .setActionSettingsFlags(FLAG_UNSELECTED)
                     .build();
         }
@@ -215,7 +230,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
                     .setControlFlags(FLAG_REVEAL | FLAG_ENABLE)
                     .setPlaylistFlags(FLAG_HIDE | FLAG_DISABLE)
                     .setSettingsFlags(FLAG_REVEAL | FLAG_ENABLE)
-                    .setActionAdjustFlags(FLAG_UNSELECTED)
+                    .setFABFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setActionPlaylistFlags(FLAG_UNSELECTED)
                     .setActionSettingsFlags(FLAG_SELECTED)
                     .build();
         }
@@ -374,9 +390,36 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
                 playlistContainer.setTag(R.id.view_tag_flags, nextActivityState.playlistFlags);
             }
 
+            // FAB flags
+            int FABFlags = (int) fab.getTag(R.id.view_tag_flags);
+            if (nextActivityState.FABFlags != FABFlags && nextActivityState.FABFlags != FLAG_NO_CHANGE) {
+                // Enable/disable
+                if (nextActivityState.FABFlagSet(FLAG_DISABLE) || nextActivityState.FABFlagSet(FLAG_ENABLE)) {
+                    final boolean enable = nextActivityState.FABFlagSet(FLAG_ENABLE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            UIUtils.setViewAndChildrenEnabled(fab, enable);
+                        }
+                    });
+                }
+                // Reveal/Hide
+                if (nextActivityState.FABFlagSet(FLAG_HIDE) || nextActivityState.FABFlagSet(FLAG_REVEAL)) {
+                    final boolean dismiss = nextActivityState.FABFlagSet(FLAG_HIDE);
+                    longestAnimation = Math.max(longestAnimation, 200l); // TODO HAX
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            animatePlaylistFAB(dismiss).start();
+                        }
+                    });
+                }
+                fab.setTag(R.id.view_tag_flags, nextActivityState.FABFlags);
+            }
+
             // Actions
             int [] actionButtonFlags = new int [] {nextActivityState.actionShareFlags,
-                    nextActivityState.actionSaveFlags, nextActivityState.actionAdjustFlags,
+                    nextActivityState.actionSaveFlags, nextActivityState.actionPlaylistFlags,
                     nextActivityState.actionSkipFlags, nextActivityState.actionSettingsFlags};
             View [] actionViews = new View[] {shareButton, saveButton, playlistButton, skipButton, settingsButton};
             for (int i = 0; i < actionButtonFlags.length; i++) {
@@ -501,6 +544,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
     ProgressBar progressBar;
     // Playlist
     View playlistContainer;
+    // FAB
+    View fab;
     // Settings
     View settingsContainer;
     // Wallpaper Actions
@@ -517,6 +562,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         overridePendingTransition(android.R.anim.fade_in, 0);
         setContentView(R.layout.activity_lwq_settings);
 
+        // Setup FAB
+        setupFAB();
         // Setup playlist
         setupPlaylist();
         // Setup settings
@@ -544,16 +591,19 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         super.onBackPressed();
     }
 
+    void setupFAB() {
+        fab = findViewById(R.id.fab_lwq_settings);
+        fab.setTranslationY(fab.getHeight() * 2);
+        fab.setAlpha(0f);
+        fab.setVisibility(View.INVISIBLE);
+        fab.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
+    }
+
     void setupPlaylist() {
         playlistContainer = findViewById(R.id.group_lwq_settings_playlist);
         playlistContainer.setAlpha(0f);
         playlistContainer.setVisibility(View.INVISIBLE);
         playlistContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
-
-        FloatingActionButton floatingActionButton = (FloatingActionButton) playlistContainer.findViewById(R.id.fab_playlist_add);
-        floatingActionButton.setTranslationY(floatingActionButton.getHeight() * 2);
-        floatingActionButton.setAlpha(0f);
-        floatingActionButton.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
 
         RecyclerView recyclerView = (RecyclerView) playlistContainer.findViewById(R.id.recycler_playlist);
         recyclerView.setHasFixedSize(true);
@@ -741,27 +791,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         Animator animator = dismiss ? AnimatorInflater.loadAnimator(this, R.animator.exit_to_left) :
                 AnimatorInflater.loadAnimator(this, R.animator.enter_from_right);
         animator.setTarget(container);
-        animator.addListener(new Animator.AnimatorListener() {
+        animator.addListener(new AnimatorListenerAdapter() {
             @Override
-            public void onAnimationStart(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
+            public void onAnimationEnd(Animator animation) {
                 if (dismiss) {
                     container.setVisibility(View.INVISIBLE);
                 }
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-
             }
         });
         animator.start();
@@ -791,6 +826,49 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.setStartDelay(startDelay);
         animatorSet.playTogether(alphaAnimator, translationAnimator);
+        return animatorSet;
+    }
+
+    Animator animatePlaylistFAB(final boolean dismiss) {
+        fab.setVisibility(View.VISIBLE);
+        float [] toFrom = dismiss ? new float[] {1f, .2f} : new float[] {.2f, 1f};
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                fab.setVisibility(dismiss ? View.INVISIBLE : View.VISIBLE);
+            }
+        });
+        ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(fab, "alpha", toFrom);
+        alphaAnimator.setDuration(200);
+        alphaAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        if (Build.VERSION.SDK_INT < 21) {
+            final int centerXY = fab.getMeasuredHeight();
+            final int maxRadius = fab.getWidth() / 2;
+            final Animator circularReveal = ViewAnimationUtils.createCircularReveal(fab, centerXY, centerXY,
+                    dismiss ? maxRadius : 0,
+                    dismiss ? 0 : maxRadius);
+            circularReveal.setInterpolator(new AccelerateDecelerateInterpolator());
+            circularReveal.setDuration(200);
+            circularReveal.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (dismiss) {
+                        fab.setVisibility(View.INVISIBLE);
+                    }
+                }
+            });
+            animatorSet.playTogether(circularReveal, alphaAnimator);
+            return animatorSet;
+        }
+
+        // Create a scale + fade animation
+        ObjectAnimator scaleDown = ObjectAnimator.ofPropertyValuesHolder(fab,
+                PropertyValuesHolder.ofFloat("scaleX", toFrom),
+                PropertyValuesHolder.ofFloat("scaleY", toFrom));
+        scaleDown.setDuration(200);
+        scaleDown.setInterpolator(new AccelerateDecelerateInterpolator());
+        animatorSet.playTogether(scaleDown, alphaAnimator);
         return animatorSet;
     }
 
