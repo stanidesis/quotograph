@@ -89,6 +89,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         int actionSkipFlags = FLAG_NO_CHANGE;
         int actionSettingsFlags = FLAG_NO_CHANGE;
         int progressBarFlags = FLAG_NO_CHANGE;
+        int contentFlags = FLAG_NO_CHANGE;
 
         boolean controlFlagSet(int compareWith) {
             return (controlFlags & compareWith) > 0;
@@ -179,6 +180,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
             return this;
         }
 
+        Builder setContentFlags(int flags) {
+            activityState.contentFlags = flags;
+            return this;
+        }
+
         static ActivityState buildInitialState() {
             final Builder builder = new Builder();
             return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.HIDDEN)
@@ -266,16 +272,28 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
             return builder.setSilkScreenState(LWQWallpaperActivity.SilkScreenState.HIDDEN)
                     .setActionSaveFlags(FLAG_DISABLE)
                     .setActionSkipFlags(FLAG_DISABLE | FLAG_ROTATE)
+                    .setActionPlaylistFlags(FLAG_DISABLE | FLAG_UNSELECTED)
+                    .setActionSettingsFlags(FLAG_DISABLE | FLAG_UNSELECTED)
+                    .setActionShareFlags(FLAG_DISABLE)
+                    .setContentFlags(FLAG_DISABLE)
+                    .setPlaylistFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
+                    .setFABFlags(FLAG_HIDE | FLAG_DISABLE)
                     .setProgressBarFlags(FLAG_REVEAL)
                     .build();
         }
 
         static ActivityState buildRevealSkipCompleted() {
-            final ActivityState activityState = buildRevealWallpaper();
-            activityState.actionSaveFlags = FLAG_ENABLE;
-            activityState.actionSkipFlags = FLAG_ENABLE | FLAG_NO_ROTATE;
-            activityState.progressBarFlags = FLAG_HIDE;
-            return activityState;
+            final Builder builder = new Builder();
+            return builder.setSilkScreenState(SilkScreenState.REVEALED)
+                    .setActionShareFlags(FLAG_ENABLE)
+                    .setActionSaveFlags(FLAG_ENABLE)
+                    .setActionPlaylistFlags(FLAG_ENABLE)
+                    .setActionSkipFlags(FLAG_ENABLE | FLAG_NO_ROTATE)
+                    .setActionSettingsFlags(FLAG_ENABLE)
+                    .setContentFlags(FLAG_ENABLE)
+                    .setProgressBarFlags(FLAG_HIDE)
+                    .build();
         }
     }
 
@@ -307,6 +325,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
                         animateSilkScreen(newSilkScreenState);
                     }
                 });
+            }
+
+            // Content flags
+            int contentFlags = (int) findViewById(android.R.id.content).getTag(R.id.view_tag_flags);
+            if (nextActivityState.contentFlags != contentFlags && nextActivityState.contentFlags != FLAG_NO_CHANGE) {
+                // Enable/disable
+                if ((nextActivityState.contentFlags & FLAG_ENABLE) > 0 || (nextActivityState.contentFlags & FLAG_DISABLE) > 0) {
+                    final boolean enabled = (nextActivityState.contentFlags & FLAG_ENABLE) > 0;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setupContent(enabled);
+                        }
+                    });
+                }
+                findViewById(android.R.id.content).setTag(R.id.view_tag_flags, contentFlags);
             }
 
             // Control flags
@@ -572,8 +606,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         setupWallpaperActions();
         // Setup progress bar
         setupProgressBar();
-        // Setup touch to dismiss
-        setupTouchToDismiss();
+        // Setup content
+        setupContent(true);
     }
 
     @Override
@@ -770,8 +804,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
         progressBar.setTag(R.id.view_tag_flags, FLAG_HIDE);
     }
 
-    void setupTouchToDismiss() {
-        findViewById(android.R.id.content).setOnClickListener(new View.OnClickListener() {
+    void setupContent(boolean enable) {
+        View content = findViewById(android.R.id.content);
+        content.setTag(R.id.view_tag_flags, enable ? FLAG_ENABLE : FLAG_DISABLE);
+        content.setEnabled(enable);
+        content.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (revealControlsTimerTask.scheduledExecutionTime() > 0) {
@@ -919,7 +956,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements StateFl
     @Override
     public void onEvent(final WallpaperEvent wallpaperEvent) {
         super.onEvent(wallpaperEvent);
-        if (!wallpaperEvent.didFail() && wallpaperEvent.getStatus() != WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+        if (wallpaperEvent.didFail() && activityState == revealSkipState) {
+            changeState(revealSkipCompletedState);
+        } else if (wallpaperEvent.getStatus() != WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             changeState(revealSkipState);
         }
     }
