@@ -78,7 +78,67 @@
         android:layout_width="match_parent"
         android:layout_alignParentBottom="true"/>
 
+    <!-- FAB Buttons -->
+
+    <View
+        android:id="@+id/view_fab_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/palette_A100"
+        android:fitsSystemWindows="false"
+        android:clickable="true"
+        android:visibility="gone"/>
+
+    <android.support.percent.PercentFrameLayout
+        android:id="@+id/fl_lwq_settings_fab_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:layout_above="@+id/fl_lwq_settings_fab_create_quote"
+        android:layout_alignRight="@+id/fl_lwq_settings_fab"
+        android:layout_alignEnd="@+id/fl_lwq_settings_fab"
+        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"
+        app:layout_heightPercent="9%"
+        app:layout_marginBottomPercent="3%">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_lwq_settings_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_search_white_small"
+            android:visibility="gone"
+            app:backgroundTint="@color/palette_A400"/>
+
+    </android.support.percent.PercentFrameLayout>
+
+    <android.support.percent.PercentFrameLayout
+        android:id="@+id/fl_lwq_settings_fab_create_quote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:layout_above="@+id/fl_lwq_settings_fab"
+        android:layout_alignRight="@+id/fl_lwq_settings_fab"
+        android:layout_alignEnd="@+id/fl_lwq_settings_fab"
+        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"
+        app:layout_heightPercent="9%"
+        app:layout_marginBottomPercent="3%">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_lwq_settings_create_quote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_create_white_small"
+            android:visibility="gone"
+            app:backgroundTint="@color/palette_A400"/>
+
+    </android.support.percent.PercentFrameLayout>
+
+    <!-- Main FAB-->
+
     <FrameLayout
+        android:id="@+id/fl_lwq_settings_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
