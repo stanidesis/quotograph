@@ -25,7 +25,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.orm.SugarRecord;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
@@ -77,7 +79,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  *
  * Date: 07/11/2015
  */
-public class LWQSettingsActivity extends LWQWallpaperActivity implements ActivityStateFlags, SeekBar.OnSeekBarChangeListener {
+public class LWQSettingsActivity extends LWQWallpaperActivity implements ActivityStateFlags, SeekBar.OnSeekBarChangeListener, PlaylistAdapter.Delegate {
 
     static class ActivityState {
 
@@ -598,6 +600,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         @Override
         public void run() {
             changeState(revealControlsState);
+            revealControlsTimer = null;
+            revealControlsTimerTask = null;
         }
     };
 
@@ -696,7 +700,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         RecyclerView recyclerView = (RecyclerView) playlistContainer.findViewById(R.id.recycler_playlist);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new PlaylistAdapter());
+        recyclerView.setAdapter(new PlaylistAdapter(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         UIUtils.setViewAndChildrenEnabled(playlistContainer, false);
@@ -865,8 +869,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         content.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (revealControlsTimerTask.scheduledExecutionTime() > 0) {
-                    revealControlsTimerTask.cancel();
+                if (revealControlsTimer != null) {
+                    revealControlsTimer.purge();
+                    revealControlsTimer.cancel();
+                    revealControlsTimer = null;
+                    revealControlsTimerTask = null;
                 }
                 if (activityState == revealWallpaperState) {
                     changeState(revealControlsState);
@@ -1018,7 +1025,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
         if (revealControlsTimer == null) {
             revealControlsTimer = new Timer();
-            revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 3);
+            revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 2);
         }
     }
 
@@ -1068,6 +1075,25 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         changeState(revealSettingsState);
+    }
+
+    // PlaylistAdapter.Delegate
+
+    @Override
+    public void onPlaylistItemRemove(PlaylistAdapter adapter, int position) {
+        if (adapter.getItemCount() == 1) {
+            Toast.makeText(this, "Your playlist may not be empty", Toast.LENGTH_LONG).show();
+            return;
+        }
+        final Object item = adapter.getItem(position);
+        SugarRecord record = (SugarRecord) item;
+        record.delete();
+        adapter.removeItem(position);
+    }
+
+    @Override
+    public void onQuoteEdit(PlaylistAdapter adapter, int position) {
+
     }
 
 }

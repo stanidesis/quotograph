@@ -1,10 +1,13 @@
 package com.stanleyidesis.livewallpaperquotes.ui.adapter;
 
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -55,33 +58,34 @@ import java.util.List;
  */
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
 
+    public static interface Delegate {
+        void onPlaylistItemRemove(PlaylistAdapter adapter, int position);
+        void onQuoteEdit(PlaylistAdapter adapter, int position);
+    }
+
+    Delegate delegate;
     List<Object> playlistItems;
 
     public PlaylistAdapter() {
+        this(null);
+    }
+
+    public PlaylistAdapter(Delegate delegate) {
+        this.delegate = delegate;
         final Playlist activePlaylist = Playlist.active();
         playlistItems = new ArrayList<>();
-//        playlistItems.addAll(PlaylistCategory.forPlaylist(activePlaylist));
-//        playlistItems.addAll(PlaylistAuthor.forPlaylist(activePlaylist));
-//        playlistItems.addAll(PlaylistQuote.forPlaylist(activePlaylist));
-        // TODO REMOVE
-        for (Category category : Category.listAll(Category.class)) {
-            playlistItems.add(new PlaylistCategory(activePlaylist, category));
-            if (playlistItems.size() == 5) {
-                break;
-            }
-        }
-        for (Author author : Author.listAll(Author.class)) {
-            playlistItems.add(new PlaylistAuthor(activePlaylist, author));
-            if (playlistItems.size() == 10) {
-                break;
-            }
-        }
-        for (Quote quote : Quote.listAll(Quote.class)) {
-            playlistItems.add(new PlaylistQuote(activePlaylist, quote));
-            if (playlistItems.size() == 15) {
-                break;
-            }
-        }
+        playlistItems.addAll(PlaylistCategory.forPlaylist(activePlaylist));
+        playlistItems.addAll(PlaylistAuthor.forPlaylist(activePlaylist));
+        playlistItems.addAll(PlaylistQuote.forPlaylist(activePlaylist));
+    }
+
+    public Object getItem(int position) {
+        return playlistItems.get(position);
+    }
+
+    public void removeItem(int position) {
+        playlistItems.remove(position);
+        notifyItemRemoved(position);
     }
 
     @Override
@@ -109,7 +113,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         return playlistItems.size();
     }
 
-    class PlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class PlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AdapterView.OnItemClickListener {
 
         Object data;
         ImageView icon;
@@ -117,6 +121,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         TextView subtitle;
         TextView description;
         View moreButton;
+        ListPopupWindow listPopupWindow;
 
         public PlaylistViewHolder(View itemView) {
             super(itemView);
@@ -160,7 +165,39 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
         @Override
         public void onClick(View view) {
-            // TODO
+            int popupWidth = view.getResources().getDimensionPixelSize(R.dimen.playlist_popup_width);
+            listPopupWindow = new ListPopupWindow(view.getContext());
+            listPopupWindow.setAnchorView(view);
+            listPopupWindow.setWidth(popupWidth);
+            listPopupWindow.setOnItemClickListener(this);
+            listPopupWindow.setModal(true);
+            String [] options = null;
+            if (data instanceof Quote) {
+                options = view.getResources().getStringArray(R.array.popup_playlist_quote_options);
+            } else {
+                options = view.getResources().getStringArray(R.array.popup_playlist_options);
+            }
+            listPopupWindow.setAdapter(new ArrayAdapter<String>(view.getContext(), R.layout.support_simple_spinner_dropdown_item, android.R.id.text1, options));
+            listPopupWindow.show();
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            listPopupWindow.dismiss();
+            listPopupWindow = null;
+            if (!(view instanceof TextView)) {
+                return;
+            }
+            TextView textView = (TextView) view;
+            if (textView.getText().toString().equalsIgnoreCase("remove")) {
+                if (delegate != null) {
+                    delegate.onPlaylistItemRemove(PlaylistAdapter.this, getAdapterPosition());
+                }
+            } else if (textView.getText().toString().equalsIgnoreCase("edit")) {
+                if (delegate != null) {
+                    delegate.onQuoteEdit(PlaylistAdapter.this, getAdapterPosition());
+                }
+            }
         }
     }
 }
