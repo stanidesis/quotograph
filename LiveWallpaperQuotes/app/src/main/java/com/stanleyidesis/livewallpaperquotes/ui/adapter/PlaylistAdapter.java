@@ -21,7 +21,12 @@ import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -65,6 +70,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     Delegate delegate;
     List<Object> playlistItems;
+    List<PlaylistCategory> playlistCategories;
+    List<PlaylistAuthor> playlistAuthors;
+    List<PlaylistQuote> playlistQuotes;
 
     public PlaylistAdapter() {
         this(null);
@@ -73,18 +81,46 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public PlaylistAdapter(Delegate delegate) {
         this.delegate = delegate;
         final Playlist activePlaylist = Playlist.active();
+        playlistCategories = PlaylistCategory.forPlaylist(activePlaylist);
+        playlistAuthors = PlaylistAuthor.forPlaylist(activePlaylist);
+        playlistQuotes = PlaylistQuote.forPlaylist(activePlaylist);
+        Collections.sort(playlistCategories);
+        Collections.sort(playlistAuthors);
+        Collections.sort(playlistQuotes);
         playlistItems = new ArrayList<>();
-        playlistItems.addAll(PlaylistCategory.forPlaylist(activePlaylist));
-        playlistItems.addAll(PlaylistAuthor.forPlaylist(activePlaylist));
-        playlistItems.addAll(PlaylistQuote.forPlaylist(activePlaylist));
+        playlistItems.addAll(playlistCategories);
+        playlistItems.addAll(playlistAuthors);
+        playlistItems.addAll(playlistQuotes);
     }
 
     public Object getItem(int position) {
         return playlistItems.get(position);
     }
 
+    public void insertItem(Object object) {
+        if (object instanceof PlaylistCategory) {
+            playlistCategories.add((PlaylistCategory) object);
+        } else if (object instanceof PlaylistAuthor) {
+            playlistAuthors.add((PlaylistAuthor) object);
+        } else {
+            playlistQuotes.add((PlaylistQuote) object);
+        }
+        playlistItems.clear();
+        playlistItems.addAll(playlistCategories);
+        playlistItems.addAll(playlistAuthors);
+        playlistItems.addAll(playlistQuotes);
+        notifyItemInserted(playlistItems.indexOf(object));
+    }
+
     public void removeItem(int position) {
-        playlistItems.remove(position);
+        final Object remove = playlistItems.remove(position);
+        if (remove instanceof PlaylistCategory) {
+            playlistCategories.remove(remove);
+        } else if (remove instanceof PlaylistAuthor) {
+            playlistAuthors.remove(remove);
+        } else {
+            playlistQuotes.remove(remove);
+        }
         notifyItemRemoved(position);
     }
 
@@ -95,7 +131,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     @Override
     public void onBindViewHolder(PlaylistViewHolder holder, int position) {
-        final Object o = playlistItems.get(position);
+        final Object o = getItem(position);
         if (o instanceof PlaylistCategory) {
             PlaylistCategory playlistCategory = (PlaylistCategory) o;
             holder.updateWithCategory(playlistCategory.category);
@@ -110,27 +146,21 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
 
     @Override
     public int getItemCount() {
-        return playlistItems.size();
+        return playlistCategories.size() + playlistAuthors.size() + playlistQuotes.size();
     }
 
-    class PlaylistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, AdapterView.OnItemClickListener {
+    class PlaylistViewHolder extends RecyclerView.ViewHolder implements AdapterView.OnItemClickListener {
 
         Object data;
-        ImageView icon;
-        TextView title;
-        TextView subtitle;
-        TextView description;
-        View moreButton;
+        @Bind(R.id.iv_playlist_item_icon) ImageView icon;
+        @Bind(R.id.tv_playlist_item_title) TextView title;
+        @Bind(R.id.tv_playlist_item_subtitle) TextView subtitle;
+        @Bind(R.id.tv_playlist_item_description) TextView description;
         ListPopupWindow listPopupWindow;
 
         public PlaylistViewHolder(View itemView) {
             super(itemView);
-            icon = (ImageView) itemView.findViewById(R.id.iv_playlist_item_icon);
-            title = (TextView) itemView.findViewById(R.id.tv_playlist_item_title);
-            subtitle = (TextView) itemView.findViewById(R.id.tv_playlist_item_subtitle);
-            description = (TextView) itemView.findViewById(R.id.tv_playlist_item_description);
-            moreButton = itemView.findViewById(R.id.iv_playlist_item_more);
-            moreButton.setOnClickListener(this);
+            ButterKnife.bind(this, itemView);
         }
 
         void updateWithCategory(Category category) {
@@ -163,8 +193,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             description.setText(quote.text);
         }
 
-        @Override
-        public void onClick(View view) {
+        @OnClick({R.id.iv_playlist_item_more, R.id.fl_playlist_item_more_wrapper}) void revealPopup(View view) {
             int popupWidth = view.getResources().getDimensionPixelSize(R.dimen.playlist_popup_width);
             listPopupWindow = new ListPopupWindow(view.getContext());
             listPopupWindow.setAnchorView(view);

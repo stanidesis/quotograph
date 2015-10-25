@@ -58,7 +58,7 @@
         app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>
 
     <ImageButton
-        android:id="@+id/btn_wallpaper_actions_adjust"
+        android:id="@+id/btn_wallpaper_actions_playlist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/selectable_playlist_button"
@@ -72,7 +72,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/selectable_skip_button"
         android:background="@android:color/transparent"
-        android:layout_toRightOf="@id/btn_wallpaper_actions_adjust"
+        android:layout_toRightOf="@id/btn_wallpaper_actions_playlist"
         app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>
 
     <ImageButton

@@ -6,12 +6,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.percent.PercentRelativeLayout;
+import android.support.v7.widget.AppCompatAutoCompleteTextView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,16 +24,23 @@ import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
+import com.orm.query.Select;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
+import com.stanleyidesis.livewallpaperquotes.api.db.Author;
+import com.stanleyidesis.livewallpaperquotes.api.db.Playlist;
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
+import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
@@ -45,6 +54,10 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -96,6 +109,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         int actionSettingsFlags = FLAG_NO_CHANGE;
         int progressBarFlags = FLAG_NO_CHANGE;
         int contentFlags = FLAG_NO_CHANGE;
+        int addEditQuoteFlags = FLAG_NO_CHANGE;
 
         boolean controlFlagSet(int compareWith) {
             return (controlFlags & compareWith) > 0;
@@ -120,6 +134,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
         boolean progressBarFlagsSet(int compareWith) {
             return (progressBarFlags & compareWith) > 0;
+        }
+
+        boolean addEditQuoteFlagsSet(int compareWith) {
+            return (addEditQuoteFlags & compareWith) > 0;
         }
 
     }
@@ -198,6 +216,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
         Builder setContentFlags(int flags) {
             activityState.contentFlags = flags;
+            return this;
+        }
+
+        Builder setAddEditQuoteFlags(int flags) {
+            activityState.addEditQuoteFlags = flags;
             return this;
         }
     }
@@ -477,6 +500,23 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 }
                 progressBar.setTag(R.id.view_tag_flags, nextActivityState.progressBarFlags);
             }
+
+            // Add/Edit Quote
+            int addEditQuoteFlags = (int) addEditQuote.getTag(R.id.view_tag_flags);
+            if (addEditQuoteFlags != nextActivityState.addEditQuoteFlags && nextActivityState.addEditQuoteFlags != FLAG_NO_CHANGE) {
+                // Reveal/Hide
+                if (nextActivityState.addEditQuoteFlagsSet(FLAG_HIDE) || nextActivityState.addEditQuoteFlagsSet(FLAG_REVEAL)) {
+                    final boolean dismiss = nextActivityState.addEditQuoteFlagsSet(FLAG_HIDE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            animateContainer(addEditQuote, dismiss);
+                        }
+                    });
+                }
+                addEditQuote.setTag(R.id.view_tag_flags, nextActivityState.addEditQuoteFlags);
+            }
+
             activityState = nextActivityState;
             try {
                 Thread.sleep(longestAnimation);
@@ -509,12 +549,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     ActivityState revealPlaylistState = new Builder()
             .setSilkScreenState(LWQWallpaperActivity.SilkScreenState.OBSCURED)
+            .setControlFlags(FLAG_REVEAL | FLAG_ENABLE)
             .setPlaylistFlags(FLAG_REVEAL | FLAG_ENABLE)
             .setFABFlags(FLAG_REVEAL | FLAG_ENABLE | FLAG_NO_ROTATE)
             .setSettingsFlags(FLAG_HIDE | FLAG_DISABLE)
             .setActionPlaylistFlags(FLAG_SELECTED)
             .setActionSettingsFlags(FLAG_UNSELECTED)
             .setFABActionFlags(FLAG_HIDE | FLAG_DISABLE)
+            .setAddEditQuoteFlags(FLAG_HIDE | FLAG_DISABLE)
             .build();
 
     ActivityState revealSaveToDiskState = new Builder()
@@ -586,6 +628,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     ActivityState revealFABActionsState = new Builder()
             .setFABActionFlags(FLAG_REVEAL | FLAG_ENABLE)
             .setFABFlags(FLAG_ROTATE)
+            .setAddEditQuoteFlags(FLAG_HIDE | FLAG_DISABLE)
+            .build();
+
+    ActivityState revealAddEditQuoteState = new Builder()
+            .setFABActionFlags(FLAG_REVEAL | FLAG_ENABLE)
+            .setFABFlags(FLAG_ROTATE)
+            .setAddEditQuoteFlags(FLAG_REVEAL | FLAG_ENABLE)
             .build();
 
     // Current ActivityState
@@ -594,45 +643,57 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     BlockingDeque<ActivityState> stateBlockingDeque = new LinkedBlockingDeque<>();
     // Executes state changes
     ExecutorService changeStateExecutorService = Executors.newSingleThreadScheduledExecutor();
-
+    // Timer Task to reveal controls
     Timer revealControlsTimer;
     TimerTask revealControlsTimerTask = new TimerTask() {
         @Override
         public void run() {
-            changeState(revealControlsState);
+            changeState(revealPlaylistState);
             revealControlsTimer = null;
             revealControlsTimerTask = null;
         }
     };
+    // PlaylistAdapter
+    PlaylistAdapter playlistAdapter;
+    // Editing this Quote
+    Quote editingQuote;
+    int editingQuotePosition;
 
     // ProgressBar
-    ProgressBar progressBar;
+    @Bind(R.id.pb_lwq_settings) ProgressBar progressBar;
     // Playlist
-    View playlistContainer;
+    @Bind(R.id.group_lwq_settings_playlist) View playlistContainer;
     // FAB
-    View fab;
+    @Bind(R.id.fab_lwq_reveal) View fab;
+    @Bind(R.id.view_fab_background) View fabBackground;
     // FAB Actions
-    View fabBackground;
-    View fabSearch;
-    View fabCreate;
+    @Bind(R.id.fab_lwq_search) View fabSearch;
+    @Bind(R.id.fab_lwq_create_quote) View fabCreate;
+    // Add/Edit Quote
+    @Bind(R.id.group_lwq_fab_screen_add_edit_quote) View addEditQuote;
+    @Bind(R.id.et_fab_screen_quote) EditText editableQuote;
+    @Bind(R.id.actv_fab_screen_author) AppCompatAutoCompleteTextView editableAuthor;
     // Settings
-    View settingsContainer;
+    @Bind(R.id.group_lwq_settings_settings) View settingsContainer;
     // Wallpaper Actions
-    View wallpaperActionsContainer;
-    View shareButton;
-    View saveButton;
-    View playlistButton;
-    View skipButton;
-    View settingsButton;
+    @Bind(R.id.group_lwq_settings_wallpaper_actions) View wallpaperActionsContainer;
+    @Bind(R.id.btn_wallpaper_actions_share) View shareButton;
+    @Bind(R.id.btn_wallpaper_actions_save) View saveButton;
+    @Bind(R.id.btn_wallpaper_actions_playlist) View playlistButton;
+    @Bind(R.id.btn_wallpaper_actions_skip) View skipButton;
+    @Bind(R.id.btn_wallpaper_actions_settings) View settingsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         overridePendingTransition(android.R.anim.fade_in, 0);
         setContentView(R.layout.activity_lwq_settings);
+        ButterKnife.bind(this);
 
         // Setup FAB
         setupFABs();
+        // Setup Add/Edit
+        setupAddEditQuote();
         // Setup playlist
         setupPlaylist();
         // Setup settings
@@ -661,55 +722,69 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     void setupFABs() {
-        fab = findViewById(R.id.fab_lwq_settings);
         fab.setTranslationY(fab.getHeight() * 2);
         fab.setAlpha(0f);
         fab.setVisibility(View.GONE);
         fab.setEnabled(false);
         fab.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE | FLAG_NO_ROTATE);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (activityState == revealFABActionsState) {
-                    changeState(revealPlaylistState);
-                } else {
-                    changeState(revealFABActionsState);
-                }
-            }
-        });
 
-        fabBackground = findViewById(R.id.view_fab_background);
         fabBackground.setVisibility(View.GONE);
         fabBackground.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
 
-        fabCreate = findViewById(R.id.fab_lwq_settings_create_quote);
         fabCreate.setAlpha(0f);
         fabCreate.setVisibility(View.GONE);
 
-        fabSearch = findViewById(R.id.fab_lwq_settings_search);
         fabSearch.setAlpha(0f);
         fabSearch.setVisibility(View.GONE);
     }
 
+    void setupAddEditQuote() {
+        addEditQuote.setAlpha(0f);
+        addEditQuote.setVisibility(View.GONE);
+        addEditQuote.setEnabled(false);
+        addEditQuote.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Activity context = LWQSettingsActivity.this;
+                if (context == null) {
+                    return;
+                }
+                final List<Author> list = Select.from(Author.class).orderBy(StringUtil.toSQLName("name")).list();
+                String [] allAuthors = new String[list.size()];
+                for (int i = 0; i < list.size(); i++) {
+                    allAuthors[i] = list.get(i).name;
+                }
+                final ArrayAdapter<String> authorAdapter = new ArrayAdapter<String>(context,
+                        R.layout.support_simple_spinner_dropdown_item, allAuthors);
+                context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        editableAuthor.setAdapter(authorAdapter);
+                    }
+                });
+            }
+        }).start();
+    }
+
     void setupPlaylist() {
-        playlistContainer = findViewById(R.id.group_lwq_settings_playlist);
         playlistContainer.setAlpha(0f);
-        playlistContainer.setVisibility(View.INVISIBLE);
+        playlistContainer.setVisibility(View.GONE);
         playlistContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
 
-        RecyclerView recyclerView = (RecyclerView) playlistContainer.findViewById(R.id.recycler_playlist);
+        playlistAdapter = new PlaylistAdapter(this);
+        RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler_playlist);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new PlaylistAdapter(this));
+        recyclerView.setAdapter(playlistAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         UIUtils.setViewAndChildrenEnabled(playlistContainer, false);
     }
 
     void setupSettings() {
-        settingsContainer = findViewById(R.id.group_lwq_settings_settings);
         settingsContainer.setAlpha(0f);
-        settingsContainer.setVisibility(View.INVISIBLE);
+        settingsContainer.setVisibility(View.GONE);
         settingsContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
         UIUtils.setViewAndChildrenEnabled(settingsContainer, false);
 
@@ -726,7 +801,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 R.layout.spinner_item,
                 backgroundCategories);
         imageCategoryAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
-        Spinner imageCategorySpinner = (Spinner) settingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_image_category);
+        Spinner imageCategorySpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_image_category);
         imageCategorySpinner.setAdapter(imageCategoryAdapter);
         imageCategorySpinner.setSelection(currentSelection);
         imageCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -737,7 +812,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
         });
 
         final String [] refreshPreferenceOptions = getResources().getStringArray(R.array.refresh_preference_options);
@@ -745,7 +821,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 R.layout.spinner_item,
                 refreshPreferenceOptions);
         refreshOptionsAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
-        Spinner refreshSpinner = (Spinner) settingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_interval);
+        Spinner refreshSpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_interval);
         refreshSpinner.setAdapter(refreshOptionsAdapter);
         refreshSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -762,22 +838,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
         // Blur
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            settingsContainer.findViewById(R.id.rl_lwq_settings_blur).setVisibility(View.GONE);
+            ButterKnife.findById(settingsContainer, R.id.sb_lwq_settings_blur).setVisibility(View.GONE);
         } else {
-            SeekBar blurBar = (SeekBar) settingsContainer.findViewById(R.id.sb_lwq_settings_blur);
+            SeekBar blurBar = ButterKnife.findById(settingsContainer, R.id.sb_lwq_settings_blur);
             blurBar.setProgress(LWQPreferences.getBlurPreference());
             blurBar.setOnSeekBarChangeListener(this);
         }
 
         // Dim
-        SeekBar dimBar = (SeekBar) settingsContainer.findViewById(R.id.sb_lwq_settings_dim);
+        SeekBar dimBar = ButterKnife.findById(settingsContainer, R.id.sb_lwq_settings_dim);
         dimBar.setProgress(LWQPreferences.getDimPreference());
         dimBar.setOnSeekBarChangeListener(this);
         UIUtils.setViewAndChildrenEnabled(settingsContainer, false);
     }
 
     void updateRefreshSpinner() {
-        Spinner refreshSpinner = (Spinner) settingsContainer.findViewById(R.id.spinner_lwq_autopilot_settings_interval);
+        Spinner refreshSpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_interval);
         final AdapterView.OnItemSelectedListener onItemSelectedListener = refreshSpinner.getOnItemSelectedListener();
         refreshSpinner.setOnItemSelectedListener(null);
         final long refreshPreference = LWQPreferences.getRefreshPreference();
@@ -792,97 +868,136 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     void setupWallpaperActions() {
-        wallpaperActionsContainer = findViewById(R.id.group_lwq_settings_wallpaper_actions);
         wallpaperActionsContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
         wallpaperActionsContainer.setEnabled(false);
         final PercentRelativeLayout.LayoutParams layoutParams = (PercentRelativeLayout.LayoutParams) wallpaperActionsContainer.getLayoutParams();
         layoutParams.bottomMargin = (int) (UIUtils.getNavBarHeight(this) * 1.3);
         wallpaperActionsContainer.setLayoutParams(layoutParams);
 
-        shareButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_share);
-        saveButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_save);
-        playlistButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_adjust);
-        skipButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_skip);
-        settingsButton = wallpaperActionsContainer.findViewById(R.id.btn_wallpaper_actions_settings);
         View [] buttons = new View[] {shareButton, saveButton, playlistButton, skipButton, settingsButton};
         for (View button : buttons) {
             button.setAlpha(0f);
             button.setTranslationY(button.getHeight() * 2f);
             button.setTag(R.id.view_tag_flags, FLAG_ENABLE);
-        }
-        playlistButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (activityState != revealPlaylistState) {
-                    view.setSelected(true);
-                    changeState(revealPlaylistState);
-                } else {
-                    view.setSelected(false);
-                    changeState(revealControlsState);
-                }
-            }
-        });
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (activityState != revealSettingsState) {
-                    view.setSelected(true);
-                    changeState(revealSettingsState);
-                } else {
-                    view.setSelected(false);
-                    changeState(revealControlsState);
-                }
-            }
-        });
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendBroadcast(new Intent(getString(R.string.action_share)));
-            }
-        });
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                changeState(revealSaveToDiskState);
-                sendBroadcast(new Intent(getString(R.string.action_save)));
-            }
-        });
-        skipButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                changeState(revealSkipState);
-                LWQApplication.getWallpaperController().generateNewWallpaper();
-            }
-        });
+        };
     }
 
     void setupProgressBar() {
-        progressBar = (ProgressBar) findViewById(R.id.pb_lwq_settings);
         progressBar.setAlpha(0f);
         progressBar.setTag(R.id.view_tag_flags, FLAG_HIDE);
     }
 
     void setupContent(boolean enable) {
-        View content = findViewById(android.R.id.content);
+        View content = ButterKnife.findById(this, android.R.id.content);
         content.setTag(R.id.view_tag_flags, enable ? FLAG_ENABLE : FLAG_DISABLE);
         content.setEnabled(enable);
-        content.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (revealControlsTimer != null) {
-                    revealControlsTimer.purge();
-                    revealControlsTimer.cancel();
-                    revealControlsTimer = null;
-                    revealControlsTimerTask = null;
-                }
-                if (activityState == revealWallpaperState) {
-                    changeState(revealControlsState);
-                } else {
-                    changeState(revealWallpaperState);
-                }
-            }
-        });
     }
+
+    // Click Handling
+
+    @OnClick(R.id.fab_lwq_create_quote) void revealAddEditQuote() {
+        if (activityState == revealAddEditQuoteState) {
+            changeState(revealFABActionsState);
+        } else {
+            editableAuthor.setText("");
+            editableQuote.setText("");
+            changeState(revealAddEditQuoteState);
+        }
+    }
+
+    @OnClick(R.id.btn_fab_screen_save) void saveQuote() {
+        Author author = Author.findAuthor(editableAuthor.getText().toString().trim());
+        if (author == null) {
+            // Create a new Author
+            author = new Author(editableAuthor.getText().toString().trim(), true);
+            author.save();
+        }
+        if (editingQuote != null) {
+            editingQuote.author = author;
+            editingQuote.text = editableQuote.getText().toString().trim();
+            editingQuote.save();
+            playlistAdapter.notifyItemChanged(editingQuotePosition);
+            editingQuote = null;
+            editingQuotePosition = -1;
+            changeState(revealPlaylistState);
+            return;
+        }
+        Quote quote = Quote.find(editableQuote.getText().toString().trim(), author);
+        if (quote == null) {
+            quote = new Quote(editableQuote.getText().toString().trim(), author, null);
+            quote.save();
+        }
+        PlaylistQuote playlistQuote = new PlaylistQuote(Playlist.active(), quote);
+        playlistQuote.save();
+        playlistAdapter.insertItem(playlistQuote);
+        changeState(revealPlaylistState);
+        UIUtils.dismissKeyboard(this);
+    }
+
+    @OnClick(R.id.btn_fab_screen_cancel) void dismissAddEditQuote() {
+        editingQuote = null;
+        editingQuotePosition = -1;
+        changeState(revealFABActionsState);
+        UIUtils.dismissKeyboard(this);
+    }
+
+    @OnClick(R.id.fab_lwq_reveal) void toggleAddScreen() {
+        if (activityState == revealFABActionsState || activityState == revealAddEditQuoteState) {
+            changeState(revealPlaylistState);
+        } else {
+            changeState(revealFABActionsState);
+        }
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_playlist) void togglePlaylist(View view) {
+        if (activityState != revealPlaylistState) {
+            view.setSelected(true);
+            changeState(revealPlaylistState);
+        } else {
+            view.setSelected(false);
+            changeState(revealControlsState);
+        }
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_settings) void toggleSettings(View view) {
+        if (activityState != revealSettingsState) {
+            view.setSelected(true);
+            changeState(revealSettingsState);
+        } else {
+            view.setSelected(false);
+            changeState(revealControlsState);
+        }
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_share) void shareWallpaper() {
+        sendBroadcast(new Intent(getString(R.string.action_share)));
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperToDisk() {
+        changeState(revealSaveToDiskState);
+        sendBroadcast(new Intent(getString(R.string.action_save)));
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_skip) void skipWallpaper() {
+        changeState(revealSkipState);
+        LWQApplication.getWallpaperController().generateNewWallpaper();
+    }
+
+    @OnClick(android.R.id.content) void toggleShowWallpaper() {
+        if (revealControlsTimer != null) {
+            revealControlsTimer.purge();
+            revealControlsTimer.cancel();
+            revealControlsTimer = null;
+            revealControlsTimerTask = null;
+        }
+        if (activityState == revealWallpaperState) {
+            changeState(revealControlsState);
+        } else {
+            changeState(revealWallpaperState);
+        }
+    }
+
+    // Animation
 
     void animateContainer(final View container, final boolean dismiss) {
         container.setVisibility(View.VISIBLE);
@@ -893,7 +1008,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (dismiss) {
-                    container.setVisibility(View.INVISIBLE);
+                    container.setVisibility(View.GONE);
                 }
             }
         });
@@ -998,6 +1113,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         return allAnimations;
     }
 
+    // Misc
+
     void changeState(ActivityState activityState) {
         try {
             stateBlockingDeque.put(activityState);
@@ -1028,6 +1145,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 2);
         }
     }
+
+    // Event Handling
 
     @Override
     public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
@@ -1093,7 +1212,16 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onQuoteEdit(PlaylistAdapter adapter, int position) {
-
+        final Object item = adapter.getItem(position);
+        if (item instanceof PlaylistQuote) {
+            editingQuotePosition = position;
+            editingQuote = ((PlaylistQuote) item).quote;
+            editableAuthor.setText(editingQuote.author.name);
+            editableQuote.setText(editingQuote.text);
+            if (activityState != revealAddEditQuoteState) {
+                changeState(revealAddEditQuoteState);
+            }
+        }
     }
 
 }

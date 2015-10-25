@@ -122,7 +122,7 @@
             app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
 
         <Spinner
-            android:id="@+id/spinner_lwq_autopilot_settings_interval"
+            android:id="@+id/spinner_lwq_settings_interval"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -155,7 +155,7 @@
             app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
 
         <Spinner
-            android:id="@+id/spinner_lwq_autopilot_settings_image_category"
+            android:id="@+id/spinner_lwq_settings_image_category"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"

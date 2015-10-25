@@ -40,7 +40,7 @@ import java.util.List;
  *
  * Date: 10/03/2015
  */
-public class PlaylistCategory extends SugarRecord<PlaylistCategory> {
+public class PlaylistCategory extends SugarRecord<PlaylistCategory> implements Comparable<PlaylistCategory> {
     public Playlist playlist;
     public Category category;
 
@@ -53,5 +53,10 @@ public class PlaylistCategory extends SugarRecord<PlaylistCategory> {
 
     public static List<PlaylistCategory> forPlaylist(Playlist playlist) {
         return Select.from(PlaylistCategory.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId())).list();
+    }
+
+    @Override
+    public int compareTo(PlaylistCategory playlistCategory) {
+        return category.name.compareToIgnoreCase(playlistCategory.category.name);
     }
 }

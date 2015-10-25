@@ -1,5 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 
@@ -115,6 +117,13 @@ public class UIUtils {
             }
         }
         return result;
+    }
+
+    public static void dismissKeyboard(Activity activity) {
+        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(inputMethodManager.isAcceptingText()) { // verify if the soft keyboard is open
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        }
     }
 
 
