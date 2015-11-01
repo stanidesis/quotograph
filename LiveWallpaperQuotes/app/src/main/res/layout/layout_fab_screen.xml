@@ -34,11 +34,18 @@
 <android.support.percent.PercentRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:clipToPadding="false"
-    android:clipChildren="false"
-    android:clickable="false">
+    android:clipChildren="false">
+
+    <View
+        android:id="@+id/view_fab_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/palette_A100"
+        android:clickable="true"
+        android:visibility="gone"/>
 
     <!-- Quote Edit -->
 
@@ -54,7 +61,6 @@
         android:id="@+id/fl_lwq_fab_search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
         android:layout_above="@+id/fl_lwq_fab_create_quote"
         android:layout_alignRight="@+id/fl_lwq_fab_reveal"
         android:layout_alignEnd="@+id/fl_lwq_fab_reveal"
@@ -77,7 +83,6 @@
         android:id="@+id/fl_lwq_fab_create_quote"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
         android:layout_above="@+id/fl_lwq_fab_reveal"
         android:layout_alignRight="@+id/fl_lwq_fab_reveal"
         android:layout_alignEnd="@+id/fl_lwq_fab_reveal"
@@ -105,11 +110,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:fitsSystemWindows="true"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"
-        app:layout_marginBottomPercent="3%">
+        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width">
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_lwq_reveal"

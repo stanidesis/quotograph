@@ -10,5 +10,5 @@
     <fraction name="lwq_settings_element_category_percent_width">35%</fraction>
     <fraction name="lwq_settings_element_interface_percent_width">65%</fraction>
     <fraction name="lwq_settings_mode_percent_width">95%</fraction>
-    <fraction name="lwq_wallpaper_action_item_width">20%</fraction>
+    <fraction name="lwq_wallpaper_action_item_width">33%</fraction>
 </resources>
