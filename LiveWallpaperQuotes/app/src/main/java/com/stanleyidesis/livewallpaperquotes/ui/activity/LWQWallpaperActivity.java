@@ -1,5 +1,8 @@
 package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
@@ -17,6 +20,7 @@ import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
+import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
@@ -85,6 +89,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
 
     LWQSurfaceHolderDrawScript drawScript;
     State state;
+    boolean wallpaperActionsVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +122,8 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
     public void surfaceCreated(SurfaceHolder holder) {
         if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
             LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+        } else {
+            draw();
         }
     }
 
@@ -135,9 +142,11 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
 
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
+            endActionAnimation(skipButton);
             return;
         }
         if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+            endActionAnimation(skipButton);
             draw();
         }
     }
@@ -149,13 +158,17 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         }
     }
 
+    public void onEvent(ImageSaveEvent imageSaveEvent) {
+        endActionAnimation(saveButton);
+    }
+
     // Setup
 
     void setupWallpaperActions() {
         wallpaperActionsContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
         wallpaperActionsContainer.setEnabled(false);
         final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) wallpaperActionsContainer.getLayoutParams();
-        layoutParams.bottomMargin = UIUtils.getNavBarHeight(this);
+        layoutParams.bottomMargin = (int) (UIUtils.getNavBarHeight(this) * 1.5);
         wallpaperActionsContainer.setLayoutParams(layoutParams);
 
         View [] buttons = new View[] {shareButton, saveButton, skipButton};
@@ -176,6 +189,23 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         }
     }
 
+    void draw() {
+        if (drawScript == null) {
+            drawScript = new LWQSurfaceHolderDrawScript(surfaceView.getHolder());
+        } else {
+            drawScript.setSurfaceHolder(surfaceView.getHolder());
+        }
+        drawScript.requestDraw(new Callback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                didFinishDrawing();
+            }
+
+            @Override
+            public void onError(String errorMessage, Throwable throwable) {}
+        });
+    }
+
     void didFinishDrawing() {
         // Nothing for now
     }
@@ -194,29 +224,18 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         return 300;
     }
 
-    void animateWallpaperActions(boolean dismiss) {
+    void animateWallpaperActions(final boolean dismiss) {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(generateAnimator(shareButton, dismiss, 0),
                 generateAnimator(saveButton, dismiss, 15),
                 generateAnimator(skipButton, dismiss, 30));
-        animatorSet.start();
-    }
-
-    void draw() {
-        if (drawScript == null) {
-            drawScript = new LWQSurfaceHolderDrawScript(surfaceView.getHolder());
-        } else {
-            drawScript.setSurfaceHolder(surfaceView.getHolder());
-        }
-        drawScript.requestDraw(new Callback<Boolean>() {
+        animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
-            public void onSuccess(Boolean aBoolean) {
-                didFinishDrawing();
+            public void onAnimationEnd(Animator animation) {
+                wallpaperActionsVisible = !dismiss;
             }
-
-            @Override
-            public void onError(String errorMessage, Throwable throwable) {}
         });
+        animatorSet.start();
     }
 
     AnimatorSet generateAnimator(View target, boolean dismiss, long startDelay) {
@@ -236,6 +255,27 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         return animatorSet;
     }
 
+    void animateAction(View button) {
+        final Animator animator = AnimatorInflater.loadAnimator(this, R.animator.progress_rotation);
+        animator.setTarget(button);
+        button.setTag(R.id.view_tag_animator, animator);
+        animator.start();
+    }
+
+    void endActionAnimation(final View button) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (button.getTag(R.id.view_tag_animator) != null) {
+                    ((Animator)button.getTag(R.id.view_tag_animator)).end();
+                    button.setTag(R.id.view_tag_animator, null);
+                    skipButton.setEnabled(true);
+                    saveButton.setEnabled(true);
+                }
+            }
+        });
+    }
+
     // Click Handling
     @OnClick(R.id.btn_wallpaper_actions_share) void shareWallpaper() {
         sendBroadcast(new Intent(getString(R.string.action_share)));
@@ -243,9 +283,15 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
 
     @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperToDisk() {
         sendBroadcast(new Intent(getString(R.string.action_save)));
+        saveButton.setEnabled(false);
+        skipButton.setEnabled(false);
+        animateAction(saveButton);
     }
 
     @OnClick(R.id.btn_wallpaper_actions_skip) void skipWallpaper() {
         LWQApplication.getWallpaperController().generateNewWallpaper();
+        saveButton.setEnabled(false);
+        skipButton.setEnabled(false);
+        animateAction(skipButton);
     }
 }

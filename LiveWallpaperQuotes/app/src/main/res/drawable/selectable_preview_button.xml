@@ -20,7 +20,7 @@
     SOFTWARE.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    layout_wallpaper.xml
+    selectable_share_button.xml
     @author Stanley Idesis
 
     From Live-Wallpaper-Quotes
@@ -29,29 +29,14 @@
     Please report any issues
     https://github.com/stanidesis/live-wallpaper-quotes/issues
 
-    Date: 09/06/2015
+    Date: 10/31/2015
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clipToPadding="false"
-    android:clipChildren="false">
 
-    <SurfaceView
-        android:id="@+id/surface_lwq_wallpaper"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <View
-        android:id="@+id/view_screen_lwq_wallpaper"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/black"/>
-
-    <include layout="@layout/layout_wallpaper_actions"
-        android:id="@+id/group_lwq_settings_wallpaper_actions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"/>
-
-</RelativeLayout>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:enterFadeDuration="100"
+    android:exitFadeDuration="100">
+    <item android:state_pressed="true">
+        <bitmap android:src="@mipmap/ic_remove_red_eye_white" android:alpha=".7"/>
+    </item>
+    <item android:drawable="@mipmap/ic_remove_red_eye_white" />
+</selector>
