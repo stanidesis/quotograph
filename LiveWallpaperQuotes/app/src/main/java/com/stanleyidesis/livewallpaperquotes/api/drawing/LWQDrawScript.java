@@ -175,24 +175,28 @@ public abstract class LWQDrawScript {
 
         final Canvas canvas = reserveCanvas();
         canvas.save();
-
-        final int blurPreference = LWQPreferences.getBlurPreference();
-        // Determine cache validity
-        if (cachedBackground == null || cachedBlur != blurPreference ||
-                backgroundImage.hashCode() != cachedBackgroundHashCode) {
-            if (cachedBackground != null && cachedBackground != backgroundImage) {
-                cachedBackground.recycle();
+        try {
+            final int blurPreference = LWQPreferences.getBlurPreference();
+            // Determine cache validity
+            if (cachedBackground == null || cachedBlur != blurPreference ||
+                    backgroundImage.hashCode() != cachedBackgroundHashCode) {
+                if (cachedBackground != null && cachedBackground != backgroundImage) {
+                    cachedBackground.recycle();
+                }
+                cachedBackgroundHashCode = backgroundImage.hashCode();
+                cachedBackground = generateBitmap(blurPreference, backgroundImage);
+                cachedBlur = blurPreference;
             }
-            cachedBackgroundHashCode = backgroundImage.hashCode();
-            cachedBackground = generateBitmap(blurPreference, backgroundImage);
-            cachedBlur = blurPreference;
+            drawBitmap(canvas, screenWidth, surfaceFrame, cachedBackground);
+            drawDimmer(canvas, LWQPreferences.getDimPreference());
+            drawText(canvas, screenWidth, screenHeight);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            canvas.restore();
+            releaseCanvas(canvas);
         }
-        drawBitmap(canvas, screenWidth, surfaceFrame, cachedBackground);
-        drawDimmer(canvas, LWQPreferences.getDimPreference());
-        drawText(canvas, screenWidth, screenHeight);
 
-        canvas.restore();
-        releaseCanvas(canvas);
     }
 
     void drawText(Canvas canvas, int screenWidth, int screenHeight) {

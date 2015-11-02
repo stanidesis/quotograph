@@ -2,7 +2,11 @@ package com.stanleyidesis.livewallpaperquotes.api.drawing;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.SurfaceHolder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -40,6 +44,7 @@ import android.view.SurfaceHolder;
 public class LWQSurfaceHolderDrawScript extends LWQDrawScript {
 
     SurfaceHolder surfaceHolder;
+    Map<Canvas, SurfaceHolder> canvasMap = new HashMap<>();
 
     public LWQSurfaceHolderDrawScript(SurfaceHolder surfaceHolder) {
         this.surfaceHolder = surfaceHolder;
@@ -61,12 +66,20 @@ public class LWQSurfaceHolderDrawScript extends LWQDrawScript {
     @Override
     protected Canvas reserveCanvas() {
         waitToCreate();
-        return surfaceHolder.lockCanvas();
+        final Canvas canvas = surfaceHolder.lockCanvas();
+        canvasMap.put(canvas, surfaceHolder);
+        return canvas;
     }
 
     @Override
     protected void releaseCanvas(Canvas canvas) {
-        surfaceHolder.unlockCanvasAndPost(canvas);
+        if (canvasMap.containsKey(canvas)) {
+            final SurfaceHolder remove = canvasMap.remove(canvas);
+            remove.unlockCanvasAndPost(canvas);
+        } else {
+            // Uh oh?
+            Log.e(getClass().getSimpleName(), "No SurfaceHolder for canvas, can't release", new RuntimeException());
+        }
     }
 
     @Override
