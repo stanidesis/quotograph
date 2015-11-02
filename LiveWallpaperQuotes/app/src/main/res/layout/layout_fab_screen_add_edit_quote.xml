@@ -36,8 +36,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="false"
-    app:layout_widthPercent="@fraction/lwq_settings_element_width_percent">
+    android:clickable="false">
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/til_fab_screen_quote_wrapper"

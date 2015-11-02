@@ -57,6 +57,16 @@
         app:layout_widthPercent="@fraction/lwq_settings_element_width_percent"
         app:layout_marginTopPercent="10%"/>
 
+    <!-- Search -->
+
+    <include layout="@layout/layout_fab_screen_search"
+        android:id="@+id/group_lwq_fab_screen_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_widthPercent="66%"
+        app:layout_marginTopPercent="10%"
+        app:layout_marginLeftPercent="10%"/>
+
     <android.support.percent.PercentFrameLayout
         android:id="@+id/fl_lwq_fab_search"
         android:layout_width="wrap_content"

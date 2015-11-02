@@ -20,17 +20,20 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.orm.StringUtil;
@@ -39,8 +42,10 @@ import com.orm.query.Select;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
+import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Playlist;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
@@ -105,6 +110,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         int FABActionFlags = FLAG_NO_CHANGE;
         int progressBarFlags = FLAG_NO_CHANGE;
         int addEditQuoteFlags = FLAG_NO_CHANGE;
+        int searchFlags = FLAG_NO_CHANGE;
         int contentFlags = FLAG_NO_CHANGE;
 
         boolean contentFlagSet(int compareWith) {
@@ -126,6 +132,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         boolean addEditQuoteFlagsSet(int compareWith) {
             return (addEditQuoteFlags & compareWith) > 0;
         }
+
+        boolean searchFlagsSet(int compareWith) {
+            return (searchFlags & compareWith) > 0;
+        }
+
 
     }
 
@@ -173,6 +184,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
         Builder setAddEditQuoteFlags(int flags) {
             activityState.addEditQuoteFlags = flags;
+            return this;
+        }
+
+        Builder setSearchFlags(int flags) {
+            activityState.searchFlags = flags;
             return this;
         }
     }
@@ -359,6 +375,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 addEditQuote.setTag(R.id.view_tag_flags, nextActivityState.addEditQuoteFlags);
             }
 
+            // Search
+            int searchFlags = (int) searchContainer.getTag(R.id.view_tag_flags);
+            if (searchFlags != nextActivityState.searchFlags && nextActivityState.searchFlags != FLAG_NO_CHANGE) {
+                // Reveal/Hide
+                if (nextActivityState.searchFlagsSet(FLAG_HIDE) || nextActivityState.searchFlagsSet(FLAG_REVEAL)) {
+                    final boolean dismiss = nextActivityState.searchFlagsSet(FLAG_HIDE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            animateContainer(searchContainer, dismiss);
+                        }
+                    });
+                }
+                searchContainer.setTag(R.id.view_tag_flags, nextActivityState.searchFlags);
+            }
+
             activityState = nextActivityState;
             try {
                 Thread.sleep(longestAnimation);
@@ -384,6 +416,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setFABFlags(FLAG_HIDE | FLAG_DISABLE | FLAG_NO_ROTATE)
             .setFABActionFlags(FLAG_HIDE | FLAG_DISABLE)
             .setAddEditQuoteFlags(FLAG_HIDE | FLAG_DISABLE)
+            .setSearchFlags(FLAG_HIDE | FLAG_DISABLE)
             .setProgressBarFlags(FLAG_HIDE)
             .build();
 
@@ -402,12 +435,21 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setFABActionFlags(FLAG_REVEAL | FLAG_ENABLE)
             .setFABFlags(FLAG_ROTATE)
             .setAddEditQuoteFlags(FLAG_HIDE | FLAG_DISABLE)
+            .setSearchFlags(FLAG_HIDE | FLAG_DISABLE)
             .build();
 
     ActivityState revealAddEditQuoteState = new Builder()
             .setFABActionFlags(FLAG_REVEAL | FLAG_ENABLE)
             .setFABFlags(FLAG_ROTATE)
             .setAddEditQuoteFlags(FLAG_REVEAL | FLAG_ENABLE)
+            .setSearchFlags(FLAG_HIDE | FLAG_DISABLE)
+            .build();
+
+    ActivityState revealSearchState = new Builder()
+            .setFABActionFlags(FLAG_REVEAL | FLAG_ENABLE)
+            .setFABFlags(FLAG_ROTATE)
+            .setAddEditQuoteFlags(FLAG_HIDE | FLAG_DISABLE)
+            .setSearchFlags(FLAG_REVEAL | FLAG_ENABLE)
             .build();
 
     // Current ActivityState
@@ -484,6 +526,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @Bind(R.id.actv_fab_screen_author)
     AppCompatAutoCompleteTextView editableAuthor;
 
+    // Search
+    @Bind(R.id.group_lwq_fab_screen_search)
+    View searchContainer;
+    @Bind(R.id.actv_fab_screen_search)
+    AppCompatAutoCompleteTextView editableQuery;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -498,6 +546,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         setupFABs();
         // Setup Add/Edit
         setupAddEditQuote();
+        // Setup search
+        setupSearch();
         // Setup playlist
         setupPlaylist();
         // Setup settings
@@ -520,11 +570,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onBackPressed() {
-        if (activityState == revealWallpaperState) {
+        if (activityState == revealWallpaperState || activityState == revealFABActionsState) {
             changeState(revealContentState);
-            return;
+        } else if (activityState == revealSearchState || activityState == revealAddEditQuoteState) {
+            changeState(revealFABActionsState);
+        } else {
+            super.onBackPressed();
         }
-        super.onBackPressed();
     }
 
     // Setup
@@ -634,6 +686,44 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }).start();
     }
 
+    void setupSearch() {
+        searchContainer.setAlpha(0f);
+        searchContainer.setVisibility(View.GONE);
+        searchContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
+        editableQuery.setSupportBackgroundTintList(getResources().getColorStateList(R.color.text_field_state_list));
+        editableQuery.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (i == EditorInfo.IME_NULL) {
+                    performSearch();
+                }
+                return false;
+            }
+        });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final List<Category> categories = Category.listAll(Category.class);
+                final List<Author> authors = Author.listAll(Author.class);
+                String[] allHints = new String[categories.size() + authors.size()];
+                for (int i = 0; i < categories.size(); i++) {
+                    allHints[i] = categories.get(i).name;
+                }
+                for (int i = 0; i < authors.size(); i++) {
+                    allHints[categories.size() + i] = authors.get(i).name;
+                }
+                final ArrayAdapter<String> searchAdapter = new ArrayAdapter<String>(LWQSettingsActivity.this,
+                        R.layout.support_simple_spinner_dropdown_item, allHints);
+                LWQSettingsActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        editableQuery.setAdapter(searchAdapter);
+                    }
+                });
+            }
+        }).start();
+    }
+
     void setupPlaylist() {
         playlistAdapter = new PlaylistAdapter(this);
         RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler_playlist);
@@ -729,6 +819,20 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Click Handling
 
+    @OnClick(R.id.btn_fab_screen_search) void performSearch() {
+        LWQApplication.getQuoteController().fetchQuotes(editableQuery.getText().toString().trim(), new Callback<List<Object>>() {
+            @Override
+            public void onSuccess(List<Object> objects) {
+
+            }
+
+            @Override
+            public void onError(String errorMessage, Throwable throwable) {
+                // TODO
+            }
+        });
+    }
+
     @OnClick(R.id.view_screen_lwq_wallpaper) void revealContent() {
         if (activityState == revealWallpaperState) {
             return;
@@ -783,10 +887,21 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     @OnClick(R.id.fab_lwq_reveal) void toggleAddScreen() {
-        if (activityState == revealFABActionsState || activityState == revealAddEditQuoteState) {
+        if (activityState == revealFABActionsState
+                || activityState == revealAddEditQuoteState
+                || activityState == revealSearchState) {
             changeState(revealContentState);
         } else {
             changeState(revealFABActionsState);
+        }
+    }
+
+    @OnClick(R.id.fab_lwq_search) void revealSearch() {
+        if (activityState == revealSearchState) {
+            changeState(revealFABActionsState);
+        } else {
+            editableQuery.setText("");
+            changeState(revealSearchState);
         }
     }
 
