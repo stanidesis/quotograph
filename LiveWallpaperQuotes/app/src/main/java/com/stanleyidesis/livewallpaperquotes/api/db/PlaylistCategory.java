@@ -55,6 +55,11 @@ public class PlaylistCategory extends SugarRecord<PlaylistCategory> implements C
         return Select.from(PlaylistCategory.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId())).list();
     }
 
+    public static PlaylistCategory find(Playlist playlist, Category category) {
+        return Select.from(PlaylistCategory.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId()),
+                Condition.prop(StringUtil.toSQLName("category")).eq(category.getId())).first();
+    }
+
     @Override
     public int compareTo(PlaylistCategory playlistCategory) {
         return category.name.compareToIgnoreCase(playlistCategory.category.name);

@@ -55,6 +55,11 @@ public class PlaylistQuote extends SugarRecord<PlaylistQuote> implements Compara
         return Select.from(PlaylistQuote.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId())).list();
     }
 
+    public static PlaylistQuote find(Playlist playlist, Quote quote) {
+        return Select.from(PlaylistQuote.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId()),
+                Condition.prop(StringUtil.toSQLName("quote")).eq(quote.getId())).first();
+    }
+
     @Override
     public int compareTo(PlaylistQuote playlistQuote) {
         return quote.author.name.compareToIgnoreCase(playlistQuote.quote.author.name);

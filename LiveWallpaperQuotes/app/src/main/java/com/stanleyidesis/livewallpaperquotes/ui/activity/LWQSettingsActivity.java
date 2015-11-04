@@ -54,6 +54,7 @@ import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 import com.stanleyidesis.livewallpaperquotes.ui.adapter.PlaylistAdapter;
+import com.stanleyidesis.livewallpaperquotes.ui.adapter.SearchResultsAdapter;
 
 import java.util.List;
 import java.util.Timer;
@@ -527,6 +528,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     View searchContainer;
     @Bind(R.id.actv_fab_screen_search)
     AppCompatAutoCompleteTextView editableQuery;
+    SearchResultsAdapter searchResultsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -693,6 +695,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 return false;
             }
         });
+
+        // RecyclerView
+        searchResultsAdapter = new SearchResultsAdapter();
+        final RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler_fab_screen_search_results);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(searchResultsAdapter);
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -815,8 +825,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @OnClick(R.id.btn_fab_screen_search) void performSearch() {
         LWQApplication.getQuoteController().fetchQuotes(editableQuery.getText().toString().trim(), new Callback<List<Object>>() {
             @Override
-            public void onSuccess(List<Object> objects) {
-
+            public void onSuccess(final List<Object> objects) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        searchResultsAdapter.setSearchResults(objects);
+                        searchResultsAdapter.notifyDataSetChanged();
+                    }
+                });
             }
 
             @Override

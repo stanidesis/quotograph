@@ -167,6 +167,7 @@ public class BrainyQuoteManager {
             return e.getLocalizedMessage();
         }
         String finalUrl = String.format(Endpoints.BRAINY_QUOTE_SEARCH_QUERY, escapedQuery);
+        Log.v(getClass().getSimpleName(), "URL: " + finalUrl, new RuntimeException());
         final Object o = parseDocument(finalUrl);
         if (o instanceof String) {
             return o;

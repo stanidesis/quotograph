@@ -55,6 +55,11 @@ public class PlaylistAuthor extends SugarRecord<PlaylistAuthor> implements Compa
         return Select.from(PlaylistAuthor.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId())).list();
     }
 
+    public static PlaylistAuthor find(Playlist playlist, Author author) {
+        return Select.from(PlaylistAuthor.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId()),
+                Condition.prop(StringUtil.toSQLName("author")).eq(author.getId())).first();
+    }
+
     @Override
     public int compareTo(PlaylistAuthor playlistAuthor) {
         return author.name.compareToIgnoreCase(playlistAuthor.author.name);
