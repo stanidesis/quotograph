@@ -497,16 +497,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // Playlist Container
     @Bind(R.id.group_lwq_settings_playlist_wrapper)
     View playlistWrapper;
-    @Bind(R.id.group_lwq_settings_playlist)
-    View playlistContainer;
 
     // ProgressBar
     @Bind(R.id.pb_lwq_settings)
     ProgressBar progressBar;
 
     // FAB
-    @Bind(R.id.fab_lwq_preview)
-    View fabPreview;
     @Bind(R.id.fab_lwq_reveal)
     View fabAdd;
     @Bind(R.id.view_fab_background)
@@ -666,9 +662,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void run() {
                 Activity context = LWQSettingsActivity.this;
-                if (context == null) {
-                    return;
-                }
                 final List<Author> list = Select.from(Author.class).orderBy(StringUtil.toSQLName("name")).list();
                 String [] allAuthors = new String[list.size()];
                 for (int i = 0; i < list.size(); i++) {

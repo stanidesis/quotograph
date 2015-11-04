@@ -51,9 +51,11 @@
             android:layout_height="wrap_content"
             android:minHeight="100dp"
             android:hint="Quote"
-            android:inputType="textNoSuggestions"
+            android:lines="3"
+            android:maxLines="20"
             android:scrollbars="vertical"
             android:scrollbarStyle="insideOverlay"
+            android:scrollHorizontally="false"
             android:text="@string/inspirational_quote_0"/>
 
     </android.support.design.widget.TextInputLayout>

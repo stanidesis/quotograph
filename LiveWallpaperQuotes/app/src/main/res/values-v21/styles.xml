@@ -14,6 +14,7 @@
     </style>
 
     <style name="Theme.LWQ.TextAppearance.Settings.EditQuote.Quote" parent="@style/Theme.LWQ.TextAppearance.Settings.Category">
+        <item name="android:textAllCaps">false</item>
         <item name="android:gravity">start|left|top</item>
         <item name="android:capitalize">characters</item>
     </style>
