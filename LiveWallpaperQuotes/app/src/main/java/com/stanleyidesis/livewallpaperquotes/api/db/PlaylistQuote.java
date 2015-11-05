@@ -61,6 +61,15 @@ public class PlaylistQuote extends SugarRecord<PlaylistQuote> implements Compara
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o instanceof PlaylistQuote) {
+            return playlist.getId() == ((PlaylistQuote) o).playlist.getId()
+                    && quote.getId() == ((PlaylistQuote) o).quote.getId();
+        }
+        return super.equals(o);
+    }
+
+    @Override
     public int compareTo(PlaylistQuote playlistQuote) {
         return quote.author.name.compareToIgnoreCase(playlistQuote.quote.author.name);
     }

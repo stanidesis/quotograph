@@ -58,6 +58,23 @@ import butterknife.OnClick;
  */
 public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdapter.BaseResultHolder> {
 
+    public static interface Delegate {
+        /**
+         * User removes this from their playlist
+         * @param adapter
+         * @param playlistItem
+         */
+        void onRemove(SearchResultsAdapter adapter, Object playlistItem);
+
+        /**
+         * User adds this to their playlist
+         * @param adapter
+         * @param model
+         * @return
+         */
+        Object onAdd(SearchResultsAdapter adapter, Object model);
+    }
+
     static final int TYPE_CATEGORY = 0;
     static final int TYPE_AUTHOR = 1;
     static final int TYPE_QUOTE = 2;
@@ -68,6 +85,16 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     }
 
     List<Object> searchResults = new ArrayList<>();
+    Delegate delegate;
+
+
+    public Delegate getDelegate() {
+        return delegate;
+    }
+
+    public void setDelegate(Delegate delegate) {
+        this.delegate = delegate;
+    }
 
     public List<Object> getSearchResults() {
         return searchResults;
@@ -170,14 +197,13 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         @OnClick({R.id.fl_category_result_item_add_wrapper, R.id.iv_category_result_item_add})
         void addOrRemoveCategory() {
             if (playlistCategory == null) {
-                playlistCategory = new PlaylistCategory(Playlist.active(), category);
-                playlistCategory.save();
+                playlistCategory = (PlaylistCategory) delegate.onAdd(SearchResultsAdapter.this, category);
                 categoryAddRemove.setImageResource(R.mipmap.ic_remove_white);
             } else {
-                playlistCategory.delete();
+                delegate.onRemove(SearchResultsAdapter.this, playlistCategory);
                 playlistCategory = null;
+                categoryAddRemove.setImageResource(R.mipmap.ic_add_white);
             }
-            // TODO broadcast this info?
         }
     }
 
@@ -236,12 +262,11 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
         PlaylistAuthor addOrRemove(Author author, PlaylistAuthor playlistAuthor, ImageView addOrRemove) {
             PlaylistAuthor returned = null;
-            if (author == null) {
-                returned = new PlaylistAuthor(Playlist.active(), firstAuthor);
-                returned.save();
+            if (playlistAuthor == null) {
+                returned = (PlaylistAuthor) delegate.onAdd(SearchResultsAdapter.this, author);
                 addOrRemove.setImageResource(R.mipmap.ic_remove_white);
             } else {
-                playlistAuthor.delete();
+                delegate.onRemove(SearchResultsAdapter.this, playlistAuthor);
                 addOrRemove.setImageResource(R.mipmap.ic_add_white);
             }
             return returned;
@@ -276,11 +301,10 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         @OnClick({R.id.fl_quote_result_item_add_wrapper, R.id.iv_quote_result_item_add})
         void addOrRemoveQuote() {
             if (playlistQuote == null) {
-                playlistQuote = new PlaylistQuote(Playlist.active(), quote);
-                playlistQuote.save();
+                playlistQuote = (PlaylistQuote) delegate.onAdd(SearchResultsAdapter.this, quote);
                 addOrRemoveQuote.setImageResource(R.mipmap.ic_remove_white);
             } else {
-                playlistQuote.delete();
+                delegate.onRemove(SearchResultsAdapter.this, playlistQuote);
                 playlistQuote = null;
                 addOrRemoveQuote.setImageResource(R.mipmap.ic_add_white);
             }

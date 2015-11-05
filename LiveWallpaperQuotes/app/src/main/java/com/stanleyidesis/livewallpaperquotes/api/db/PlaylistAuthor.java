@@ -61,6 +61,15 @@ public class PlaylistAuthor extends SugarRecord<PlaylistAuthor> implements Compa
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o instanceof PlaylistAuthor) {
+            return playlist.getId() == ((PlaylistAuthor) o).playlist.getId()
+                    && author.getId() == ((PlaylistAuthor) o).author.getId();
+        }
+        return super.equals(o);
+    }
+
+    @Override
     public int compareTo(PlaylistAuthor playlistAuthor) {
         return author.name.compareToIgnoreCase(playlistAuthor.author.name);
     }

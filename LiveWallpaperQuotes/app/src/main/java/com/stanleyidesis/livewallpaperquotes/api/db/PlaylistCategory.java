@@ -61,6 +61,15 @@ public class PlaylistCategory extends SugarRecord<PlaylistCategory> implements C
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o instanceof PlaylistCategory) {
+            return playlist.getId() == ((PlaylistCategory) o).playlist.getId()
+                    && category.getId() == ((PlaylistCategory) o).category.getId();
+        }
+        return super.equals(o);
+    }
+
+    @Override
     public int compareTo(PlaylistCategory playlistCategory) {
         return category.name.compareToIgnoreCase(playlistCategory.category.name);
     }

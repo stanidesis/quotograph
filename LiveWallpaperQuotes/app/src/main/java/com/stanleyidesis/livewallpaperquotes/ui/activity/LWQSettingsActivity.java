@@ -47,6 +47,8 @@ import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Playlist;
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistAuthor;
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistCategory;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
@@ -101,7 +103,10 @@ import butterknife.OnClick;
  *
  * Date: 07/11/2015
  */
-public class LWQSettingsActivity extends LWQWallpaperActivity implements ActivityStateFlags, SeekBar.OnSeekBarChangeListener, PlaylistAdapter.Delegate {
+public class LWQSettingsActivity extends LWQWallpaperActivity implements ActivityStateFlags,
+        SeekBar.OnSeekBarChangeListener,
+        PlaylistAdapter.Delegate,
+        SearchResultsAdapter.Delegate {
 
     static class ActivityState {
 
@@ -698,6 +703,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
         // RecyclerView
         searchResultsAdapter = new SearchResultsAdapter();
+        searchResultsAdapter.setDelegate(this);
         final RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler_fab_screen_search_results);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -1144,6 +1150,37 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 changeState(revealAddEditQuoteState);
             }
         }
+    }
+
+    // Search Delegate
+
+    @Override
+    public void onRemove(SearchResultsAdapter adapter, Object playlistItem) {
+        if (playlistItem instanceof PlaylistCategory) {
+            ((PlaylistCategory) playlistItem).delete();
+        } else if (playlistItem instanceof PlaylistAuthor) {
+            ((PlaylistAuthor) playlistItem).delete();
+        } else if (playlistItem instanceof PlaylistQuote) {
+            ((PlaylistQuote) playlistItem).delete();
+        }
+        playlistAdapter.removeItem(playlistItem);
+    }
+
+    @Override
+    public Object onAdd(SearchResultsAdapter adapter, Object model) {
+        SugarRecord playlistItem = null;
+        if (model instanceof Category) {
+            playlistItem = new PlaylistCategory(Playlist.active(), (Category) model);
+        } else if (model instanceof Author) {
+            playlistItem = new PlaylistAuthor(Playlist.active(), (Author) model);
+        } else if (model instanceof Quote) {
+            playlistItem = new PlaylistQuote(Playlist.active(), (Quote) model);
+        }
+        if (playlistItem != null) {
+            playlistItem.save();
+            playlistAdapter.insertItem(playlistItem);
+        }
+        return playlistItem;
     }
 
 }

@@ -112,6 +112,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         notifyItemInserted(playlistItems.indexOf(object));
     }
 
+    public void removeItem(Object item) {
+        final int position = playlistItems.indexOf(item);
+        if (position > -1) {
+            removeItem(position);
+        }
+    }
+
     public void removeItem(int position) {
         final Object remove = playlistItems.remove(position);
         if (remove instanceof PlaylistCategory) {
