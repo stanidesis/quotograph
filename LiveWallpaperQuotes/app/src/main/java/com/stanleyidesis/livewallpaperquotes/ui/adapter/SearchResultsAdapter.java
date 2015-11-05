@@ -62,33 +62,31 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     static final int TYPE_AUTHOR = 1;
     static final int TYPE_QUOTE = 2;
 
+    private class AuthorCouplet {
+        Author firstAuthor;
+        Author secondAuthor;
+    }
+
     List<Object> searchResults = new ArrayList<>();
-    int authorIndex = -1;
-    int authorCount = 0;
-    int quoteIndex = -1;
-    int quoteCount = 0;
 
     public List<Object> getSearchResults() {
         return searchResults;
     }
 
-    public void setSearchResults(List<Object> searchResults) {
-        this.authorCount = 0;
-        this.authorIndex = -1;
-        this.quoteCount = 0;
-        this.quoteIndex = -1;
-        this.searchResults = searchResults;
-        for (Object object : searchResults) {
-            if (object instanceof Author) {
-                authorCount++;
-                if (authorIndex == -1) {
-                    authorIndex = searchResults.indexOf(object);
+    public void setSearchResults(List<Object> originalSearchResults) {
+        this.searchResults.clear();
+        for (int i = 0; i < originalSearchResults.size(); i++) {
+            final Object o = originalSearchResults.get(i);
+            if (o instanceof Category || o instanceof Quote) {
+                searchResults.add(o);
+            } else {
+                AuthorCouplet authorCouplet = new AuthorCouplet();
+                authorCouplet.firstAuthor = (Author) o;
+                if (i + 1 < originalSearchResults.size() && originalSearchResults.get(i + 1) instanceof Author) {
+                    authorCouplet.secondAuthor = (Author) originalSearchResults.get(i + 1);
+                    i++;
                 }
-            } else if (object instanceof Quote) {
-                quoteCount++;
-                if (quoteIndex == -1) {
-                    quoteIndex = searchResults.indexOf(object);
-                }
+                searchResults.add(authorCouplet);
             }
         }
         notifyDataSetChanged();
@@ -96,9 +94,9 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
     @Override
     public int getItemViewType(int position) {
-        if (position >= quoteIndex && quoteIndex > -1) {
+        if (searchResults.get(position) instanceof Quote) {
             return TYPE_QUOTE;
-        } else if (position >= authorIndex && authorIndex > -1) {
+        } else if (searchResults.get(position) instanceof AuthorCouplet) {
             return TYPE_AUTHOR;
         }
         return TYPE_CATEGORY;
@@ -128,30 +126,16 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         if (holder instanceof CategoryResultHolder) {
             ((CategoryResultHolder) holder).updateWithCategory((Category) searchResults.get(position));
         } else if (holder instanceof AuthorResultHolder) {
-            int authorPosition = (position - authorIndex) * 2;
-            final Object o = searchResults.get(authorIndex + authorPosition);
-            Author firstAuthor = null;
-            Author secondAuthor = null;
-            if (o instanceof Author) {
-                firstAuthor = (Author) o;
-            }
-            int secondAuthorPosition = authorIndex + authorPosition + 1;
-            if (searchResults.size() > secondAuthorPosition && searchResults.get(secondAuthorPosition) instanceof Author) {
-                secondAuthor = (Author) searchResults.get(secondAuthorPosition);
-            }
-            ((AuthorResultHolder) holder).updateWithAuthor(firstAuthor, secondAuthor);
+            AuthorCouplet authorCouplet = (AuthorCouplet) searchResults.get(position);
+            ((AuthorResultHolder) holder).updateWithAuthor(authorCouplet.firstAuthor, authorCouplet.secondAuthor);
         } else if (holder instanceof QuoteResultHolder) {
-            int quotePosition = position;
-            if (authorIndex > -1) {
-                quotePosition += (int) Math.floor(authorCount / 2);
-            }
-            ((QuoteResultHolder) holder).updateWithQuote((Quote) searchResults.get(quotePosition));
+            ((QuoteResultHolder) holder).updateWithQuote((Quote) searchResults.get(position));
         }
     }
 
     @Override
     public int getItemCount() {
-        return searchResults.size() - (int) Math.floor(authorCount / 2);
+        return searchResults.size();
     }
 
     abstract class BaseResultHolder extends RecyclerView.ViewHolder {
@@ -221,14 +205,14 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             ButterKnife.bind(this, itemView);
         }
 
-        void updateWithAuthor(Author firstAuthor, Author secondAuthor) {
+        void updateWithAuthor(final Author firstAuthor, Author secondAuthor) {
             this.firstAuthor = firstAuthor;
             this.firstPlaylistAuthor = PlaylistAuthor.find(Playlist.active(), firstAuthor);
             firstAuthorTextView.setText(firstAuthor.name);
             firstAuthorAddRemove.setImageResource(firstPlaylistAuthor == null ? R.mipmap.ic_add_white : R.mipmap.ic_remove_white);
 
             if (secondAuthor == null) {
-                secondAuthor = null;
+                this.secondAuthor = null;
                 secondPlaylistAuthor = null;
                 secondAuthorCard.setVisibility(View.GONE);
                 return;

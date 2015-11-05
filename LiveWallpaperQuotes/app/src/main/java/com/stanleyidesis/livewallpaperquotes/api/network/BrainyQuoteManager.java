@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -225,7 +226,7 @@ public class BrainyQuoteManager {
             }
             brainyQuote.topic = new BrainyTopic(category.get(0).text());
         }
-        return brainyQuotes;
+        return new ArrayList<>(new LinkedHashSet<>(brainyQuotes));
     }
 
     private List<BrainyAuthor> parseForAuthors(Document document) {
@@ -235,6 +236,13 @@ public class BrainyQuoteManager {
             return brainyAuthors;
         }
         for (Element authorElement : elements) {
+            boolean exists = false;
+            for (BrainyAuthor author : brainyAuthors) {
+                exists = exists || author.name.equalsIgnoreCase(authorElement.text());
+            }
+            if (exists) {
+                continue;
+            }
             brainyAuthors.add(new BrainyAuthor(authorElement.text()));
         }
         return brainyAuthors;
@@ -247,6 +255,13 @@ public class BrainyQuoteManager {
             return brainyTopics;
         }
         for (Element topicElement : elements) {
+            boolean exists = false;
+            for (BrainyTopic topic : brainyTopics) {
+                exists = exists || topic.name.equalsIgnoreCase(topicElement.text());
+            }
+            if (exists) {
+                continue;
+            }
             brainyTopics.add(new BrainyTopic(topicElement.text()));
         }
         return brainyTopics;
