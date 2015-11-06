@@ -138,6 +138,10 @@ public abstract class LWQDrawScript {
             @Override
             public void run() {
                 try {
+                    if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
+                        LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+                        return;
+                    }
                     draw();
                     if (callback != null) {
                         callback.onSuccess(true);
