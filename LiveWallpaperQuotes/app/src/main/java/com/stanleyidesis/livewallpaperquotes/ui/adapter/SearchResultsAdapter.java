@@ -116,7 +116,6 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                 searchResults.add(authorCouplet);
             }
         }
-        notifyDataSetChanged();
     }
 
     @Override

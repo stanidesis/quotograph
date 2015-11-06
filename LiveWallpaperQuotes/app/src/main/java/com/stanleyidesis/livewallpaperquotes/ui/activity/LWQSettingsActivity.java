@@ -7,6 +7,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
@@ -25,8 +26,10 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -58,6 +61,7 @@ import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 import com.stanleyidesis.livewallpaperquotes.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.livewallpaperquotes.ui.adapter.SearchResultsAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -331,17 +335,99 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             }
 
             // FAB Action Flags
-            int FABActionFlags = (int) fabBackground.getTag(R.id.view_tag_flags);
+            int FABActionFlags = (int) fabContainer.getTag(R.id.view_tag_flags);
             if (nextActivityState.FABActionFlags != FABActionFlags && nextActivityState.FABActionFlags != FLAG_NO_CHANGE) {
-                // Hide (disable) / Reveal (enable)
-                final boolean dismiss = nextActivityState.FABActionFlagSet(FLAG_HIDE);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        animateFABActions(dismiss).start();
-                    }
-                });
-                fabBackground.setTag(R.id.view_tag_flags, nextActivityState.FABActionFlags);
+                // Enable / Disable
+                final int enableDisableFlags = nextActivityState.FABActionFlags & (FLAG_ENABLE | FLAG_DISABLE);
+                if ((FABActionFlags & enableDisableFlags) == 0 && enableDisableFlags > 0) {
+                    final boolean enable = nextActivityState.FABActionFlagSet(FLAG_ENABLE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            UIUtils.setViewAndChildrenEnabled(fabContainer, enable);
+                        }
+                    });
+                    FABActionFlags &= ~(FLAG_ENABLE | FLAG_DISABLE);
+                    FABActionFlags |= enableDisableFlags;
+                }
+                // Hide / Show
+                final int hideRevealFlags = nextActivityState.FABActionFlags & (FLAG_HIDE | FLAG_REVEAL);
+                if ((FABActionFlags & hideRevealFlags) == 0 && hideRevealFlags > 0) {
+                    final boolean dismiss = nextActivityState.FABActionFlagSet(FLAG_HIDE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            animateFABActions(dismiss).start();
+                        }
+                    });
+                    FABActionFlags &= ~(FLAG_HIDE | FLAG_REVEAL);
+                    FABActionFlags |= hideRevealFlags;
+                }
+                fabContainer.setTag(R.id.view_tag_flags, FABActionFlags);
+            }
+
+            // Add/Edit Quote
+            int addEditQuoteFlags = (int) addEditQuote.getTag(R.id.view_tag_flags);
+            if (addEditQuoteFlags != nextActivityState.addEditQuoteFlags && nextActivityState.addEditQuoteFlags != FLAG_NO_CHANGE) {
+                // Enable / Disable
+                final int enableDisableFlags = nextActivityState.addEditQuoteFlags & (FLAG_ENABLE | FLAG_DISABLE);
+                if ((addEditQuoteFlags & enableDisableFlags) == 0 && enableDisableFlags > 0) {
+                    final boolean enable = nextActivityState.addEditQuoteFlagsSet(FLAG_ENABLE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            UIUtils.setViewAndChildrenEnabled(addEditQuote, enable);
+                        }
+                    });
+                    addEditQuoteFlags &= ~(FLAG_ENABLE | FLAG_DISABLE);
+                    addEditQuoteFlags |= enableDisableFlags;
+                }
+                // Hide / Show
+                final int hideRevealFlags = nextActivityState.addEditQuoteFlags & (FLAG_HIDE | FLAG_REVEAL);
+                if ((addEditQuoteFlags & hideRevealFlags) == 0 && hideRevealFlags > 0) {
+                    final boolean dismiss = nextActivityState.addEditQuoteFlagsSet(FLAG_HIDE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            animateContainer(addEditQuote, dismiss);
+                        }
+                    });
+                    addEditQuoteFlags &= ~(FLAG_HIDE | FLAG_REVEAL);
+                    addEditQuoteFlags |= hideRevealFlags;
+                }
+                addEditQuote.setTag(R.id.view_tag_flags, addEditQuoteFlags);
+            }
+
+            // Search
+            int searchFlags = (int) searchContainer.getTag(R.id.view_tag_flags);
+            if (searchFlags != nextActivityState.searchFlags && nextActivityState.searchFlags != FLAG_NO_CHANGE) {
+                // Enable / Disable
+                final int enableDisableFlags = nextActivityState.searchFlags & (FLAG_ENABLE | FLAG_DISABLE);
+                if ((searchFlags & enableDisableFlags) == 0 && enableDisableFlags > 0) {
+                    final boolean enable = nextActivityState.searchFlagsSet(FLAG_ENABLE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            UIUtils.setViewAndChildrenEnabled(searchContainer, enable);
+                        }
+                    });
+                    searchFlags &= ~(FLAG_ENABLE | FLAG_DISABLE);
+                    searchFlags |= enableDisableFlags;
+                }
+                // Hide / Show
+                final int hideRevealFlags = nextActivityState.searchFlags & (FLAG_HIDE | FLAG_REVEAL);
+                if ((searchFlags & hideRevealFlags) == 0 && hideRevealFlags > 0) {
+                    final boolean dismiss = nextActivityState.searchFlagsSet(FLAG_HIDE);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            animateContainer(searchContainer, dismiss);
+                        }
+                    });
+                    searchFlags &= ~(FLAG_HIDE | FLAG_REVEAL);
+                    searchFlags |= hideRevealFlags;
+                }
+                searchContainer.setTag(R.id.view_tag_flags, searchFlags);
             }
 
             // Progress bar
@@ -365,38 +451,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 progressBar.setTag(R.id.view_tag_flags, nextActivityState.progressBarFlags);
             }
 
-            // Add/Edit Quote
-            int addEditQuoteFlags = (int) addEditQuote.getTag(R.id.view_tag_flags);
-            if (addEditQuoteFlags != nextActivityState.addEditQuoteFlags && nextActivityState.addEditQuoteFlags != FLAG_NO_CHANGE) {
-                // Reveal/Hide
-                if (nextActivityState.addEditQuoteFlagsSet(FLAG_HIDE) || nextActivityState.addEditQuoteFlagsSet(FLAG_REVEAL)) {
-                    final boolean dismiss = nextActivityState.addEditQuoteFlagsSet(FLAG_HIDE);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            animateContainer(addEditQuote, dismiss);
-                        }
-                    });
-                }
-                addEditQuote.setTag(R.id.view_tag_flags, nextActivityState.addEditQuoteFlags);
-            }
-
-            // Search
-            int searchFlags = (int) searchContainer.getTag(R.id.view_tag_flags);
-            if (searchFlags != nextActivityState.searchFlags && nextActivityState.searchFlags != FLAG_NO_CHANGE) {
-                // Reveal/Hide
-                if (nextActivityState.searchFlagsSet(FLAG_HIDE) || nextActivityState.searchFlagsSet(FLAG_REVEAL)) {
-                    final boolean dismiss = nextActivityState.searchFlagsSet(FLAG_HIDE);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            animateContainer(searchContainer, dismiss);
-                        }
-                    });
-                }
-                searchContainer.setTag(R.id.view_tag_flags, nextActivityState.searchFlags);
-            }
-
             activityState = nextActivityState;
             try {
                 Thread.sleep(longestAnimation);
@@ -411,7 +465,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setWallpaperControlsVisible(false)
             .setContentFlags(FLAG_HIDE | FLAG_DISABLE)
             .setFABFlags(FLAG_HIDE | FLAG_DISABLE | FLAG_NO_ROTATE)
-            .setFABActionFlags(FLAG_HIDE | FLAG_DISABLE)
+            .setFABActionFlags(FLAG_HIDE)
             .setProgressBarFlags(FLAG_HIDE)
             .build();
 
@@ -419,8 +473,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setWallpaperState(State.OBSCURED)
             .setWallpaperControlsVisible(false)
             .setContentFlags(FLAG_REVEAL | FLAG_ENABLE)
-            .setFABFlags(FLAG_HIDE | FLAG_DISABLE | FLAG_NO_ROTATE)
-            .setFABActionFlags(FLAG_HIDE | FLAG_DISABLE)
+            .setFABFlags(FLAG_NO_ROTATE)
+            .setFABActionFlags(FLAG_HIDE)
             .setAddEditQuoteFlags(FLAG_HIDE | FLAG_DISABLE)
             .setSearchFlags(FLAG_HIDE | FLAG_DISABLE)
             .setProgressBarFlags(FLAG_HIDE)
@@ -453,9 +507,18 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     ActivityState revealSearchState = new Builder()
             .setFABActionFlags(FLAG_REVEAL | FLAG_ENABLE)
-            .setFABFlags(FLAG_ROTATE)
+            .setFABFlags(FLAG_ROTATE | FLAG_ENABLE)
             .setAddEditQuoteFlags(FLAG_HIDE | FLAG_DISABLE)
             .setSearchFlags(FLAG_REVEAL | FLAG_ENABLE)
+            .setProgressBarFlags(FLAG_HIDE)
+            .build();
+
+    ActivityState revealSearchInProgress = new Builder()
+            .setFABActionFlags(FLAG_REVEAL | FLAG_DISABLE)
+            .setFABFlags(FLAG_REVEAL | FLAG_DISABLE)
+            .setAddEditQuoteFlags(FLAG_HIDE | FLAG_DISABLE)
+            .setSearchFlags(FLAG_REVEAL | FLAG_DISABLE)
+            .setProgressBarFlags(FLAG_REVEAL)
             .build();
 
     // Current ActivityState
@@ -509,6 +572,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     ProgressBar progressBar;
 
     // FAB
+    @Bind(R.id.group_lwq_settings_fabs)
+    View fabContainer;
     @Bind(R.id.fab_lwq_reveal)
     View fabAdd;
     @Bind(R.id.view_fab_background)
@@ -640,17 +705,18 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     void setupFABs() {
-        View fabContainer = ButterKnife.findById(this, R.id.fl_lwq_fab_preview);
-        PercentRelativeLayout.LayoutParams layoutParams = (PercentRelativeLayout.LayoutParams) fabContainer.getLayoutParams();
+        fabContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_ENABLE);
+
+        View fabWrapper = ButterKnife.findById(this, R.id.fl_lwq_fab_preview);
+        PercentRelativeLayout.LayoutParams layoutParams = (PercentRelativeLayout.LayoutParams) fabWrapper.getLayoutParams();
         layoutParams.bottomMargin = (int) (UIUtils.getNavBarHeight(this) * 1.5);
-        fabContainer.setLayoutParams(layoutParams);
+        fabWrapper.setLayoutParams(layoutParams);
 
         fabAdd.setAlpha(0f);
         fabAdd.setVisibility(View.GONE);
         fabAdd.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE | FLAG_NO_ROTATE);
 
         fabBackground.setVisibility(View.GONE);
-        fabBackground.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
 
         fabCreate.setAlpha(0f);
         fabCreate.setVisibility(View.GONE);
@@ -829,21 +895,33 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // Click Handling
 
     @OnClick(R.id.btn_fab_screen_search) void performSearch() {
+        dismissKeyboard(editableQuery);
+        changeState(revealSearchInProgress);
+        final int itemCount = searchResultsAdapter.getItemCount();
+        searchResultsAdapter.setSearchResults(new ArrayList<Object>());
+        searchResultsAdapter.notifyItemRangeRemoved(0, itemCount);
         LWQApplication.getQuoteController().fetchQuotes(editableQuery.getText().toString().trim(), new Callback<List<Object>>() {
             @Override
             public void onSuccess(final List<Object> objects) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        changeState(revealSearchState);
                         searchResultsAdapter.setSearchResults(objects);
-                        searchResultsAdapter.notifyDataSetChanged();
+                        searchResultsAdapter.notifyItemRangeInserted(0, searchResultsAdapter.getItemCount());
                     }
                 });
             }
 
             @Override
             public void onError(String errorMessage, Throwable throwable) {
-                // TODO
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(LWQSettingsActivity.this, "Search pooped out :(, please try again later.", Toast.LENGTH_LONG).show();
+                        changeState(revealSearchState);
+                    }
+                });
             }
         });
     }
@@ -905,6 +983,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         if (activityState == revealFABActionsState
                 || activityState == revealAddEditQuoteState
                 || activityState == revealSearchState) {
+            dismissKeyboard(editableAuthor);
+            dismissKeyboard(editableQuote);
+            dismissKeyboard(editableQuery);
             changeState(revealContentState);
         } else {
             changeState(revealFABActionsState);
@@ -914,8 +995,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @OnClick(R.id.fab_lwq_search) void revealSearch() {
         if (activityState == revealSearchState) {
             changeState(revealFABActionsState);
+            dismissKeyboard(editableQuery);
         } else {
             editableQuery.setText("");
+            editableQuery.requestFocusFromTouch();
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
             changeState(revealSearchState);
         }
     }
@@ -1056,6 +1140,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    void dismissKeyboard(View tokenOwner) {
+        // Dismiss the keyboard
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(tokenOwner.getWindowToken(), 0);
     }
 
     @Override
