@@ -53,9 +53,9 @@
         android:id="@+id/group_lwq_fab_screen_add_edit_quote"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        app:layout_widthPercent="@fraction/lwq_settings_element_width_percent"
-        app:layout_marginTopPercent="10%"/>
+        app:layout_widthPercent="66%"
+        app:layout_marginTopPercent="10%"
+        app:layout_marginLeftPercent="10%"/>
 
     <!-- Search -->
 
