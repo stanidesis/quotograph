@@ -40,12 +40,10 @@ import java.util.Random;
  *
  * Date: 07/11/2015
  */
-
 public class Category extends SugarRecord<Category> {
     public enum Source {
         DEFAULT,
-        BRAINY_QUOTE,
-        USER_QUOTE
+        BRAINY_QUOTE;
     }
 
     public String name;

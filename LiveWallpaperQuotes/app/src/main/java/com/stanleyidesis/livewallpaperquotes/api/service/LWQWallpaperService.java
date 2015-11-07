@@ -57,6 +57,7 @@ public class LWQWallpaperService extends WallpaperService {
 
         LWQSurfaceHolderDrawScript drawScript;
         GestureDetectorCompat gestureDetectorCompat;
+        Intent launchIntent;
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
@@ -130,9 +131,11 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             if (LWQPreferences.isDoubleTapEnabled()) {
-                final PackageManager packageManager = getPackageManager();
-                final Intent launchIntentForPackage = packageManager.getLaunchIntentForPackage(getPackageName());
-                startActivity(launchIntentForPackage);
+                if (launchIntent == null) {
+                    final PackageManager packageManager = getPackageManager();
+                    launchIntent = packageManager.getLaunchIntentForPackage(getPackageName());
+                }
+                startActivity(launchIntent);
             }
             return true;
         }

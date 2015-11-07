@@ -59,4 +59,12 @@
         <item>@integer/one_week</item>
     </integer-array>
 
+    <string-array name="popup_playlist_options">
+        <item>Remove</item>
+    </string-array>
+
+    <string-array name="popup_playlist_quote_options">
+        <item>Edit</item>
+        <item>Remove</item>
+    </string-array>
 </resources>

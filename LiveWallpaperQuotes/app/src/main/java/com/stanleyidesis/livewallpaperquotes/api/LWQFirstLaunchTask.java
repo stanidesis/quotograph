@@ -5,8 +5,10 @@ import android.os.AsyncTask;
 import com.orm.query.Select;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
+import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
-import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.api.db.Playlist;
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistCategory;
 import com.stanleyidesis.livewallpaperquotes.api.event.FirstLaunchTaskEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
@@ -61,6 +63,10 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
                     return;
                 }
             }
+
+            Playlist defaultPlaylist = new Playlist(LWQApplication.get().getString(R.string.app_name), true);
+            defaultPlaylist.save();
+
             // TODO not first?
             Category initialCategory = categories.get(0);
             for (Category category : categories) {
@@ -69,20 +75,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
                     break;
                 }
             }
-            LWQPreferences.setQuoteCategoryPreference(initialCategory.name);
-            LWQApplication.getQuoteController().fetchQuotes(initialCategory, fetchQuotesCallback);
-        }
-
-        @Override
-        public void onError(String errorMessage, Throwable throwable) {
-            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(errorMessage, throwable));
-        }
-    };
-
-    Callback<List<Quote>> fetchQuotesCallback = new Callback<List<Quote>>() {
-        @Override
-        public void onSuccess(List<Quote> quotes) {
-            publishProgress(quotes.size() + " quotes fetched");
+            new PlaylistCategory(defaultPlaylist, initialCategory).save();
             LWQPreferences.setImageCategoryPreference(UnsplashManager.UnsplashCategory.NATURE.sqlName());
             LWQApplication.getWallpaperController().generateNewWallpaper();
         }

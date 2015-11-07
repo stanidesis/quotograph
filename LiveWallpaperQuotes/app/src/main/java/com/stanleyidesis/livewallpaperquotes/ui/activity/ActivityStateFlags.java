@@ -33,7 +33,7 @@ package com.stanleyidesis.livewallpaperquotes.ui.activity;
  *
  * Date: 10/01/2015
  */
-public interface StateFlags {
+public interface ActivityStateFlags {
     int FLAG_NO_CHANGE = -1;
     int FLAG_REVEAL = 1;
     int FLAG_HIDE = 2;

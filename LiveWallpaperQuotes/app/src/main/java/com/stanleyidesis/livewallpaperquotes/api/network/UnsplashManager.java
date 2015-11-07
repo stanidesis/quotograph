@@ -139,7 +139,7 @@ public class UnsplashManager {
     }
 
     private interface Endpoints {
-        String UNSPLASH_SEARCH_URL= "https://unsplash.com/search?utf8=✓";
+        String UNSPLASH_SEARCH_URL= "https://unsplash.com/search?";
     }
 
     private static final String KEYWORD_PARAM = "keyword=%s&";

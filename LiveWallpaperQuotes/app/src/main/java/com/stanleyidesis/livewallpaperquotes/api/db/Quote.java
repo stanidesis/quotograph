@@ -5,6 +5,7 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -40,10 +41,8 @@ import java.util.Random;
  *
  * Date: 07/11/2015
  */
-
 public class Quote extends SugarRecord<Quote> {
     public String text;
-
     public Author author;
     public Category category;
 
@@ -64,6 +63,24 @@ public class Quote extends SugarRecord<Quote> {
         final long count = Select.from(Quote.class).count();
         final int offset = new Random().nextInt((int) count);
         return Quote.findWithQuery(Quote.class, "Select * from Quote LIMIT 1 OFFSET " + offset, null).get(0);
+    }
+
+    public static List<Quote> allFromCategory(Category category) {
+        return Select.from(Quote.class).where(Condition.prop(StringUtil.toSQLName("category")).eq(category)).list();
+    }
+
+    public static Quote randomFromCategory(Category category) {
+        final List<Quote> quotes = allFromCategory(category);
+        return quotes.get(new Random().nextInt(quotes.size()));
+    }
+
+    public static List<Quote> allFromAuthor(Author author) {
+        return Select.from(Quote.class).where(Condition.prop(StringUtil.toSQLName("author")).eq(author)).list();
+    }
+
+    public static Quote randomFromAuthor(Author author) {
+        final List<Quote> quotes = allFromAuthor(author);
+        return quotes.get(new Random().nextInt(quotes.size()));
     }
 
     public static Quote find(String text, Author author) {

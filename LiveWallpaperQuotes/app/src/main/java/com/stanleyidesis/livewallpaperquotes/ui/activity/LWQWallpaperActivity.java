@@ -1,21 +1,33 @@
 package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.RelativeLayout;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
+import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
+import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 /**
@@ -51,38 +63,47 @@ import de.greenrobot.event.EventBus;
  *
  * Date: 09/06/2015
  */
-public abstract class LWQWallpaperActivity extends AppCompatActivity implements SurfaceHolder.Callback {
+public abstract class LWQWallpaperActivity extends AppCompatActivity implements
+        SurfaceHolder.Callback,
+        ActivityStateFlags {
 
-    enum SilkScreenState {
+    enum State {
         OBSCURED(.7f),
         REVEALED(0f),
         HIDDEN(1f);
 
         float screenAlpha;
 
-        SilkScreenState(float screenAlpha) {
+        State(float screenAlpha) {
             this.screenAlpha = screenAlpha;
         }
     }
 
+    @Bind(R.id.view_screen_lwq_wallpaper) View silkScreen;
+    @Bind(R.id.surface_lwq_wallpaper) SurfaceView surfaceView;
+    // Wallpaper Actions
+    @Bind(R.id.group_lwq_settings_wallpaper_actions) View wallpaperActionsContainer;
+    @Bind(R.id.btn_wallpaper_actions_share) View shareButton;
+    @Bind(R.id.btn_wallpaper_actions_save) View saveButton;
+    @Bind(R.id.btn_wallpaper_actions_skip) View skipButton;
+
     LWQSurfaceHolderDrawScript drawScript;
-    SurfaceView surfaceView;
-    SilkScreenState silkScreenState;
-    View silkScreen;
+    State state;
+    boolean wallpaperActionsVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fullScreenIfPossible();
+        setupFullscreenIfPossible();
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        silkScreen = findViewById(R.id.view_screen_lwq_wallpaper);
-        surfaceView = (SurfaceView) findViewById(R.id.surface_lwq_wallpaper);
+        ButterKnife.bind(this);
         surfaceView.getHolder().addCallback(this);
-        animateSilkScreen(SilkScreenState.HIDDEN);
+        setupWallpaperActions();
+        animateState(State.HIDDEN);
     }
 
     @Override
@@ -101,6 +122,8 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     public void surfaceCreated(SurfaceHolder holder) {
         if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
             LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+        } else {
+            draw();
         }
     }
 
@@ -115,11 +138,15 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {}
 
+    // Event Handling
+
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
+            endActionAnimation(skipButton);
             return;
         }
         if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+            endActionAnimation(skipButton);
             draw();
         }
     }
@@ -131,28 +158,32 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
         }
     }
 
-    void didFinishDrawing() {
-        // Nothing for now
+    public void onEvent(ImageSaveEvent imageSaveEvent) {
+        endActionAnimation(saveButton);
     }
 
-    void switchToSilkScreen(SilkScreenState state) {
-        silkScreen.setAlpha(state.screenAlpha);
-        silkScreenState = state;
+    // Setup
+
+    void setupWallpaperActions() {
+        wallpaperActionsContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
+        wallpaperActionsContainer.setEnabled(false);
+        final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) wallpaperActionsContainer.getLayoutParams();
+        layoutParams.bottomMargin = (int) (UIUtils.getNavBarHeight(this) * 1.5);
+        wallpaperActionsContainer.setLayoutParams(layoutParams);
+
+        View [] buttons = new View[] {shareButton, saveButton, skipButton};
+        for (View button : buttons) {
+            button.setAlpha(0f);
+            button.setTranslationY(button.getHeight() * 2f);
+            button.setTag(R.id.view_tag_flags, FLAG_ENABLE);
+        };
     }
 
-    long animateSilkScreen(SilkScreenState state) {
-        ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), state.screenAlpha);
-        silkScreenAnimator.setDuration(300);
-        silkScreenAnimator.setInterpolator(new LinearInterpolator());
-        silkScreenAnimator.start();
-        silkScreenState = state;
-        return 300;
-    }
-
-    void fullScreenIfPossible() {
+    void setupFullscreenIfPossible() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         }
@@ -173,5 +204,94 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
             @Override
             public void onError(String errorMessage, Throwable throwable) {}
         });
+    }
+
+    void didFinishDrawing() {
+        // Nothing for now
+    }
+
+    void switchToState(State state) {
+        silkScreen.setAlpha(state.screenAlpha);
+        this.state = state;
+    }
+
+    long animateState(State state) {
+        ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), state.screenAlpha);
+        silkScreenAnimator.setDuration(300);
+        silkScreenAnimator.setInterpolator(new LinearInterpolator());
+        silkScreenAnimator.start();
+        this.state = state;
+        return 300;
+    }
+
+    void animateWallpaperActions(final boolean dismiss) {
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(generateAnimator(shareButton, dismiss, 0),
+                generateAnimator(saveButton, dismiss, 15),
+                generateAnimator(skipButton, dismiss, 30));
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                wallpaperActionsVisible = !dismiss;
+            }
+        });
+        animatorSet.start();
+    }
+
+    AnimatorSet generateAnimator(View target, boolean dismiss, long startDelay) {
+        float [] fadeIn = new float[] {0f, 1f};
+        float [] fadeOut = new float[] {1f, 0f};
+        final ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(target, "alpha", dismiss ? fadeOut : fadeIn);
+        alphaAnimator.setDuration(240);
+        alphaAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        final ObjectAnimator translationAnimator = ObjectAnimator.ofFloat(target, "translationY", dismiss ? (target.getHeight() * 2f) : 0f);
+        translationAnimator.setDuration(240);
+        translationAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.setStartDelay(startDelay);
+        animatorSet.playTogether(alphaAnimator, translationAnimator);
+        return animatorSet;
+    }
+
+    void animateAction(View button) {
+        final Animator animator = AnimatorInflater.loadAnimator(this, R.animator.progress_rotation);
+        animator.setTarget(button);
+        button.setTag(R.id.view_tag_animator, animator);
+        animator.start();
+    }
+
+    void endActionAnimation(final View button) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (button.getTag(R.id.view_tag_animator) != null) {
+                    ((Animator)button.getTag(R.id.view_tag_animator)).end();
+                    button.setTag(R.id.view_tag_animator, null);
+                    skipButton.setEnabled(true);
+                    saveButton.setEnabled(true);
+                }
+            }
+        });
+    }
+
+    // Click Handling
+    @OnClick(R.id.btn_wallpaper_actions_share) void shareWallpaper() {
+        sendBroadcast(new Intent(getString(R.string.action_share)));
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperToDisk() {
+        sendBroadcast(new Intent(getString(R.string.action_save)));
+        saveButton.setEnabled(false);
+        skipButton.setEnabled(false);
+        animateAction(saveButton);
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_skip) void skipWallpaper() {
+        LWQApplication.getWallpaperController().generateNewWallpaper();
+        saveButton.setEnabled(false);
+        skipButton.setEnabled(false);
+        animateAction(skipButton);
     }
 }

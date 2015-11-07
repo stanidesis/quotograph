@@ -1,7 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes;
 
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
@@ -91,15 +90,6 @@ public class LWQPreferences {
         EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_image_category, imageCategory));
     }
 
-    public static String getQuoteCategoryPreference() {
-        return sharedPreferences.getString(LWQApplication.get().getString(R.string.preference_key_quote_category), null);
-    }
-
-    public static void setQuoteCategoryPreference(String quoteCategory) {
-        sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_quote_category), quoteCategory).apply();
-        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_quote_category, quoteCategory));
-    }
-
     public static long getRefreshPreference() {
         return sharedPreferences.getLong(LWQApplication.get().getString(R.string.preference_key_refresh), DateUtils.DAY_IN_MILLIS);
     }
@@ -107,18 +97,6 @@ public class LWQPreferences {
     public static void setRefreshPreference(long refresh) {
         sharedPreferences.edit().putLong(LWQApplication.get().getString(R.string.preference_key_refresh), refresh).apply();
         EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_refresh, refresh));
-    }
-
-    public static boolean isAutoPilot() {
-        final Resources resources = LWQApplication.get().getResources();
-        final int autopilotMode = resources.getInteger(R.integer.preference_mode_autopilot);
-        final int mode = sharedPreferences.getInt(resources.getString(R.string.preference_key_mode), autopilotMode);
-        return mode == autopilotMode;
-    }
-
-    public static void setMode(int mode) {
-        sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_mode), mode).apply();
-        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_mode, mode));
     }
 
     public static boolean isDoubleTapEnabled() {

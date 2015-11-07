@@ -11,7 +11,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,6 +59,9 @@ public class BrainyQuoteManager {
         String BRAINY_QUOTE_TOPICS = "https://www.brainyquote.com/quotes/topics.html";
         String BRAINY_QUOTE_TOPIC_PAGE_1 = "https://www.brainyquote.com/quotes/topics/%s.html";
         String BRAINY_QUOTE_TOPIC_PAGE_NUMBER = "https://www.brainyquote.com/quotes/topics/%s%d.html";
+        String BRAINY_QUOTE_AUTHOR_PAGE_1 = "https://www.brainyquote.com/quotes/authors/%s/%s.html";
+        String BRAINY_QUOTE_AUTHOR_PAGE_NUMBER = "https://www.brainyquote.com/quotes/authors/%s/%s_%d.html";
+        String BRAINY_QUOTE_SEARCH_QUERY = "https://www.brainyquote.com/search_results.html?q=%s";
     }
 
     private ScheduledExecutorService scheduledExecutorService;
@@ -79,6 +85,13 @@ public class BrainyQuoteManager {
         return "topic_" + lowerCase;
     }
 
+    private String convertAuthorToURLName(String authorDisplayName) {
+        final String maxLength = authorDisplayName.substring(0, Math.min(authorDisplayName.length(), 25));
+        final String noPunctuation = maxLength.replaceAll("[,.'-]", "");
+        final String underscores = noPunctuation.replaceAll(" ", "_");
+        return underscores.toLowerCase();
+    }
+
     public BrainyQuoteManager() {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
@@ -100,13 +113,9 @@ public class BrainyQuoteManager {
                 }
 
                 List<BrainyTopic> topics = new ArrayList<>();
-                final Elements elements = document.select("a[href^=\"/quotes/topics/\"]");
+                final Elements elements = document.select("a[href^=/quotes/topics/]");
                 for (Element element : elements) {
-                    BrainyTopic brainyTopic = new BrainyTopic();
-                    brainyTopic.displayName = element.text();
-
-                    final String href = element.attr("href");
-                    brainyTopic.urlShortName = href.substring(href.lastIndexOf('/') + 1);
+                    BrainyTopic brainyTopic = new BrainyTopic(element.text());
                     topics.add(brainyTopic);
                 }
                 callback.onSuccess(topics);
@@ -125,7 +134,58 @@ public class BrainyQuoteManager {
         } else {
             finalUrl = String.format(baseUrl, urlTopicName);
         }
-        final Connection connection = Jsoup.connect(finalUrl);
+        final Object o = parseDocument(finalUrl);
+        if (o instanceof String) {
+            return o;
+        }
+        return parseForQuotes((Document) o);
+    }
+
+    public Object getQuotesBy(String authorDisplayName, int pageIndex) {
+        final String urlAuthorName = convertAuthorToURLName(authorDisplayName);
+        String baseUrl = pageIndex > 1 ?
+                Endpoints.BRAINY_QUOTE_AUTHOR_PAGE_NUMBER
+                : Endpoints.BRAINY_QUOTE_AUTHOR_PAGE_1;
+        String finalUrl;
+        if (pageIndex > 1) {
+            finalUrl = String.format(baseUrl, urlAuthorName.substring(0, 1), urlAuthorName, pageIndex);
+        } else {
+            finalUrl = String.format(baseUrl, urlAuthorName.substring(0, 1), urlAuthorName);
+        }
+        final Object o = parseDocument(finalUrl);
+        if (o instanceof String) {
+            return o;
+        }
+        return parseForQuotes((Document) o);
+    }
+
+    public Object searchForQuotes(String searchQuery) {
+        String escapedQuery = null;
+        try {
+            escapedQuery = URLEncoder.encode(searchQuery, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return e.getLocalizedMessage();
+        }
+        String finalUrl = String.format(Endpoints.BRAINY_QUOTE_SEARCH_QUERY, escapedQuery);
+        Log.v(getClass().getSimpleName(), "URL: " + finalUrl, new RuntimeException());
+        final Object o = parseDocument(finalUrl);
+        if (o instanceof String) {
+            return o;
+        }
+        Document document = (Document) o;
+        final List<BrainyQuote> brainyQuotes = parseForQuotes(document);
+        final List<BrainyAuthor> brainyAuthors = parseForAuthors(document);
+        final List<BrainyTopic> brainyTopics = parseForTopics(document);
+        final List<Object> result = new ArrayList<>();
+        result.addAll(brainyTopics);
+        result.addAll(brainyAuthors);
+        result.addAll(brainyQuotes);
+        return result;
+    }
+
+    private Object parseDocument(String url) {
+        final Connection connection = Jsoup.connect(url);
         final Connection.Response response;
         try {
             response = connection.execute();
@@ -141,45 +201,99 @@ public class BrainyQuoteManager {
             e.printStackTrace();
             return e.getLocalizedMessage();
         }
+        return document;
+    }
 
+    private List<BrainyQuote> parseForQuotes(Document document) {
         List<BrainyQuote> brainyQuotes = new ArrayList<>();
-        final Elements elements = document.select("div.boxyPaddingBig");
-        for (final Element quoteAndAuthor : elements) {
-            final Elements possibleQuote = quoteAndAuthor.select("a[href^=\"/quotes/quotes\"]");
-            final Elements possibleAuthor = quoteAndAuthor.select("a[href^=\"/quotes/authors\"]");
-            if (possibleQuote == null || possibleAuthor == null || possibleQuote.isEmpty() || possibleAuthor.isEmpty()) {
+        final Elements elements = document.select(".boxy");
+        for (final Element quoteAuthorCategories : elements) {
+            final Elements quotes = quoteAuthorCategories.select("span.bqQuoteLink > a");
+            if (quotes == null || quotes.isEmpty()) {
+                continue;
+            }
+            final Elements authors = quoteAuthorCategories.select("div.bq-aut > a");
+            if (authors == null || authors.isEmpty()) {
                 continue;
             }
             BrainyQuote brainyQuote = new BrainyQuote();
-            brainyQuote.quote = possibleQuote.text().replace("\"", "");
-            brainyQuote.author = possibleAuthor.text();
+            brainyQuote.quote = quotes.get(0).text().replace("\"", "");
+            brainyQuote.author = new BrainyAuthor(authors.get(0).text());
             brainyQuotes.add(brainyQuote);
+            final Elements category = quoteAuthorCategories.select("a[href^=/quotes/topics]");
+            if (category == null || category.isEmpty()) {
+                continue;
+            }
+            brainyQuote.topic = new BrainyTopic(category.get(0).text());
         }
-        return brainyQuotes;
+        return new ArrayList<>(new LinkedHashSet<>(brainyQuotes));
     }
 
-    public void getQuotesAsync(final String topicDisplayName,
-                          final int pageIndex, final Callback<List<BrainyQuote>> callback) {
-        submit(new Runnable() {
-            @Override
-            public void run() {
-                final Object returnObject = getQuotes(topicDisplayName, pageIndex);
-                if (returnObject instanceof String) {
-                    callback.onError((String) returnObject, null);
-                } else {
-                    callback.onSuccess((List<BrainyQuote>) returnObject);
-                }
+    private List<BrainyAuthor> parseForAuthors(Document document) {
+        List<BrainyAuthor> brainyAuthors = new ArrayList<>();
+        final Elements elements = document.select("a[href^=/quotes/authors]");
+        if (elements == null || elements.isEmpty()) {
+            return brainyAuthors;
+        }
+        for (Element authorElement : elements) {
+            boolean exists = false;
+            for (BrainyAuthor author : brainyAuthors) {
+                exists = exists || author.name.equalsIgnoreCase(authorElement.text());
             }
-        });
+            if (exists) {
+                continue;
+            }
+            brainyAuthors.add(new BrainyAuthor(authorElement.text()));
+        }
+        return brainyAuthors;
+    }
+
+    private List<BrainyTopic> parseForTopics(Document document) {
+        List<BrainyTopic> brainyTopics = new ArrayList<>();
+        final Elements elements = document.select("div.bqLn > a[href^=/quotes/topics/topic_]");
+        if (elements == null || elements.isEmpty()) {
+            return brainyTopics;
+        }
+        for (Element topicElement : elements) {
+            boolean exists = false;
+            for (BrainyTopic topic : brainyTopics) {
+                exists = exists || topic.name.equalsIgnoreCase(topicElement.text());
+            }
+            if (exists) {
+                continue;
+            }
+            brainyTopics.add(new BrainyTopic(topicElement.text()));
+        }
+        return brainyTopics;
     }
 
     public class BrainyTopic {
-        public String displayName;
-        public String urlShortName;
+        public String name;
+
+        BrainyTopic(String name) {
+            this.name = name;
+        }
+    }
+
+    public class BrainyAuthor {
+        public String name;
+
+        BrainyAuthor(String name) {
+            this.name = name;
+        }
     }
 
     public class BrainyQuote {
-        public String author;
         public String quote;
+        public BrainyAuthor author;
+        public BrainyTopic topic;
+
+        BrainyQuote() {}
+
+        BrainyQuote(String quote, BrainyAuthor author, BrainyTopic topic) {
+            this.quote = quote;
+            this.author = author;
+            this.topic = topic;
+        }
     }
 }

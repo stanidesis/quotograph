@@ -34,7 +34,6 @@
 <android.support.percent.PercentRelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipToPadding="false"
@@ -55,15 +54,7 @@
         android:src="@drawable/selectable_save_button"
         android:background="@android:color/transparent"
         android:layout_toRightOf="@id/btn_wallpaper_actions_share"
-        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>
-
-    <ImageButton
-        android:id="@+id/btn_wallpaper_actions_adjust"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/selectable_adjust_button"
-        android:background="@android:color/transparent"
-        android:layout_toRightOf="@id/btn_wallpaper_actions_save"
+        android:layout_toEndOf="@id/btn_wallpaper_actions_share"
         app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>
 
     <ImageButton
@@ -72,16 +63,8 @@
         android:layout_height="wrap_content"
         android:src="@drawable/selectable_skip_button"
         android:background="@android:color/transparent"
-        android:layout_toRightOf="@id/btn_wallpaper_actions_adjust"
-        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>
-
-    <ImageButton
-        android:id="@+id/btn_wallpaper_actions_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/selectable_settings_button"
-        android:background="@android:color/transparent"
-        android:layout_toRightOf="@id/btn_wallpaper_actions_skip"
+        android:layout_toRightOf="@id/btn_wallpaper_actions_save"
+        android:layout_toEndOf="@id/btn_wallpaper_actions_save"
         app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>
 
 </android.support.percent.PercentRelativeLayout>

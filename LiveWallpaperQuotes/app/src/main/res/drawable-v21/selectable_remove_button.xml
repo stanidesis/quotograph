@@ -20,7 +20,7 @@
     SOFTWARE.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    selectable_adjust_button.xml
+    selectable_remove_button.xml
     @author Stanley Idesis
 
     From Live-Wallpaper-Quotes
@@ -29,17 +29,18 @@
     Please report any issues
     https://github.com/stanidesis/live-wallpaper-quotes/issues
 
-    Date: 09/26/2015
+    Date: 10/09/2015
 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:exitFadeDuration="@android:integer/config_shortAnimTime"
+    android:color="@color/palette_50" >
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:enterFadeDuration="100"
-    android:exitFadeDuration="100">
-    <item android:state_selected="true">
-        <bitmap android:src="@mipmap/ic_brightness_6_white" android:alpha=".8"/>
+    <item android:id="@android:id/mask">
+        <shape android:shape="oval">
+            <solid android:color="@android:color/white" />
+        </shape>
     </item>
-    <item android:state_pressed="true">
-        <bitmap android:src="@mipmap/ic_brightness_6_white" android:alpha=".7"/>
-    </item>
-    <item android:drawable="@mipmap/ic_brightness_6_white" />
-</selector>
+
+    <item android:drawable="@mipmap/ic_remove_white" />
+
+</ripple>
