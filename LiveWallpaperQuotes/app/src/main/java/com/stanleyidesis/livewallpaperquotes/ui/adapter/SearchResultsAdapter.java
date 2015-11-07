@@ -4,7 +4,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.stanleyidesis.livewallpaperquotes.R;
@@ -15,6 +14,7 @@ import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistAuthor;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistCategory;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.ui.view.AddRemoveButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ import butterknife.OnClick;
  */
 public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdapter.BaseResultHolder> {
 
-    public static interface Delegate {
+    public interface Delegate {
         /**
          * User removes this from their playlist
          * @param adapter
@@ -86,7 +86,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
     List<Object> searchResults = new ArrayList<>();
     Delegate delegate;
-
+    Playlist activePlaylist = Playlist.active();
 
     public Delegate getDelegate() {
         return delegate;
@@ -178,8 +178,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
         @Bind(R.id.tv_category_result_item_category)
         TextView categoryTextView;
-        @Bind(R.id.iv_category_result_item_add)
-        ImageView categoryAddRemove;
+        @Bind(R.id.add_remove_category_result_item)
+        AddRemoveButton categoryAddRemove;
 
         public CategoryResultHolder(View itemView) {
             super(itemView);
@@ -188,20 +188,20 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
         void updateWithCategory(Category category) {
             this.category = category;
-            this.playlistCategory = PlaylistCategory.find(Playlist.active(), category);
+            this.playlistCategory = PlaylistCategory.find(activePlaylist, category);
             categoryTextView.setText(category.name);
-            categoryAddRemove.setImageResource(playlistCategory == null ? R.mipmap.ic_add_white : R.mipmap.ic_remove_white);
+            categoryAddRemove.setMode(playlistCategory != null);
         }
 
-        @OnClick({R.id.fl_category_result_item_add_wrapper, R.id.iv_category_result_item_add})
+        @OnClick({R.id.add_remove_category_result_item})
         void addOrRemoveCategory() {
             if (playlistCategory == null) {
                 playlistCategory = (PlaylistCategory) delegate.onAdd(SearchResultsAdapter.this, category);
-                categoryAddRemove.setImageResource(R.mipmap.ic_remove_white);
+                categoryAddRemove.setMode(true);
             } else {
                 delegate.onRemove(SearchResultsAdapter.this, playlistCategory);
                 playlistCategory = null;
-                categoryAddRemove.setImageResource(R.mipmap.ic_add_white);
+                categoryAddRemove.setMode(false);
             }
         }
     }
@@ -220,10 +220,10 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         TextView firstAuthorTextView;
         @Bind(R.id.tv_author_result_item_author_second)
         TextView secondAuthorTextView;
-        @Bind(R.id.iv_author_result_item_add_first)
-        ImageView firstAuthorAddRemove;
-        @Bind(R.id.iv_author_result_item_add_second)
-        ImageView secondAuthorAddRemove;
+        @Bind(R.id.add_remove_author_result_item_first)
+        AddRemoveButton firstAuthorAddRemove;
+        @Bind(R.id.add_remove_author_result_item_second)
+        AddRemoveButton secondAuthorAddRemove;
 
         public AuthorResultHolder(View itemView) {
             super(itemView);
@@ -232,9 +232,9 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
         void updateWithAuthor(final Author firstAuthor, Author secondAuthor) {
             this.firstAuthor = firstAuthor;
-            this.firstPlaylistAuthor = PlaylistAuthor.find(Playlist.active(), firstAuthor);
+            this.firstPlaylistAuthor = PlaylistAuthor.find(activePlaylist, firstAuthor);
             firstAuthorTextView.setText(firstAuthor.name);
-            firstAuthorAddRemove.setImageResource(firstPlaylistAuthor == null ? R.mipmap.ic_add_white : R.mipmap.ic_remove_white);
+            firstAuthorAddRemove.setMode(firstPlaylistAuthor != null);
 
             if (secondAuthor == null) {
                 this.secondAuthor = null;
@@ -243,30 +243,30 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                 return;
             }
             this.secondAuthor = secondAuthor;
-            secondPlaylistAuthor = PlaylistAuthor.find(Playlist.active(), secondAuthor);
+            secondPlaylistAuthor = PlaylistAuthor.find(activePlaylist, secondAuthor);
             secondAuthorCard.setVisibility(View.VISIBLE);
             secondAuthorTextView.setText(secondAuthor.name);
-            secondAuthorAddRemove.setImageResource(secondPlaylistAuthor == null ? R.mipmap.ic_add_white : R.mipmap.ic_remove_white);
+            secondAuthorAddRemove.setMode(secondPlaylistAuthor != null);
         }
 
-        @OnClick({R.id.fl_author_result_item_add_wrapper_first, R.id.iv_author_result_item_add_first})
+        @OnClick(R.id.add_remove_author_result_item_first)
         void addOrRemoveFirstAuthor() {
             firstPlaylistAuthor = addOrRemove(firstAuthor, firstPlaylistAuthor, firstAuthorAddRemove);
         }
 
-        @OnClick({R.id.fl_author_result_item_add_wrapper_second, R.id.iv_author_result_item_add_second})
+        @OnClick(R.id.add_remove_author_result_item_second)
         void addOrRemoveSecondAuthor() {
             secondPlaylistAuthor = addOrRemove(secondAuthor, secondPlaylistAuthor, secondAuthorAddRemove);
         }
 
-        PlaylistAuthor addOrRemove(Author author, PlaylistAuthor playlistAuthor, ImageView addOrRemove) {
+        PlaylistAuthor addOrRemove(Author author, PlaylistAuthor playlistAuthor, AddRemoveButton addOrRemove) {
             PlaylistAuthor returned = null;
             if (playlistAuthor == null) {
                 returned = (PlaylistAuthor) delegate.onAdd(SearchResultsAdapter.this, author);
-                addOrRemove.setImageResource(R.mipmap.ic_remove_white);
+                addOrRemove.setMode(true);
             } else {
                 delegate.onRemove(SearchResultsAdapter.this, playlistAuthor);
-                addOrRemove.setImageResource(R.mipmap.ic_add_white);
+                addOrRemove.setMode(false);
             }
             return returned;
         }
@@ -281,8 +281,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         TextView quoteTextView;
         @Bind(R.id.tv_quote_result_item_author)
         TextView authorTextView;
-        @Bind(R.id.iv_quote_result_item_add)
-        ImageView addOrRemoveQuote;
+        @Bind(R.id.add_remove_quote_result_item)
+        AddRemoveButton addOrRemoveQuote;
 
         public QuoteResultHolder(View itemView) {
             super(itemView);
@@ -291,21 +291,21 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
         void updateWithQuote(Quote quote) {
             this.quote = quote;
-            playlistQuote = PlaylistQuote.find(Playlist.active(), quote);
+            playlistQuote = PlaylistQuote.find(activePlaylist, quote);
             quoteTextView.setText(quote.text);
             authorTextView.setText(quote.author.name);
-            addOrRemoveQuote.setImageResource(playlistQuote == null ? R.mipmap.ic_add_white : R.mipmap.ic_remove_white);
+            addOrRemoveQuote.setMode(playlistQuote != null);
         }
 
-        @OnClick({R.id.fl_quote_result_item_add_wrapper, R.id.iv_quote_result_item_add})
+        @OnClick(R.id.add_remove_quote_result_item)
         void addOrRemoveQuote() {
             if (playlistQuote == null) {
                 playlistQuote = (PlaylistQuote) delegate.onAdd(SearchResultsAdapter.this, quote);
-                addOrRemoveQuote.setImageResource(R.mipmap.ic_remove_white);
+                addOrRemoveQuote.setMode(true);
             } else {
                 delegate.onRemove(SearchResultsAdapter.this, playlistQuote);
                 playlistQuote = null;
-                addOrRemoveQuote.setImageResource(R.mipmap.ic_add_white);
+                addOrRemoveQuote.setMode(false);
             }
         }
     }

@@ -1053,7 +1053,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     ViewPropertyAnimator animateFABRotation(final boolean rotate) {
         final ViewPropertyAnimator animate = fabAdd.animate();
-        animate.rotationBy(rotate ? 45f : -45f)
+        animate.rotation(rotate ? 45f : 0f)
                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 .setDuration(150);
         return animate;

@@ -70,23 +70,12 @@
                 android:text="@string/inspirational_author_0"
                 app:layout_marginTopPercent="0%"/>
 
-            <FrameLayout
-                android:id="@+id/fl_author_result_item_add_wrapper_first"
+            <com.stanleyidesis.livewallpaperquotes.ui.view.AddRemoveButton
+                android:id="@+id/add_remove_author_result_item_first"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:clipToPadding="false">
-
-                <ImageView
-                    android:id="@+id/iv_author_result_item_add_first"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/selectable_add_button"
-                    android:scaleType="center"
-                    android:layout_gravity="end|center_vertical"/>
-
-            </FrameLayout>
+                android:layout_alignParentEnd="true"/>
 
         </android.support.percent.PercentRelativeLayout>
 
@@ -127,23 +116,12 @@
                 android:text="@string/inspirational_author_1"
                 app:layout_marginTopPercent="0%"/>
 
-            <FrameLayout
-                android:id="@+id/fl_author_result_item_add_wrapper_second"
+            <com.stanleyidesis.livewallpaperquotes.ui.view.AddRemoveButton
+                android:id="@+id/add_remove_author_result_item_second"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:clipToPadding="false">
-
-                <ImageView
-                    android:id="@+id/iv_author_result_item_add_second"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/selectable_add_button"
-                    android:scaleType="center"
-                    android:layout_gravity="end|center_vertical"/>
-
-            </FrameLayout>
+                android:layout_alignParentEnd="true"/>
 
         </android.support.percent.PercentRelativeLayout>
 

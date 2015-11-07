@@ -55,8 +55,8 @@
             android:textAllCaps="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@+id/fl_quote_result_item_add_wrapper"
-            android:layout_toStartOf="@+id/fl_quote_result_item_add_wrapper"
+            android:layout_toLeftOf="@+id/add_remove_quote_result_item"
+            android:layout_toStartOf="@+id/add_remove_quote_result_item"
             android:text="@string/inspirational_quote_0"/>
 
         <TextView
@@ -66,13 +66,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@+id/fl_quote_result_item_add_wrapper"
-            android:layout_toStartOf="@+id/fl_quote_result_item_add_wrapper"
+            android:layout_toLeftOf="@+id/add_remove_quote_result_item"
+            android:layout_toStartOf="@+id/add_remove_quote_result_item"
             android:layout_below="@+id/tv_quote_result_item_quote"
             android:text="@string/inspirational_author_0"/>
 
-        <FrameLayout
-            android:id="@+id/fl_quote_result_item_add_wrapper"
+        <com.stanleyidesis.livewallpaperquotes.ui.view.AddRemoveButton
+            android:id="@+id/add_remove_quote_result_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -81,17 +81,7 @@
             android:clipToPadding="false"
             app:layout_marginLeftPercent="3%"
             app:layout_widthPercent="10%"
-            app:layout_heightPercent="7%">
-
-            <ImageView
-                android:id="@+id/iv_quote_result_item_add"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/selectable_add_button"
-                android:scaleType="center"
-                android:layout_gravity="end|center_vertical"/>
-
-        </FrameLayout>
+            app:layout_heightPercent="7%"/>
 
     </android.support.percent.PercentRelativeLayout>
 
