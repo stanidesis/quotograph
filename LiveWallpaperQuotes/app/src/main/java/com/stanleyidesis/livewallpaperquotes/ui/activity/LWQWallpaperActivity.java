@@ -67,14 +67,14 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         SurfaceHolder.Callback,
         ActivityStateFlags {
 
-    enum State {
+    enum BackgroundWallpaperState {
         OBSCURED(.7f),
         REVEALED(0f),
         HIDDEN(1f);
 
         float screenAlpha;
 
-        State(float screenAlpha) {
+        BackgroundWallpaperState(float screenAlpha) {
             this.screenAlpha = screenAlpha;
         }
     }
@@ -88,7 +88,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
     @Bind(R.id.btn_wallpaper_actions_skip) View skipButton;
 
     LWQSurfaceHolderDrawScript drawScript;
-    State state;
+    BackgroundWallpaperState backgroundWallpaperState;
     boolean wallpaperActionsVisible;
 
     @Override
@@ -103,7 +103,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         ButterKnife.bind(this);
         surfaceView.getHolder().addCallback(this);
         setupWallpaperActions();
-        animateState(State.HIDDEN);
+        animateState(BackgroundWallpaperState.HIDDEN);
     }
 
     @Override
@@ -210,17 +210,17 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         // Nothing for now
     }
 
-    void switchToState(State state) {
-        silkScreen.setAlpha(state.screenAlpha);
-        this.state = state;
+    void switchToState(BackgroundWallpaperState backgroundWallpaperState) {
+        silkScreen.setAlpha(backgroundWallpaperState.screenAlpha);
+        this.backgroundWallpaperState = backgroundWallpaperState;
     }
 
-    long animateState(State state) {
-        ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), state.screenAlpha);
+    long animateState(BackgroundWallpaperState backgroundWallpaperState) {
+        ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), backgroundWallpaperState.screenAlpha);
         silkScreenAnimator.setDuration(300);
         silkScreenAnimator.setInterpolator(new LinearInterpolator());
         silkScreenAnimator.start();
-        this.state = state;
+        this.backgroundWallpaperState = backgroundWallpaperState;
         return 300;
     }
 
