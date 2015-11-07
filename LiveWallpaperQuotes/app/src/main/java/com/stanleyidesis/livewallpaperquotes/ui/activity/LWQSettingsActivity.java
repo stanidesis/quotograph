@@ -17,6 +17,7 @@ import android.support.percent.PercentRelativeLayout;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -72,6 +73,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 
 /**
@@ -870,6 +872,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         SeekBar dimBar = ButterKnife.findById(settingsContainer, R.id.sb_lwq_settings_dim);
         dimBar.setProgress(LWQPreferences.getDimPreference());
         dimBar.setOnSeekBarChangeListener(this);
+
+        AppCompatCheckBox doubleTapCheckbox = ButterKnife.findById(this, R.id.check_lwq_settings_double_tap);
+        doubleTapCheckbox.setChecked(LWQPreferences.isDoubleTapEnabled());
     }
 
     void updateRefreshSpinner() {
@@ -1006,6 +1011,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @OnClick(R.id.fab_lwq_preview) void toggleWallpaper() {
         changeState(revealWallpaperState);
+    }
+
+    @OnCheckedChanged(R.id.check_lwq_settings_double_tap)
+    void onDoubleTapCheckChange(boolean checked) {
+        LWQPreferences.setDoubleTapEnabled(checked);
     }
 
     @Override

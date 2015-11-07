@@ -47,10 +47,10 @@
             android:id="@+id/til_fab_screen_search_wrapper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:hintAnimationEnabled="true"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/btn_fab_screen_search"
-            android:layout_toStartOf="@+id/btn_fab_screen_search">
+            android:layout_toStartOf="@+id/btn_fab_screen_search"
+            app:hintAnimationEnabled="true">
 
             <android.support.v7.widget.AppCompatAutoCompleteTextView
                 style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Author"
