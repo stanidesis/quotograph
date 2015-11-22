@@ -28,4 +28,59 @@
         android:textSize="30sp"
         app:layout_widthPercent="80%"/>
 
+    <TextView
+        style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Author"
+        android:id="@+id/tv_tut_category"
+        android:layout_below="@+id/tv_tut_details"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:gravity="center"
+        android:text="Motivational Quotes"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/palette_600"
+        android:textAllCaps="true"
+        android:background="@drawable/circle_button"
+        android:elevation="3dp"
+        android:padding="5dp"
+        app:layout_marginTopPercent="5%"
+        app:layout_marginLeftPercent="23%"/>
+
+    <TextView
+        style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Author"
+        android:id="@+id/tv_tut_author"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/tv_tut_details"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:gravity="center"
+        android:text="Quotes by William Shakespeare"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/palette_600"
+        android:textAllCaps="true"
+        android:background="@drawable/circle_button"
+        android:elevation="5dp"
+        android:padding="5dp"
+        app:layout_marginTopPercent="15%"
+        app:layout_marginRightPercent="20%"/>
+
+    <TextView
+        style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Author"
+        android:id="@+id/tv_tut_own_quote"
+        android:layout_below="@+id/tv_tut_details"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:gravity="center"
+        android:text="“Follow your own advice!”\n- Me"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/palette_600"
+        android:textAllCaps="true"
+        android:background="@drawable/circle_button"
+        android:elevation="6dp"
+        android:padding="5dp"
+        app:layout_marginTopPercent="32%"
+        app:layout_marginLeftPercent="28%"/>
+
 </android.support.percent.PercentRelativeLayout>

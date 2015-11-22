@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
@@ -102,6 +103,8 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     ImageView tutorialWallpaperOne;
     @Bind(R.id.iv_lwq_activate_tutorial_image_2)
     ImageView tutorialWallpaperTwo;
+    @Bind({R.id.tv_tut_category, R.id.tv_tut_author, R.id.tv_tut_own_quote})
+    List<TextView> sourceBubbles;
     @Bind({R.id.lwq_activate_tut_0,R.id.lwq_activate_tut_1,
             R.id.lwq_activate_tut_2,R.id.lwq_activate_tut_3,R.id.lwq_activate_tut_4,})
     List<View> viewPages;
@@ -122,6 +125,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         colorList.add(colorFour);
         colorList.add(colorFive);
 
+        setupSourceBubbles();
         setupViewPager();
         setIndicator(0);
         activePageFiveView = progressBar;
@@ -190,16 +194,22 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
             tutorialWallpaperTwo.setTop(wallpaperTop + (int) (tutorialWallpaperOne.getMeasuredHeight() * positionOffset));
             tutorialWallpaperOne.setAlpha(1f - positionOffset);
             tutorialWallpaperTwo.setAlpha(1f - positionOffset);
+
+            fadeBubbles(positionOffset, true);
         } else if (position == 2) {
+            fadeBubbles(positionOffset, false);
         } else if (position == 3) {
             activePageFiveView.setVisibility(View.VISIBLE);
             activePageFiveView.setAlpha(positionOffset);
+            activePageFiveView.setScaleX(positionOffset);
+            activePageFiveView.setScaleY(positionOffset);
         }
     }
 
     @Override
     public void onPageSelected(int position) {
         setIndicator(position);
+        // Active View
         if (position == 4) {
             activePageFiveView.setEnabled(firstLaunchTaskCompleted);
         } else {
@@ -255,6 +265,39 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         });
     }
 
+
+    // Setup
+
+    void setupSourceBubbles() {
+        sourceBubbles.get(0).setRotation(-5f);
+        sourceBubbles.get(1).setRotation(5f);
+        sourceBubbles.get(2).setRotation(-10f);
+        for (View bubble : sourceBubbles) {
+            bubble.setVisibility(View.GONE);
+            bubble.setScaleX(0f);
+            bubble.setScaleY(0f);
+            bubble.setAlpha(0f);
+        }
+    }
+
+    void fadeBubbles(float percentage, boolean reveal) {
+        List<Float> percentageShifts =new ArrayList<>();
+        percentageShifts.add(1/3f);
+        percentageShifts.add(2/3f);
+        percentageShifts.add(1f);
+        for (View bubble : sourceBubbles) {
+            bubble.setVisibility(View.VISIBLE);
+            float shiftedPosition = percentage / percentageShifts.remove(0);
+            if (shiftedPosition > 1f || shiftedPosition < 0f) {
+                continue;
+            }
+            float finalValue = reveal ? shiftedPosition : 1f - shiftedPosition;
+            bubble.setAlpha(finalValue);
+            bubble.setScaleX(finalValue);
+            bubble.setScaleY(finalValue);
+        }
+    }
+
     void setupViewPager() {
         viewPager.setAdapter(new TutorialAdapter());
         viewPager.setOffscreenPageLimit(5);
@@ -272,6 +315,8 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         return true;
     }
 
+
+    // TODO remove?
     void setupIndicators() {
         PercentRelativeLayout.LayoutParams layoutParams = (PercentRelativeLayout.LayoutParams) indicators.getLayoutParams();
         layoutParams.bottomMargin = UIUtils.getNavBarHeight(this);
