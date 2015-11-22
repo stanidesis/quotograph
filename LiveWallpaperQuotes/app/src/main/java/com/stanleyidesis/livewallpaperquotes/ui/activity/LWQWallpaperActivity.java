@@ -6,7 +6,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.SurfaceHolder;
@@ -94,7 +93,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupFullscreenIfPossible();
+        UIUtils.setupFullscreenIfPossible(this);
     }
 
     @Override
@@ -177,16 +176,6 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
             button.setTranslationY(button.getHeight() * 2f);
             button.setTag(R.id.view_tag_flags, FLAG_ENABLE);
         };
-    }
-
-    void setupFullscreenIfPossible() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-        }
     }
 
     void draw() {

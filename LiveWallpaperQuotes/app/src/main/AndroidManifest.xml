@@ -10,6 +10,10 @@
         android:icon="@mipmap/ic_launcher" android:theme="@style/Theme.LWQ"
         android:name=".LWQApplication">
 
+        <!-- LayoutCast -->
+
+        <activity android:name="com.github.mmin18.layoutcast.ResetActivity" />
+
         <!-- Sugar ORM Meta Data -->
 
         <meta-data android:name="DATABASE" android:value="live_wallpaper_quote.db" />

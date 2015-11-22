@@ -37,12 +37,12 @@
     android:exitFadeDuration="100">
     <item android:state_pressed="true">
         <shape android:shape="oval">
-            <solid android:color="#3000" />
+            <solid android:color="@color/palette_100" />
         </shape>
     </item>
     <item android:state_focused="true">
         <shape android:shape="oval">
-            <solid android:color="#2000" />
+            <solid android:color="@color/palette_50" />
         </shape>
     </item>
     <item android:drawable="@android:color/transparent" />

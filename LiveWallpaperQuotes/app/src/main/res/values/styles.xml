@@ -55,8 +55,4 @@
         <item name="android:textColor">@color/palette_100</item>
     </style>
 
-    <style name="Theme.LWQ.TabBar" parent="Widget.AppCompat.Light.ActionBar.TabBar">
-
-    </style>
-
 </resources>

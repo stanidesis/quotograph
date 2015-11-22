@@ -1,5 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.api.service;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.service.wallpaper.WallpaperService;
@@ -52,6 +53,15 @@ import de.greenrobot.event.EventBus;
  * Date: 07/11/2015
  */
 public class LWQWallpaperService extends WallpaperService {
+
+    public static void setServiceEnabled(boolean enabled) {
+        final LWQApplication lwqApplication = LWQApplication.get();
+        lwqApplication.getPackageManager()
+                .setComponentEnabledSetting(
+                        new ComponentName(lwqApplication, LWQWallpaperService.class),
+                        enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                        PackageManager.DONT_KILL_APP);
+    }
 
     public class LWQWallpaperEngine extends Engine implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 

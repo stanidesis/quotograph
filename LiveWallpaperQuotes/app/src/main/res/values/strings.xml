@@ -58,4 +58,14 @@
     <string name="view_using">View with…</string>
     <string name="notification_title_save_failed">Failed to save Quotograph</string>
     <string name="notification_content_save_failed">Click here to retry.</string>
+    <string name="tutorial_headline_0">Welcome,</string>
+    <string name="tutorial_headline_1">…And Sets Them</string>
+    <string name="tutorial_headline_2">Choose Where</string>
+    <string name="tutorial_headline_3">Set How Often</string>
+    <string name="tutorial_headline_4">Just One Thing</string>
+    <string name="tutorial_detail_0">Quotograph generates beautiful images…</string>
+    <string name="tutorial_detail_1">as your wallpaper.</string>
+    <string name="tutorial_detail_2">quotes come from, or write your own.</string>
+    <string name="tutorial_detail_3">Quotograph refreshes your wallpaper.</string>
+    <string name="tutorial_detail_4">stands between you and an inspiring home screen:</string>
 </resources>

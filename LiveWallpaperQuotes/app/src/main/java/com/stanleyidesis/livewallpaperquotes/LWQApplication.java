@@ -6,10 +6,10 @@ import android.content.res.TypedArray;
 import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.github.mmin18.layoutcast.LayoutCast;
 import com.orm.SugarApp;
 import com.orm.query.Condition;
 import com.orm.query.Select;
-import com.stanleyidesis.livewallpaperquotes.api.LWQFirstLaunchTask;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQImageController;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQImageControllerFrescoImpl;
 import com.stanleyidesis.livewallpaperquotes.api.controller.LWQNotificationController;
@@ -21,6 +21,7 @@ import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperControll
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.api.service.LWQWallpaperService;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -76,10 +77,11 @@ public class LWQApplication extends SugarApp {
         notificationController = new LWQNotificationControllerImpl();
 
         if (LWQPreferences.isFirstLaunch()) {
-//            if (BuildConfig.DEBUG) {
-//                populateDefaults();
-//            }
-            new LWQFirstLaunchTask().execute();
+            LWQWallpaperService.setServiceEnabled(false);
+        }
+
+        if (BuildConfig.DEBUG) {
+            LayoutCast.init(this);
         }
     }
 
