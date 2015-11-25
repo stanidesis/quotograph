@@ -221,8 +221,6 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
             clock.setAlpha(1f - positionOffset);
             hourHand.setAlpha(1f - positionOffset);
             minuteHand.setAlpha(1f - positionOffset);
-            minuteHand.setRotation(1f - positionOffset);
-            hourHand.setRotation(1f - positionOffset);
         }
     }
 
