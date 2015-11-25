@@ -6,7 +6,6 @@ import android.content.res.TypedArray;
 import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.github.mmin18.layoutcast.LayoutCast;
 import com.orm.SugarApp;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -78,10 +77,6 @@ public class LWQApplication extends SugarApp {
 
         if (LWQPreferences.isFirstLaunch()) {
             LWQWallpaperService.setServiceEnabled(false);
-        }
-
-        if (BuildConfig.DEBUG) {
-            LayoutCast.init(this);
         }
     }
 

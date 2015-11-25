@@ -30,4 +30,44 @@
         android:gravity="end"
         app:layout_widthPercent="80%"/>
 
+
+    <android.support.percent.PercentRelativeLayout
+        android:id="@+id/rl_tut_clock"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tv_tut_details"
+        android:background="@drawable/tutorial_background_ring"
+        app:layout_marginTopPercent="5%">
+
+        <View
+            android:id="@+id/v_tut_minute_hand"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/tutorial_minute_hand"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/v_dead_view"
+            android:layout_marginBottom="-15dp"
+            app:layout_heightPercent="45%"/>
+
+        <View
+            android:id="@+id/v_tut_hour_hand"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/tutorial_hour_hand"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/v_dead_view"
+            android:layout_marginBottom="-15dp"
+            app:layout_heightPercent="35%"/>
+
+        <View
+            android:id="@+id/v_dead_view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="1dp"
+            android:visibility="invisible"/>
+
+    </android.support.percent.PercentRelativeLayout>
+
 </android.support.percent.PercentRelativeLayout>

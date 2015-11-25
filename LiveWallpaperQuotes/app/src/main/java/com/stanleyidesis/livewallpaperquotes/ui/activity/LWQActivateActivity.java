@@ -108,6 +108,13 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     @Bind({R.id.lwq_activate_tut_0,R.id.lwq_activate_tut_1,
             R.id.lwq_activate_tut_2,R.id.lwq_activate_tut_3,R.id.lwq_activate_tut_4,})
     List<View> viewPages;
+    @Bind(R.id.rl_tut_clock)
+    View clock;
+    @Bind(R.id.v_tut_hour_hand)
+    View hourHand;
+    @Bind(R.id.v_tut_minute_hand)
+    View minuteHand;
+    boolean pivotsCalculated;
 
     int wallpaperTop = -1;
     boolean firstLaunchTaskCompleted = false;
@@ -128,6 +135,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         setupSourceBubbles();
         setupViewPager();
         setIndicator(0);
+        setupClock();
         activePageFiveView = progressBar;
     }
 
@@ -198,11 +206,23 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
             fadeBubbles(positionOffset, true);
         } else if (position == 2) {
             fadeBubbles(positionOffset, false);
+            calculatePivots();
+            clock.setAlpha(positionOffset);
+            hourHand.setAlpha(positionOffset);
+            minuteHand.setAlpha(positionOffset);
+            minuteHand.setRotation(360f * positionOffset);
+            hourHand.setRotation(360f/5f*positionOffset);
         } else if (position == 3) {
             activePageFiveView.setVisibility(View.VISIBLE);
             activePageFiveView.setAlpha(positionOffset);
             activePageFiveView.setScaleX(positionOffset);
             activePageFiveView.setScaleY(positionOffset);
+
+            clock.setAlpha(1f - positionOffset);
+            hourHand.setAlpha(1f - positionOffset);
+            minuteHand.setAlpha(1f - positionOffset);
+            minuteHand.setRotation(1f - positionOffset);
+            hourHand.setRotation(1f - positionOffset);
         }
     }
 
@@ -267,6 +287,21 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
 
 
     // Setup
+
+    void setupClock() {
+        clock.setAlpha(0f);
+        hourHand.setAlpha(0f);
+        minuteHand.setAlpha(0f);
+    }
+
+    void calculatePivots() {
+        if (pivotsCalculated) {
+            return;
+        }
+        pivotsCalculated = true;
+        hourHand.setPivotY(hourHand.getMeasuredHeight() - (hourHand.getMeasuredWidth() / 2));
+        minuteHand.setPivotY(minuteHand.getMeasuredHeight() - (minuteHand.getMeasuredWidth() / 2));
+    }
 
     void setupSourceBubbles() {
         sourceBubbles.get(0).setRotation(-5f);
