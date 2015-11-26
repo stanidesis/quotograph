@@ -219,8 +219,8 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
             activePageFiveView.setScaleY(positionOffset);
 
             clock.setAlpha(1f - positionOffset);
-            hourHand.setAlpha(1f - positionOffset);
-            minuteHand.setAlpha(1f - positionOffset);
+            minuteHand.setRotation(360f * positionOffset);
+            hourHand.setRotation(360f/5f + 360f/5*positionOffset);
         }
     }
 
@@ -320,14 +320,14 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         percentageShifts.add(1f);
         for (View bubble : sourceBubbles) {
             bubble.setVisibility(View.VISIBLE);
-            float shiftedPosition = percentage / percentageShifts.remove(0);
-            if (shiftedPosition > 1f || shiftedPosition < 0f) {
-                continue;
+            float actualPercentage = reveal ? percentage : 1f - percentage;
+            float shiftedPosition = actualPercentage / percentageShifts.remove(0);
+            if (shiftedPosition > 1f) {
+                shiftedPosition = 1f;
             }
-            float finalValue = reveal ? shiftedPosition : 1f - shiftedPosition;
-            bubble.setAlpha(finalValue);
-            bubble.setScaleX(finalValue);
-            bubble.setScaleY(finalValue);
+            bubble.setAlpha(shiftedPosition);
+            bubble.setScaleX(shiftedPosition);
+            bubble.setScaleY(shiftedPosition);
         }
     }
 
