@@ -1153,6 +1153,18 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
+    @Override
+    public void onMakeQuotograph(PlaylistAdapter adapter, int position) {
+        final Object item = adapter.getItem(position);
+        if (item instanceof PlaylistCategory) {
+            LWQApplication.getWallpaperController().generateNewWallpaper((PlaylistCategory) item);
+        } else if (item instanceof PlaylistAuthor) {
+            LWQApplication.getWallpaperController().generateNewWallpaper((PlaylistAuthor) item);
+        } else if (item instanceof PlaylistQuote) {
+            LWQApplication.getWallpaperController().generateNewWallpaper((PlaylistQuote) item);
+        }
+    }
+
     // Search Delegate
 
     @Override

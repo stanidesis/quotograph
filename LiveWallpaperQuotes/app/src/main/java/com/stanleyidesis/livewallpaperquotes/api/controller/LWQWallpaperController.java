@@ -2,6 +2,10 @@ package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import android.graphics.Bitmap;
 
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistAuthor;
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistCategory;
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
+
 import java.util.List;
 
 /**
@@ -57,6 +61,24 @@ public interface LWQWallpaperController {
      * @return true if the active wallpaper is accessible now
      */
     boolean activeWallpaperLoaded();
+
+    /**
+     * Convenience to create a new wallpaper from quotes in this category
+     * @param category
+     */
+    void generateNewWallpaper(PlaylistCategory category);
+
+    /**
+     * Convenience to create a new wallpaper from quotes by an author.
+     * @param author
+     */
+    void generateNewWallpaper(PlaylistAuthor author);
+
+    /**
+     * Convenience to create a new wallpaper using a specific quote.
+     * @param quote
+     */
+    void generateNewWallpaper(PlaylistQuote quote);
 
     /**
      * Generates a new wallpaper, stores it as active and notifies the EventBus when completed

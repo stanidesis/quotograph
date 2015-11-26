@@ -5,7 +5,6 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,34 +51,19 @@ public class Playlist extends SugarRecord<Playlist> {
         this.active = active;
     }
 
-    public List<Quote> quotes() {
-        final List<PlaylistQuote> playlistQuotes = Select.from(PlaylistQuote.class)
+    public List<PlaylistQuote> quotes() {
+        return Select.from(PlaylistQuote.class)
                 .where(Condition.prop(StringUtil.toSQLName("playlist")).eq(getId())).list();
-        final List<Quote> quotes = new ArrayList<>(playlistQuotes.size());
-        for (PlaylistQuote playlistQuote : playlistQuotes) {
-            quotes.add(playlistQuote.quote);
-        }
-        return quotes;
     }
 
-    public List<Author> authors() {
-        final List<PlaylistAuthor> playlistAuthors = Select.from(PlaylistAuthor.class)
+    public List<PlaylistAuthor> authors() {
+        return Select.from(PlaylistAuthor.class)
                 .where(Condition.prop(StringUtil.toSQLName("playlist")).eq(getId())).list();
-        final List<Author> authors = new ArrayList<>(playlistAuthors.size());
-        for (PlaylistAuthor playlistAuthor: playlistAuthors) {
-            authors.add(playlistAuthor.author);
-        }
-        return authors;
     }
 
-    public List<Category> categories() {
-        final List<PlaylistCategory> playlistCategories = Select.from(PlaylistCategory.class)
+    public List<PlaylistCategory> categories() {
+        return Select.from(PlaylistCategory.class)
                 .where(Condition.prop(StringUtil.toSQLName("playlist")).eq(getId())).list();
-        final List<Category> categories = new ArrayList<>(playlistCategories.size());
-        for (PlaylistCategory playlistCategory: playlistCategories) {
-            categories.add(playlistCategory.category);
-        }
-        return categories;
     }
 
     public static Playlist active() {

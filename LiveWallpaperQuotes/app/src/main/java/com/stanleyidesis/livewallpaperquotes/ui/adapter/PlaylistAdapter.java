@@ -67,6 +67,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public static interface Delegate {
         void onPlaylistItemRemove(PlaylistAdapter adapter, int position);
         void onQuoteEdit(PlaylistAdapter adapter, int position);
+        void onMakeQuotograph(PlaylistAdapter adapter, int position);
     }
 
     Delegate delegate;
@@ -233,6 +234,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             } else if (textView.getText().toString().equalsIgnoreCase("edit")) {
                 if (delegate != null) {
                     delegate.onQuoteEdit(PlaylistAdapter.this, getAdapterPosition());
+                }
+            } else if (textView.getText().toString().equalsIgnoreCase("make a quotograph")) {
+                if (delegate != null) {
+                    delegate.onMakeQuotograph(PlaylistAdapter.this, getAdapterPosition());
                 }
             }
         }

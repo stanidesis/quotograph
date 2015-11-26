@@ -60,11 +60,13 @@
     </integer-array>
 
     <string-array name="popup_playlist_options">
+        <item>Make a Quotograph</item>
         <item>Remove</item>
     </string-array>
 
     <string-array name="popup_playlist_quote_options">
-        <item>Edit</item>
+        <item>Make a Quotograph</item>
         <item>Remove</item>
+        <item>Edit</item>
     </string-array>
 </resources>

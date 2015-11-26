@@ -5,10 +5,11 @@ import android.graphics.Bitmap;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.api.Callback;
-import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.BackgroundImage;
-import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Playlist;
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistAuthor;
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistCategory;
+import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Wallpaper;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
@@ -153,6 +154,21 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     }
 
     @Override
+    public void generateNewWallpaper(PlaylistCategory category) {
+        _generateNewWallpaper(category);
+    }
+
+    @Override
+    public void generateNewWallpaper(PlaylistAuthor author) {
+        _generateNewWallpaper(author);
+    }
+
+    @Override
+    public void generateNewWallpaper(PlaylistQuote quote) {
+        _generateNewWallpaper(quote);
+    }
+
+    @Override
     public synchronized void generateNewWallpaper() {
         if (retrievalState == RetrievalState.NEW_WALLPAPER) {
             return;
@@ -160,25 +176,23 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER);
         retrievalState = RetrievalState.NEW_WALLPAPER;
         final Playlist activePlaylist = Playlist.active();
-        final List<Category> categoriesInPlaylist = activePlaylist.categories();
-        final List<Author> authorsInPlaylist = activePlaylist.authors();
-        final List<Quote> quotesInPlaylist = activePlaylist.quotes();
-        final List<List<?>> options = new ArrayList<>();
-        if (categoriesInPlaylist.size() > 0) {options.add(categoriesInPlaylist);}
-        if (authorsInPlaylist.size() > 0) {options.add(authorsInPlaylist);}
-        if (quotesInPlaylist.size() > 0) {options.add(quotesInPlaylist);}
-        final List<?> playlistSource = options.get(new Random().nextInt(options.size()));
-        final Object playlistObject = playlistSource.get(new Random().nextInt(playlistSource.size()));
+        final List<Object> options = new ArrayList<>();
+        options.addAll(activePlaylist.categories());
+        options.addAll(activePlaylist.authors());
+        options.addAll(activePlaylist.quotes());
+        _generateNewWallpaper(options.get(new Random().nextInt(options.size())));
+    }
 
-        if (playlistObject instanceof Category) {
-            LWQApplication.getQuoteController().fetchUnusedQuotes((Category) playlistObject, new Callback<List<Quote>>() {
+    void _generateNewWallpaper(final Object playlistObject) {
+        if (playlistObject instanceof PlaylistCategory) {
+            LWQApplication.getQuoteController().fetchUnusedQuotes(((PlaylistCategory) playlistObject).category, new Callback<List<Quote>>() {
                 @Override
                 public void onSuccess(List<Quote> quotes) {
                     if (quotes.size() > 0) {
                         generateNewWallpaperCallback.onSuccess(quotes);
                     } else {
                         // No new Quotes found
-                        generateNewWallpaperCallback.onSuccess(Quote.allFromCategory((Category) playlistObject));
+                        generateNewWallpaperCallback.onSuccess(Quote.allFromCategory(((PlaylistCategory) playlistObject).category));
                     }
                 }
 
@@ -188,15 +202,15 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                     notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
                 }
             });
-        } else if (playlistObject instanceof Author) {
-            LWQApplication.getQuoteController().fetchUnusedQuotesBy((Author) playlistObject, new Callback<List<Quote>>() {
+        } else if (playlistObject instanceof PlaylistAuthor) {
+            LWQApplication.getQuoteController().fetchUnusedQuotesBy(((PlaylistAuthor) playlistObject).author, new Callback<List<Quote>>() {
                 @Override
                 public void onSuccess(List<Quote> quotes) {
                     if (quotes.size() > 0) {
                         generateNewWallpaperCallback.onSuccess(quotes);
                     } else {
                         // No new Quotes found
-                        generateNewWallpaperCallback.onSuccess(Quote.allFromAuthor((Author) playlistObject));
+                        generateNewWallpaperCallback.onSuccess(Quote.allFromAuthor(((PlaylistAuthor) playlistObject).author));
                     }
                 }
 
@@ -206,10 +220,8 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                     notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
                 }
             });
-        } else if (playlistObject instanceof Quote) {
-            generateNewWallpaperCallback.onSuccess(quotesInPlaylist);
-        } else {
-            // TODO Playlist is empty?
+        } else if (playlistObject instanceof PlaylistQuote) {
+            generateNewWallpaperCallback.onSuccess(Collections.singletonList(((PlaylistQuote) playlistObject).quote));
         }
     }
 
