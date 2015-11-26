@@ -155,6 +155,11 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        requiresActivation();
+    }
 
     @Override
     protected void onStart() {

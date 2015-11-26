@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
@@ -176,8 +177,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             data = category;
             icon.setImageResource(R.mipmap.ic_style_white);
             title.setText(category.name);
-            subtitle.setText("Category");
-            description.setText("Recovers quotes related to \"" + category.name + "\"");
+            subtitle.setText(R.string.category);
+            description.setText(LWQApplication.get().getString(R.string.blank_quotes, category.name));
         }
 
         void updateWithAuthor(Author author) {
@@ -186,8 +187,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             data = author;
             icon.setImageResource(R.mipmap.ic_person_white);
             title.setText(author.name);
-            subtitle.setText("Author");
-            description.setText("Recovers quotes authored by " + author.name);
+            subtitle.setText(R.string.author);
+            description.setText(LWQApplication.get().getString(R.string.quotes_by, author.name));
         }
 
         void updateWithQuote(Quote quote) {
@@ -196,7 +197,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             data = quote;
             icon.setImageResource(R.mipmap.ic_format_quote_white);
             title.setText(quote.author.name);
-            subtitle.setText("Quote");
+            subtitle.setText(R.string.quote);
             description.setText(quote.text);
         }
 

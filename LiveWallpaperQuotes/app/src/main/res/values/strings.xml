@@ -68,4 +68,9 @@
     <string name="tutorial_detail_2">quotes come from, or write your own.</string>
     <string name="tutorial_detail_3">Quotograph refreshes your wallpaper.</string>
     <string name="tutorial_detail_4">stands between you and an inspiring home screen:</string>
+    <string name="category">Category</string>
+    <string name="author">Author</string>
+    <string name="quote">Quote</string>
+    <string name="quotes_by">Quotes by %1$s</string>
+    <string name="blank_quotes">%1$s quotes</string>
 </resources>

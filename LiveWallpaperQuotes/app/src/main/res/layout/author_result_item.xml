@@ -67,8 +67,7 @@
                 android:layout_centerHorizontal="true"
                 android:textSize="20sp"
                 android:layout_below="@+id/iv_author_result_item_person_first"
-                android:text="@string/inspirational_author_0"
-                app:layout_marginTopPercent="0%"/>
+                android:text="@string/inspirational_author_0"/>
 
             <com.stanleyidesis.livewallpaperquotes.ui.view.AddRemoveButton
                 android:id="@+id/add_remove_author_result_item_first"
