@@ -62,10 +62,12 @@
             <TextView
                 style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Author"
                 android:id="@+id/tv_author_result_item_author_first"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:textSize="20sp"
+                android:gravity="center_vertical|start"
+                android:lines="2"
                 android:layout_below="@+id/iv_author_result_item_person_first"
                 android:text="@string/inspirational_author_0"/>
 
@@ -107,11 +109,13 @@
             <TextView
                 style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Author"
                 android:id="@+id/tv_author_result_item_author_second"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/iv_author_result_item_person_second"
                 android:textSize="20sp"
+                android:lines="2"
+                android:gravity="center_vertical|start"
                 android:text="@string/inspirational_author_1"
                 app:layout_marginTopPercent="0%"/>
 

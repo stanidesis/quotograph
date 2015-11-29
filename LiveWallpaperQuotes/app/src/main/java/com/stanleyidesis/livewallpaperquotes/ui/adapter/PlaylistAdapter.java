@@ -102,10 +102,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public void insertItem(Object object) {
         if (object instanceof PlaylistCategory) {
             playlistCategories.add((PlaylistCategory) object);
+            Collections.sort(playlistCategories);
         } else if (object instanceof PlaylistAuthor) {
             playlistAuthors.add((PlaylistAuthor) object);
+            Collections.sort(playlistAuthors);
         } else {
             playlistQuotes.add((PlaylistQuote) object);
+            Collections.sort(playlistQuotes);
         }
         playlistItems.clear();
         playlistItems.addAll(playlistCategories);
@@ -127,7 +130,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             playlistCategories.remove(remove);
         } else if (remove instanceof PlaylistAuthor) {
             playlistAuthors.remove(remove);
-        } else {
+        } else if (remove instanceof PlaylistQuote){
             playlistQuotes.remove(remove);
         }
         notifyItemRemoved(position);
@@ -215,7 +218,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             } else {
                 options = view.getResources().getStringArray(R.array.popup_playlist_options);
             }
-            listPopupWindow.setAdapter(new ArrayAdapter<String>(view.getContext(), R.layout.support_simple_spinner_dropdown_item, android.R.id.text1, options));
+            listPopupWindow.setAdapter(new ArrayAdapter<>(view.getContext(), R.layout.support_simple_spinner_dropdown_item, android.R.id.text1, options));
             listPopupWindow.show();
         }
 
