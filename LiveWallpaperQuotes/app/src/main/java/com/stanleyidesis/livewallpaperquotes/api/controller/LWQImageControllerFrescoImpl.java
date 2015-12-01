@@ -39,7 +39,7 @@ public class LWQImageControllerFrescoImpl implements LWQImageController {
 
     @Override
     public synchronized void retrieveBitmap(String uri, Callback<Bitmap> callback) {
-        if (imageCache.containsKey(uri)) {
+        if (isCached(uri)) {
             final CloseableReference<CloseableImage> closeableImageCloseableReference = imageCache.get(uri);
             callback.onSuccess(((CloseableBitmap)closeableImageCloseableReference.get()).getUnderlyingBitmap());
             return;
@@ -91,11 +91,8 @@ public class LWQImageControllerFrescoImpl implements LWQImageController {
                 try {
                     callback.onSuccess(((CloseableBitmap)imageReference.get()).getUnderlyingBitmap());
                 } finally {
-                    final Map<String, CloseableReference<CloseableImage>> cache = getCache();
-                    if (cache != null) {
-                        clearBitmap(uri);
-                        cache.put(uri, imageReference);
-                    }
+                    clearBitmap(uri);
+                    getCache().put(uri, imageReference);
                 }
             } else {
                 callback.onError("Failed to recover the image", null);
