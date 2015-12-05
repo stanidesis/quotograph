@@ -1,6 +1,9 @@
 package com.stanleyidesis.livewallpaperquotes.api.db;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
+import com.orm.query.Condition;
+import com.orm.query.Select;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -24,7 +27,7 @@ import com.orm.SugarRecord;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * BackgroundImage.java
+ * UnsplashPhoto.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -33,25 +36,27 @@ import com.orm.SugarRecord;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 08/01/2015
+ * Date: 11/29/2015
  */
+public class UnsplashPhoto extends SugarRecord<UnsplashPhoto> {
 
-public class BackgroundImage extends SugarRecord<BackgroundImage> {
+    String unsplashId;
+    String fullURL;
+    String regularURL;
+    String smallURL;
+    String thumbURL;
 
-    public enum Source {
-        // Additional info for Unsplash provides UnsplashPhoto unsplashId
-        UNSPLASH,
-        // Additional info for User provides local image URI
-        USER;
+    public UnsplashPhoto() {}
+
+    public UnsplashPhoto(String unsplashId, String fullURL, String regularURL, String smallURL, String thumbURL) {
+        this.unsplashId = unsplashId;
+        this.fullURL = fullURL;
+        this.regularURL = regularURL;
+        this.smallURL = smallURL;
+        this.thumbURL = thumbURL;
     }
 
-    public Source source;
-    public String additionalInfo;
-
-    public BackgroundImage() {}
-
-    public BackgroundImage(Source source, String additionalInfo) {
-        this.source = source;
-        this.additionalInfo = additionalInfo;
+    public static UnsplashPhoto find(String unsplashId) {
+        return Select.from(UnsplashPhoto.class).where(Condition.prop(StringUtil.toSQLName("unsplashId")).eq(unsplashId)).first();
     }
 }

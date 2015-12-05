@@ -11,6 +11,8 @@ import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistAuthor;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistCategory;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.api.db.UnsplashCategory;
+import com.stanleyidesis.livewallpaperquotes.api.db.UnsplashPhoto;
 import com.stanleyidesis.livewallpaperquotes.api.db.Wallpaper;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
@@ -89,7 +91,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
         @Override
         public void onSuccess(final List<Quote> newQuotes) {
-            final UnsplashManager.UnsplashCategory unsplashCategory =
+            final UnsplashCategory unsplashCategory =
                     UnsplashManager.UnsplashCategory.fromName(LWQPreferences.getImageCategoryPreference());
             final BackgroundImage backgroundImage = BackgroundImage.unusedFromCategory(unsplashCategory.sqlName());
             if (backgroundImage != null) {
@@ -274,19 +276,16 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     @Override
     public List<String> getBackgroundCategories() {
-        List<String> categoryList = new ArrayList<>();
-        for (UnsplashManager.UnsplashCategory unsplashCategory : UnsplashManager.UnsplashCategory.values()) {
-            categoryList.add(unsplashCategory.prettyName);
-        }
-        Collections.sort(categoryList);
-        return categoryList;
+        // TODO
+//        Collections.sort(categoryList);
+        return null;
     }
 
     String getFullUri() {
         if (activeWallpaper.backgroundImage.source == BackgroundImage.Source.UNSPLASH) {
-            return UnsplashManager.appendJPGFormat(activeWallpaper.backgroundImage.uri);
+            // TODO return the URL from the UnsplashPhoto object
         }
-        return activeWallpaper.backgroundImage.uri;
+        return activeWallpaper.backgroundImage.additionalInfo;
     }
 
     void notifyWallpaper(WallpaperEvent.Status status) {
@@ -300,50 +299,28 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     class UnsplashRetryableRequest {
         private boolean started = false;
 
-        UnsplashManager.UnsplashCategory category;
+        UnsplashCategory category;
         int numberOfAttempts;
-        int startingPageNumber;
-        Callback<List<BackgroundImage>> callback;
+        Callback<BackgroundImage> callback;
 
         ExecutorService executorService;
-        List<BackgroundImage> newBackgroundImages;
+        BackgroundImage newBackgroundImage;
 
         Runnable downloadRunnable = new Runnable() {
             @Override
             public void run() {
-                unsplashManager.getPhotoURLs(startingPageNumber, category, new Callback<List<UnsplashManager.LWQUnsplashImage>>() {
-                    @Override
-                    public void onSuccess(List<UnsplashManager.LWQUnsplashImage> lwqUnsplashImages) {
-                        for (UnsplashManager.LWQUnsplashImage unsplashImage : lwqUnsplashImages) {
-                            BackgroundImage existingBackgroundImage = BackgroundImage.findImage(unsplashImage.url);
-                            if (existingBackgroundImage == null) {
-                                final BackgroundImage newBackgroundImage = new BackgroundImage(unsplashImage.url,
-                                        BackgroundImage.Source.UNSPLASH, category.sqlName(), false);
-                                newBackgroundImage.save();
-                                newBackgroundImages.add(newBackgroundImage);
-                            }
-                        }
-                        attempt();
-                    }
-
-                    @Override
-                    public void onError(String errorMessage, Throwable throwable) {
-                        callback.onError(errorMessage, throwable);
-                    }
-                });
+                // TODO retry random photo search until an unused photo is found
+                final UnsplashPhoto unsplashPhoto = unsplashManager.fetchRandomPhoto(category, true, null);
             }
         };
 
-        public UnsplashRetryableRequest(UnsplashManager.UnsplashCategory category,
+        public UnsplashRetryableRequest(UnsplashCategory category,
                                         int numberOfAttempts,
-                                        int startingPageNumber,
-                                        Callback<List<BackgroundImage>> callback) {
+                                        Callback<BackgroundImage> callback) {
             this.category = category;
             this.numberOfAttempts = numberOfAttempts;
-            this.startingPageNumber = startingPageNumber;
             this.callback = callback;
             this.executorService = Executors.newSingleThreadExecutor();
-            this.newBackgroundImages = new ArrayList<>();
         }
 
         public void start() {
@@ -355,12 +332,11 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         }
 
         private void attempt() {
-            if (numberOfAttempts > 0 && newBackgroundImages.size() == 0) {
-                startingPageNumber++;
+            if (numberOfAttempts > 0 && newBackgroundImage == null) {
                 numberOfAttempts--;
                 executorService.submit(downloadRunnable);
             } else {
-                callback.onSuccess(newBackgroundImages);
+                callback.onSuccess(newBackgroundImage);
             }
         }
     }

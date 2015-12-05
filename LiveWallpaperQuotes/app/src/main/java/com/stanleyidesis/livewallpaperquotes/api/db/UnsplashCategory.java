@@ -24,7 +24,7 @@ import com.orm.SugarRecord;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * BackgroundImage.java
+ * UnsplashCategory.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -33,25 +33,17 @@ import com.orm.SugarRecord;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 08/01/2015
+ * Date: 11/29/2015
  */
+public class UnsplashCategory extends SugarRecord<UnsplashCategory> {
 
-public class BackgroundImage extends SugarRecord<BackgroundImage> {
+    public String unsplashId;
+    public String title;
 
-    public enum Source {
-        // Additional info for Unsplash provides UnsplashPhoto unsplashId
-        UNSPLASH,
-        // Additional info for User provides local image URI
-        USER;
-    }
+    public UnsplashCategory() {}
 
-    public Source source;
-    public String additionalInfo;
-
-    public BackgroundImage() {}
-
-    public BackgroundImage(Source source, String additionalInfo) {
-        this.source = source;
-        this.additionalInfo = additionalInfo;
+    public UnsplashCategory(String unsplashId, String title) {
+        this.unsplashId = unsplashId;
+        this.title = title;
     }
 }
