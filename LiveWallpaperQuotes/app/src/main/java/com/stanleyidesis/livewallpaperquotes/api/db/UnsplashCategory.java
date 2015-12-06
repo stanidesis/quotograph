@@ -27,7 +27,7 @@ import com.orm.query.Select;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Wallpaper.java
+ * UnsplashCategory.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -36,50 +36,25 @@ import com.orm.query.Select;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 08/01/2015
+ * Date: 11/29/2015
  */
-public class Wallpaper extends SugarRecord<Wallpaper> {
+public class UnsplashCategory extends SugarRecord<UnsplashCategory> {
 
-    public static final short IMAGE_SOURCE_RESOURCE = 0;
-    public static final short IMAGE_SOURCE_USER = 1;
-    public static final short IMAGE_SOURCE_UNSPLASH = 2;
+    public int unsplashId;
+    public String title;
 
-    public Quote quote;
-    public boolean active;
-    public long dateCreated;
-    public short imageSource;
-    public long imageId;
+    public UnsplashCategory() {}
 
-    public Wallpaper() {}
-
-    public Wallpaper(Quote quote, boolean active, long dateCreated, short imageSource, long imageId) {
-        this.quote = quote;
-        this.active = active;
-        this.dateCreated = dateCreated;
-        this.imageSource = imageSource;
-        this.imageId = imageId;
+    public UnsplashCategory(int unsplashId, String title) {
+        this.unsplashId = unsplashId;
+        this.title = title;
     }
 
-    public UserPhoto recoverUserPhoto() {
-        if (imageSource != IMAGE_SOURCE_USER) {
-            return null;
-        }
-        return Select.from(UserPhoto.class).where(Condition.prop(StringUtil.toSQLName("id")).eq(imageId)).first();
+    public static UnsplashCategory find(int id) {
+        return Select.from(UnsplashCategory.class).where(Condition.prop(StringUtil.toSQLName("unsplashId")).eq(id)).first();
     }
 
-    public UnsplashPhoto recoverUnsplashPhoto() {
-        if (imageSource != IMAGE_SOURCE_UNSPLASH) {
-            return null;
-        }
-        return Select.from(UnsplashPhoto.class).where(Condition.prop(StringUtil.toSQLName("id")).eq(imageId)).first();
-    }
-
-    public static Wallpaper active() {
-        return Select.from(Wallpaper.class).where(Condition.prop("active").eq("1")).first();
-    }
-
-    public static boolean exists(short source, long id) {
-        return Select.from(Wallpaper.class).where(Condition.prop(StringUtil.toSQLName("imageSource")).eq(source),
-                Condition.prop(StringUtil.toSQLName("imageId")).eq(id)).first() != null;
+    public static UnsplashCategory find(String title) {
+        return Select.from(UnsplashCategory.class).where(Condition.prop(StringUtil.toSQLName("title")).eq(title)).first();
     }
 }

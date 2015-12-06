@@ -2,6 +2,7 @@ package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import android.graphics.Bitmap;
 
+import com.stanleyidesis.livewallpaperquotes.api.Callback;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistAuthor;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistCategory;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
@@ -64,19 +65,19 @@ public interface LWQWallpaperController {
 
     /**
      * Convenience to create a new wallpaper from quotes in this category
-     * @param category
+     * @param category The category from which to draw quotes from when generating a new wallpaper
      */
     void generateNewWallpaper(PlaylistCategory category);
 
     /**
      * Convenience to create a new wallpaper from quotes by an author.
-     * @param author
+     * @param author The author whose quotes to use when we generate a new wallpaper
      */
     void generateNewWallpaper(PlaylistAuthor author);
 
     /**
      * Convenience to create a new wallpaper using a specific quote.
-     * @param quote
+     * @param quote The quote to use when generating a new wallpaper
      */
     void generateNewWallpaper(PlaylistQuote quote);
 
@@ -102,6 +103,13 @@ public interface LWQWallpaperController {
      * This method should cleans up any bitmaps and references which the active wallpaper required.
      */
     void discardActiveWallpaper();
+
+    /**
+     * Fetch background categories, replace existing if necessary.
+     *
+     * @param callback This callback receives the list returned from {@link #getBackgroundCategories()} once fetched.
+     */
+    void fetchBackgroundCategories(Callback<List<String>> callback);
 
     /**
      * @return the available categories from which the user may choose their background, if applicable

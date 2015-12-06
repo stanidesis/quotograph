@@ -55,6 +55,7 @@ import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistAuthor;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistCategory;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistQuote;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.api.db.UnsplashCategory;
 import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
@@ -680,12 +681,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     void setupSettings() {
         final List<String> backgroundCategories = LWQApplication.getWallpaperController().getBackgroundCategories();
-        final String imageCategoryPreference = LWQPreferences.getImageCategoryPreference();
+        UnsplashCategory unsplashCategory = UnsplashCategory.find(LWQPreferences.getImageCategoryPreference());
         int currentSelection = 0;
-        for (String category : backgroundCategories) {
-            if (category.equalsIgnoreCase(imageCategoryPreference)) {
-                currentSelection = backgroundCategories.indexOf(category);
-                break;
+        if (unsplashCategory != null) {
+            for (String category : backgroundCategories) {
+                if (category.equalsIgnoreCase(unsplashCategory.title)) {
+                    currentSelection = backgroundCategories.indexOf(category);
+                    break;
+                }
             }
         }
         ArrayAdapter<String> imageCategoryAdapter = new ArrayAdapter<>(this,
@@ -698,8 +701,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         imageCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
-                LWQPreferences.setImageCategoryPreference(LWQApplication.getWallpaperController().getBackgroundCategories().get(index));
-                // TODO toast or the slidy thingy from the bottom that says LWQ will apply settings to your next wallpaper
+                UnsplashCategory unsplashCategory = UnsplashCategory.find((String) adapterView.getAdapter().getItem(index));
+                LWQPreferences.setImageCategoryPreference(unsplashCategory.unsplashId);
             }
 
             @Override

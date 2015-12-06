@@ -1,22 +1,17 @@
 package com.stanleyidesis.livewallpaperquotes.api.network;
 
-import android.util.Log;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.stanleyidesis.livewallpaperquotes.api.db.UnsplashCategory;
+import com.stanleyidesis.livewallpaperquotes.api.db.UnsplashPhoto;
 
-import com.orm.StringUtil;
-import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -52,125 +47,116 @@ import java.util.concurrent.ScheduledExecutorService;
  * Date: 07/28/2015
  */
 public class UnsplashManager {
-    public enum UnsplashCategory {
-        BUILDINGS(2, "Buildings"),
-        FOOD_DRINK(3, "Food and Drink"),
-        NATURE(4, "Nature"),
-        OBJECTS(8, "Objects"),
-        PEOPLE(6, "People"),
-        TECHNOLOGY(7, "Technology");
 
-        public int identifier;
-        public String prettyName;
-
-        UnsplashCategory(int identifier, String prettyName) {
-            this.identifier = identifier;
-            this.prettyName = prettyName;
-        }
-
-        public String sqlName() {
-            return StringUtil.toSQLName(name());
-        }
-
-        public static UnsplashCategory random() {
-            final int randomIndex = new Random().nextInt(UnsplashCategory.values().length);
-            return UnsplashCategory.values()[randomIndex];
-        }
-
-        public static UnsplashCategory fromName(String name) {
-            for (UnsplashCategory unsplashCategory : UnsplashCategory.values()) {
-                if (unsplashCategory.name().equalsIgnoreCase(name) || unsplashCategory.prettyName.equalsIgnoreCase(name)) {
-                    return unsplashCategory;
-                }
-            }
-            Log.e(UnsplashCategory.class.getSimpleName(), "Defaulting to Nature category", new Throwable());
-            // Defaults to nature if not found
-            return NATURE;
-        }
-    }
-
-    public static String appendJPGFormat(String unsplashUri) {
-        return unsplashUri + "?fm=jpg";
-    }
-
-    public UnsplashManager() {
-        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-    }
-
-    public void getPhotoURLs(final int pageIndex, final UnsplashCategory unsplashCategory,
-                             final Callback<List<LWQUnsplashImage>> callback) {
-        submit(new Runnable() {
-            @Override
-            public void run() {
-                StringBuilder urlBuilder = new StringBuilder(Endpoints.UNSPLASH_SEARCH_URL);
-                urlBuilder.append(String.format(PAGE_PARAM, pageIndex));
-                urlBuilder.append(String.format(KEYWORD_PARAM, unsplashCategory.name().toLowerCase()));
-                Log.v(UnsplashManager.class.getSimpleName(), "URL: " + urlBuilder.toString());
-
-                final Connection connection = Jsoup.connect(urlBuilder.toString());
-                final Connection.Response response;
-                final Document document;
-                try {
-                    response = connection.execute();
-                    Log.v(UnsplashManager.class.getSimpleName(), "Response: " + response.statusMessage());
-                    document = response.parse();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    callback.onError(e.getMessage(), e);
-                    return;
-                }
-
-                List<LWQUnsplashImage> returnImages = new ArrayList<>();
-
-                final Elements elements = document.select("div.photo-grid img");
-                for (final Element element : elements) {
-                    if (element.tagName().equals("img")) {
-                        final String fullSrc = element.attr("src");
-                        final String src = fullSrc.substring(0, fullSrc.indexOf("?"));
-                        final String byLine = element.attr("alt");
-                        final String dataWidth = element.attr("data-width");
-                        final String dataHeight = element.attr("data-height");
-                        returnImages.add(new LWQUnsplashImage(src, byLine, dataWidth, dataHeight));
-                    }
-                }
-                callback.onSuccess(returnImages);
-            }
-        });
-    }
+    private static String APP_ID = "d1759c7e191a4e170b2b64ddcdd555d82dd65085ccc4f0e7c0165c031b64cbd0";
 
     private interface Endpoints {
-        String UNSPLASH_SEARCH_URL= "https://unsplash.com/search?";
+        String UNSPLASH_API_URL= "https://api.unsplash.com/";
+        String UNSPLASH_CATEGORIES = "categories";
+        String UNSPLASH_RANDOM_PHOTO = "photos/random";
     }
 
-    private static final String KEYWORD_PARAM = "keyword=%s&";
-    private static final String PAGE_PARAM = "page=%d&";
+    private interface Parameters {
+        String PAGE_PARAM = "page=%d&";
+        String QUERY_PARAM = "query=%s&";
+        String CATEGORIES_PARAM = "category=%s&";
+        String FEATURED_PARAM = "featured=%s&";
+    }
 
-    private ScheduledExecutorService scheduledExecutorService;
+    private interface JSONCategoryKeys {
+        String KEY_ID = "id";
+        String KEY_TITLE = "title";
+    }
 
-    private void submit(final Runnable runnable) {
-        scheduledExecutorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    runnable.run();
-                } catch (Exception e) {
-                    Log.e(getClass().getSimpleName(), "Error in executor service task", e);
+    private interface JSONPhotoKeys {
+        String KEY_ID = "id";
+        String KEY_URLS = "urls";
+        String KEY_URL_FULL = "full";
+        String KEY_URL_REGULAR = "regular";
+        String KEY_URL_SMALL = "small";
+        String KEY_URL_THUMB = "thumb";
+    }
+
+    private OkHttpClient client = new OkHttpClient();
+
+    Object fetchResponse(String urlWithParams) {
+        try {
+            Request request = new Request.Builder()
+                    .url(urlWithParams)
+                    .addHeader("Accept-Version", "v1")
+                    .addHeader("Authorization", "Client-ID " + APP_ID)
+                    .build();
+            return client.newCall(request).execute().body().string();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e;
+        }
+    }
+
+    public Object fetchAllCategories() {
+        Object result = fetchResponse(Endpoints.UNSPLASH_API_URL.concat(Endpoints.UNSPLASH_CATEGORIES));
+        if (!(result instanceof String)) {
+            // Error
+            return ((Exception)result).getLocalizedMessage();
+        }
+        List<UnsplashCategory> unsplashCategories = new ArrayList<>();
+        try {
+            JSONArray categoriesArray = new JSONArray((String) result);
+            for (int i = 0; i < categoriesArray.length(); i++) {
+                JSONObject categoryJSON = categoriesArray.getJSONObject(i);
+                UnsplashCategory unsplashCategory = UnsplashCategory.find(categoryJSON.getInt(JSONCategoryKeys.KEY_ID));
+                if (unsplashCategory == null) {
+                    unsplashCategory = new UnsplashCategory(categoryJSON.getInt(JSONCategoryKeys.KEY_ID),
+                            categoryJSON.getString(JSONCategoryKeys.KEY_TITLE));
+                    unsplashCategory.save();
                 }
+                unsplashCategories.add(unsplashCategory);
             }
-        });
+            return unsplashCategories;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.getLocalizedMessage();
+        }
     }
 
-    public class LWQUnsplashImage {
-        public String url;
-        public String altText;
-        public String width;
-        public String height;
-
-        public LWQUnsplashImage(String url, String altText, String width, String height) {
-            this.url = url;
-            this.altText = altText;
-            this.width = width;
-            this.height = height;
+    public Object fetchRandomPhoto(final UnsplashCategory unsplashCategory, final boolean featured,
+                                 final String optionalQuery) {
+        String urlWithParams = Endpoints.UNSPLASH_API_URL.concat(Endpoints.UNSPLASH_RANDOM_PHOTO).concat("?");
+        if (unsplashCategory != null) {
+            urlWithParams = urlWithParams.concat(String.format(Parameters.CATEGORIES_PARAM, String.valueOf(unsplashCategory.unsplashId)));
+        }
+        if (featured) {
+            urlWithParams = urlWithParams.concat(String.format(Parameters.FEATURED_PARAM, Boolean.toString(true)));
+        }
+        if (optionalQuery != null) {
+            try {
+                urlWithParams = urlWithParams.concat(String.format(Parameters.QUERY_PARAM, URLEncoder.encode(optionalQuery, "UTF-8")));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            Object result = fetchResponse(urlWithParams);
+            if (!(result instanceof String)) {
+                // Error
+                return ((Exception)result).getLocalizedMessage();
+            }
+            JSONObject randomPhotoJSON = new JSONObject((String) result);
+            String unsplashId = randomPhotoJSON.getString(JSONPhotoKeys.KEY_ID);
+            UnsplashPhoto unsplashPhoto = UnsplashPhoto.find(unsplashId);
+            if (unsplashPhoto != null) {
+                return unsplashPhoto;
+            }
+            JSONObject urls = randomPhotoJSON.getJSONObject(JSONPhotoKeys.KEY_URLS);
+            unsplashPhoto = new UnsplashPhoto(unsplashId,
+                    urls.getString(JSONPhotoKeys.KEY_URL_FULL),
+                    urls.getString(JSONPhotoKeys.KEY_URL_REGULAR),
+                    urls.getString(JSONPhotoKeys.KEY_URL_SMALL),
+                    urls.getString(JSONPhotoKeys.KEY_URL_THUMB));
+            unsplashPhoto.save();
+            return unsplashPhoto;
+        } catch (Exception e) {
+            return e.getLocalizedMessage();
         }
     }
 }
