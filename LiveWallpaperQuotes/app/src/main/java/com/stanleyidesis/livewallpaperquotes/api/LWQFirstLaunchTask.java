@@ -9,9 +9,9 @@ import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Playlist;
 import com.stanleyidesis.livewallpaperquotes.api.db.PlaylistCategory;
+import com.stanleyidesis.livewallpaperquotes.api.db.UnsplashCategory;
 import com.stanleyidesis.livewallpaperquotes.api.event.FirstLaunchTaskEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
-import com.stanleyidesis.livewallpaperquotes.api.network.UnsplashManager;
 
 import java.util.List;
 
@@ -52,14 +52,26 @@ import de.greenrobot.event.EventBus;
  */
 public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
 
-    Callback<List<Category>> fetchCategoriesCallback = new Callback<List<Category>>() {
+    Callback<List<String>> fetchImageCategoriesCallback = new Callback<List<String>>() {
+        @Override
+        public void onSuccess(List<String> strings) {
+            // TODO I'm not in <3 with this…
+            LWQPreferences.setImageCategoryPreference(UnsplashCategory.listAll(UnsplashCategory.class).get(0).unsplashId);
+            LWQApplication.getQuoteController().fetchCategories(fetchQuoteCategoriesCallback);
+        }
+
+        @Override
+        public void onError(String errorMessage, Throwable throwable) {
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(errorMessage, throwable));
+        }
+    };
+
+    Callback<List<Category>> fetchQuoteCategoriesCallback = new Callback<List<Category>>() {
         @Override
         public void onSuccess(List<Category> categories) {
-            publishProgress(categories.size() + " categories fetched");
             if (categories.isEmpty()) {
                 categories = Select.from(Category.class).list();
                 if (categories.isEmpty()) {
-                    publishProgress("Failed to find any categories");
                     return;
                 }
             }
@@ -76,7 +88,6 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
                 }
             }
             new PlaylistCategory(defaultPlaylist, initialCategory).save();
-            LWQPreferences.setImageCategoryPreference(UnsplashManager.UnsplashCategory.NATURE.sqlName());
             LWQApplication.getWallpaperController().generateNewWallpaper();
         }
 
@@ -98,7 +109,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
             return null;
         } else if (!LWQApplication.getWallpaperController().activeWallpaperExists()) {
             // Go through everything again
-            LWQApplication.getQuoteController().fetchCategories(fetchCategoriesCallback);
+            LWQApplication.getWallpaperController().fetchBackgroundCategories(fetchImageCategoriesCallback);
         } else {
             LWQApplication.getWallpaperController().retrieveActiveWallpaper();
         }

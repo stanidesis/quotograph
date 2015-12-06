@@ -1,24 +1,17 @@
 package com.stanleyidesis.livewallpaperquotes.api.network;
 
-import android.util.Log;
-
-import com.stanleyidesis.livewallpaperquotes.api.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
 import com.stanleyidesis.livewallpaperquotes.api.db.UnsplashCategory;
 import com.stanleyidesis.livewallpaperquotes.api.db.UnsplashPhoto;
 
-import org.json.JSONException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -58,7 +51,6 @@ public class UnsplashManager {
     private static String APP_ID = "d1759c7e191a4e170b2b64ddcdd555d82dd65085ccc4f0e7c0165c031b64cbd0";
 
     private interface Endpoints {
-        String UNSPLASH_SEARCH_URL= "https://unsplash.com/search?";
         String UNSPLASH_API_URL= "https://api.unsplash.com/";
         String UNSPLASH_CATEGORIES = "categories";
         String UNSPLASH_RANDOM_PHOTO = "photos/random";
@@ -71,6 +63,11 @@ public class UnsplashManager {
         String FEATURED_PARAM = "featured=%s&";
     }
 
+    private interface JSONCategoryKeys {
+        String KEY_ID = "id";
+        String KEY_TITLE = "title";
+    }
+
     private interface JSONPhotoKeys {
         String KEY_ID = "id";
         String KEY_URLS = "urls";
@@ -80,19 +77,46 @@ public class UnsplashManager {
         String KEY_URL_THUMB = "thumb";
     }
 
-    URLConnection openConnection(String urlWithParams) {
+    private OkHttpClient client = new OkHttpClient();
+
+    Object fetchResponse(String urlWithParams) {
         try {
-            URL url = new URL(Endpoints.UNSPLASH_API_URL.concat(urlWithParams));
-            final URLConnection connection = url.openConnection();
-            connection.setRequestProperty("Accept-Version", "v1");
-            connection.setRequestProperty("Authorization", "Client-ID " + APP_ID);
-            return connection;
-        } catch (MalformedURLException e) {
+            Request request = new Request.Builder()
+                    .url(urlWithParams)
+                    .addHeader("Accept-Version", "v1")
+                    .addHeader("Authorization", "Client-ID " + APP_ID)
+                    .build();
+            return client.newCall(request).execute().body().string();
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            return e;
         }
-        return null;
+    }
+
+    public Object fetchAllCategories() {
+        Object result = fetchResponse(Endpoints.UNSPLASH_API_URL.concat(Endpoints.UNSPLASH_CATEGORIES));
+        if (!(result instanceof String)) {
+            // Error
+            return ((Exception)result).getLocalizedMessage();
+        }
+        List<UnsplashCategory> unsplashCategories = new ArrayList<>();
+        try {
+            JSONArray categoriesArray = new JSONArray((String) result);
+            for (int i = 0; i < categoriesArray.length(); i++) {
+                JSONObject categoryJSON = categoriesArray.getJSONObject(i);
+                UnsplashCategory unsplashCategory = UnsplashCategory.find(categoryJSON.getInt(JSONCategoryKeys.KEY_ID));
+                if (unsplashCategory == null) {
+                    unsplashCategory = new UnsplashCategory(categoryJSON.getInt(JSONCategoryKeys.KEY_ID),
+                            categoryJSON.getString(JSONCategoryKeys.KEY_TITLE));
+                    unsplashCategory.save();
+                }
+                unsplashCategories.add(unsplashCategory);
+            }
+            return unsplashCategories;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.getLocalizedMessage();
+        }
     }
 
     public Object fetchRandomPhoto(final UnsplashCategory unsplashCategory, final boolean featured,
@@ -102,7 +126,7 @@ public class UnsplashManager {
             urlWithParams = urlWithParams.concat(String.format(Parameters.CATEGORIES_PARAM, String.valueOf(unsplashCategory.unsplashId)));
         }
         if (featured) {
-            urlWithParams = urlWithParams.concat(String.format(Parameters.FEATURED_PARAM, Boolean.toString(true))));
+            urlWithParams = urlWithParams.concat(String.format(Parameters.FEATURED_PARAM, Boolean.toString(true)));
         }
         if (optionalQuery != null) {
             try {
@@ -112,14 +136,12 @@ public class UnsplashManager {
             }
         }
         try {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(openConnection(urlWithParams).getInputStream()));
-            StringBuilder jsonStringBuilder = new StringBuilder();
-            String readLine = null;
-            while ((readLine = bufferedReader.readLine()) != null) {
-                jsonStringBuilder.append(readLine);
+            Object result = fetchResponse(urlWithParams);
+            if (!(result instanceof String)) {
+                // Error
+                return ((Exception)result).getLocalizedMessage();
             }
-            bufferedReader.close();
-            JSONObject randomPhotoJSON = new JSONObject(jsonStringBuilder.toString());
+            JSONObject randomPhotoJSON = new JSONObject((String) result);
             String unsplashId = randomPhotoJSON.getString(JSONPhotoKeys.KEY_ID);
             UnsplashPhoto unsplashPhoto = UnsplashPhoto.find(unsplashId);
             if (unsplashPhoto != null) {
@@ -133,10 +155,8 @@ public class UnsplashManager {
                     urls.getString(JSONPhotoKeys.KEY_URL_THUMB));
             unsplashPhoto.save();
             return unsplashPhoto;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            return e.getLocalizedMessage();
         }
     }
 }

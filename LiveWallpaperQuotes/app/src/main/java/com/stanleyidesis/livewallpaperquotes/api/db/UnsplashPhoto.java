@@ -5,6 +5,9 @@ import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import java.util.List;
+import java.util.Random;
+
 /**
  * Copyright (c) 2015 Stanley Idesis
  *
@@ -40,11 +43,11 @@ import com.orm.query.Select;
  */
 public class UnsplashPhoto extends SugarRecord<UnsplashPhoto> {
 
-    String unsplashId;
-    String fullURL;
-    String regularURL;
-    String smallURL;
-    String thumbURL;
+    public String unsplashId;
+    public String fullURL;
+    public String regularURL;
+    public String smallURL;
+    public String thumbURL;
 
     public UnsplashPhoto() {}
 
@@ -58,5 +61,10 @@ public class UnsplashPhoto extends SugarRecord<UnsplashPhoto> {
 
     public static UnsplashPhoto find(String unsplashId) {
         return Select.from(UnsplashPhoto.class).where(Condition.prop(StringUtil.toSQLName("unsplashId")).eq(unsplashId)).first();
+    }
+
+    public static UnsplashPhoto random() {
+        List<UnsplashPhoto> unsplashPhotos = Select.from(UnsplashPhoto.class).limit("100").list();
+        return unsplashPhotos.get(new Random().nextInt(unsplashPhotos.size()));
     }
 }

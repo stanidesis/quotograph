@@ -24,7 +24,7 @@ import com.orm.SugarRecord;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * BackgroundImage.java
+ * UserPhoto.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -33,25 +33,14 @@ import com.orm.SugarRecord;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 08/01/2015
+ * Date: 12/05/2015
  */
+public class UserPhoto extends SugarRecord<UserPhoto> {
+    public String uri;
 
-public class BackgroundImage extends SugarRecord<BackgroundImage> {
+    public UserPhoto() {}
 
-    public enum Source {
-        // Additional info for Unsplash provides UnsplashPhoto unsplashId
-        UNSPLASH,
-        // Additional info for User provides local image URI
-        USER;
-    }
-
-    public Source source;
-    public String additionalInfo;
-
-    public BackgroundImage() {}
-
-    public BackgroundImage(Source source, String additionalInfo) {
-        this.source = source;
-        this.additionalInfo = additionalInfo;
+    public UserPhoto(String uri) {
+        this.uri = uri;
     }
 }

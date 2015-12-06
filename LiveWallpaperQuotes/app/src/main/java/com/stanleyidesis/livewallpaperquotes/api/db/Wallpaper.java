@@ -1,5 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.api.db;
 
+import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -38,21 +39,47 @@ import com.orm.query.Select;
  * Date: 08/01/2015
  */
 public class Wallpaper extends SugarRecord<Wallpaper> {
+
+    public static final short IMAGE_SOURCE_RESOURCE = 0;
+    public static final short IMAGE_SOURCE_USER = 1;
+    public static final short IMAGE_SOURCE_UNSPLASH = 2;
+
     public Quote quote;
-    public BackgroundImage backgroundImage;
     public boolean active;
     public long dateCreated;
+    public short imageSource;
+    public long imageId;
 
     public Wallpaper() {}
 
-    public Wallpaper(Quote quote, BackgroundImage backgroundImage, boolean active, long dateCreated) {
+    public Wallpaper(Quote quote, boolean active, long dateCreated, short imageSource, long imageId) {
         this.quote = quote;
-        this.backgroundImage = backgroundImage;
         this.active = active;
         this.dateCreated = dateCreated;
+        this.imageSource = imageSource;
+        this.imageId = imageId;
     }
 
-    public static final Wallpaper active() {
+    public UserPhoto recoverUserPhoto() {
+        if (imageSource != IMAGE_SOURCE_USER) {
+            return null;
+        }
+        return Select.from(UserPhoto.class).where(Condition.prop(StringUtil.toSQLName("id")).eq(imageId)).first();
+    }
+
+    public UnsplashPhoto recoverUnsplashPhoto() {
+        if (imageSource != IMAGE_SOURCE_UNSPLASH) {
+            return null;
+        }
+        return Select.from(UnsplashPhoto.class).where(Condition.prop(StringUtil.toSQLName("id")).eq(imageId)).first();
+    }
+
+    public static Wallpaper active() {
         return Select.from(Wallpaper.class).where(Condition.prop("active").eq("1")).first();
+    }
+
+    public static boolean exists(short source, long id) {
+        return Select.from(Wallpaper.class).where(Condition.prop(StringUtil.toSQLName("imageSource")).eq(source),
+                Condition.prop(StringUtil.toSQLName("imageId")).eq(id)).first() != null;
     }
 }

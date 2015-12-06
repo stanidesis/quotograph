@@ -1,9 +1,4 @@
-package com.stanleyidesis.livewallpaperquotes.api.db;
-
-import com.orm.StringUtil;
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
+package com.stanleyidesis.livewallpaperquotes.api;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -27,7 +22,7 @@ import com.orm.query.Select;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * UnsplashCategory.java
+ * BaseCallbacl.java
  * @author Stanley Idesis
  *
  * From Live-Wallpaper-Quotes
@@ -36,25 +31,16 @@ import com.orm.query.Select;
  * Please report any issues
  * https://github.com/stanidesis/live-wallpaper-quotes/issues
  *
- * Date: 11/29/2015
+ * Date: 12/05/2015
  */
-public class UnsplashCategory extends SugarRecord<UnsplashCategory> {
-
-    public int unsplashId;
-    public String title;
-
-    public UnsplashCategory() {}
-
-    public UnsplashCategory(int unsplashId, String title) {
-        this.unsplashId = unsplashId;
-        this.title = title;
+public class BaseCallback <Result> implements Callback<Result> {
+    @Override
+    public void onSuccess(Result result) {
+        // Nothing by default
     }
 
-    public static UnsplashCategory find(int id) {
-        return Select.from(UnsplashCategory.class).where(Condition.prop(StringUtil.toSQLName("unsplashId")).eq(id)).first();
-    }
-
-    public static UnsplashCategory find(String title) {
-        return Select.from(UnsplashCategory.class).where(Condition.prop(StringUtil.toSQLName("title")).eq(title)).first();
+    @Override
+    public void onError(String errorMessage, Throwable throwable) {
+        throwable.printStackTrace();
     }
 }

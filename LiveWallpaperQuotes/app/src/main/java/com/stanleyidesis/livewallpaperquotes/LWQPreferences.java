@@ -81,13 +81,13 @@ public class LWQPreferences {
         sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_first_launch), firstLaunch).apply();
     }
 
-    public static String getImageCategoryPreference() {
-        return sharedPreferences.getString(LWQApplication.get().getString(R.string.preference_key_image_category), null);
+    public static int getImageCategoryPreference() {
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_image_category), 0);
     }
 
-    public static void setImageCategoryPreference(String imageCategory) {
-        sharedPreferences.edit().putString(LWQApplication.get().getString(R.string.preference_key_image_category), imageCategory).apply();
-        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_image_category, imageCategory));
+    public static void setImageCategoryPreference(int imageCategoryId) {
+        sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_image_category), imageCategoryId).apply();
+        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_image_category, imageCategoryId));
     }
 
     public static long getRefreshPreference() {
