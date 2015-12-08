@@ -6,7 +6,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.percent.PercentRelativeLayout;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -142,17 +141,17 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (LWQPreferences.isFirstLaunch()) {
-            new LWQFirstLaunchTask().execute();
-        } else {
-            firstLaunchTaskCompleted = true;
-            activateButton.setEnabled(false);
-            activateButton.setVisibility(View.GONE);
-            progressBar.setEnabled(false);
-            progressBar.setVisibility(View.GONE);
-            activePageFiveView = activateButton;
+        firstLaunchTaskCompleted = !LWQPreferences.isFirstLaunch();
+        if (firstLaunchTaskCompleted) {
             LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+        } else {
+            new LWQFirstLaunchTask().execute();
         }
+        activateButton.setEnabled(firstLaunchTaskCompleted);
+        activateButton.setVisibility(firstLaunchTaskCompleted ? View.VISIBLE : View.GONE);
+        progressBar.setEnabled(!firstLaunchTaskCompleted);
+        progressBar.setVisibility(firstLaunchTaskCompleted ? View.GONE : View.VISIBLE);
+        activePageFiveView = firstLaunchTaskCompleted ? activateButton : progressBar;
     }
 
     @Override
@@ -244,9 +243,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     }
 
     @Override
-    public void onPageScrollStateChanged(int state) {
-
-    }
+    public void onPageScrollStateChanged(int state) {}
 
     // OnClick
     @OnClick(R.id.button_lwq_activate)
@@ -351,14 +348,6 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
             return false;
         }
         return true;
-    }
-
-
-    // TODO remove?
-    void setupIndicators() {
-        PercentRelativeLayout.LayoutParams layoutParams = (PercentRelativeLayout.LayoutParams) indicators.getLayoutParams();
-        layoutParams.bottomMargin = UIUtils.getNavBarHeight(this);
-        indicators.setLayoutParams(layoutParams);
     }
 
     void setIndicator(int index){
