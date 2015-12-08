@@ -215,7 +215,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         if (wallpaperEvent.getStatus() == WallpaperEvent.Status.GENERATED_NEW_WALLPAPER) {
             newWallpaperIncoming = !wallpaperEvent.didFail();
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
-            if (!wallpaperEvent.didFail() && newWallpaperIncoming) {
+            if (!wallpaperEvent.didFail() && newWallpaperIncoming && LWQApplication.isWallpaperActivated()) {
                 postNewWallpaperNotification();
                 newWallpaperIncoming = false;
             }

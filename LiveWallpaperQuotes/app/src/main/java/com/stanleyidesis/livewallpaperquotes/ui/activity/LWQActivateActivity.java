@@ -3,9 +3,11 @@ package com.stanleyidesis.livewallpaperquotes.ui.activity;
 import android.app.WallpaperManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,7 @@ import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
 import com.stanleyidesis.livewallpaperquotes.api.LWQFirstLaunchTask;
 import com.stanleyidesis.livewallpaperquotes.api.event.FirstLaunchTaskEvent;
+import com.stanleyidesis.livewallpaperquotes.api.event.NetworkConnectivityEvent;
 import com.stanleyidesis.livewallpaperquotes.api.service.LWQWallpaperService;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
@@ -117,6 +120,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
 
     int wallpaperTop = -1;
     boolean firstLaunchTaskCompleted = false;
+    LWQFirstLaunchTask firstLaunchTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,7 +149,12 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         if (firstLaunchTaskCompleted) {
             LWQApplication.getWallpaperController().retrieveActiveWallpaper();
         } else {
-            new LWQFirstLaunchTask().execute();
+            if (!LWQApplication.getNetworkConnectionListener().getCurrentConnectionType().isConnected()) {
+                presentNetworkRequiredDialog();
+            } else {
+                firstLaunchTask = new LWQFirstLaunchTask();
+                firstLaunchTask.execute();
+            }
         }
         activateButton.setEnabled(firstLaunchTaskCompleted);
         activateButton.setVisibility(firstLaunchTaskCompleted ? View.VISIBLE : View.GONE);
@@ -272,12 +281,13 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
             @Override
             public void run() {
                 if (firstLaunchTaskEvent.didFail()) {
-                    Toast.makeText(LWQActivateActivity.this, "Error: " + firstLaunchTaskEvent.getErrorMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(LWQActivateActivity.this, R.string.first_launch_task_failed, Toast.LENGTH_LONG).show();
                     return;
                 }
                 firstLaunchTaskCompleted = true;
                 activePageFiveView = activateButton;
                 if (viewPager.getCurrentItem() == Pages.values().length - 1) {
+                    activateButton.setVisibility(View.VISIBLE);
                     activateButton.animate().alpha(1f).setDuration(150).setInterpolator(new AccelerateDecelerateInterpolator()).start();
                     progressBar.animate().alpha(0f).setDuration(100).setInterpolator(new AccelerateDecelerateInterpolator()).start();
                 }
@@ -285,6 +295,36 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         });
     }
 
+    public void onEvent(NetworkConnectivityEvent networkConnectivityEvent) {
+        if (networkConnectivityEvent.getNewConnectionType().isConnected() && firstLaunchTask == null) {
+            firstLaunchTask = new LWQFirstLaunchTask();
+            firstLaunchTask.execute();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    UIUtils.presentDialog(LWQActivateActivity.this, R.string.network_connection_established_title,
+                            R.string.network_connection_established_message,
+                            R.string.network_connection_established_positive, null, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            }, null);
+                }
+            });
+        } else if (!networkConnectivityEvent.getNewConnectionType().isConnected()) {
+            if (firstLaunchTask != null && !firstLaunchTask.isCancelled()) {
+                firstLaunchTask.cancel(true);
+                firstLaunchTask = null;
+            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    presentNetworkRequiredDialog();
+                }
+            });
+        }
+    }
 
     // Setup
 
@@ -356,6 +396,23 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
                 indicators.getChildAt(i).setSelected(i == index);
             }
         }
+    }
+
+    // Misc.
+
+    void presentNetworkRequiredDialog() {
+        UIUtils.presentDialog(this, R.string.network_connection_required_title,
+                R.string.network_connection_required_message,
+                android.R.string.ok, R.string.network_connection_required_negative,
+                null, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        try {
+                            startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+                        } catch (Exception e) {}
+                    }
+                });
     }
 
     class TutorialAdapter extends PagerAdapter {

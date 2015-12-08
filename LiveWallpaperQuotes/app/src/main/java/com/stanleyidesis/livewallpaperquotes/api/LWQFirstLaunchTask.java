@@ -117,6 +117,12 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
     }
 
     @Override
+    protected void onCancelled() {
+        super.onCancelled();
+        EventBus.getDefault().post(FirstLaunchTaskEvent.failed("Cancelled by user", null));
+    }
+
+    @Override
     protected void finalize() throws Throwable {
         EventBus.getDefault().unregister(this);
         super.finalize();

@@ -73,4 +73,11 @@
     <string name="quote">Quote</string>
     <string name="quotes_by">Quotes by %1$s</string>
     <string name="blank_quotes">%1$s quotes</string>
+    <string name="network_connection_required_title">Network Access Unavailable</string>
+    <string name="network_connection_required_message">Quotograph requires access to the Internet to continue, please enable WiFi or a Network Data Connection.</string>
+    <string name="network_connection_required_negative">Open Network Settings</string>
+    <string name="network_connection_established_title">Network Access Established</string>
+    <string name="network_connection_established_message">Thank you for your patience. Quotograph is getting back to work.</string>
+    <string name="network_connection_established_positive">Heck, yeah!</string>
+    <string name="first_launch_task_failed">Unable to setup Quotograph</string>
 </resources>

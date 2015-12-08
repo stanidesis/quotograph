@@ -20,6 +20,7 @@ import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperControll
 import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
+import com.stanleyidesis.livewallpaperquotes.api.network.NetworkConnectionListener;
 import com.stanleyidesis.livewallpaperquotes.api.service.LWQWallpaperService;
 
 /**
@@ -63,6 +64,7 @@ public class LWQApplication extends SugarApp {
     LWQImageController imageController;
     LWQQuoteController quoteController;
     LWQNotificationController notificationController;
+    NetworkConnectionListener networkConnectionListener;
 
     @Override
     public void onCreate() {
@@ -74,6 +76,7 @@ public class LWQApplication extends SugarApp {
         imageController = new LWQImageControllerFrescoImpl();
         quoteController = new LWQQuoteControllerBrainyQuoteImpl();
         notificationController = new LWQNotificationControllerImpl();
+        networkConnectionListener = new NetworkConnectionListener(this);
 
         if (LWQPreferences.isFirstLaunch()) {
             LWQWallpaperService.setServiceEnabled(false);
@@ -98,6 +101,10 @@ public class LWQApplication extends SugarApp {
 
     public static LWQNotificationController getNotificationController() {
         return sApplication.notificationController;
+    }
+
+    public static NetworkConnectionListener getNetworkConnectionListener() {
+        return sApplication.networkConnectionListener;
     }
 
     public static boolean isWallpaperActivated() {
