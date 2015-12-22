@@ -177,6 +177,11 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     }
 
     void _generateNewWallpaper(final Object playlistObject) {
+        if (!LWQApplication.getNetworkConnectionListener().getCurrentConnectionType().isConnected()) {
+            notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, LWQApplication.get().getString(R.string.network_connection_required_title), null);
+            retrievalState = RetrievalState.NONE;
+            return;
+        }
         if (playlistObject instanceof PlaylistCategory) {
             LWQApplication.getQuoteController().fetchUnusedQuotes(((PlaylistCategory) playlistObject).category, new Callback<List<Quote>>() {
                 @Override
@@ -225,6 +230,11 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     @Override
     public synchronized boolean retrieveActiveWallpaper() {
+        if (!LWQApplication.getNetworkConnectionListener().getCurrentConnectionType().isConnected()) {
+            notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER, LWQApplication.get().getString(R.string.network_connection_required_title), null);
+            retrievalState = RetrievalState.NONE;
+            return false;
+        }
         if (!activeWallpaperExists()) {
             retrievalState = RetrievalState.NONE;
             notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER, "No Wallpaper active", null);

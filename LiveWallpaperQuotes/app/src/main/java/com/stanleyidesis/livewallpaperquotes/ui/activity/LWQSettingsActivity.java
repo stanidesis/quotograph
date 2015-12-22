@@ -832,6 +832,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     @OnClick(R.id.btn_fab_screen_save) void saveQuote() {
+        // TODO check permission
         Author author = Author.findAuthor(editableAuthor.getText().toString().trim());
         if (author == null) {
             // Create a new Author

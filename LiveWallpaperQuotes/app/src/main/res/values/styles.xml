@@ -54,5 +54,11 @@
         <item name="android:capitalize">words</item>
         <item name="android:textColor">@color/palette_100</item>
     </style>
+    
+    <style name="Theme.LWQ.AppCompatAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">#5fa3d0</item>
+        <item name="android:textColorPrimary">#000000</item>
+        <item name="android:background">#FFFFFF</item>
+    </style>
 
 </resources>

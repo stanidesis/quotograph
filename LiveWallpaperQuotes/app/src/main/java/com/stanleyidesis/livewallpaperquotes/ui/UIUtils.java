@@ -2,10 +2,12 @@ package com.stanleyidesis.livewallpaperquotes.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Build;
+import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.KeyCharacterMap;
@@ -17,6 +19,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
+import com.stanleyidesis.livewallpaperquotes.R;
 
 /**
  * Copyright (c) 2015 Stanley Idesis
@@ -137,6 +140,25 @@ public class UIUtils {
         }
     }
 
+    public static void presentDialog(Activity activity, Integer titleIdRes, Integer messageIdRes,
+                                     Integer positiveButtonTextRes, Integer negativeButtonTextRes,
+                                     DialogInterface.OnClickListener positiveOnClickListener,
+                                     DialogInterface.OnClickListener negativeOnClickListener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.Theme_LWQ_AppCompatAlertDialog);
+        if (titleIdRes != null) {
+            builder.setTitle(titleIdRes);
+        }
+        if (messageIdRes != null) {
+            builder.setMessage(messageIdRes);
+        }
+        if (positiveButtonTextRes != null) {
+            builder.setPositiveButton(positiveButtonTextRes, positiveOnClickListener);
+        }
+        if (negativeButtonTextRes != null) {
+            builder.setNegativeButton(negativeButtonTextRes, negativeOnClickListener);
+        }
+        builder.show();
+    }
 
     private static boolean isTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
