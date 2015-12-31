@@ -79,7 +79,6 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
             Playlist defaultPlaylist = new Playlist(LWQApplication.get().getString(R.string.app_name), true);
             defaultPlaylist.save();
 
-            // TODO not first?
             Category initialCategory = categories.get(0);
             for (Category category : categories) {
                 if ("inspirational".equalsIgnoreCase(category.name)) {

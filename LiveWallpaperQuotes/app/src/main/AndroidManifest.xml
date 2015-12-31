@@ -46,7 +46,7 @@
 
         <!-- Services -->
 
-        <service android:name=".api.service.LWQWallpaperService"
+        <service android:name=".api.service.LWQWallpaperService" android:enabled="false"
             android:permission="android.permission.BIND_WALLPAPER">
 
             <intent-filter>

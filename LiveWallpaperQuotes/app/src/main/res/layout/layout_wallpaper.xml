@@ -37,16 +37,12 @@
     android:clipToPadding="false"
     android:clipChildren="false">
 
-    <SurfaceView
-        android:id="@+id/surface_lwq_wallpaper"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
     <View
         android:id="@+id/view_screen_lwq_wallpaper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black"/>
+        android:background="@android:color/black"
+        android:alpha="0"/>
 
     <include layout="@layout/layout_wallpaper_actions"
         android:id="@+id/group_lwq_settings_wallpaper_actions"

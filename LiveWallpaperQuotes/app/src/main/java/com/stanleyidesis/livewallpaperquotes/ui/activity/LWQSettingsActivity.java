@@ -336,7 +336,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         public void run() {
             changeState(revealContentState);
             revealControlsTimer = null;
-            revealControlsTimerTask = null;
         }
     };
 
@@ -402,7 +401,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        overridePendingTransition(android.R.anim.fade_in, 0);
         setContentView(R.layout.activity_lwq_settings);
         ButterKnife.bind(this);
         // Setup content
@@ -420,7 +418,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         // Setup settings
         setupSettings();
         // Setup Wallpaper actions
-        setupWallpaperActions();
+        setupWallpaperActionContainer();
         // Setup progress bar
         setupProgressBar();
     }
@@ -430,6 +428,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         super.onPostCreate(savedInstanceState);
         if (LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
             changeState(revealWallpaperState);
+            if (revealControlsTimer == null) {
+                revealControlsTimer = new Timer();
+                try {
+                    revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 2);
+                } catch (Exception e) {}
+            }
         } else {
             changeState(initialState);
         }
@@ -1000,7 +1004,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     Animator animateFABActions(final boolean dismiss) {
         fabBackground.setVisibility(View.VISIBLE);
-        Animator backgroundAnimator = null;
+        Animator backgroundAnimator;
 
         if (Build.VERSION.SDK_INT >= 21) {
             Rect fabRect = new Rect();
@@ -1024,7 +1028,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             });
             backgroundAnimator = circularReveal;
         } else {
-            // TODO?
+            backgroundAnimator = ObjectAnimator.ofFloat(fabBackground, "alpha", dismiss ? 1f : 0f, dismiss ? 0f : 1f);
+            backgroundAnimator.setDuration(300l).setInterpolator(new AccelerateDecelerateInterpolator());
         }
         final long shortDelay = 50;
         final long longDelay = 100;
@@ -1063,22 +1068,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         imm.hideSoftInputFromWindow(tokenOwner.getWindowToken(), 0);
     }
 
-    @Override
-    void didFinishDrawing() {
-        if (activityState == initialState) {
-            changeState(revealWallpaperState);
-        }
-        if (revealControlsTimer == null) {
-            revealControlsTimer = new Timer();
-            revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 2);
-        }
-    }
-
     // Event Handling
 
-    @Override
     public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
-        super.onEvent(preferenceUpdateEvent);
         if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_refresh) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -1094,6 +1086,16 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         super.onEvent(wallpaperEvent);
         if (wallpaperEvent.didFail()) {
             animateProgressBar(false);
+        } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RENDERED_WALLPAPER) {
+            if (activityState == initialState) {
+                changeState(revealWallpaperState);
+            }
+            if (revealControlsTimer == null) {
+                revealControlsTimer = new Timer();
+                try {
+                    revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 2);
+                } catch (Exception e) {}
+            }
         } else if (wallpaperEvent.getStatus() != WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             changeState(initialState);
             animateProgressBar(true);

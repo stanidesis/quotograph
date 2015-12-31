@@ -2,10 +2,8 @@ package com.stanleyidesis.livewallpaperquotes.api.controller;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.BuildConfig;
@@ -53,7 +51,6 @@ import java.util.Date;
  */
 public class LWQAlarmController {
     public static void setTestRepeatingAlarm() {
-        enableAlarmReceiver(true);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         AlarmManager alarmManager = (AlarmManager) LWQApplication.get()
@@ -63,7 +60,6 @@ public class LWQAlarmController {
     }
 
     public static void setRepeatingAlarm() {
-        enableAlarmReceiver(true);
         final long refreshPreference = LWQPreferences.getRefreshPreference();
         final int[] refreshOptions = LWQApplication.get().getResources().getIntArray(R.array.refresh_preference_values);
         if (refreshPreference == refreshOptions[0]) {
@@ -107,7 +103,6 @@ public class LWQAlarmController {
     }
 
     public static void cancelRepeatingAlarm() {
-        enableAlarmReceiver(false);
         AlarmManager alarmManager = (AlarmManager) LWQApplication.get()
                 .getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(getPendingIntent());
@@ -116,15 +111,6 @@ public class LWQAlarmController {
     public static void resetAlarm() {
         cancelRepeatingAlarm();
         setRepeatingAlarm();
-    }
-
-    static void enableAlarmReceiver(boolean enabled) {
-        ComponentName receiver = new ComponentName(LWQApplication.get(), LWQReceiver.class);
-        PackageManager pm = LWQApplication.get().getPackageManager();
-
-        pm.setComponentEnabledSetting(receiver,
-                enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP);
     }
 
     static PendingIntent getPendingIntent() {

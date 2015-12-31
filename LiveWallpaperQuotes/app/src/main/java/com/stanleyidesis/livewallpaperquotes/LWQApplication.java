@@ -2,6 +2,8 @@ package com.stanleyidesis.livewallpaperquotes;
 
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.util.Log;
 
@@ -21,6 +23,7 @@ import com.stanleyidesis.livewallpaperquotes.api.db.Author;
 import com.stanleyidesis.livewallpaperquotes.api.db.Category;
 import com.stanleyidesis.livewallpaperquotes.api.db.Quote;
 import com.stanleyidesis.livewallpaperquotes.api.network.NetworkConnectionListener;
+import com.stanleyidesis.livewallpaperquotes.api.receiver.LWQReceiver;
 import com.stanleyidesis.livewallpaperquotes.api.service.LWQWallpaperService;
 
 /**
@@ -78,9 +81,7 @@ public class LWQApplication extends SugarApp {
         notificationController = new LWQNotificationControllerImpl();
         networkConnectionListener = new NetworkConnectionListener(this);
 
-        if (LWQPreferences.isFirstLaunch()) {
-            LWQWallpaperService.setServiceEnabled(false);
-        }
+        setComponentsEnabled(isWallpaperActivated());
     }
 
     public static LWQApplication get() {
@@ -111,6 +112,21 @@ public class LWQApplication extends SugarApp {
         final WallpaperManager wallpaperManager = WallpaperManager.getInstance(sApplication);
         final WallpaperInfo wallpaperInfo = wallpaperManager.getWallpaperInfo();
         return wallpaperInfo != null && sApplication.getPackageName().equalsIgnoreCase(wallpaperInfo.getPackageName());
+    }
+
+    public static void setComponentsEnabled(boolean enabled) {
+        ComponentName receiver = new ComponentName(LWQApplication.get(), LWQReceiver.class);
+        ComponentName wallpaperService = new ComponentName(LWQApplication.get(), LWQWallpaperService.class);
+        PackageManager pm = LWQApplication.get().getPackageManager();
+        pm.setComponentEnabledSetting(receiver,
+                enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
+        pm.setComponentEnabledSetting(wallpaperService,
+                enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
+
     }
 
     private void populateDefaults() {

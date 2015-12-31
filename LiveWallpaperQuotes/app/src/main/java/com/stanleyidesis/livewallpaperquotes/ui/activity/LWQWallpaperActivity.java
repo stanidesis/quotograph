@@ -5,22 +5,17 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.RelativeLayout;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.Callback;
-import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.event.ImageSaveEvent;
-import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
 import com.stanleyidesis.livewallpaperquotes.ui.UIUtils;
 
@@ -62,9 +57,7 @@ import de.greenrobot.event.EventBus;
  *
  * Date: 09/06/2015
  */
-public abstract class LWQWallpaperActivity extends AppCompatActivity implements
-        SurfaceHolder.Callback,
-        ActivityStateFlags {
+public abstract class LWQWallpaperActivity extends AppCompatActivity implements ActivityStateFlags {
 
     enum BackgroundWallpaperState {
         OBSCURED(.7f),
@@ -79,14 +72,12 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
     }
 
     @Bind(R.id.view_screen_lwq_wallpaper) View silkScreen;
-    @Bind(R.id.surface_lwq_wallpaper) SurfaceView surfaceView;
     // Wallpaper Actions
     @Bind(R.id.group_lwq_settings_wallpaper_actions) View wallpaperActionsContainer;
     @Bind(R.id.btn_wallpaper_actions_share) View shareButton;
     @Bind(R.id.btn_wallpaper_actions_save) View saveButton;
     @Bind(R.id.btn_wallpaper_actions_skip) View skipButton;
 
-    LWQSurfaceHolderDrawScript drawScript;
     BackgroundWallpaperState backgroundWallpaperState;
     boolean wallpaperActionsVisible;
 
@@ -100,9 +91,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         ButterKnife.bind(this);
-        surfaceView.getHolder().addCallback(this);
-        setupWallpaperActions();
-        animateState(BackgroundWallpaperState.HIDDEN);
+        setupWallpaperActionContainer();
     }
 
     @Override
@@ -117,43 +106,12 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         EventBus.getDefault().unregister(this);
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
-            LWQApplication.getWallpaperController().retrieveActiveWallpaper();
-        } else {
-            draw();
-        }
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
-            return;
-        }
-        draw();
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {}
-
     // Event Handling
 
     public void onEvent(WallpaperEvent wallpaperEvent) {
-        if (wallpaperEvent.didFail()) {
+        if (wallpaperEvent.didFail() || wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             endActionAnimation(skipButton);
             return;
-        }
-        if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
-            endActionAnimation(skipButton);
-            draw();
-        }
-    }
-
-    public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
-        if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_blur ||
-                preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_dim) {
-            draw();
         }
     }
 
@@ -163,7 +121,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
 
     // Setup
 
-    void setupWallpaperActions() {
+    void setupWallpaperActionContainer() {
         wallpaperActionsContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
         wallpaperActionsContainer.setEnabled(false);
         final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) wallpaperActionsContainer.getLayoutParams();
@@ -173,30 +131,8 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         View [] buttons = new View[] {shareButton, saveButton, skipButton};
         for (View button : buttons) {
             button.setAlpha(0f);
-            button.setTranslationY(button.getHeight() * 2f);
             button.setTag(R.id.view_tag_flags, FLAG_ENABLE);
-        };
-    }
-
-    void draw() {
-        if (drawScript == null) {
-            drawScript = new LWQSurfaceHolderDrawScript(surfaceView.getHolder());
-        } else {
-            drawScript.setSurfaceHolder(surfaceView.getHolder());
         }
-        drawScript.requestDraw(new Callback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-                didFinishDrawing();
-            }
-
-            @Override
-            public void onError(String errorMessage, Throwable throwable) {}
-        });
-    }
-
-    void didFinishDrawing() {
-        // Nothing for now
     }
 
     void switchToState(BackgroundWallpaperState backgroundWallpaperState) {
@@ -205,19 +141,17 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
     }
 
     long animateState(BackgroundWallpaperState backgroundWallpaperState) {
-        ObjectAnimator silkScreenAnimator = ObjectAnimator.ofFloat(silkScreen, "alpha", silkScreen.getAlpha(), backgroundWallpaperState.screenAlpha);
-        silkScreenAnimator.setDuration(300);
-        silkScreenAnimator.setInterpolator(new LinearInterpolator());
-        silkScreenAnimator.start();
+        silkScreen.animate().alpha(backgroundWallpaperState.screenAlpha).setDuration(300l)
+                .setInterpolator(new AccelerateDecelerateInterpolator()).start();
         this.backgroundWallpaperState = backgroundWallpaperState;
-        return 300;
+        return 300l;
     }
 
     void animateWallpaperActions(final boolean dismiss) {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(generateAnimator(shareButton, dismiss, 0),
-                generateAnimator(saveButton, dismiss, 15),
-                generateAnimator(skipButton, dismiss, 30));
+                generateAnimator(saveButton, dismiss, 20),
+                generateAnimator(skipButton, dismiss, 35));
         animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -227,21 +161,16 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements
         animatorSet.start();
     }
 
-    AnimatorSet generateAnimator(View target, boolean dismiss, long startDelay) {
+    Animator generateAnimator(View target, boolean dismiss, long startDelay) {
         float [] fadeIn = new float[] {0f, 1f};
         float [] fadeOut = new float[] {1f, 0f};
-        final ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(target, "alpha", dismiss ? fadeOut : fadeIn);
-        alphaAnimator.setDuration(240);
-        alphaAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        final ObjectAnimator translationAnimator = ObjectAnimator.ofFloat(target, "translationY", dismiss ? (target.getHeight() * 2f) : 0f);
-        translationAnimator.setDuration(240);
-        translationAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.setStartDelay(startDelay);
-        animatorSet.playTogether(alphaAnimator, translationAnimator);
-        return animatorSet;
+        final ObjectAnimator propAnimator = ObjectAnimator.ofPropertyValuesHolder(target,
+                PropertyValuesHolder.ofFloat(View.ALPHA, dismiss ? fadeOut : fadeIn),
+                PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, dismiss ? (target.getHeight() * 2f) : 0f));
+        propAnimator.setStartDelay(startDelay);
+        propAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        propAnimator.setDuration(240);
+        return propAnimator;
     }
 
     void animateAction(View button) {
