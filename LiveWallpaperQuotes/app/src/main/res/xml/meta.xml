@@ -3,5 +3,5 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:author="@string/wallpaper_author"
     android:description="@string/wallpaper_description"
-    android:settingsActivity="com.stanleyidesis.livewallpaperquotes.ui.activity.LWQActivateActivity"
+    android:settingsActivity="com.stanleyidesis.quotograph.ui.activity.LWQActivateActivity"
     android:thumbnail="@mipmap/ic_launcher"/>

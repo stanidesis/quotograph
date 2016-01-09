@@ -6,7 +6,7 @@
     <statePointEntry>
       <state      
         class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
-        className = "com.stanleyidesis.livewallpaperquotes.ui.activity.LWQSettingsActivity"/>
+        className = "com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity"/>
       <point      
         x = "496"      
         y = "104"/>

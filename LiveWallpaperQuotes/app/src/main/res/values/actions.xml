@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_change_wallpaper">com.stanleyidesis.livewallpaperquotes.action.CHANGE_WALLPAPER</string>
-    <string name="action_share">com.stanleyidesis.livewallpaperquotes.action.SHARE</string>
-    <string name="action_save">com.stanleyidesis.livewallpaperquotes.action.SAVE</string>
+    <string name="action_change_wallpaper">com.stanleyidesis.quotograph.action.CHANGE_WALLPAPER</string>
+    <string name="action_share">com.stanleyidesis.quotograph.action.SHARE</string>
+    <string name="action_save">com.stanleyidesis.quotograph.action.SAVE</string>
 </resources>
