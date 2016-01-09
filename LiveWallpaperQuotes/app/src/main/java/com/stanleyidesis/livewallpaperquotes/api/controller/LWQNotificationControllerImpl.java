@@ -87,7 +87,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setLargeIcon(notificationBitmap);
         notificationBuilder.setOngoing(false);
         notificationBuilder.setShowWhen(false);
-        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher); // TODO
+        notificationBuilder.setSmallIcon(R.mipmap.ic_stat);
         notificationBuilder.setTicker(String.format("New quote from %s", wallpaperController.getAuthor()));
         notificationBuilder.setWhen(System.currentTimeMillis());
 
@@ -150,7 +150,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setLargeIcon(notificationBitmap);
         notificationBuilder.setOngoing(false);
         notificationBuilder.setShowWhen(false);
-        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher); // TODO
+        notificationBuilder.setSmallIcon(R.mipmap.ic_stat);
         notificationBuilder.setTicker(LWQApplication.get().getString(R.string.notification_title_save_image));
         notificationBuilder.setWhen(System.currentTimeMillis());
 
@@ -193,7 +193,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setContentText(LWQApplication.get().getString(R.string.notification_content_save_failed));
         notificationBuilder.setOngoing(false);
         notificationBuilder.setShowWhen(false);
-        notificationBuilder.setSmallIcon(R.mipmap.ic_launcher); // TODO
+        notificationBuilder.setSmallIcon(R.mipmap.ic_stat);
         notificationBuilder.setTicker(String.format(LWQApplication.get().getString(R.string.notification_title_save_failed)));
         notificationBuilder.setWhen(System.currentTimeMillis());
 
