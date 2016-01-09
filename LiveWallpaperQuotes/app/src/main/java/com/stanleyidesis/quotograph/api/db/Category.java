@@ -66,7 +66,7 @@ public class Category extends SugarRecord<Category> {
     public static Category random() {
         final long count = Select.from(Category.class).count();
         final int offset = new Random().nextInt((int) count);
-        return Category.findWithQuery(Category.class, "Select * from Category LIMIT 1 OFFSET " + offset, null).get(0);
+        return Category.findWithQuery(Category.class, "Select * from Category LIMIT 1 OFFSET " + offset, (String []) null).get(0);
     }
 
     public static Category findWithName(String name) {

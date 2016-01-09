@@ -62,7 +62,7 @@ public class Quote extends SugarRecord<Quote> {
     public static Quote random() {
         final long count = Select.from(Quote.class).count();
         final int offset = new Random().nextInt((int) count);
-        return Quote.findWithQuery(Quote.class, "Select * from Quote LIMIT 1 OFFSET " + offset, null).get(0);
+        return Quote.findWithQuery(Quote.class, "Select * from Quote LIMIT 1 OFFSET " + offset, (String []) null).get(0);
     }
 
     public static List<Quote> allFromCategory(Category category) {
