@@ -1,0 +1,88 @@
+<!--
+    Copyright (c) 2015 Stanley Idesis
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    quote_result_item.xml
+    @author Stanley Idesis
+
+    From Live-Wallpaper-Quotes
+    https://github.com/stanidesis/live-wallpaper-quotes
+
+    Please report any issues
+    https://github.com/stanidesis/live-wallpaper-quotes/issues
+
+    Date: 11/03/2015
+-->
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/palette_500"
+    app:cardUseCompatPadding="true">
+
+    <android.support.percent.PercentRelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="32dp"
+        android:padding="8dp">
+
+        <TextView
+            style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Quote"
+            android:id="@+id/tv_quote_result_item_quote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAllCaps="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/add_remove_quote_result_item"
+            android:layout_toStartOf="@+id/add_remove_quote_result_item"
+            android:text="@string/inspirational_quote_0"/>
+
+        <TextView
+            style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Author"
+            android:id="@+id/tv_quote_result_item_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/add_remove_quote_result_item"
+            android:layout_toStartOf="@+id/add_remove_quote_result_item"
+            android:layout_below="@+id/tv_quote_result_item_quote"
+            android:text="@string/inspirational_author_0"/>
+
+        <com.stanleyidesis.quotograph.ui.view.AddRemoveButton
+            android:id="@+id/add_remove_quote_result_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:clipToPadding="false"
+            app:layout_marginLeftPercent="3%"
+            app:layout_widthPercent="10%"
+            app:layout_heightPercent="7%"/>
+
+    </android.support.percent.PercentRelativeLayout>
+
+</android.support.v7.widget.CardView>

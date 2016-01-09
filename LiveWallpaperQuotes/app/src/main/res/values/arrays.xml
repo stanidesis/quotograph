@@ -39,4 +39,34 @@
         <item>@string/inspirational_author_9</item>
     </string-array>
 
+    <string-array name="refresh_preference_options">
+        <item>@string/period_preference_dont_refresh</item>
+        <item>@string/period_preference_half_hour</item>
+        <item>@string/period_preference_one_hour</item>
+        <item>@string/period_preference_six_hours</item>
+        <item>@string/period_preference_twelve_hours</item>
+        <item>@string/period_preference_twenty_four_hours</item>
+        <item>@string/period_preference_one_week</item>
+    </string-array>
+
+    <integer-array name="refresh_preference_values">
+        <item>@integer/dont_refresh</item>
+        <item>@integer/half_hour</item>
+        <item>@integer/one_hour</item>
+        <item>@integer/six_hours</item>
+        <item>@integer/twelve_hours</item>
+        <item>@integer/twenty_four_hours</item>
+        <item>@integer/one_week</item>
+    </integer-array>
+
+    <string-array name="popup_playlist_options">
+        <item>Make a Quotograph</item>
+        <item>Remove</item>
+    </string-array>
+
+    <string-array name="popup_playlist_quote_options">
+        <item>Make a Quotograph</item>
+        <item>Remove</item>
+        <item>Edit</item>
+    </string-array>
 </resources>

@@ -1,30 +1,54 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.stanleyidesis.livewallpaperquotes">
+    package="com.stanleyidesis.quotograph">
+
+    <!-- Do Not Require Permission Flow -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- Requires Permission Flow -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application android:allowBackup="true" android:label="@string/app_name"
-        android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme"
-        android:name=".LWQApplication">
+        android:icon="@mipmap/ic_launcher" android:theme="@style/Theme.LWQ"
+        android:name="com.stanleyidesis.quotograph.LWQApplication">
 
         <!-- Sugar ORM Meta Data -->
 
-        <meta-data android:name="DATABASE" android:value="live_wallpaper_quote.db" />
+        <meta-data android:name="DATABASE" android:value="quotograph.db" />
         <meta-data android:name="VERSION" android:value="1" />
-        <meta-data android:name="QUERY_LOG" android:value="true" />
-        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="com.stanleyidesis.livewallpaperquotes.api.db"/>
+        <meta-data android:name="QUERY_LOG" android:value="false" />
+        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="com.stanleyidesis.quotograph.api.db"/>
 
         <!-- Activities -->
 
-        <activity android:name=".ui.activity.LWQSettingsActivity"
-            android:launchMode="singleInstance">
+        <activity android:name="com.stanleyidesis.quotograph.ui.activity.LWQActivateActivity" android:screenOrientation="sensorPortrait"
+            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
+        <activity android:name="com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity" android:screenOrientation="sensorPortrait"
+            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper">
+        </activity>
+
+        <!-- Receivers -->
+
+        <receiver android:name="com.stanleyidesis.quotograph.api.receiver.LWQReceiver" android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.REBOOT"/>
+                <action android:name="com.stanleyidesis.quotograph.action.CHANGE_WALLPAPER"/>
+                <action android:name="com.stanleyidesis.quotograph.action.SHARE"/>
+                <action android:name="com.stanleyidesis.quotograph.action.SAVE"/>
+            </intent-filter>
+        </receiver>
+
         <!-- Services -->
 
-        <service android:name=".api.service.LWQWallpaperService"
+        <service android:name="com.stanleyidesis.quotograph.api.service.LWQWallpaperService" android:enabled="false"
             android:permission="android.permission.BIND_WALLPAPER">
 
             <intent-filter>
@@ -34,6 +58,8 @@
             <meta-data android:name="android.service.wallpaper"
                 android:resource="@xml/meta"/>
         </service>
+
+        <service android:name="com.stanleyidesis.quotograph.api.service.LWQUpdateService"/>
 
     </application>
 

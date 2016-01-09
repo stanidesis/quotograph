@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="preference_key_first_launch">com.stanleyidesis.livewallpaperquotes.preference.FIRST_LAUNCH</string>
+    <string name="preference_key_first_launch">com.stanleyidesis.quotograph.preference.FIRST_LAUNCH</string>
+    <string name="preference_key_blur">com.stanleyidesis.quotograph.preference.BLUR</string>
+    <string name="preference_key_dim">com.stanleyidesis.quotograph.preference.DIM</string>
+    <string name="preference_key_image_category">com.stanleyidesis.quotograph.preference.IMAGE_CATEGORY</string>
+    <string name="preference_key_refresh">com.stanleyidesis.quotograph.preference.REFRESH</string>
+    <string name="preference_key_double_tap_to_launch">com.stanleyidesis.quotograph.preference.DOUBLE_TAP</string>
 </resources>

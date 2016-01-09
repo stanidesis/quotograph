@@ -1,0 +1,164 @@
+<!--
+    Copyright (c) 2015 Stanley Idesis
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    activity_lwq_activate.xml
+    @author Stanley Idesis
+
+    From Live-Wallpaper-Quotes
+    https://github.com/stanidesis/live-wallpaper-quotes
+
+    Please report any issues
+    https://github.com/stanidesis/live-wallpaper-quotes/issues
+
+    Date: 09/26/2015
+-->
+<android.support.percent.PercentRelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:fitsSystemWindows="false"
+    android:clipToPadding="false">
+
+
+    <!-- FTUE goes here -->
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager_lwq_activate"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include android:id="@+id/lwq_activate_tut_0"
+            layout="@layout/layout_tut_0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <include android:id="@+id/lwq_activate_tut_1"
+            layout="@layout/layout_tut_1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <include android:id="@+id/lwq_activate_tut_2"
+            layout="@layout/layout_tut_2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <include android:id="@+id/lwq_activate_tut_3"
+            layout="@layout/layout_tut_3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <include android:id="@+id/lwq_activate_tut_4"
+            layout="@layout/layout_tut_4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </android.support.v4.view.ViewPager>
+
+    <FrameLayout
+        android:id="@+id/fl_lwq_activate_wallpapers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/ll_lwq_activate_indicators">
+
+        <ImageView
+            android:id="@+id/iv_lwq_activate_tutorial_image_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="center"
+            android:src="@mipmap/tutorial_bg"/>
+
+        <ImageView
+            android:id="@+id/iv_lwq_activate_tutorial_image_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="center"
+            android:src="@mipmap/tutorial_bg_with_home_screen"/>
+
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/button_lwq_activate"
+        android:layout_height="140dp"
+        android:layout_width="140dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/circle_button"
+        android:textSize="24sp"
+        android:textAllCaps="true"
+        android:text="@string/activate"
+        android:textColor="@color/palette_900"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-condensed"
+        android:alpha="0"
+        android:enabled="false"
+        app:layout_marginBottomPercent="10%"/>
+
+    <ProgressBar
+        android:id="@+id/pb_lwq_activate"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_centerInParent="true"
+        android:indeterminate="true"
+        android:indeterminateOnly="true"
+        android:alpha="0"
+        style="@style/Widget.AppCompat.ProgressBar"/>
+
+    <LinearLayout
+        android:id="@+id/ll_lwq_activate_indicators"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:fitsSystemWindows="true">
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/ic_swipe_indicator"
+            android:layout_margin="3dp"
+            android:alpha=".7"/>
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/ic_swipe_indicator"
+            android:layout_margin="3dp"
+            android:alpha=".7"/>
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/ic_swipe_indicator"
+            android:layout_margin="3dp"
+            android:alpha=".7"/>
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/ic_swipe_indicator"
+            android:layout_margin="3dp"
+            android:alpha=".7"/>
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/ic_swipe_indicator"
+            android:layout_margin="3dp"
+            android:alpha=".7"/>
+
+    </LinearLayout>
+
+</android.support.percent.PercentRelativeLayout>

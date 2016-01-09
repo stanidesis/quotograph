@@ -1,0 +1,130 @@
+<!--
+    Copyright (c) 2015 Stanley Idesis
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    activity_lwq_settings.xml
+    @author Stanley Idesis
+
+    From Live-Wallpaper-Quotes
+    https://github.com/stanidesis/live-wallpaper-quotes
+
+    Please report any issues
+    https://github.com/stanidesis/live-wallpaper-quotes/issues
+
+    Date: 09/26/2015
+-->
+<android.support.percent.PercentFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:clipToPadding="false">
+
+    <include layout="@layout/layout_wallpaper"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
+
+    <android.support.percent.PercentRelativeLayout
+        android:id="@+id/group_lwq_settings_content"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <android.support.design.widget.CoordinatorLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            android:clipToPadding="true"
+            app:statusBarBackground="@android:color/transparent">
+
+            <android.support.design.widget.AppBarLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent">
+
+                <android.support.design.widget.TabLayout
+                    android:id="@+id/tab_layout_lwq_settings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    app:tabMode="fixed"
+                    app:tabGravity="fill"/>
+
+            </android.support.design.widget.AppBarLayout>
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/viewpager_lwq_settings"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                <android.support.percent.PercentRelativeLayout
+                    android:id="@+id/group_lwq_settings_playlist_wrapper"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent">
+
+                    <include layout="@layout/layout_playlist"
+                        android:id="@+id/group_lwq_settings_playlist"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_above="@+id/group_lwq_settings_wallpaper_actions"
+                        app:layout_widthPercent="@fraction/lwq_settings_mode_percent_width"
+                        app:layout_marginTopPercent="3%"
+                        app:layout_marginBottomPercent="3%"/>
+
+                </android.support.percent.PercentRelativeLayout>
+
+                <android.support.percent.PercentRelativeLayout
+                    android:id="@+id/group_lwq_settings_settings_wrapper"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent">
+
+                    <include layout="@layout/layout_settings"
+                        android:id="@+id/group_lwq_settings_settings"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        app:layout_widthPercent="@fraction/lwq_settings_mode_percent_width"
+                        app:layout_marginTopPercent="3%"/>
+
+                </android.support.percent.PercentRelativeLayout>
+            </android.support.v4.view.ViewPager>
+        </android.support.design.widget.CoordinatorLayout>
+
+        <!-- FABs & Quote Edit & Search -->
+
+        <include layout="@layout/layout_fab_screen"
+            android:id="@+id/group_lwq_settings_fabs"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
+
+    </android.support.percent.PercentRelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/pb_lwq_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:indeterminate="true"
+        android:indeterminateOnly="true"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
+
+</android.support.percent.PercentFrameLayout>

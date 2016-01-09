@@ -1,0 +1,156 @@
+<!--
+    Copyright (c) 2015 Stanley Idesis
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    layout_fab_screen.xml
+    @author Stanley Idesis
+
+    From Live-Wallpaper-Quotes
+    https://github.com/stanidesis/live-wallpaper-quotes
+
+    Please report any issues
+    https://github.com/stanidesis/live-wallpaper-quotes/issues
+
+    Date: 10/24/2015
+-->
+<android.support.percent.PercentRelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:clipChildren="false">
+
+    <View
+        android:id="@+id/view_fab_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/palette_A100"
+        android:clickable="true"
+        android:visibility="gone"/>
+
+    <!-- Quote Edit -->
+
+    <include layout="@layout/layout_fab_screen_add_edit_quote"
+        android:id="@+id/group_lwq_fab_screen_add_edit_quote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_widthPercent="66%"
+        app:layout_marginTopPercent="10%"
+        app:layout_marginLeftPercent="10%"/>
+
+    <!-- Search -->
+
+    <include layout="@layout/layout_fab_screen_search"
+        android:id="@+id/group_lwq_fab_screen_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_widthPercent="66%"
+        app:layout_marginTopPercent="10%"
+        app:layout_marginLeftPercent="10%"/>
+
+    <android.support.percent.PercentFrameLayout
+        android:id="@+id/fl_lwq_fab_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/fl_lwq_fab_create_quote"
+        android:layout_alignRight="@+id/fl_lwq_fab_reveal"
+        android:layout_alignEnd="@+id/fl_lwq_fab_reveal"
+        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"
+        app:layout_heightPercent="9%"
+        app:layout_marginBottomPercent="3%">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_lwq_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_search_white_small"
+            android:visibility="gone"
+            app:backgroundTint="@color/palette_A400"/>
+
+    </android.support.percent.PercentFrameLayout>
+
+    <android.support.percent.PercentFrameLayout
+        android:id="@+id/fl_lwq_fab_create_quote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/fl_lwq_fab_reveal"
+        android:layout_alignRight="@+id/fl_lwq_fab_reveal"
+        android:layout_alignEnd="@+id/fl_lwq_fab_reveal"
+        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"
+        app:layout_heightPercent="9%"
+        app:layout_marginBottomPercent="3%">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_lwq_create_quote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_create_white_small"
+            android:visibility="gone"
+            app:backgroundTint="@color/palette_A400"/>
+
+    </android.support.percent.PercentFrameLayout>
+
+    <!-- Add FAB-->
+
+    <FrameLayout
+        android:id="@+id/fl_lwq_fab_reveal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/fl_lwq_fab_preview"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"
+        app:layout_heightPercent="9%"
+        app:layout_marginBottomPercent="3%">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_lwq_reveal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_add_white"
+            app:backgroundTint="@color/palette_A400"/>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/fl_lwq_fab_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_lwq_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_remove_red_eye_white"
+            app:backgroundTint="@color/palette_A100"/>
+
+    </FrameLayout>
+
+</android.support.percent.PercentRelativeLayout>

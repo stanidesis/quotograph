@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="view_tag_flags" type="id"/>
+    <item name="view_tag_animator" type="id"/>
+    <item name="view_tag_animator_reveal" type="id"/>
+    <item name="view_tag_animator_hide" type="id"/>
+    <item name="view_tag_animator_rotate" type="id"/>
+    <item name="view_tag_animator_unrotate" type="id"/>
+</resources>
