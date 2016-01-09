@@ -1,6 +1,5 @@
 package com.stanleyidesis.livewallpaperquotes.api.service;
 
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.service.wallpaper.WallpaperService;
@@ -12,7 +11,8 @@ import android.view.SurfaceHolder;
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.LWQPreferences;
 import com.stanleyidesis.livewallpaperquotes.R;
-import com.stanleyidesis.livewallpaperquotes.api.controller.LWQAlarmController;
+import com.stanleyidesis.livewallpaperquotes.api.BaseCallback;
+import com.stanleyidesis.livewallpaperquotes.api.controller.LWQWallpaperController;
 import com.stanleyidesis.livewallpaperquotes.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.livewallpaperquotes.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.livewallpaperquotes.api.event.WallpaperEvent;
@@ -54,29 +54,29 @@ import de.greenrobot.event.EventBus;
  */
 public class LWQWallpaperService extends WallpaperService {
 
-    public static void setServiceEnabled(boolean enabled) {
-        final LWQApplication lwqApplication = LWQApplication.get();
-        lwqApplication.getPackageManager()
-                .setComponentEnabledSetting(
-                        new ComponentName(lwqApplication, LWQWallpaperService.class),
-                        enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                        PackageManager.DONT_KILL_APP);
-    }
-
     public class LWQWallpaperEngine extends Engine implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
         LWQSurfaceHolderDrawScript drawScript;
         GestureDetectorCompat gestureDetectorCompat;
         Intent launchIntent;
+        BaseCallback<Boolean> eventCallback = new BaseCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                EventBus.getDefault().post(WallpaperEvent.withStatus(WallpaperEvent.Status.RENDERED_WALLPAPER));
+            }
+        };
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
             drawScript = new LWQSurfaceHolderDrawScript(surfaceHolder);
-            LWQAlarmController.resetAlarm();
             gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
             gestureDetectorCompat.setOnDoubleTapListener(this);
             EventBus.getDefault().register(this);
+            LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
+            if (!wallpaperController.activeWallpaperLoaded()) {
+                wallpaperController.retrieveActiveWallpaper();
+            }
         }
 
         @Override
@@ -89,7 +89,7 @@ public class LWQWallpaperService extends WallpaperService {
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
             drawScript.setSurfaceHolder(holder);
-            drawScript.requestDraw();
+            drawScript.requestDraw(eventCallback);
         }
 
         @Override
@@ -102,7 +102,7 @@ public class LWQWallpaperService extends WallpaperService {
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
             super.onSurfaceRedrawNeeded(holder);
             drawScript.setSurfaceHolder(holder);
-            drawScript.requestDraw();
+            drawScript.requestDraw(eventCallback);
         }
 
         @Override
@@ -118,14 +118,14 @@ public class LWQWallpaperService extends WallpaperService {
                 return;
             }
             if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
-                drawScript.requestDraw();
+                drawScript.requestDraw(eventCallback);
             }
         }
 
         public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
             if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_blur ||
                     preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_dim) {
-                drawScript.requestDraw();
+                drawScript.requestDraw(eventCallback);
             }
         }
 

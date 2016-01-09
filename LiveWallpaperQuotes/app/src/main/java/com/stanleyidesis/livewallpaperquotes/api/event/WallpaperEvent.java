@@ -39,7 +39,8 @@ public class WallpaperEvent extends FailableEvent {
         GENERATING_NEW_WALLPAPER,
         GENERATED_NEW_WALLPAPER,
         RETRIEVING_WALLPAPER,
-        RETRIEVED_WALLPAPER
+        RETRIEVED_WALLPAPER,
+        RENDERED_WALLPAPER;
     }
 
     public static WallpaperEvent withStatus(Status status) {

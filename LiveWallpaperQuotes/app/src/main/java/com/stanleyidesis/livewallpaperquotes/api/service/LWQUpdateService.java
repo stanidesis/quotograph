@@ -44,6 +44,8 @@ import de.greenrobot.event.EventBus;
  */
 public class LWQUpdateService extends IntentService {
 
+    final int MAX_ATTEMPTS = 3;
+    int attempt;
     Intent intent;
 
     public LWQUpdateService() {
@@ -59,7 +61,8 @@ public class LWQUpdateService extends IntentService {
     @Override
     protected void onHandleIntent(final Intent intent) {
         this.intent = intent;
-        LWQApplication.getWallpaperController().generateNewWallpaper();
+        this.attempt = 0;
+        attempt();
     }
 
     @Override
@@ -70,10 +73,18 @@ public class LWQUpdateService extends IntentService {
 
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
-            // TODO Retry?
-            LWQReceiver.completeWakefulIntent(intent);
-        } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER){
+            attempt();
+        } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             LWQReceiver.completeWakefulIntent(intent);
         }
+    }
+
+    void attempt() {
+        attempt++;
+        if (attempt > MAX_ATTEMPTS) {
+            LWQReceiver.completeWakefulIntent(intent);
+            return;
+        }
+        LWQApplication.getWallpaperController().generateNewWallpaper();
     }
 }
