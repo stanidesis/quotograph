@@ -1,5 +1,6 @@
 package com.stanleyidesis.livewallpaperquotes.ui.activity;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
@@ -7,11 +8,15 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.stanleyidesis.livewallpaperquotes.LWQApplication;
 import com.stanleyidesis.livewallpaperquotes.R;
@@ -59,6 +64,8 @@ import de.greenrobot.event.EventBus;
  */
 public abstract class LWQWallpaperActivity extends AppCompatActivity implements ActivityStateFlags {
 
+    static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 0xABCDEF;
+
     enum BackgroundWallpaperState {
         OBSCURED(.7f),
         REVEALED(0f),
@@ -104,6 +111,19 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     protected void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode != REQUEST_CODE_WRITE_EXTERNAL_STORAGE) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            return;
+        }
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            saveWallpaper();
+        } else {
+            Toast.makeText(this, R.string.write_external_permission_denied_toast, Toast.LENGTH_LONG).show();
+        }
     }
 
     // Event Handling
@@ -194,19 +214,33 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
         });
     }
 
-    // Click Handling
-    @OnClick(R.id.btn_wallpaper_actions_share) void shareWallpaper() {
-        sendBroadcast(new Intent(getString(R.string.action_share)));
-    }
-
-    @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperToDisk() {
+    void saveWallpaper() {
         sendBroadcast(new Intent(getString(R.string.action_save)));
         saveButton.setEnabled(false);
         skipButton.setEnabled(false);
         animateAction(saveButton);
     }
 
-    @OnClick(R.id.btn_wallpaper_actions_skip) void skipWallpaper() {
+    // Click Handling
+    @OnClick(R.id.btn_wallpaper_actions_share) void shareWallpaperClick() {
+        sendBroadcast(new Intent(getString(R.string.action_share)));
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperClick() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            saveWallpaper();
+            return;
+        }
+        // Begin permissions flow
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            saveWallpaper();
+            return;
+        }
+        requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_skip) void skipWallpaperClick() {
         LWQApplication.getWallpaperController().generateNewWallpaper();
         saveButton.setEnabled(false);
         skipButton.setEnabled(false);

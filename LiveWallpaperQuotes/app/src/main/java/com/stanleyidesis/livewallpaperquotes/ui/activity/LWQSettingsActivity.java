@@ -330,10 +330,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     ExecutorService changeStateExecutorService = Executors.newSingleThreadScheduledExecutor();
 
     // Timer Task to reveal controls
+    boolean timerCancelled;
     Timer revealControlsTimer;
     TimerTask revealControlsTimerTask = new TimerTask() {
         @Override
         public void run() {
+            if (timerCancelled) {
+                timerCancelled = false;
+                return;
+            }
             changeState(revealContentState);
             revealControlsTimer = null;
         }
@@ -428,12 +433,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         super.onPostCreate(savedInstanceState);
         if (LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
             changeState(revealWallpaperState);
-            if (revealControlsTimer == null) {
-                revealControlsTimer = new Timer();
-                try {
-                    revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 2);
-                } catch (Exception e) {}
-            }
+            scheduleTimer();
         } else {
             changeState(initialState);
         }
@@ -784,6 +784,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         });
     }
 
+    void scheduleTimer() {
+        timerCancelled = false;
+        if (revealControlsTimer == null) {
+            revealControlsTimer = new Timer();
+            try {
+                revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    void cancelTimer() {
+        timerCancelled = true;
+    }
+
     // Click Handling
 
     @OnClick(R.id.btn_fab_screen_search) void performSearch() {
@@ -907,15 +923,23 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     @Override
-    void saveWallpaperToDisk() {
-        super.saveWallpaperToDisk();
+    void saveWallpaper() {
+        super.saveWallpaper();
         animateProgressBar(true);
+        cancelTimer();
     }
 
     @Override
-    void skipWallpaper() {
-        super.skipWallpaper();
+    void skipWallpaperClick() {
+        super.skipWallpaperClick();
         animateProgressBar(true);
+        cancelTimer();
+    }
+
+    @Override
+    void shareWallpaperClick() {
+        super.shareWallpaperClick();
+        cancelTimer();
     }
 
     // Animation
@@ -1090,12 +1114,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             if (activityState == initialState) {
                 changeState(revealWallpaperState);
             }
-            if (revealControlsTimer == null) {
-                revealControlsTimer = new Timer();
-                try {
-                    revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 2);
-                } catch (Exception e) {}
-            }
+            scheduleTimer();
         } else if (wallpaperEvent.getStatus() != WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             changeState(initialState);
             animateProgressBar(true);
