@@ -61,6 +61,9 @@
 
         <service android:name="com.stanleyidesis.quotograph.api.service.LWQUpdateService"/>
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="54ccbc4bc8a5ef34bb4af2a94a3cb263bcb24127" />
     </application>
 
 </manifest>
