@@ -4,7 +4,7 @@
     android:enterFadeDuration="100">
     <item android:state_selected="true">
         <shape android:shape="oval">
-            <solid android:color="@color/palette_200"/>
+            <solid android:color="@color/palette_900"/>
         </shape>
     </item>
     <item>
