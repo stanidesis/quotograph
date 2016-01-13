@@ -8,6 +8,7 @@ import android.content.res.TypedArray;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.orm.SugarApp;
 import com.orm.query.Condition;
@@ -26,6 +27,7 @@ import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
 import com.stanleyidesis.quotograph.api.receiver.LWQReceiver;
 import com.stanleyidesis.quotograph.api.service.LWQWallpaperService;
+
 import io.fabric.sdk.android.Fabric;
 
 /**
@@ -74,7 +76,8 @@ public class LWQApplication extends SugarApp {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
+        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
+        Fabric.with(this, new Crashlytics.Builder().core(core).build());
         Fresco.initialize(this);
 
         sApplication = this;

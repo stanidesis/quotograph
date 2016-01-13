@@ -61,8 +61,7 @@
                 android:minWidth="150dp"
                 android:gravity="start|center_vertical"
                 android:singleLine="true"
-                android:imeOptions="actionSearch"
-                android:text="@string/inspirational_author_0"/>
+                android:imeOptions="actionSearch"/>
 
         </android.support.design.widget.TextInputLayout>
 

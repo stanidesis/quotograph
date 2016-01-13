@@ -31,10 +31,12 @@
 
     Date: 10/31/2015
 -->
-
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
     android:enterFadeDuration="100"
     android:exitFadeDuration="100">
+    <item android:state_selected="true">
+        <bitmap android:src="@mipmap/ic_remove_red_eye_white" android:alpha=".8"/>
+    </item>
     <item android:state_pressed="true">
         <bitmap android:src="@mipmap/ic_remove_red_eye_white" android:alpha=".7"/>
     </item>
