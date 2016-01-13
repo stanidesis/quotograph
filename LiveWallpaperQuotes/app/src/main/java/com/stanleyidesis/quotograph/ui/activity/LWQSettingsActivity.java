@@ -1,5 +1,6 @@
 package com.stanleyidesis.quotograph.ui.activity;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
@@ -8,11 +9,15 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
+import android.support.percent.PercentFrameLayout;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -27,7 +32,7 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
-import android.view.WindowManager;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -118,6 +123,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         SearchResultsAdapter.Delegate {
 
     static class ActivityState {
+        int page = -1;
         Map<Integer, Integer> newStateValues = new HashMap<>();
         BackgroundWallpaperState backgroundWallpaperState = null;
         boolean wallpaperControlsVisible = false;
@@ -135,6 +141,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             activityState = new ActivityState();
         }
 
+        Builder setViewPagerPage(int page) {
+            activityState.page = page;
+            return this;
+        }
+
         Builder setViewState(int resId, int stateFlags) {
             activityState.newStateValues.put(resId, stateFlags);
             return this;
@@ -142,11 +153,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
         Builder setWallpaperState(BackgroundWallpaperState backgroundWallpaperState) {
             activityState.backgroundWallpaperState = backgroundWallpaperState;
-            return this;
-        }
-
-        Builder setWallpaperControlsVisible(boolean visible) {
-            activityState.wallpaperControlsVisible = visible;
             return this;
         }
     }
@@ -167,7 +173,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 return;
             }
 
-            long longestAnimation = 0l;
+            long longestAnimation = 0;
 
             // Wallpaper State
             final BackgroundWallpaperState newBackgroundWallpaperState = nextActivityState.backgroundWallpaperState;
@@ -181,13 +187,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 });
             }
 
-            // Wallpaper Controls
-            if (LWQSettingsActivity.this.wallpaperActionsVisible != nextActivityState.wallpaperControlsVisible) {
-                final boolean dismiss = !nextActivityState.wallpaperControlsVisible;
+            // ViewPager Page Set
+            if (nextActivityState.page > -1) {
+                final int newPage = nextActivityState.page;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        animateWallpaperActions(dismiss);
+                        viewPager.setCurrentItem(newPage, true);
                     }
                 });
             }
@@ -261,16 +267,27 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     ActivityState initialState = new Builder()
             .setWallpaperState(BackgroundWallpaperState.HIDDEN)
-            .setWallpaperControlsVisible(false)
+            .setViewPagerPage(0)
             .setViewState(R.id.group_lwq_settings_content, FLAG_HIDE | FLAG_DISABLE)
             .setViewState(R.id.fab_lwq_reveal, FLAG_HIDE | FLAG_DISABLE | FLAG_NO_ROTATE)
             .setViewState(R.id.group_lwq_settings_fabs, FLAG_HIDE)
             .setViewState(R.id.pb_lwq_settings, FLAG_HIDE)
             .build();
 
-    ActivityState revealContentState = new Builder()
+    ActivityState revealPlaylistState = new Builder()
             .setWallpaperState(BackgroundWallpaperState.OBSCURED)
-            .setWallpaperControlsVisible(false)
+            .setViewPagerPage(1)
+            .setViewState(R.id.group_lwq_settings_content, FLAG_REVEAL | FLAG_ENABLE)
+            .setViewState(R.id.fab_lwq_reveal, FLAG_NO_ROTATE)
+            .setViewState(R.id.group_lwq_settings_fabs, FLAG_HIDE)
+            .setViewState(R.id.group_lwq_fab_screen_add_edit_quote, FLAG_HIDE | FLAG_DISABLE)
+            .setViewState(R.id.group_lwq_fab_screen_search, FLAG_HIDE | FLAG_DISABLE)
+            .setViewState(R.id.pb_lwq_settings, FLAG_HIDE)
+            .build();
+
+    ActivityState revealSettingsState = new Builder()
+            .setWallpaperState(BackgroundWallpaperState.OBSCURED)
+            .setViewPagerPage(2)
             .setViewState(R.id.group_lwq_settings_content, FLAG_REVEAL | FLAG_ENABLE)
             .setViewState(R.id.fab_lwq_reveal, FLAG_NO_ROTATE)
             .setViewState(R.id.group_lwq_settings_fabs, FLAG_HIDE)
@@ -281,7 +298,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     ActivityState revealWallpaperState = new Builder()
             .setWallpaperState(BackgroundWallpaperState.REVEALED)
-            .setWallpaperControlsVisible(true)
+            .setViewPagerPage(0)
             .setViewState(R.id.group_lwq_settings_content, FLAG_HIDE | FLAG_DISABLE)
             .build();
 
@@ -320,6 +337,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setViewState(R.id.pb_lwq_settings, FLAG_REVEAL)
             .build();
 
+    static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 0xABCDEF;
+
     // Current ActivityState
     ActivityState activityState = null;
 
@@ -339,7 +358,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 timerCancelled = false;
                 return;
             }
-            changeState(revealContentState);
+            changeState(revealPlaylistState);
             revealControlsTimer = null;
         }
     };
@@ -359,6 +378,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     TabLayout tabLayout;
     @Bind(R.id.viewpager_lwq_settings)
     ViewPager viewPager;
+
+    // Preview Container and Wallpaper Actions
+    @Bind(R.id.group_lwq_settings_wallpaper_preview_wrapper) View wallpaperPreviewWrapper;
+    @Bind(R.id.btn_wallpaper_actions_share) View shareButton;
+    @Bind(R.id.btn_wallpaper_actions_save) View saveButton;
+    @Bind(R.id.btn_wallpaper_actions_skip) View skipButton;
 
     // Settings Container
     @Bind(R.id.group_lwq_settings_settings_wrapper)
@@ -408,6 +433,21 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lwq_settings);
         ButterKnife.bind(this);
+
+        content.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                content.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                View [] buttons = new View[] {shareButton, saveButton, skipButton};
+                for (View button : buttons) {
+                    button.setAlpha(0f);
+                    button.setTranslationY(button.getHeight() * 2);
+                    button.requestLayout();
+                }
+                animateWallpaperActions(false);
+            }
+        });
+
         // Setup content
         setupContent();
         // Setup ViewPager and Controls
@@ -423,7 +463,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         // Setup settings
         setupSettings();
         // Setup Wallpaper actions
-        setupWallpaperActionContainer();
+        setupWallpaperActions();
         // Setup progress bar
         setupProgressBar();
     }
@@ -441,12 +481,25 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onBackPressed() {
-        if (activityState == revealWallpaperState || activityState == revealFABActionsState) {
-            changeState(revealContentState);
+        if (activityState == revealFABActionsState) {
+            changeState(revealPlaylistState);
         } else if (activityState == revealSearchState || activityState == revealAddEditQuoteState) {
             changeState(revealFABActionsState);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode != REQUEST_CODE_WRITE_EXTERNAL_STORAGE) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            return;
+        }
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            saveWallpaper();
+        } else {
+            Toast.makeText(this, R.string.write_external_permission_denied_toast, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -472,12 +525,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     void setupViewPagerAndTabs() {
+        viewPager.setOffscreenPageLimit(3);
         viewPager.setAdapter(new PagerAdapter() {
 
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
                 switch (position) {
                     case 0:
+                        return wallpaperPreviewWrapper;
+                    case 1:
                         return playlistWrapper;
                     default:
                         return settingsWrapper;
@@ -486,7 +542,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
             @Override
             public int getCount() {
-                return 2;
+                return 3;
             }
 
             @Override
@@ -502,21 +558,73 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                switch (position) {
+                    case 0:
+                        setBackgroundAlpha(BackgroundWallpaperState.OBSCURED.screenAlpha * positionOffset);
+                        // Fab Add
+                        fabAdd.setScaleX(positionOffset);
+                        fabAdd.setScaleY(positionOffset);
+                        // Content
+                        content.setAlpha(positionOffset);
+                        // At .3, share is gone, at .6, save is gone, and at 1, skip is gone
+                        shareButton.setAlpha(1f - (Math.min(positionOffset, 1/3f) / (1/3f)));
+                        shareButton.setTranslationY((1f - shareButton.getAlpha()) * shareButton.getHeight() * 2);
+                        saveButton.setAlpha(1f - (Math.min(positionOffset, 2/3f) / (2/3f)));
+                        saveButton.setTranslationY((1f - saveButton.getAlpha()) * saveButton.getHeight() * 2);
+                        skipButton.setAlpha(1f - positionOffset);
+                        skipButton.setTranslationY((1f - skipButton.getAlpha()) * skipButton.getHeight() * 2);
+                        break;
+                    case 1:
+                        fabAdd.setAlpha(1f - positionOffset);
+                        fabAdd.setScaleX(1f - positionOffset);
+                        fabAdd.setScaleY(1f - positionOffset);
+                }
             }
 
             @Override
             public void onPageSelected(int position) {
-                animateFAB(fabAdd, position != 0).start();
+                // Content
+                content.setAlpha(position == 0 ? 0f : 1f);
+
+                // Add Fab
+                fabAdd.setScaleX(position == 1 ? 1f : 0f);
+                fabAdd.setScaleY(position == 1 ? 1f : 0f);
+                fabAdd.setAlpha(position == 1 ? 1f : 0f);
+                fabAdd.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
+
+                // Action Buttons
+                View [] buttons = new View[] {shareButton, saveButton, skipButton};
+                for (View button : buttons) {
+                    button.setTranslationY(position == 0 ? 0f : button.getHeight() * 2);
+                    button.setAlpha(position == 0 ? 1f : 0f);
+                    button.setEnabled(position == 0);
+                    button.setTag(R.id.view_tag_flags, position == 0 ? FLAG_ENABLE : FLAG_DISABLE);
+                }
+
+                // Background
+                animateState(position == 0 ? BackgroundWallpaperState.REVEALED : BackgroundWallpaperState.OBSCURED);
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-            }
+            public void onPageScrollStateChanged(int state) {}
         });
         tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.palette_500));
         tabLayout.setupWithViewPager(viewPager);
-        tabLayout.getTabAt(0).setIcon(R.drawable.selectable_playlist_button);
-        tabLayout.getTabAt(1).setIcon(R.drawable.selectable_settings_button);
+        tabLayout.getTabAt(0).setIcon(R.drawable.selectable_preview_button);
+        tabLayout.getTabAt(1).setIcon(R.drawable.selectable_playlist_button);
+        tabLayout.getTabAt(2).setIcon(R.drawable.selectable_settings_button);
+    }
+
+    void setupWallpaperActions() {
+        int navBarHeight = UIUtils.getNavBarHeight(this);
+        if (navBarHeight > 0) {
+            View wallpaperActionsContainer = ButterKnife.findById(this, R.id.group_lwq_settings_wallpaper_actions);
+            float navBarHeightPercentage = (float) navBarHeight / (float) UIUtils.getRealScreenSize().y;
+            final PercentFrameLayout.LayoutParams layoutParams =
+                    (PercentFrameLayout.LayoutParams) wallpaperActionsContainer.getLayoutParams();
+            layoutParams.getPercentLayoutInfo().bottomMarginPercent += navBarHeightPercentage;
+            wallpaperActionsContainer.requestLayout();
+        }
     }
 
     void setupFABs() {
@@ -534,10 +642,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             }
         });
 
-        View fabWrapper = ButterKnife.findById(this, R.id.fl_lwq_fab_preview);
-        PercentRelativeLayout.LayoutParams layoutParams = (PercentRelativeLayout.LayoutParams) fabWrapper.getLayoutParams();
-        layoutParams.bottomMargin = (int) (UIUtils.getNavBarHeight(this) * 1.5);
-        fabWrapper.setLayoutParams(layoutParams);
+        int navBarHeight = UIUtils.getNavBarHeight(this);
+        if (navBarHeight > 0) {
+            float navBarHeightPercentage = (float) navBarHeight / (float) UIUtils.getRealScreenSize().y;
+            View fabAddWrapper = ButterKnife.findById(this, R.id.fl_lwq_fab_reveal);
+            PercentRelativeLayout.LayoutParams layoutParams =
+                    (PercentRelativeLayout.LayoutParams) fabAddWrapper.getLayoutParams();
+            layoutParams.getPercentLayoutInfo().bottomMarginPercent += navBarHeightPercentage;
+            fabAddWrapper.requestLayout();
+        }
 
         fabAdd.setAlpha(0f);
         fabAdd.setVisibility(View.GONE);
@@ -834,13 +947,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         });
     }
 
-    @OnClick(R.id.view_screen_lwq_wallpaper) void revealContent() {
-        if (activityState == revealWallpaperState) {
-            return;
-        }
-        changeState(revealContentState);
-    }
-
     @OnClick(R.id.fab_lwq_create_quote) void revealAddEditQuote() {
         if (activityState == revealAddEditQuoteState) {
             changeState(revealFABActionsState);
@@ -866,7 +972,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             playlistAdapter.notifyItemChanged(editingQuotePosition);
             editingQuote = null;
             editingQuotePosition = -1;
-            changeState(revealContentState);
+            changeState(revealPlaylistState);
             return;
         }
         Quote quote = Quote.find(editableQuote.getText().toString().trim(), author);
@@ -877,7 +983,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         PlaylistQuote playlistQuote = new PlaylistQuote(Playlist.active(), quote);
         playlistQuote.save();
         playlistAdapter.insertItem(playlistQuote);
-        changeState(revealContentState);
+        changeState(revealPlaylistState);
         UIUtils.dismissKeyboard(this);
     }
 
@@ -895,7 +1001,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             dismissKeyboard(editableAuthor);
             dismissKeyboard(editableQuote);
             dismissKeyboard(editableQuery);
-            changeState(revealContentState);
+            changeState(revealPlaylistState);
         } else {
             changeState(revealFABActionsState);
         }
@@ -906,15 +1012,38 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             changeState(revealFABActionsState);
             dismissKeyboard(editableQuery);
         } else {
-            editableQuery.setText("");
-            editableQuery.requestFocusFromTouch();
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            editableQuery.clearComposingText();
+            editableQuery.clearFocus();
             changeState(revealSearchState);
         }
     }
 
-    @OnClick(R.id.fab_lwq_preview) void toggleWallpaper() {
-        changeState(revealWallpaperState);
+    @OnClick(R.id.btn_wallpaper_actions_skip) void skipWallpaperClick() {
+        LWQApplication.getWallpaperController().generateNewWallpaper();
+        saveButton.setEnabled(false);
+        skipButton.setEnabled(false);
+        animateAction(skipButton);
+        animateProgressBar(true);
+        cancelTimer();
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperClick() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            saveWallpaper();
+            return;
+        }
+        // Begin permissions flow
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            saveWallpaper();
+            return;
+        }
+        requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+    }
+
+    @OnClick(R.id.btn_wallpaper_actions_share) void shareWallpaperClick() {
+        cancelTimer();
+        sendBroadcast(new Intent(getString(R.string.action_share)));
     }
 
     @OnCheckedChanged(R.id.check_lwq_settings_double_tap)
@@ -922,27 +1051,48 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         LWQPreferences.setDoubleTapEnabled(checked);
     }
 
-    @Override
-    void saveWallpaper() {
-        super.saveWallpaper();
-        animateProgressBar(true);
-        cancelTimer();
-    }
-
-    @Override
-    void skipWallpaperClick() {
-        super.skipWallpaperClick();
-        animateProgressBar(true);
-        cancelTimer();
-    }
-
-    @Override
-    void shareWallpaperClick() {
-        super.shareWallpaperClick();
-        cancelTimer();
-    }
-
     // Animation
+
+    void endActionAnimation(final View button) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (button.getTag(R.id.view_tag_animator) != null) {
+                    ((Animator)button.getTag(R.id.view_tag_animator)).end();
+                    button.setTag(R.id.view_tag_animator, null);
+                    skipButton.setEnabled(true);
+                    saveButton.setEnabled(true);
+                }
+            }
+        });
+    }
+
+    void animateWallpaperActions(final boolean dismiss) {
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(generateAnimator(shareButton, dismiss, 0),
+                generateAnimator(saveButton, dismiss, 20),
+                generateAnimator(skipButton, dismiss, 35));
+        animatorSet.start();
+    }
+
+    Animator generateAnimator(View target, boolean dismiss, long startDelay) {
+        float [] fadeIn = new float[] {0f, 1f};
+        float [] fadeOut = new float[] {1f, 0f};
+        final ObjectAnimator propAnimator = ObjectAnimator.ofPropertyValuesHolder(target,
+                PropertyValuesHolder.ofFloat(View.ALPHA, dismiss ? fadeOut : fadeIn),
+                PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, dismiss ? (target.getHeight() * 2f) : 0f));
+        propAnimator.setStartDelay(startDelay);
+        propAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        propAnimator.setDuration(240);
+        return propAnimator;
+    }
+
+    void animateAction(View button) {
+        final Animator animator = AnimatorInflater.loadAnimator(this, R.animator.progress_rotation);
+        animator.setTarget(button);
+        button.setTag(R.id.view_tag_animator, animator);
+        animator.start();
+    }
 
     void animateProgressBar(final boolean reveal) {
         runOnUiThread(new Runnable() {
@@ -1068,6 +1218,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Misc
 
+    void saveWallpaper() {
+        animateProgressBar(true);
+        cancelTimer();
+        sendBroadcast(new Intent(getString(R.string.action_save)));
+        saveButton.setEnabled(false);
+        skipButton.setEnabled(false);
+        animateAction(saveButton);
+    }
+
     void changeState(ActivityState activityState) {
         try {
             stateBlockingDeque.put(activityState);
@@ -1105,11 +1264,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
-    @Override
     public void onEvent(final WallpaperEvent wallpaperEvent) {
-        super.onEvent(wallpaperEvent);
-        if (wallpaperEvent.didFail()) {
+        if (wallpaperEvent.didFail()
+                || wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             animateProgressBar(false);
+            endActionAnimation(skipButton);
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RENDERED_WALLPAPER) {
             if (activityState == initialState) {
                 changeState(revealWallpaperState);
@@ -1123,9 +1282,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
-    @Override
     public void onEvent(ImageSaveEvent imageSaveEvent) {
-        super.onEvent(imageSaveEvent);
+        endActionAnimation(saveButton);
         animateProgressBar(false);
     }
 
@@ -1147,7 +1305,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        changeState(revealContentState);
+        changeState(revealSettingsState);
     }
 
     // PlaylistAdapter.Delegate

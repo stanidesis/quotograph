@@ -36,7 +36,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:clipToPadding="false">
+    android:clipToPadding="false"
+    android:clipChildren="false">
 
     <include layout="@layout/layout_wallpaper"
         android:layout_height="match_parent"
@@ -75,6 +76,11 @@
                 android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+                <include layout="@layout/layout_wallpaper_preview"
+                    android:id="@+id/group_lwq_settings_wallpaper_preview_wrapper"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+
                 <android.support.percent.PercentRelativeLayout
                     android:id="@+id/group_lwq_settings_playlist_wrapper"
                     android:layout_height="match_parent"
@@ -85,7 +91,6 @@
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_centerHorizontal="true"
-                        android:layout_above="@+id/group_lwq_settings_wallpaper_actions"
                         app:layout_widthPercent="@fraction/lwq_settings_mode_percent_width"
                         app:layout_marginTopPercent="3%"
                         app:layout_marginBottomPercent="3%"/>
@@ -117,6 +122,13 @@
             android:layout_width="match_parent"/>
 
     </android.support.percent.PercentRelativeLayout>
+
+    <include layout="@layout/layout_wallpaper_actions"
+        android:id="@+id/group_lwq_settings_wallpaper_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:layout_marginBottomPercent="5%"/>
 
     <ProgressBar
         android:id="@+id/pb_lwq_settings"
