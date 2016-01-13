@@ -598,7 +598,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     button.setTranslationY(position == 0 ? 0f : button.getHeight() * 2);
                     button.setAlpha(position == 0 ? 1f : 0f);
                     button.setEnabled(position == 0);
-                    button.setTag(R.id.view_tag_flags, position == 0 ? FLAG_ENABLE : FLAG_DISABLE);
                 }
 
                 // Background
