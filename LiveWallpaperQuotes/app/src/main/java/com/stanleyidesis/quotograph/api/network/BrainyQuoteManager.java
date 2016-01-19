@@ -221,7 +221,7 @@ public class BrainyQuoteManager {
             brainyQuote.author = new BrainyAuthor(authors.get(0).text());
             brainyQuotes.add(brainyQuote);
             final Elements category = quoteAuthorCategories.select("a[href^=/quotes/topics]");
-            if (category == null || category.isEmpty()) {
+            if (category == null || category.isEmpty() || category.get(0).text() == null) {
                 continue;
             }
             brainyQuote.topic = new BrainyTopic(category.get(0).text());
