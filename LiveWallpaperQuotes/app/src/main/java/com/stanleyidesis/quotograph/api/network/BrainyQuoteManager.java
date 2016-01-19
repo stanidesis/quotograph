@@ -208,12 +208,12 @@ public class BrainyQuoteManager {
         List<BrainyQuote> brainyQuotes = new ArrayList<>();
         final Elements elements = document.select(".boxy");
         for (final Element quoteAuthorCategories : elements) {
-            final Elements quotes = quoteAuthorCategories.select("span.bqQuoteLink > a");
-            if (quotes == null || quotes.isEmpty()) {
+            final Elements quote = quoteAuthorCategories.select("span.bqQuoteLink > a");
+            if (quote == null || quote.isEmpty() || quote.get(0).text() == null) {
                 continue;
             }
-            final Elements authors = quoteAuthorCategories.select("div.bq-aut > a");
-            if (authors == null || authors.isEmpty()) {
+            final Elements author = quoteAuthorCategories.select("div.bq-aut > a");
+            if (author == null || author.isEmpty() || author.get(0).text() == null) {
                 continue;
             }
             final Elements category = quoteAuthorCategories.select("a[href^=/quotes/topics]");
@@ -221,8 +221,8 @@ public class BrainyQuoteManager {
                 continue;
             }
             BrainyQuote brainyQuote = new BrainyQuote();
-            brainyQuote.quote = quotes.get(0).text().replace("\"", "");
-            brainyQuote.author = new BrainyAuthor(authors.get(0).text());
+            brainyQuote.quote = quote.get(0).text().replace("\"", "");
+            brainyQuote.author = new BrainyAuthor(author.get(0).text());
             brainyQuote.topic = new BrainyTopic(category.get(0).text());
             brainyQuotes.add(brainyQuote);
         }
