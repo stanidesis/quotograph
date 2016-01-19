@@ -562,6 +562,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     case 0:
                         setBackgroundAlpha(BackgroundWallpaperState.OBSCURED.screenAlpha * positionOffset);
                         // Fab Add
+                        fabAdd.setAlpha(positionOffset);
                         fabAdd.setScaleX(positionOffset);
                         fabAdd.setScaleY(positionOffset);
                         // Content
@@ -590,7 +591,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 fabAdd.setScaleX(position == 1 ? 1f : 0f);
                 fabAdd.setScaleY(position == 1 ? 1f : 0f);
                 fabAdd.setAlpha(position == 1 ? 1f : 0f);
-                fabAdd.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
+                fabAdd.setEnabled(position == 1);
 
                 // Action Buttons
                 View [] buttons = new View[] {shareButton, saveButton, skipButton};

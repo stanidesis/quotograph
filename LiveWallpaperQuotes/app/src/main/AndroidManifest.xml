@@ -31,8 +31,7 @@
         </activity>
 
         <activity android:name="com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity" android:screenOrientation="sensorPortrait"
-            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper">
-        </activity>
+            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.Wallpaper" android:enabled="false"/>
 
         <!-- Receivers -->
 
