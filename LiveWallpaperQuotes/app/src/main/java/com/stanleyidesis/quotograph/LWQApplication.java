@@ -27,6 +27,7 @@ import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
 import com.stanleyidesis.quotograph.api.receiver.LWQReceiver;
 import com.stanleyidesis.quotograph.api.service.LWQWallpaperService;
+import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -123,6 +124,7 @@ public class LWQApplication extends SugarApp {
     public static void setComponentsEnabled(boolean enabled) {
         ComponentName receiver = new ComponentName(LWQApplication.get(), LWQReceiver.class);
         ComponentName wallpaperService = new ComponentName(LWQApplication.get(), LWQWallpaperService.class);
+        ComponentName settingsActivity = new ComponentName(LWQApplication.get(), LWQSettingsActivity.class);
         PackageManager pm = LWQApplication.get().getPackageManager();
         pm.setComponentEnabledSetting(receiver,
                 enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
@@ -132,7 +134,10 @@ public class LWQApplication extends SugarApp {
                 enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                         : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
-
+        pm.setComponentEnabledSetting(settingsActivity,
+                enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP);
     }
 
     private void populateDefaults() {

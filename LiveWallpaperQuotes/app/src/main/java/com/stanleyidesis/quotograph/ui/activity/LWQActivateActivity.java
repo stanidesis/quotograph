@@ -146,6 +146,12 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         firstLaunchTaskCompleted = !LWQPreferences.isFirstLaunch();
+        activateButton.setEnabled(firstLaunchTaskCompleted);
+        activateButton.setVisibility(firstLaunchTaskCompleted ? View.VISIBLE : View.GONE);
+        progressBar.setEnabled(!firstLaunchTaskCompleted);
+        progressBar.setVisibility(firstLaunchTaskCompleted ? View.GONE : View.VISIBLE);
+        activePageFiveView = firstLaunchTaskCompleted ? activateButton : progressBar;
+        activePageFiveView.requestLayout();
         if (firstLaunchTaskCompleted) {
             LWQApplication.getWallpaperController().retrieveActiveWallpaper();
         } else {
@@ -156,11 +162,6 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
                 firstLaunchTask.execute();
             }
         }
-        activateButton.setEnabled(firstLaunchTaskCompleted);
-        activateButton.setVisibility(firstLaunchTaskCompleted ? View.VISIBLE : View.GONE);
-        progressBar.setEnabled(!firstLaunchTaskCompleted);
-        progressBar.setVisibility(firstLaunchTaskCompleted ? View.GONE : View.VISIBLE);
-        activePageFiveView = firstLaunchTaskCompleted ? activateButton : progressBar;
     }
 
     @Override
