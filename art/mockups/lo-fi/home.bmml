@@ -120,9 +120,9 @@
         <text>Dynamically%20flips%20through%20beautiful%20Unsplash%20images%20and%20amazing%20quotes</text>
       </controlProperties>
     </control>
-    <control controlID="34" controlTypeID="com.balsamiq.mockups::StickyNote" x="602" y="503" w="183" h="63" measuredW="109" measuredH="123" zOrder="25" locked="false" isInGroup="-1">
+    <control controlID="34" controlTypeID="com.balsamiq.mockups::StickyNote" x="602" y="503" w="183" h="103" measuredW="109" measuredH="123" zOrder="25" locked="false" isInGroup="-1">
       <controlProperties>
-        <text>Screenshots%20of%20Quotograph%20in%20action%21</text>
+        <text>Screenshots%20of%20Quotograph%20in%20action%21%20These%20auto-scroll%20and%20auto-highlight%20the%20corresponding%20feature%20to%20the%20right</text>
       </controlProperties>
     </control>
     <control controlID="35" controlTypeID="com.balsamiq.mockups::StickyNote" x="1418" y="1108" w="183" h="48" measuredW="109" measuredH="123" zOrder="26" locked="false" isInGroup="-1">
@@ -205,6 +205,11 @@
     <control controlID="59" controlTypeID="com.balsamiq.mockups::StickyNote" x="1509" y="1341" w="183" h="60" measuredW="109" measuredH="123" zOrder="37" locked="false" isInGroup="-1">
       <controlProperties>
         <text>Mailing%20list%2C%20Instagram%2C%20and%20of%20course%20Facebook%20page</text>
+      </controlProperties>
+    </control>
+    <control controlID="60" controlTypeID="com.balsamiq.mockups::StickyNote" x="1476" y="678" w="183" h="84" measuredW="109" measuredH="123" zOrder="38" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>When%20hovered%2C%20the%20screenshot%20representing%20the%20feature%20should%20appear%20on%20the%20right</text>
       </controlProperties>
     </control>
   </controls>
