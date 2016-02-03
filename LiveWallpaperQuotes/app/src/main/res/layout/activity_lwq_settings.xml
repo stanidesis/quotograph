@@ -117,7 +117,7 @@
         <!-- FABs & Quote Edit & Search -->
 
         <include layout="@layout/layout_fab_screen"
-            android:id="@+id/group_lwq_settings_fabs"
+            android:id="@+id/group_lwq_settings_fab_screen"
             android:layout_height="match_parent"
             android:layout_width="match_parent"/>
 
