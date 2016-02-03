@@ -122,7 +122,7 @@
         app:layout_marginBottomPercent="5%">
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_lwq_reveal"
+            android:id="@+id/fab_lwq_plus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
