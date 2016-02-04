@@ -253,7 +253,9 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             LWQApplication.getImageController().retrieveBitmap(getFullUri(), new Callback<Bitmap>() {
                 @Override
                 public void onSuccess(Bitmap bitmap) {
-                    discardActiveBitmap();
+                    if (activeBackgroundImage != null) {
+                        discardActiveBitmap();
+                    }
                     activeBackgroundImage = bitmap;
                     retrievalState = RetrievalState.NONE;
                     notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
