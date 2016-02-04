@@ -168,7 +168,9 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     protected void onResume() {
         super.onResume();
         LWQApplication.setComponentsEnabled(LWQApplication.isWallpaperActivated());
-        requiresActivation();
+        if (requiresActivation() && firstLaunchTaskCompleted) {
+          activate();
+        }
     }
 
     @Override
