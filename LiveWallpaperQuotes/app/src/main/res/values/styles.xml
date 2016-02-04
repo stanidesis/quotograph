@@ -14,9 +14,12 @@
     <style name="Theme.LWQ.Wallpaper.Base" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowShowWallpaper">true</item>
+        <item name="colorAccent">@color/palette_500</item>
     </style>
 
-    <style name="Theme.LWQ.Wallpaper" parent="Theme.LWQ.Wallpaper.Base"></style>
+    <style name="Theme.LWQ.Wallpaper" parent="Theme.LWQ.Wallpaper.Base">
+        <item name="colorAccent">@color/palette_500</item>
+    </style>
 
     <style name="Theme.LWQ.TextAppearance.Settings.Category" parent="Base.TextAppearance.AppCompat.Headline">
         <item name="android:gravity">end|center_vertical</item>
