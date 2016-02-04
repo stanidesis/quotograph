@@ -10,7 +10,7 @@ import com.stanleyidesis.quotograph.api.db.PlaylistQuote;
 import java.util.List;
 
 /**
- * Copyright (c) 2015 Stanley Idesis
+ * Copyright (c) 2016 Stanley Idesis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,11 +34,11 @@ import java.util.List;
  * LWQWallpaperController.java
  * @author Stanley Idesis
  *
- * From Live-Wallpaper-Quotes
- * https://github.com/stanidesis/live-wallpaper-quotes
+ * From Quotograph
+ * https://github.com/stanidesis/quotograph
  *
  * Please report any issues
- * https://github.com/stanidesis/live-wallpaper-quotes/issues
+ * https://github.com/stanidesis/quotograph/issues
  *
  * Date: 08/01/2015
  */
