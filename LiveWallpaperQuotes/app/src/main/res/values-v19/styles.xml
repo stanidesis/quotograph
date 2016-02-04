@@ -3,5 +3,6 @@
     <style name="Theme.LWQ.Wallpaper" parent="Theme.LWQ.Wallpaper.Base">
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:windowTranslucentStatus">true</item>
+        <item name="colorAccent">@color/palette_500</item>
     </style>
 </resources>
