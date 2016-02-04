@@ -72,6 +72,9 @@ import de.greenrobot.event.EventBus;
  */
 public class LWQActivateActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
 
+    // First run check
+    static boolean RUN_ONCE = true;
+
     private enum Pages {
         WELCOME,
         SET_AS_WALLPAPER,
@@ -168,8 +171,9 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     protected void onResume() {
         super.onResume();
         LWQApplication.setComponentsEnabled(LWQApplication.isWallpaperActivated());
-        if (requiresActivation() && firstLaunchTaskCompleted) {
-          activate();
+        if (requiresActivation() && firstLaunchTaskCompleted && RUN_ONCE) {
+            RUN_ONCE = false;
+            activate();
         }
     }
 
