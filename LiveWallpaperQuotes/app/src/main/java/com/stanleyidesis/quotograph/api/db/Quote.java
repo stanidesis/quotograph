@@ -45,13 +45,19 @@ public class Quote extends SugarRecord<Quote> {
     public String text;
     public Author author;
     public Category category;
+    public boolean used;
 
     public Quote() {}
 
     public Quote(String text, Author author, Category category) {
+        this(text, author, category, false);
+    }
+
+    public Quote(String text, Author author, Category category, boolean used) {
         this.text = text;
         this.author = author;
         this.category = category;
+        this.used = used;
     }
 
     @Override

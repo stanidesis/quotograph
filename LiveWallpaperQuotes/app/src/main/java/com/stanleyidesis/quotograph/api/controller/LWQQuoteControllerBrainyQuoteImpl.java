@@ -9,7 +9,6 @@ import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.db.Author;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Quote;
-import com.stanleyidesis.quotograph.api.db.Wallpaper;
 import com.stanleyidesis.quotograph.api.network.BrainyQuoteManager;
 
 import java.util.ArrayList;
@@ -127,12 +126,9 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
 
     @Override
     public void fetchUnusedQuotes(final Category category, final Callback<List<Quote>> callback) {
-        final List<Wallpaper> allWallpapers = Select.from(Wallpaper.class).list();
-        Condition [] conditions = new Condition[allWallpapers.size() + 1];
-        for (int i = 0; i < allWallpapers.size(); i++) {
-            conditions[i] = Condition.prop("id").notEq(allWallpapers.get(i).quote.getId());
-        }
-        conditions[conditions.length - 1] = Condition.prop(StringUtil.toSQLName("category")).eq(category.getId());
+        Condition [] conditions = new Condition[2];
+        conditions[0] = Condition.prop(StringUtil.toSQLName("used")).eq("0");
+        conditions[1] = Condition.prop(StringUtil.toSQLName("category")).eq(category.getId());
         final List<Quote> unusedQuotesFromCategory = Select.from(Quote.class).where(conditions).list();
         if (unusedQuotesFromCategory != null && !unusedQuotesFromCategory.isEmpty()) {
             callback.onSuccess(unusedQuotesFromCategory);
@@ -156,12 +152,9 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
 
     @Override
     public void fetchUnusedQuotesBy(final Author author, final Callback<List<Quote>> callback) {
-        final List<Wallpaper> allWallpapers = Select.from(Wallpaper.class).list();
-        Condition [] conditions = new Condition[allWallpapers.size() + 1];
-        for (int i = 0; i < allWallpapers.size(); i++) {
-            conditions[i] = Condition.prop("id").notEq(allWallpapers.get(i).quote.author.getId());
-        }
-        conditions[conditions.length - 1] = Condition.prop(StringUtil.toSQLName("author")).eq(author.getId());
+        Condition [] conditions = new Condition[2];
+        conditions[0] = Condition.prop(StringUtil.toSQLName("used")).eq("0");
+        conditions[1] = Condition.prop(StringUtil.toSQLName("author")).eq(author.getId());
         final List<Quote> unusedQuotesFromAuthor = Select.from(Quote.class).where(conditions).list();
         if (unusedQuotesFromAuthor != null && !unusedQuotesFromAuthor.isEmpty()) {
             callback.onSuccess(unusedQuotesFromAuthor);
