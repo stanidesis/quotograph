@@ -1,6 +1,5 @@
 package com.stanleyidesis.quotograph.ui.activity;
 
-import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
@@ -10,12 +9,10 @@ import android.animation.PropertyValuesHolder;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.percent.PercentFrameLayout;
 import android.support.percent.PercentRelativeLayout;
@@ -61,7 +58,6 @@ import com.stanleyidesis.quotograph.api.db.PlaylistCategory;
 import com.stanleyidesis.quotograph.api.db.PlaylistQuote;
 import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
-import com.stanleyidesis.quotograph.api.event.ImageSaveEvent;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.ui.UIUtils;
@@ -353,7 +349,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setViewState(R.id.pb_lwq_settings, FLAG_REVEAL)
             .build();
 
-    static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 0xABCDEF;
+    private static final int REQUEST_CODE_SAVE = 0;
 
     // Current ActivityState
     ActivityState activityState = null;
@@ -499,6 +495,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_SAVE) {
+            changeState(stateSaveSkipCompleted);
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public void onBackPressed() {
         if (activityState == stateAddReveal) {
             changeState(statePlaylist);
@@ -506,19 +511,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             changeState(stateAddReveal);
         } else {
             super.onBackPressed();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode != REQUEST_CODE_WRITE_EXTERNAL_STORAGE) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            return;
-        }
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            saveWallpaper();
-        } else {
-            Toast.makeText(this, R.string.write_external_permission_denied_toast, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -1067,17 +1059,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperClick() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            saveWallpaper();
-            return;
-        }
-        // Begin permissions flow
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            saveWallpaper();
-            return;
-        }
-        requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+        cancelTimer();
+        startActivityForResult(new Intent(this, LWQSaveWallpaperActivity.class), REQUEST_CODE_SAVE);
+        changeState(stateSaveWallpaper);
     }
 
     @OnClick(R.id.btn_wallpaper_actions_share) void shareWallpaperClick() {
@@ -1251,12 +1235,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Misc
 
-    void saveWallpaper() {
-        cancelTimer();
-        sendBroadcast(new Intent(getString(R.string.action_save)));
-        changeState(stateSaveWallpaper);
-    }
-
     void changeState(ActivityState activityState) {
         try {
             stateBlockingDeque.put(activityState);
@@ -1308,10 +1286,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         } else {
             changeState(stateSkipWallpaper);
         }
-    }
-
-    public void onEvent(ImageSaveEvent imageSaveEvent) {
-        changeState(stateSaveSkipCompleted);
     }
 
     // SeekBar Listener

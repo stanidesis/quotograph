@@ -81,4 +81,5 @@
     <string name="network_connection_established_positive">Heck, yeah!</string>
     <string name="first_launch_task_failed">Unable to setup Quotograph</string>
     <string name="write_external_permission_denied_toast">Saving a Quotograph requires additional permissions</string>
+    <string name="save_failed">Failed to save your Quotograph :(</string>
 </resources>

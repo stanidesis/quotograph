@@ -18,6 +18,7 @@ import com.stanleyidesis.quotograph.api.event.ImageSaveEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.activity.LWQActivateActivity;
+import com.stanleyidesis.quotograph.ui.activity.LWQSaveWallpaperActivity;
 
 import java.io.File;
 
@@ -111,10 +112,10 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.addAction(shareAction);
 
         // Add save to disk
-        Intent saveToDiskIntent = new Intent(LWQApplication.get().getString(R.string.action_save));
-        final PendingIntent saveToDiskBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, saveToDiskIntent, 0);
+        Intent saveToDiskIntent = new Intent(LWQApplication.get(), LWQSaveWallpaperActivity.class);
+        final PendingIntent saveToDiskActivity = PendingIntent.getActivity(LWQApplication.get(), 0, saveToDiskIntent, 0);
         final NotificationCompat.Action saveToDiskAction = new NotificationCompat.Action.Builder(R.mipmap.ic_save_white,
-                LWQApplication.get().getString(R.string.save_to_disk), saveToDiskBroadcast).build();
+                LWQApplication.get().getString(R.string.save_to_disk), saveToDiskActivity).build();
         notificationBuilder.addAction(saveToDiskAction);
 
         // Add Skip Action
@@ -197,9 +198,9 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setTicker(String.format(LWQApplication.get().getString(R.string.notification_title_save_failed)));
         notificationBuilder.setWhen(System.currentTimeMillis());
 
-        Intent saveToDiskIntent = new Intent(LWQApplication.get().getString(R.string.action_save));
-        final PendingIntent saveToDiskBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, saveToDiskIntent, 0);
-        notificationBuilder.setContentIntent(saveToDiskBroadcast);
+        Intent saveToDiskIntent = new Intent(LWQApplication.get(), LWQSaveWallpaperActivity.class);
+        final PendingIntent saveToDiskActivity = PendingIntent.getActivity(LWQApplication.get(), 0, saveToDiskIntent, 0);
+        notificationBuilder.setContentIntent(saveToDiskActivity);
 
         NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(3, notificationBuilder.build());
