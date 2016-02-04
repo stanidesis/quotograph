@@ -159,7 +159,7 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
         final List<Wallpaper> allWallpapers = Select.from(Wallpaper.class).list();
         Condition [] conditions = new Condition[allWallpapers.size() + 1];
         for (int i = 0; i < allWallpapers.size(); i++) {
-            conditions[i] = Condition.prop("id").notEq(allWallpapers.get(i).quote.author.getId());
+            conditions[i] = Condition.prop("id").notEq(allWallpapers.get(i).quote.getId());
         }
         conditions[conditions.length - 1] = Condition.prop(StringUtil.toSQLName("author")).eq(author.getId());
         final List<Quote> unusedQuotesFromAuthor = Select.from(Quote.class).where(conditions).list();
