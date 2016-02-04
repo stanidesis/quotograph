@@ -16,7 +16,7 @@
         <!-- Sugar ORM Meta Data -->
 
         <meta-data android:name="DATABASE" android:value="quotograph.db" />
-        <meta-data android:name="VERSION" android:value="1" />
+        <meta-data android:name="VERSION" android:value="2" />
         <meta-data android:name="QUERY_LOG" android:value="false" />
         <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="com.stanleyidesis.quotograph.api.db"/>
 

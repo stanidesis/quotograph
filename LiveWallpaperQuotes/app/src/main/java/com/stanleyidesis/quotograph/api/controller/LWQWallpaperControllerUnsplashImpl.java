@@ -70,6 +70,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     enum RetrievalState {
         NONE,
+        ACTIVE_WALLPAPER,
         NEW_WALLPAPER;
     }
 
@@ -91,6 +92,8 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                     photoRecord instanceof UnsplashPhoto ? Wallpaper.IMAGE_SOURCE_UNSPLASH : Wallpaper.IMAGE_SOURCE_USER,
                     ((SugarRecord) photoRecord).getId());
             activeWallpaper.save();
+            newQuote.used = true;
+            newQuote.save();
             retrievalState = RetrievalState.NONE;
             notifyWallpaper(WallpaperEvent.Status.GENERATED_NEW_WALLPAPER);
             retrieveActiveWallpaper();
@@ -234,12 +237,14 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             retrievalState = RetrievalState.NONE;
             notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER, "No Wallpaper active", null);
             return false;
-        }
-        if (activeWallpaperLoaded()) {
+        } else if (activeWallpaperLoaded()) {
             retrievalState = RetrievalState.NONE;
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
             return false;
+        } else if (retrievalState == RetrievalState.ACTIVE_WALLPAPER) {
+            return false;
         }
+        retrievalState = RetrievalState.ACTIVE_WALLPAPER;
         notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER);
         if (activeWallpaper == null) {
             activeWallpaper = Wallpaper.active();
@@ -248,6 +253,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             LWQApplication.getImageController().retrieveBitmap(getFullUri(), new Callback<Bitmap>() {
                 @Override
                 public void onSuccess(Bitmap bitmap) {
+                    discardActiveBitmap();
                     activeBackgroundImage = bitmap;
                     retrievalState = RetrievalState.NONE;
                     notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
@@ -264,24 +270,19 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             Resources resources = LWQApplication.get().getResources();
             activeBackgroundImage = BitmapFactory.decodeResource(resources, R.drawable.ic_launcher);
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
+            retrievalState = RetrievalState.NONE;
         } else if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_USER) {
             UserPhoto userPhoto = activeWallpaper.recoverUserPhoto();
             activeBackgroundImage = BitmapFactory.decodeFile(userPhoto.uri);
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
+            retrievalState = RetrievalState.NONE;
         }
         return true;
     }
 
     @Override
     public void discardActiveWallpaper() {
-        if (activeWallpaperLoaded()) {
-            if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_UNSPLASH) {
-                LWQApplication.getImageController().clearBitmap(getFullUri());
-            } else {
-                activeBackgroundImage.recycle();
-            }
-        }
-        activeBackgroundImage = null;
+        discardActiveBitmap();
         activeWallpaper = null;
     }
 
@@ -316,6 +317,17 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             return activeWallpaper.recoverUnsplashPhoto().fullURL;
         }
         return activeWallpaper.recoverUserPhoto().uri;
+    }
+
+    void discardActiveBitmap() {
+        if (activeWallpaperLoaded()) {
+            if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_UNSPLASH) {
+                LWQApplication.getImageController().clearBitmap(getFullUri());
+            } else {
+                activeBackgroundImage.recycle();
+            }
+        }
+        activeBackgroundImage = null;
     }
 
     void notifyWallpaper(WallpaperEvent.Status status) {
