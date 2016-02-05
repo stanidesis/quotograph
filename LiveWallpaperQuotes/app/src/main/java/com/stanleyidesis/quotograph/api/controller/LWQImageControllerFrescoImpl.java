@@ -14,8 +14,8 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.stanleyidesis.quotograph.api.Callback;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -24,26 +24,21 @@ import java.util.concurrent.Executors;
  */
 public class LWQImageControllerFrescoImpl implements LWQImageController {
 
-    Map<String, CloseableReference<CloseableImage>> imageCache;
     Executor scheduledExecutor;
+    Set<CloseableReference<CloseableImage>> localCache;
 
     public LWQImageControllerFrescoImpl() {
-        imageCache = new HashMap<>();
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+        localCache = new HashSet<>();
     }
 
     @Override
     public synchronized boolean isCached(String uri) {
-        return imageCache.containsKey(uri);
+        return Fresco.getImagePipeline().isInBitmapMemoryCache(Uri.parse(uri));
     }
 
     @Override
     public synchronized void retrieveBitmap(String uri, Callback<Bitmap> callback) {
-        if (isCached(uri)) {
-            final CloseableReference<CloseableImage> closeableImageCloseableReference = imageCache.get(uri);
-            callback.onSuccess(((CloseableBitmap)closeableImageCloseableReference.get()).getUnderlyingBitmap());
-            return;
-        }
         Uri photoUri = Uri.parse(uri);
         ImageRequest request = ImageRequestBuilder
                 .newBuilderWithSource(photoUri)
@@ -58,15 +53,14 @@ public class LWQImageControllerFrescoImpl implements LWQImageController {
     @Override
     public synchronized void clearBitmap(String uri) {
         if (isCached(uri)) {
-            final CloseableReference<CloseableImage> removedImage = imageCache.remove(uri);
-            Uri fullUri = Uri.parse(uri);
-            Fresco.getImagePipeline().evictFromMemoryCache(fullUri);
-            CloseableReference.closeSafely(removedImage);
+            Fresco.getImagePipeline().evictFromCache(Uri.parse(uri));
         }
     }
 
-    Map<String, CloseableReference<CloseableImage>> getCache() {
-        return imageCache;
+    @Override
+    public void clearCache() {
+        localCache.clear();
+        Fresco.getImagePipeline().clearCaches();
     }
 
     class LWQDataSubscriber extends BaseDataSubscriber<CloseableReference<CloseableImage>> {
@@ -87,13 +81,9 @@ public class LWQImageControllerFrescoImpl implements LWQImageController {
             }
 
             CloseableReference<CloseableImage> imageReference = dataSource.getResult();
+            localCache.add(imageReference);
             if (imageReference != null) {
-                try {
-                    callback.onSuccess(((CloseableBitmap)imageReference.get()).getUnderlyingBitmap());
-                } finally {
-                    clearBitmap(uri);
-                    getCache().put(uri, imageReference);
-                }
+                callback.onSuccess(((CloseableBitmap)imageReference.get()).getUnderlyingBitmap());
             } else {
                 callback.onError("Failed to recover the image", null);
             }

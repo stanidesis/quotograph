@@ -28,4 +28,9 @@ public interface LWQImageController {
      * @param uri
      */
     void clearBitmap(String uri);
+
+    /**
+     * Empty the cache completely.
+     */
+    void clearCache();
 }

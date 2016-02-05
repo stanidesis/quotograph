@@ -147,7 +147,7 @@ public abstract class LWQDrawScript {
                         callback.onSuccess(true);
                     }
                 } catch (Exception e) {
-                    Log.e(getClass().getSimpleName(), e.getLocalizedMessage(), e);
+                    e.printStackTrace();
                 }
             }
         });
@@ -184,12 +184,10 @@ public abstract class LWQDrawScript {
             // Determine cache validity
             if (cachedBackground == null || cachedBlur != blurPreference ||
                     backgroundImage.hashCode() != cachedBackgroundHashCode) {
-                if (cachedBackground != null && cachedBackground != backgroundImage) {
-                    cachedBackground.recycle();
-                }
                 cachedBackgroundHashCode = backgroundImage.hashCode();
-                cachedBackground = generateBitmap(blurPreference, backgroundImage);
                 cachedBlur = blurPreference;
+                cachedBackground = blurPreference > 0f ?
+                        generateBitmap(blurPreference, backgroundImage) : backgroundImage;
             }
             drawBitmap(canvas, screenWidth, surfaceFrame, cachedBackground);
             drawDimmer(canvas, LWQPreferences.getDimPreference());
@@ -269,7 +267,7 @@ public abstract class LWQDrawScript {
 
     Bitmap generateBitmap(int blurRadius, Bitmap backgroundImage) {
         Bitmap drawnBitmap = backgroundImage;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN && blurRadius > 0f) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
             drawnBitmap = blurBitmap(backgroundImage, blurRadius);
         }
         return drawnBitmap;

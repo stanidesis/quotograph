@@ -56,9 +56,6 @@ public class LWQBitmapDrawScript extends LWQDrawScript {
     }
 
     public void finish() {
-        if (bitmap != null) {
-            bitmap.recycle();
-        }
         bitmap = null;
         canvas = null;
     }

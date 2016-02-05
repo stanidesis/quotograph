@@ -13,9 +13,7 @@ import com.stanleyidesis.quotograph.api.drawing.LWQBitmapDrawScript;
 import com.stanleyidesis.quotograph.api.event.ImageSaveEvent;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -109,9 +107,7 @@ public class LWQSaveWallpaperImageTask extends AsyncTask<Void, Void, Boolean> {
                                     EventBus.getDefault().post(ImageSaveEvent.success(Uri.parse(path), uri));
                                 }
                             });
-                } catch (FileNotFoundException e) {
-                    EventBus.getDefault().post(ImageSaveEvent.failure(e.getMessage(), e));
-                } catch (IOException e) {
+                } catch (Exception e) {
                     EventBus.getDefault().post(ImageSaveEvent.failure(e.getMessage(), e));
                 } finally {
                     drawScript.finish();
