@@ -77,9 +77,7 @@ public abstract class LWQDrawScript {
     static int swatchIndex;
     static Typeface quoteTypeFace;
     static Typeface authorTypeFace;
-    static Bitmap cachedBackground;
-    static int cachedBackgroundHashCode;
-    static int cachedBlur;
+    static RenderScript renderScript;
 
     static {
         executorService = Executors.newSingleThreadScheduledExecutor();
@@ -89,6 +87,7 @@ public abstract class LWQDrawScript {
     }
 
     Palette palette;
+    int drawRequests = 0;
 
     /**
      * @return a Canvas, ready to draw
@@ -134,10 +133,15 @@ public abstract class LWQDrawScript {
     }
 
     public void requestDraw(final Callback<Boolean> callback) {
+        increaseDrawRequests();
         executorService.submit(new Runnable() {
             @Override
             public void run() {
                 try {
+                    if (getDrawRequests() == 0) {
+                        return;
+                    }
+                    resetDrawRequests();
                     if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
                         LWQApplication.getWallpaperController().retrieveActiveWallpaper();
                         return;
@@ -147,7 +151,7 @@ public abstract class LWQDrawScript {
                         callback.onSuccess(true);
                     }
                 } catch (Exception e) {
-                    Log.e(getClass().getSimpleName(), e.getLocalizedMessage(), e);
+                    e.printStackTrace();
                 }
             }
         });
@@ -164,11 +168,12 @@ public abstract class LWQDrawScript {
         if (backgroundImage == null) {
             return;
         }
-        // Get screen width/height
-        final Rect surfaceFrame = surfaceRect();
+        // Get screen size
         final Point realScreenSize = UIUtils.getRealScreenSize();
         final int screenWidth = realScreenSize.x;
         final int screenHeight = realScreenSize.y;
+        final Rect surfaceFrame = surfaceRect();
+
         palette = paletteCache.get(backgroundImage.hashCode());
         if (palette == null) {
             LWQDrawScript.paletteCache.clear();
@@ -181,18 +186,11 @@ public abstract class LWQDrawScript {
         canvas.save();
         try {
             final int blurPreference = LWQPreferences.getBlurPreference();
+            final int dimPreference = LWQPreferences.getDimPreference();
             // Determine cache validity
-            if (cachedBackground == null || cachedBlur != blurPreference ||
-                    backgroundImage.hashCode() != cachedBackgroundHashCode) {
-                if (cachedBackground != null && cachedBackground != backgroundImage) {
-                    cachedBackground.recycle();
-                }
-                cachedBackgroundHashCode = backgroundImage.hashCode();
-                cachedBackground = generateBitmap(blurPreference, backgroundImage);
-                cachedBlur = blurPreference;
-            }
-            drawBitmap(canvas, screenWidth, surfaceFrame, cachedBackground);
-            drawDimmer(canvas, LWQPreferences.getDimPreference());
+            Bitmap toDraw = blurPreference > 0f ? generateBitmap(blurPreference, backgroundImage) : backgroundImage;
+            drawBitmap(canvas, screenWidth, surfaceFrame, toDraw);
+            drawDimmer(canvas, dimPreference);
             drawText(canvas, screenWidth, screenHeight);
         } catch (Exception e) {
             e.printStackTrace();
@@ -268,11 +266,10 @@ public abstract class LWQDrawScript {
     }
 
     Bitmap generateBitmap(int blurRadius, Bitmap backgroundImage) {
-        Bitmap drawnBitmap = backgroundImage;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN && blurRadius > 0f) {
-            drawnBitmap = blurBitmap(backgroundImage, blurRadius);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
+            return blurBitmap(backgroundImage, blurRadius);
         }
-        return drawnBitmap;
+        return backgroundImage;
     }
 
     void drawBitmap(Canvas canvas, int screenWidth, Rect surfaceFrame, Bitmap bitmapToDraw) {
@@ -325,7 +322,9 @@ public abstract class LWQDrawScript {
     }
 
     Bitmap blurBitmap(Bitmap original, float radius) {
-        RenderScript renderScript = RenderScript.create(LWQApplication.get());
+        if (renderScript == null) {
+            renderScript = RenderScript.create(LWQApplication.get());
+        }
         Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, original);
 
         ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
@@ -339,11 +338,22 @@ public abstract class LWQDrawScript {
 
         overlayAllocation.destroy();
         outAllocation.destroy();
-        renderScript.destroy();
         return result;
     }
 
     Palette.Swatch getSwatch() {
         return palette.getSwatches().get(swatchIndex);
+    }
+
+    synchronized void increaseDrawRequests() {
+        drawRequests++;
+    }
+
+    synchronized void resetDrawRequests() {
+        drawRequests = 0;
+    }
+
+    synchronized int getDrawRequests() {
+        return drawRequests;
     }
 }

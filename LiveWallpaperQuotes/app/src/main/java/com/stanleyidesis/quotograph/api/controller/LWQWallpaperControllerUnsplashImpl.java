@@ -242,14 +242,13 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER);
         if (activeWallpaper == null) {
             activeWallpaper = Wallpaper.active();
+        } else {
+            discardActiveBitmap();
         }
         if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_UNSPLASH) {
             LWQApplication.getImageController().retrieveBitmap(getFullUri(), new Callback<Bitmap>() {
                 @Override
                 public void onSuccess(Bitmap bitmap) {
-                    if (activeBackgroundImage != null) {
-                        discardActiveBitmap();
-                    }
                     activeBackgroundImage = bitmap;
                     retrievalState = RetrievalState.NONE;
                     notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
@@ -323,9 +322,8 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     void discardActiveBitmap() {
         if (activeWallpaperLoaded()) {
             if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_UNSPLASH) {
-                LWQApplication.getImageController().clearBitmap(getFullUri());
-            } else {
-                activeBackgroundImage.recycle();
+//                LWQApplication.getImageController().clearBitmap(getFullUri());
+                LWQApplication.getImageController().clearCache();
             }
         }
         activeBackgroundImage = null;
