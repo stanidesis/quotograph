@@ -77,10 +77,6 @@ public abstract class LWQDrawScript {
     static int swatchIndex;
     static Typeface quoteTypeFace;
     static Typeface authorTypeFace;
-    static int cachedBackgroundHashCode = -1;
-    static int cachedBlur = -1;
-    static int cachedDim = -1;
-    static int cachedScreenWidth = -1;
     static RenderScript renderScript;
 
     static {
@@ -91,6 +87,7 @@ public abstract class LWQDrawScript {
     }
 
     Palette palette;
+    int drawRequests = 0;
 
     /**
      * @return a Canvas, ready to draw
@@ -136,10 +133,15 @@ public abstract class LWQDrawScript {
     }
 
     public void requestDraw(final Callback<Boolean> callback) {
+        increaseDrawRequests();
         executorService.submit(new Runnable() {
             @Override
             public void run() {
                 try {
+                    if (getDrawRequests() == 0) {
+                        return;
+                    }
+                    resetDrawRequests();
                     if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
                         LWQApplication.getWallpaperController().retrieveActiveWallpaper();
                         return;
@@ -166,28 +168,11 @@ public abstract class LWQDrawScript {
         if (backgroundImage == null) {
             return;
         }
-
         // Get screen size
         final Point realScreenSize = UIUtils.getRealScreenSize();
         final int screenWidth = realScreenSize.x;
         final int screenHeight = realScreenSize.y;
         final Rect surfaceFrame = surfaceRect();
-
-        // Check cached values
-        final int blurPreference = LWQPreferences.getBlurPreference();
-        final int dimPreference = LWQPreferences.getDimPreference();
-        final int backgroundHashcode = backgroundImage.hashCode();
-        if (cachedBlur == blurPreference &&
-                cachedDim == dimPreference &&
-                cachedBackgroundHashCode == backgroundHashcode &&
-                cachedScreenWidth == screenWidth) {
-            // No need to re-draw, save CPU cycles
-            return;
-        }
-        cachedBlur = blurPreference;
-        cachedDim = dimPreference;
-        cachedBackgroundHashCode = backgroundHashcode;
-        cachedScreenWidth = screenWidth;
 
         palette = paletteCache.get(backgroundImage.hashCode());
         if (palette == null) {
@@ -200,10 +185,12 @@ public abstract class LWQDrawScript {
         final Canvas canvas = reserveCanvas();
         canvas.save();
         try {
+            final int blurPreference = LWQPreferences.getBlurPreference();
+            final int dimPreference = LWQPreferences.getDimPreference();
             // Determine cache validity
-            Bitmap toDraw = cachedBlur > 0f ? generateBitmap(cachedBlur, backgroundImage) : backgroundImage;
+            Bitmap toDraw = blurPreference > 0f ? generateBitmap(blurPreference, backgroundImage) : backgroundImage;
             drawBitmap(canvas, screenWidth, surfaceFrame, toDraw);
-            drawDimmer(canvas, cachedDim);
+            drawDimmer(canvas, dimPreference);
             drawText(canvas, screenWidth, screenHeight);
         } catch (Exception e) {
             e.printStackTrace();
@@ -344,7 +331,7 @@ public abstract class LWQDrawScript {
         blur.setRadius(radius);
         blur.setInput(overlayAllocation);
 
-        Bitmap result = Bitmap.createBitmap(original);
+        Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
         Allocation outAllocation = Allocation.createFromBitmap(renderScript, original);
         blur.forEach(outAllocation);
         outAllocation.copyTo(result);
@@ -356,5 +343,17 @@ public abstract class LWQDrawScript {
 
     Palette.Swatch getSwatch() {
         return palette.getSwatches().get(swatchIndex);
+    }
+
+    synchronized void increaseDrawRequests() {
+        drawRequests++;
+    }
+
+    synchronized void resetDrawRequests() {
+        drawRequests = 0;
+    }
+
+    synchronized int getDrawRequests() {
+        return drawRequests;
     }
 }
