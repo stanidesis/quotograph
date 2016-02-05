@@ -43,6 +43,19 @@ import java.util.List;
  * Date: 08/01/2015
  */
 public interface LWQWallpaperController {
+
+    /**
+     * The state of the controller
+     */
+    enum RetrievalState {
+        // Nothing retreived
+        NONE,
+        // Retrieving the Active Wallpaper
+        ACTIVE_WALLPAPER,
+        // Retrieving a New Wallpaper
+        NEW_WALLPAPER
+    }
+
     /**
      * @return the unformatted quote text
      */
@@ -115,4 +128,9 @@ public interface LWQWallpaperController {
      * @return the available categories from which the user may choose their background, if applicable
      */
     List<String> getBackgroundCategories();
+
+    /**
+     * @return the current state of retrieval
+     */
+    RetrievalState getRetrievalState();
 }
