@@ -59,6 +59,9 @@ public class LWQImageControllerFrescoImpl implements LWQImageController {
 
     @Override
     public void clearCache() {
+        for (CloseableReference<CloseableImage> image : localCache){
+            image.close();
+        }
         localCache.clear();
         Fresco.getImagePipeline().clearCaches();
     }
