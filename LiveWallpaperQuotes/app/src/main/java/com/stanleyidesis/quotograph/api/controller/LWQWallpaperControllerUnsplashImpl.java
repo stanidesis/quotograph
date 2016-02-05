@@ -68,12 +68,6 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     static final int MAX_RETRIES = 5;
 
-    enum RetrievalState {
-        NONE,
-        ACTIVE_WALLPAPER,
-        NEW_WALLPAPER;
-    }
-
     UnsplashManager unsplashManager;
     Wallpaper activeWallpaper;
     Bitmap activeBackgroundImage;
@@ -312,6 +306,11 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         }
         Collections.sort(categoryTitles);
         return categoryTitles;
+    }
+
+    @Override
+    public RetrievalState getRetrievalState() {
+        return retrievalState;
     }
 
     String getFullUri() {

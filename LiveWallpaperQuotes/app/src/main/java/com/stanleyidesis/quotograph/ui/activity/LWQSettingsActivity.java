@@ -50,6 +50,7 @@ import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
+import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
 import com.stanleyidesis.quotograph.api.db.Author;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Playlist;
@@ -504,12 +505,26 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (LWQApplication.getWallpaperController().getRetrievalState()
+                != LWQWallpaperController.RetrievalState.NONE) {
+            changeState(stateSkipWallpaper);
+        } else if (activityState == stateSearchInProgress) {
+            changeState(stateSearch);
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         if (activityState == stateAddReveal) {
             changeState(statePlaylist);
         } else if (activityState == stateSearch || activityState == stateAddEditQuote) {
             changeState(stateAddReveal);
         } else {
+            if (activityState == stateSkipWallpaper || activityState == stateSaveWallpaper) {
+                changeState(stateSaveSkipCompleted);
+            }
             super.onBackPressed();
         }
     }
