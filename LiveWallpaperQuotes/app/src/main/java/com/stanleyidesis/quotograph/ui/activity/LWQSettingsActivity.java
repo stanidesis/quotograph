@@ -1295,7 +1295,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 firstLaunch = false;
                 scheduleTimer();
                 changeState(stateWallpaper);
-            } else {
+            } else if (viewPager.getCurrentItem() == 0) {
                 changeState(stateSaveSkipCompleted);
             }
         } else {
