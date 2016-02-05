@@ -77,9 +77,11 @@ public abstract class LWQDrawScript {
     static int swatchIndex;
     static Typeface quoteTypeFace;
     static Typeface authorTypeFace;
-    static Bitmap cachedBackground;
-    static int cachedBackgroundHashCode;
-    static int cachedBlur;
+    static int cachedBackgroundHashCode = -1;
+    static int cachedBlur = -1;
+    static int cachedDim = -1;
+    static int cachedScreenWidth = -1;
+    static RenderScript renderScript;
 
     static {
         executorService = Executors.newSingleThreadScheduledExecutor();
@@ -164,11 +166,29 @@ public abstract class LWQDrawScript {
         if (backgroundImage == null) {
             return;
         }
-        // Get screen width/height
-        final Rect surfaceFrame = surfaceRect();
+
+        // Get screen size
         final Point realScreenSize = UIUtils.getRealScreenSize();
         final int screenWidth = realScreenSize.x;
         final int screenHeight = realScreenSize.y;
+        final Rect surfaceFrame = surfaceRect();
+
+        // Check cached values
+        final int blurPreference = LWQPreferences.getBlurPreference();
+        final int dimPreference = LWQPreferences.getDimPreference();
+        final int backgroundHashcode = backgroundImage.hashCode();
+        if (cachedBlur == blurPreference &&
+                cachedDim == dimPreference &&
+                cachedBackgroundHashCode == backgroundHashcode &&
+                cachedScreenWidth == screenWidth) {
+            // No need to re-draw, save CPU cycles
+            return;
+        }
+        cachedBlur = blurPreference;
+        cachedDim = dimPreference;
+        cachedBackgroundHashCode = backgroundHashcode;
+        cachedScreenWidth = screenWidth;
+
         palette = paletteCache.get(backgroundImage.hashCode());
         if (palette == null) {
             LWQDrawScript.paletteCache.clear();
@@ -180,17 +200,10 @@ public abstract class LWQDrawScript {
         final Canvas canvas = reserveCanvas();
         canvas.save();
         try {
-            final int blurPreference = LWQPreferences.getBlurPreference();
             // Determine cache validity
-            if (cachedBackground == null || cachedBlur != blurPreference ||
-                    backgroundImage.hashCode() != cachedBackgroundHashCode) {
-                cachedBackgroundHashCode = backgroundImage.hashCode();
-                cachedBlur = blurPreference;
-                cachedBackground = blurPreference > 0f ?
-                        generateBitmap(blurPreference, backgroundImage) : backgroundImage;
-            }
-            drawBitmap(canvas, screenWidth, surfaceFrame, cachedBackground);
-            drawDimmer(canvas, LWQPreferences.getDimPreference());
+            Bitmap toDraw = cachedBlur > 0f ? generateBitmap(cachedBlur, backgroundImage) : backgroundImage;
+            drawBitmap(canvas, screenWidth, surfaceFrame, toDraw);
+            drawDimmer(canvas, cachedDim);
             drawText(canvas, screenWidth, screenHeight);
         } catch (Exception e) {
             e.printStackTrace();
@@ -266,11 +279,10 @@ public abstract class LWQDrawScript {
     }
 
     Bitmap generateBitmap(int blurRadius, Bitmap backgroundImage) {
-        Bitmap drawnBitmap = backgroundImage;
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
-            drawnBitmap = blurBitmap(backgroundImage, blurRadius);
+            return blurBitmap(backgroundImage, blurRadius);
         }
-        return drawnBitmap;
+        return backgroundImage;
     }
 
     void drawBitmap(Canvas canvas, int screenWidth, Rect surfaceFrame, Bitmap bitmapToDraw) {
@@ -323,21 +335,22 @@ public abstract class LWQDrawScript {
     }
 
     Bitmap blurBitmap(Bitmap original, float radius) {
-        RenderScript renderScript = RenderScript.create(LWQApplication.get());
+        if (renderScript == null) {
+            renderScript = RenderScript.create(LWQApplication.get());
+        }
         Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, original);
 
         ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
         blur.setRadius(radius);
         blur.setInput(overlayAllocation);
 
-        Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
+        Bitmap result = Bitmap.createBitmap(original);
         Allocation outAllocation = Allocation.createFromBitmap(renderScript, original);
         blur.forEach(outAllocation);
         outAllocation.copyTo(result);
 
         overlayAllocation.destroy();
         outAllocation.destroy();
-        renderScript.destroy();
         return result;
     }
 
