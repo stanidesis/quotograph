@@ -156,7 +156,9 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         activePageFiveView = firstLaunchTaskCompleted ? activateButton : progressBar;
         activePageFiveView.requestLayout();
         if (firstLaunchTaskCompleted) {
-            LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+            if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
+                LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+            }
         } else {
             if (!LWQApplication.getNetworkConnectionListener().getCurrentConnectionType().isConnected()) {
                 presentNetworkRequiredDialog();
