@@ -341,6 +341,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     ActivityState stateSearch = new Builder(stateAddReveal)
             .setViewState(R.id.group_lwq_fab_screen_search, FLAG_REVEAL | FLAG_ENABLE)
+            .setViewState(R.id.group_lwq_settings_fab_screen, FLAG_REVEAL | FLAG_ENABLE)
             .setViewState(R.id.pb_lwq_settings, FLAG_HIDE)
             .build();
 
