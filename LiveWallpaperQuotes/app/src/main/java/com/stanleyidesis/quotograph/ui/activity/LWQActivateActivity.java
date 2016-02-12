@@ -7,13 +7,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,6 +27,7 @@ import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.LWQFirstLaunchTask;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskEvent;
+import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskUpdate;
 import com.stanleyidesis.quotograph.api.event.NetworkConnectivityEvent;
 import com.stanleyidesis.quotograph.api.service.LWQWallpaperService;
 import com.stanleyidesis.quotograph.ui.UIUtils;
@@ -121,6 +125,8 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     View minuteHand;
     boolean pivotsCalculated;
 
+    Snackbar activeSnackbar;
+    FirstLaunchTaskUpdate latestFirstLaunchTaskUpdate;
     int wallpaperTop = -1;
     boolean firstLaunchTaskCompleted = false;
     LWQFirstLaunchTask firstLaunchTask;
@@ -156,7 +162,9 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         activePageFiveView = firstLaunchTaskCompleted ? activateButton : progressBar;
         activePageFiveView.requestLayout();
         if (firstLaunchTaskCompleted) {
-            LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+            if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
+                LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+            }
         } else {
             if (!LWQApplication.getNetworkConnectionListener().getCurrentConnectionType().isConnected()) {
                 presentNetworkRequiredDialog();
@@ -248,14 +256,20 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     @Override
     public void onPageSelected(int position) {
         setIndicator(position);
-        // Active View
-        if (position == 4) {
+        if (position == viewPages.size() - 1) {
             activePageFiveView.setEnabled(firstLaunchTaskCompleted);
+            if (activeSnackbar != null) {
+                activeSnackbar = build(latestFirstLaunchTaskUpdate.getUpdate());
+                activeSnackbar.show();
+            }
         } else {
             activateButton.setEnabled(false);
             activateButton.setVisibility(View.GONE);
             progressBar.setEnabled(false);
             progressBar.setVisibility(View.GONE);
+            if (activeSnackbar != null) {
+                activeSnackbar.dismiss();
+            }
         }
     }
 
@@ -282,22 +296,75 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         }
     }
 
+    Snackbar build(String string) {
+        Snackbar snackbar = Snackbar.make(viewPager, string, Snackbar.LENGTH_INDEFINITE);
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) snackbar.getView().getLayoutParams();
+        layoutParams.bottomMargin += UIUtils.getNavBarHeight(LWQActivateActivity.this);
+        snackbar.getView().setLayoutParams(layoutParams);
+        return snackbar;
+    }
+
     // Events
+
+    public void onEvent(final FirstLaunchTaskUpdate firstLaunchTaskUpdate) {
+        latestFirstLaunchTaskUpdate = firstLaunchTaskUpdate;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (activeSnackbar != null) {
+                    activeSnackbar.dismiss();
+                }
+                activeSnackbar = build(firstLaunchTaskUpdate.getUpdate());
+                if (viewPager.getCurrentItem() == viewPages.size() - 1) {
+                    activeSnackbar.show();
+                }
+            }
+        });
+    }
 
     public void onEvent(final FirstLaunchTaskEvent firstLaunchTaskEvent) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (firstLaunchTaskEvent.didFail()) {
-                    Toast.makeText(LWQActivateActivity.this, R.string.first_launch_task_failed, Toast.LENGTH_LONG).show();
+                    if (activeSnackbar != null) {
+                        activeSnackbar.dismiss();
+                    }
+                    activeSnackbar = build(getString(R.string.first_launch_task_failed));
+                    activeSnackbar.setAction("Retry", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            progressBar.animate().alpha(1f).setDuration(150).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+                            activeSnackbar.dismiss();
+                            firstLaunchTask = new LWQFirstLaunchTask();
+                            firstLaunchTask.execute();
+                        }
+                    });
+                    activeSnackbar.show();
+                    progressBar.animate().alpha(0f).setDuration(150).setInterpolator(new AccelerateDecelerateInterpolator()).start();
                     return;
                 }
                 firstLaunchTaskCompleted = true;
                 activePageFiveView = activateButton;
                 if (viewPager.getCurrentItem() == Pages.values().length - 1) {
+                    activateButton.setEnabled(true);
                     activateButton.setVisibility(View.VISIBLE);
                     activateButton.animate().alpha(1f).setDuration(150).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+                    progressBar.setEnabled(false);
                     progressBar.animate().alpha(0f).setDuration(100).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+
+                    if (activeSnackbar != null) {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (activeSnackbar == null) {
+                                    return;
+                                }
+                                activeSnackbar.dismiss();
+                                activeSnackbar = null;
+                            }
+                        }, 5000);
+                    }
                 }
             }
         });
