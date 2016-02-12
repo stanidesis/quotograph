@@ -1,9 +1,5 @@
 package com.stanleyidesis.quotograph.api.controller;
 
-/**
- * Created by stanleyidesis on 9/19/15.
- */
-
 import android.net.Uri;
 
 /**

@@ -324,7 +324,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     void discardActiveBitmap() {
         if (activeWallpaperLoaded()) {
             if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_UNSPLASH) {
-                LWQApplication.getImageController().clearCache();
+                LWQApplication.getImageController().clearBitmap(getFullUri());
             }
         }
         activeBackgroundImage = null;
