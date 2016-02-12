@@ -11,6 +11,7 @@ import com.stanleyidesis.quotograph.api.db.Playlist;
 import com.stanleyidesis.quotograph.api.db.PlaylistCategory;
 import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskEvent;
+import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskUpdate;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 
 import java.util.List;
@@ -87,6 +88,8 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
                 }
             }
             new PlaylistCategory(defaultPlaylist, initialCategory).save();
+
+            publishProgress("Making your first Quotograph…");
             LWQApplication.getWallpaperController().generateNewWallpaper();
         }
 
@@ -107,9 +110,11 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         if (!LWQPreferences.isFirstLaunch()) {
             return null;
         } else if (!LWQApplication.getWallpaperController().activeWallpaperExists()) {
+            publishProgress("Fetching quote categories…");
             // Go through everything again
             LWQApplication.getWallpaperController().fetchBackgroundCategories(fetchImageCategoriesCallback);
         } else {
+            publishProgress("Retrieving artwork…");
             LWQApplication.getWallpaperController().retrieveActiveWallpaper();
         }
         return null;
@@ -127,12 +132,21 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         super.finalize();
     }
 
+    void publishProgress(int stringId) {
+        publishProgress(LWQApplication.get().getString(stringId));
+    }
+
+    void publishProgress(String progress) {
+        EventBus.getDefault().post(FirstLaunchTaskUpdate.newUpdate(progress));
+    }
+
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
             EventBus.getDefault().post(FirstLaunchTaskEvent.failed(
                     wallpaperEvent.getErrorMessage(),
                     wallpaperEvent.getThrowable()));
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+            publishProgress("Setup complete!");
             LWQPreferences.setFirstLaunch(false);
             EventBus.getDefault().post(FirstLaunchTaskEvent.success());
         }

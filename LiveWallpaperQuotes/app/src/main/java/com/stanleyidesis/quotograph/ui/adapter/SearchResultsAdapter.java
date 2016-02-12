@@ -14,6 +14,7 @@ import com.stanleyidesis.quotograph.api.db.PlaylistAuthor;
 import com.stanleyidesis.quotograph.api.db.PlaylistCategory;
 import com.stanleyidesis.quotograph.api.db.PlaylistQuote;
 import com.stanleyidesis.quotograph.api.db.Quote;
+import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.view.AddRemoveButton;
 
 import java.util.ArrayList;
@@ -149,6 +150,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
 
     @Override
     public void onBindViewHolder(BaseResultHolder holder, int position) {
+        UIUtils.setViewAndChildrenEnabled(holder.itemView, true);
         if (holder instanceof CategoryResultHolder) {
             ((CategoryResultHolder) holder).updateWithCategory((Category) searchResults.get(position));
         } else if (holder instanceof AuthorResultHolder) {

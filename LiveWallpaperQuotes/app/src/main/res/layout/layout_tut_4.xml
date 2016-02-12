@@ -51,6 +51,7 @@
         android:layout_width="140dp"
         android:layout_height="140dp"
         android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tv_tut_details"
         android:indeterminate="true"
         android:indeterminateOnly="true"
         android:alpha="0"

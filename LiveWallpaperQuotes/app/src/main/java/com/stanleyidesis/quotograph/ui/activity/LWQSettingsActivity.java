@@ -300,6 +300,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setViewState(R.id.pb_lwq_settings, FLAG_HIDE)
             .build();
 
+    ActivityState stateSaveSkipCompletedObscured = new Builder(stateSaveSkipCompleted)
+            .setWallpaperState(BackgroundWallpaperState.OBSCURED)
+            .build();
+
     ActivityState statePlaylist = new Builder()
             .setViewPagerPage(1)
             .setWallpaperState(BackgroundWallpaperState.OBSCURED)
@@ -341,6 +345,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     ActivityState stateSearch = new Builder(stateAddReveal)
             .setViewState(R.id.group_lwq_fab_screen_search, FLAG_REVEAL | FLAG_ENABLE)
+            .setViewState(R.id.group_lwq_settings_fab_screen, FLAG_REVEAL | FLAG_ENABLE)
             .setViewState(R.id.pb_lwq_settings, FLAG_HIDE)
             .build();
 
@@ -584,7 +589,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 switch (position) {
                     case 0:
-                        setBackgroundAlpha(BackgroundWallpaperState.OBSCURED.screenAlpha * positionOffset);
+                        if (activityState != stateSkipWallpaper) {
+                            setBackgroundAlpha(BackgroundWallpaperState.OBSCURED.screenAlpha * positionOffset);
+                        }
                         // Fab Add
                         fabAdd.setAlpha(positionOffset);
                         fabAdd.setScaleX(positionOffset);
@@ -625,8 +632,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     button.setEnabled(position == 0);
                 }
 
+                if (activityState == stateSkipWallpaper) {
+                    return;
+                }
                 // Background
-                animateState(position == 0 ? BackgroundWallpaperState.REVEALED : BackgroundWallpaperState.OBSCURED);
+                setBackgroundAlpha(position == 0 ?
+                        BackgroundWallpaperState.REVEALED.screenAlpha :
+                        BackgroundWallpaperState.OBSCURED.screenAlpha
+                );
             }
 
             @Override
@@ -1289,14 +1302,16 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     public void onEvent(final WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
-            changeState(stateSaveSkipCompleted);
+            changeState(viewPager.getCurrentItem() == 0 ?
+                    stateSaveSkipCompleted : stateSaveSkipCompletedObscured);
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RENDERED_WALLPAPER) {
             if (firstLaunch) {
                 firstLaunch = false;
                 scheduleTimer();
                 changeState(stateWallpaper);
-            } else if (viewPager.getCurrentItem() == 0) {
-                changeState(stateSaveSkipCompleted);
+            } else {
+                changeState(viewPager.getCurrentItem() == 0 ?
+                        stateSaveSkipCompleted : stateSaveSkipCompletedObscured);
             }
         } else {
             changeState(stateSkipWallpaper);

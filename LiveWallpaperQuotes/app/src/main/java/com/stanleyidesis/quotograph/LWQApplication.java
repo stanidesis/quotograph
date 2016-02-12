@@ -9,12 +9,11 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.orm.SugarApp;
 import com.orm.query.Condition;
 import com.orm.query.Select;
 import com.stanleyidesis.quotograph.api.controller.LWQImageController;
-import com.stanleyidesis.quotograph.api.controller.LWQImageControllerFrescoImpl;
+import com.stanleyidesis.quotograph.api.controller.LWQImageControllerUIL;
 import com.stanleyidesis.quotograph.api.controller.LWQNotificationController;
 import com.stanleyidesis.quotograph.api.controller.LWQNotificationControllerImpl;
 import com.stanleyidesis.quotograph.api.controller.LWQQuoteController;
@@ -79,11 +78,10 @@ public class LWQApplication extends SugarApp {
         super.onCreate();
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
         Fabric.with(this, new Crashlytics.Builder().core(core).build());
-        Fresco.initialize(this);
 
         sApplication = this;
         wallpaperController = new LWQWallpaperControllerUnsplashImpl();
-        imageController = new LWQImageControllerFrescoImpl();
+        imageController = new LWQImageControllerUIL();
         quoteController = new LWQQuoteControllerBrainyQuoteImpl();
         notificationController = new LWQNotificationControllerImpl();
         networkConnectionListener = new NetworkConnectionListener(this);

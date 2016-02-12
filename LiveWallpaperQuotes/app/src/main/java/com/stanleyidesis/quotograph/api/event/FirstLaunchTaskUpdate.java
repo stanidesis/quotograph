@@ -1,6 +1,4 @@
-package com.stanleyidesis.quotograph.api.controller;
-
-import android.net.Uri;
+package com.stanleyidesis.quotograph.api.event;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -24,7 +22,7 @@ import android.net.Uri;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQNotificationController.java
+ * FirstLaunchTaskUpdate.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -33,33 +31,22 @@ import android.net.Uri;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 09/19/2015
+ * Date: 02/12/2015
  */
-public interface LWQNotificationController {
-    /**
-     * Manually post a new Wallpaper notification if so desired.
-     * The controller should also subscribe to the EventBus, posting
-     * a new Wallpaper notification when appropriate.
-     */
-    void postNewWallpaperNotification();
+public class FirstLaunchTaskUpdate {
+    public static FirstLaunchTaskUpdate newUpdate(String update) {
+        FirstLaunchTaskUpdate firstLaunchTaskUpdate = new FirstLaunchTaskUpdate();
+        firstLaunchTaskUpdate.setUpdate(update);
+        return firstLaunchTaskUpdate;
+    }
 
-    /**
-     * If present, dismiss the current New wallpaper notification
-     */
-    void dismissNewWallpaperNotification();
+    String update;
 
-    /**
-     * Present a notification which shows the saved image. Clicking
-     * it should let the user view the picture, it should also feature a
-     * share action that presents a chooser.
-     *
-     * @param filePath
-     * @param imageUri
-     */
-    void postSavedWallpaperReadyNotification(Uri filePath, Uri imageUri);
+    public String getUpdate() {
+        return update;
+    }
 
-    /**
-     * If saving the wallpaper fails, notify the user that something went wrong.
-     */
-    void postWallpaperSaveFailureNotification();
+    public void setUpdate(String update) {
+        this.update = update;
+    }
 }
