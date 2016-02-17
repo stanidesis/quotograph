@@ -90,14 +90,14 @@ $gutter:                24px !default;
 /**
  * Would you like Sass’ silent classes, or regular CSS classes?
  */
-$use-silent-classes:    false !default;
+$use-silent-classes:    true !default;
 
 
 /**
  * Would you like push and pull classes enabled?
  */
-$push:                  false !default;
-$pull:                  false !default;
+$push:                  true !default;
+$pull:                  true !default;
 
 
 /**

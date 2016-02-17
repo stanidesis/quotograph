@@ -3,4 +3,8 @@
 @import "../sass/external/csswizardry-grids";
 
 // Base
-@import "../sass/base/variables"
+@import "../sass/base/variables";
+@import "../sass/base/global";
+
+// Layouts
+@import "../sass/layouts/index";
