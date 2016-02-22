@@ -1,8 +1,6 @@
-package com.stanleyidesis.quotograph.api.event;
+package com.stanleyidesis.quotograph.api;
 
-import android.net.Uri;
-
-import com.stanleyidesis.quotograph.api.LWQError;
+import com.stanleyidesis.quotograph.LWQApplication;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -26,7 +24,7 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * ImageSaveEvent.java
+ * LWQError.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -35,35 +33,49 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 09/26/2015
+ * Date: 02/21/2016
  */
-public class ImageSaveEvent extends FailableEvent {
+public class LWQError {
 
-    public static ImageSaveEvent success(Uri fileUri, Uri contentUri) {
-        return new ImageSaveEvent(fileUri, contentUri);
+    public static LWQError create(String errorMessage) {
+        LWQError lwqError = new LWQError(errorMessage);
+        LWQApplication.getLogger().logError(lwqError);
+        return lwqError;
     }
 
-    public static ImageSaveEvent failure(LWQError error) {
-        return new ImageSaveEvent(error);
+    public static LWQError create(Throwable errorThrowable) {
+        LWQError lwqError = new LWQError(errorThrowable);
+        LWQApplication.getLogger().logError(lwqError);
+        return lwqError;
     }
 
-    Uri fileUri;
-    Uri contentUri;
-
-    ImageSaveEvent(LWQError error) {
-        super(error);
+    public static LWQError create(String errorMessage, Throwable errorThrowable) {
+        LWQError lwqError = new LWQError(errorMessage, errorThrowable);
+        LWQApplication.getLogger().logError(lwqError);
+        return lwqError;
     }
 
-    ImageSaveEvent(Uri fileUri, Uri contentUri) {
-        this.fileUri = fileUri;
-        this.contentUri = contentUri;
+    final String errorMessage;
+    final Throwable errorThrowable;
+
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public Uri getFileUri() {
-        return fileUri;
+    public Throwable getErrorThrowable() {
+        return errorThrowable;
     }
 
-    public Uri getContentUri() {
-        return contentUri;
+    private LWQError(String errorMessage) {
+        this(errorMessage, new RuntimeException("Auto-generated"));
+    }
+
+    private LWQError(Throwable errorThrowable) {
+        this(errorThrowable.getMessage(), errorThrowable);
+    }
+
+    private LWQError(String errorMessage, Throwable errorThrowable) {
+        this.errorMessage = errorMessage;
+        this.errorThrowable = errorThrowable;
     }
 }

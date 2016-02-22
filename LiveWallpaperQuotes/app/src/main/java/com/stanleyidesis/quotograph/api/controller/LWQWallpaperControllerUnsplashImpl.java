@@ -10,6 +10,7 @@ import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.BaseCallback;
 import com.stanleyidesis.quotograph.api.Callback;
+import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.db.Playlist;
 import com.stanleyidesis.quotograph.api.db.PlaylistAuthor;
 import com.stanleyidesis.quotograph.api.db.PlaylistCategory;
@@ -86,6 +87,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                     photoRecord instanceof UnsplashPhoto ? Wallpaper.IMAGE_SOURCE_UNSPLASH : Wallpaper.IMAGE_SOURCE_USER,
                     ((SugarRecord) photoRecord).getId());
             activeWallpaper.save();
+            LWQApplication.getLogger().logWallpaperCount(activeWallpaper.getId());
             newQuote.used = true;
             newQuote.save();
             setRetrievalState(RetrievalState.NONE);
@@ -106,9 +108,9 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         }
 
         @Override
-        public void onError(String errorMessage, Throwable throwable) {
+        public void onError(LWQError error) {
             setRetrievalState(RetrievalState.NONE);
-            notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
+            notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, error);
         }
     };
 
@@ -160,11 +162,6 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     @Override
     public synchronized void generateNewWallpaper() {
-        if (getRetrievalState() == RetrievalState.NEW_WALLPAPER) {
-            return;
-        }
-        setRetrievalState(RetrievalState.NEW_WALLPAPER);
-        notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER);
         final Playlist activePlaylist = Playlist.active();
         final List<Object> options = new ArrayList<>();
         options.addAll(activePlaylist.categories());
@@ -174,11 +171,16 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     }
 
     void _generateNewWallpaper(final Object playlistObject) {
-        if (!LWQApplication.getNetworkConnectionListener().getCurrentConnectionType().isConnected()) {
-            notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, LWQApplication.get().getString(R.string.network_connection_required_title), null);
-            setRetrievalState(RetrievalState.NONE);
+        if (getRetrievalState() == RetrievalState.NEW_WALLPAPER) {
             return;
         }
+        if (!LWQApplication.getNetworkConnectionListener().getCurrentConnectionType().isConnected()) {
+            notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, LWQError.create(LWQApplication.get().getString(R.string.network_connection_required_title)));
+            return;
+        }
+        setRetrievalState(RetrievalState.NEW_WALLPAPER);
+        notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER);
+
         if (playlistObject instanceof PlaylistCategory) {
             LWQApplication.getQuoteController().fetchUnusedQuotes(((PlaylistCategory) playlistObject).category, new Callback<List<Quote>>() {
                 @Override
@@ -192,9 +194,9 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 }
 
                 @Override
-                public void onError(String errorMessage, Throwable throwable) {
+                public void onError(LWQError error) {
                     setRetrievalState(RetrievalState.NONE);
-                    notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
+                    notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, error);
                 }
             });
         } else if (playlistObject instanceof PlaylistAuthor) {
@@ -210,9 +212,9 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 }
 
                 @Override
-                public void onError(String errorMessage, Throwable throwable) {
+                public void onError(LWQError error) {
                     setRetrievalState(RetrievalState.NONE);
-                    notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, errorMessage, throwable);
+                    notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, error);
                 }
             });
         } else if (playlistObject instanceof PlaylistQuote) {
@@ -228,7 +230,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     @Override
     public synchronized boolean retrieveActiveWallpaper() {
         if (!activeWallpaperExists()) {
-            notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER, "No Wallpaper active", null);
+            notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER, LWQError.create("No active Wallpaper found"));
             return false;
         } else if (activeWallpaperLoaded()) {
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
@@ -236,13 +238,13 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         } else if (getRetrievalState() == RetrievalState.ACTIVE_WALLPAPER) {
             return false;
         }
-        setRetrievalState(RetrievalState.ACTIVE_WALLPAPER);
-        notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER);
+
         if (activeWallpaper == null) {
             activeWallpaper = Wallpaper.active();
-        } else {
-            discardActiveBitmap();
         }
+
+        setRetrievalState(RetrievalState.ACTIVE_WALLPAPER);
+        notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER);
         if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_UNSPLASH) {
             LWQApplication.getImageController().retrieveBitmap(getFullUri(), new Callback<Bitmap>() {
                 @Override
@@ -253,9 +255,9 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 }
 
                 @Override
-                public void onError(String errorMessage, Throwable throwable) {
+                public void onError(LWQError error) {
                     setRetrievalState(RetrievalState.NONE);
-                    notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER, errorMessage, throwable);
+                    notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER, error);
                 }
             });
         } else if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_RESOURCE) {
@@ -285,8 +287,8 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             @Override
             public void run() {
                 Object resultObject = unsplashManager.fetchAllCategories();
-                if (resultObject instanceof String) {
-                    callback.onError(String.valueOf(resultObject), null);
+                if (resultObject instanceof LWQError) {
+                    callback.onError((LWQError) resultObject);
                 } else {
                     callback.onSuccess(getBackgroundCategories());
                 }
@@ -312,6 +314,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     synchronized void setRetrievalState(RetrievalState retrievalState) {
         this.retrievalState = retrievalState;
+        LWQApplication.getLogger().logWallpaperRetrievalState(retrievalState);
     }
 
     String getFullUri() {
@@ -334,8 +337,8 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         EventBus.getDefault().post(WallpaperEvent.withStatus(status));
     }
 
-    void notifyWallpaper(WallpaperEvent.Status status, String errorMessage, Throwable throwable) {
-        EventBus.getDefault().post(WallpaperEvent.failedWithStatus(status, errorMessage, throwable));
+    void notifyWallpaper(WallpaperEvent.Status status, LWQError error) {
+        EventBus.getDefault().post(WallpaperEvent.failedWithStatus(status, error));
     }
 
     class UnsplashRetryableRequest {
@@ -392,7 +395,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                         try {
                             downloadRunnable.run();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            LWQError.create(e);
                             attempt();
                         }
                     }

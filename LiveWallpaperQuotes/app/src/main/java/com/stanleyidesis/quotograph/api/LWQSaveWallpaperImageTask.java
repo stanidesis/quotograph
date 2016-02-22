@@ -72,29 +72,31 @@ public class LWQSaveWallpaperImageTask extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected Boolean doInBackground(Void... voids) {
         if (!isExternalStorageWritable()) {
-            EventBus.getDefault().post(ImageSaveEvent.failure("External Storage not writable", null));
+            EventBus.getDefault().post(ImageSaveEvent.failure(LWQError.create("External Storage not writable")));
             return false;
         }
         final File photosDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         if (photosDirectory == null) {
-            EventBus.getDefault().post(ImageSaveEvent.failure("Photos directory does not exist", null));
+            EventBus.getDefault().post(ImageSaveEvent.failure(LWQError.create("Photos directory does not exist")));
             return false;
         }
         if (!photosDirectory.exists()) {
-            photosDirectory.mkdir();
+            if (!photosDirectory.mkdir()) {
+                EventBus.getDefault().post(ImageSaveEvent.failure(LWQError.create("Failed to make a Photos directory")));
+            }
         }
         boolean succeeded = true;
         String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmmss").format(new Date());
         final File wallpaperFile = new File(photosDirectory.getPath() + File.separator
                 + timeStamp + ".png");
         final LWQBitmapDrawScript drawScript = new LWQBitmapDrawScript();
-        drawScript.requestDraw(new Callback<Boolean>() {
+        drawScript.requestDraw(new BaseCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean aBoolean) {
                 final Bitmap bitmapToSave = drawScript.getBitmap();
                 try {
                     if (!wallpaperFile.createNewFile()) {
-                        EventBus.getDefault().post(ImageSaveEvent.failure("Failed to create new file", null));
+                        EventBus.getDefault().post(ImageSaveEvent.failure(LWQError.create("Failed to create new file")));
                         drawScript.finish();
                     }
                     FileOutputStream fos = new FileOutputStream(wallpaperFile);
@@ -108,14 +110,11 @@ public class LWQSaveWallpaperImageTask extends AsyncTask<Void, Void, Boolean> {
                                 }
                             });
                 } catch (Exception e) {
-                    EventBus.getDefault().post(ImageSaveEvent.failure(e.getMessage(), e));
+                    EventBus.getDefault().post(ImageSaveEvent.failure(LWQError.create(e)));
                 } finally {
                     drawScript.finish();
                 }
             }
-
-            @Override
-            public void onError(String errorMessage, Throwable throwable) {}
         });
         return succeeded;
     }

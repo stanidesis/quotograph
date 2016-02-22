@@ -1,8 +1,6 @@
 package com.stanleyidesis.quotograph.api.network;
 
-import android.util.Log;
-
-import com.stanleyidesis.quotograph.api.Callback;
+import com.stanleyidesis.quotograph.api.LWQError;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -16,8 +14,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -64,21 +60,6 @@ public class BrainyQuoteManager {
         String BRAINY_QUOTE_SEARCH_QUERY = "https://www.brainyquote.com/search_results.html?q=%s";
     }
 
-    private ScheduledExecutorService scheduledExecutorService;
-
-    private void submit(final Runnable runnable) {
-        scheduledExecutorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    runnable.run();
-                } catch (Exception e) {
-                    Log.e(getClass().getSimpleName(), "Error in executor service task", e);
-                }
-            }
-        });
-    }
-
     private String convertToURLName(String topicDisplayName) {
         final String cleanedUp = topicDisplayName.replaceAll("[^a-zA-Z0-9]", "");
         final String lowerCase = cleanedUp.toLowerCase();
@@ -92,35 +73,24 @@ public class BrainyQuoteManager {
         return underscores.toLowerCase();
     }
 
-    public BrainyQuoteManager() {
-        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-    }
+    public Object getTopics() {
+        final Connection connection = Jsoup.connect(Endpoints.BRAINY_QUOTE_TOPICS);
+        final Connection.Response response;
+        final Document document;
+        try {
+            response = connection.execute();
+            document = response.parse();
+        } catch (IOException e) {
+            return LWQError.create(e);
+        }
 
-    public void getTopics(final Callback<List<BrainyTopic>> callback) {
-        submit(new Runnable() {
-            @Override
-            public void run() {
-                final Connection connection = Jsoup.connect(Endpoints.BRAINY_QUOTE_TOPICS);
-                final Connection.Response response;
-                final Document document;
-                try {
-                    response = connection.execute();
-                    document = response.parse();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    callback.onError(e.getMessage(), e);
-                    return;
-                }
-
-                List<BrainyTopic> topics = new ArrayList<>();
-                final Elements elements = document.select("a[href^=/quotes/topics/]");
-                for (Element element : elements) {
-                    BrainyTopic brainyTopic = new BrainyTopic(element.text());
-                    topics.add(brainyTopic);
-                }
-                callback.onSuccess(topics);
-            }
-        });
+        List<BrainyTopic> topics = new ArrayList<>();
+        final Elements elements = document.select("a[href^=/quotes/topics/]");
+        for (Element element : elements) {
+            BrainyTopic brainyTopic = new BrainyTopic(element.text());
+            topics.add(brainyTopic);
+        }
+        return topics;
     }
 
     public Object getQuotes(String topicDisplayName, int pageIndex) {
@@ -134,11 +104,11 @@ public class BrainyQuoteManager {
         } else {
             finalUrl = String.format(baseUrl, urlTopicName);
         }
-        final Object o = parseDocument(finalUrl);
-        if (o instanceof String) {
-            return o;
+        final Object parseDocument = parseDocument(finalUrl);
+        if (parseDocument instanceof LWQError) {
+            return parseDocument;
         }
-        return parseForQuotes((Document) o);
+        return parseForQuotes((Document) parseDocument);
     }
 
     public Object getQuotesBy(String authorDisplayName, int pageIndex) {
@@ -164,15 +134,14 @@ public class BrainyQuoteManager {
         try {
             escapedQuery = URLEncoder.encode(searchQuery, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return e.getLocalizedMessage();
+            return LWQError.create(e);
         }
         String finalUrl = String.format(Endpoints.BRAINY_QUOTE_SEARCH_QUERY, escapedQuery);
-        final Object o = parseDocument(finalUrl);
-        if (o instanceof String) {
-            return o;
+        final Object parseDocument = parseDocument(finalUrl);
+        if (parseDocument instanceof LWQError) {
+            return parseDocument;
         }
-        Document document = (Document) o;
+        Document document = (Document) parseDocument;
         final List<BrainyQuote> brainyQuotes = parseForQuotes(document);
         final List<BrainyAuthor> brainyAuthors = parseForAuthors(document);
         final List<BrainyTopic> brainyTopics = parseForTopics(document);
@@ -189,16 +158,14 @@ public class BrainyQuoteManager {
         try {
             response = connection.execute();
         } catch (IOException e) {
-            e.printStackTrace();
-            return e.getLocalizedMessage();
+            return LWQError.create(e);
         }
 
         final Document document;
         try {
             document = response.parse();
         } catch (IOException e) {
-            e.printStackTrace();
-            return e.getLocalizedMessage();
+            return LWQError.create(e);
         }
         return document;
     }

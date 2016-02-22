@@ -10,6 +10,7 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.api.Callback;
+import com.stanleyidesis.quotograph.api.LWQError;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -71,7 +72,7 @@ public class LWQImageControllerUIL implements LWQImageController {
 
             @Override
             public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                callback.onError(failReason.toString(), failReason.getCause());
+                callback.onError(LWQError.create(failReason.getType().name(), failReason.getCause()));
             }
 
             @Override
@@ -81,7 +82,7 @@ public class LWQImageControllerUIL implements LWQImageController {
 
             @Override
             public void onLoadingCancelled(String imageUri, View view) {
-                callback.onError("Image Load Cancelled", new Throwable());
+                callback.onError(LWQError.create("Loading Image Cancelled"));
             }
         });
     }

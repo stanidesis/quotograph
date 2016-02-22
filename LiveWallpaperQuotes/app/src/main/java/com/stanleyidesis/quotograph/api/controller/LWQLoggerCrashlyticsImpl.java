@@ -1,7 +1,6 @@
-package com.stanleyidesis.quotograph.api.event;
+package com.stanleyidesis.quotograph.api.controller;
 
-import android.net.Uri;
-
+import com.crashlytics.android.Crashlytics;
 import com.stanleyidesis.quotograph.api.LWQError;
 
 /**
@@ -26,7 +25,7 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * ImageSaveEvent.java
+ * LWQLoggerCrashlyticsImpl.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -35,35 +34,32 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 09/26/2015
+ * Date: 02/21/2016
  */
-public class ImageSaveEvent extends FailableEvent {
+public class LWQLoggerCrashlyticsImpl implements LWQLogger {
 
-    public static ImageSaveEvent success(Uri fileUri, Uri contentUri) {
-        return new ImageSaveEvent(fileUri, contentUri);
+    static final String KEY_WALLPAPER_COUNT = "wallpaper_count";
+    static final String KEY_WALLPAPER_RETRIEVAL_STATE = "wallpaper_retrieval_state";
+    static final String KEY_WALLPAPER_ACTIVE = "wallpaper_active";
+
+    @Override
+    public void logWallpaperCount(long count) {
+        Crashlytics.setLong(KEY_WALLPAPER_COUNT, count);
     }
 
-    public static ImageSaveEvent failure(LWQError error) {
-        return new ImageSaveEvent(error);
+    @Override
+    public void logWallpaperRetrievalState(LWQWallpaperController.RetrievalState retrievalState) {
+        Crashlytics.setString(KEY_WALLPAPER_RETRIEVAL_STATE, retrievalState.name());
     }
 
-    Uri fileUri;
-    Uri contentUri;
-
-    ImageSaveEvent(LWQError error) {
-        super(error);
+    @Override
+    public void logWallpaperActive(boolean active) {
+        Crashlytics.setBool(KEY_WALLPAPER_ACTIVE, active);
     }
 
-    ImageSaveEvent(Uri fileUri, Uri contentUri) {
-        this.fileUri = fileUri;
-        this.contentUri = contentUri;
-    }
-
-    public Uri getFileUri() {
-        return fileUri;
-    }
-
-    public Uri getContentUri() {
-        return contentUri;
+    @Override
+    public void logError(LWQError error) {
+        Crashlytics.log(error.getErrorMessage());
+        Crashlytics.logException(error.getErrorThrowable());
     }
 }

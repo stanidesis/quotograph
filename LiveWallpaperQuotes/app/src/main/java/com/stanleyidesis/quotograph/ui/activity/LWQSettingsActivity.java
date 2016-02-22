@@ -49,6 +49,7 @@ import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.Callback;
+import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
 import com.stanleyidesis.quotograph.api.db.Author;
@@ -999,7 +1000,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             }
 
             @Override
-            public void onError(String errorMessage, Throwable throwable) {
+            public void onError(LWQError error) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

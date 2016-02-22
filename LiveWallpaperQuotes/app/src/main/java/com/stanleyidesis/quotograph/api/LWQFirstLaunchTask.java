@@ -62,8 +62,8 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         }
 
         @Override
-        public void onError(String errorMessage, Throwable throwable) {
-            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(errorMessage, throwable));
+        public void onError(LWQError error) {
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(error));
         }
     };
 
@@ -94,8 +94,8 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         }
 
         @Override
-        public void onError(String errorMessage, Throwable throwable) {
-            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(errorMessage, throwable));
+        public void onError(LWQError error) {
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(error));
         }
     };
 
@@ -123,7 +123,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        EventBus.getDefault().post(FirstLaunchTaskEvent.failed("Cancelled by user", null));
+        EventBus.getDefault().post(FirstLaunchTaskEvent.failed(LWQError.create("Cancelled by user")));
     }
 
     @Override
@@ -142,9 +142,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
 
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
-            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(
-                    wallpaperEvent.getErrorMessage(),
-                    wallpaperEvent.getThrowable()));
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(wallpaperEvent.getError()));
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             publishProgress("Setup complete!");
             LWQPreferences.setFirstLaunch(false);

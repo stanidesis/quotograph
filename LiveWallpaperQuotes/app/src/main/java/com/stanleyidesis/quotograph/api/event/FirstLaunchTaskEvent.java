@@ -1,5 +1,7 @@
 package com.stanleyidesis.quotograph.api.event;
 
+import com.stanleyidesis.quotograph.api.LWQError;
+
 /**
  * Copyright (c) 2016 Stanley Idesis
  *
@@ -39,11 +41,10 @@ public class FirstLaunchTaskEvent extends FailableEvent {
         return new FirstLaunchTaskEvent();
     }
 
-    public static FirstLaunchTaskEvent failed(String errorMessage, Throwable throwable) {
+    public static FirstLaunchTaskEvent failed(LWQError error) {
         final FirstLaunchTaskEvent failure = success();
         failure.success = false;
-        failure.errorMessage = errorMessage;
-        failure.throwable = throwable;
+        failure.error = error;
         return failure;
     }
 

@@ -1,5 +1,7 @@
 package com.stanleyidesis.quotograph.api.event;
 
+import com.stanleyidesis.quotograph.api.LWQError;
+
 /**
  * Copyright (c) 2016 Stanley Idesis
  *
@@ -34,18 +36,29 @@ package com.stanleyidesis.quotograph.api.event;
  * Date: 09/20/2015
  */
 public abstract class FailableEvent {
-    String errorMessage;
-    Throwable throwable;
+    LWQError error;
+
+    public FailableEvent() {
+
+    }
+
+    public FailableEvent(LWQError error) {
+        this.error = error;
+    }
+
+    public LWQError getError() {
+        return error;
+    }
 
     public String getErrorMessage() {
-        return errorMessage;
+        return error.getErrorMessage();
     }
 
     public Throwable getThrowable() {
-        return throwable;
+        return error.getErrorThrowable();
     }
 
     public boolean didFail() {
-        return errorMessage != null || throwable != null;
+        return error != null;
     }
 }

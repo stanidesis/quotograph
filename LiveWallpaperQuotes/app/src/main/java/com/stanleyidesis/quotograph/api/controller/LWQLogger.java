@@ -1,6 +1,4 @@
-package com.stanleyidesis.quotograph.api.event;
-
-import android.net.Uri;
+package com.stanleyidesis.quotograph.api.controller;
 
 import com.stanleyidesis.quotograph.api.LWQError;
 
@@ -26,7 +24,7 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * ImageSaveEvent.java
+ * LWQLogger.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -35,35 +33,14 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 09/26/2015
+ * Date: 02/21/2016
  */
-public class ImageSaveEvent extends FailableEvent {
+public interface LWQLogger {
+    void logWallpaperCount(long count);
 
-    public static ImageSaveEvent success(Uri fileUri, Uri contentUri) {
-        return new ImageSaveEvent(fileUri, contentUri);
-    }
+    void logWallpaperRetrievalState(LWQWallpaperController.RetrievalState retrievalState);
 
-    public static ImageSaveEvent failure(LWQError error) {
-        return new ImageSaveEvent(error);
-    }
+    void logWallpaperActive(boolean active);
 
-    Uri fileUri;
-    Uri contentUri;
-
-    ImageSaveEvent(LWQError error) {
-        super(error);
-    }
-
-    ImageSaveEvent(Uri fileUri, Uri contentUri) {
-        this.fileUri = fileUri;
-        this.contentUri = contentUri;
-    }
-
-    public Uri getFileUri() {
-        return fileUri;
-    }
-
-    public Uri getContentUri() {
-        return contentUri;
-    }
+    void logError(LWQError error);
 }

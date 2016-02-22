@@ -14,6 +14,8 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 import com.stanleyidesis.quotograph.api.controller.LWQImageController;
 import com.stanleyidesis.quotograph.api.controller.LWQImageControllerUIL;
+import com.stanleyidesis.quotograph.api.controller.LWQLogger;
+import com.stanleyidesis.quotograph.api.controller.LWQLoggerCrashlyticsImpl;
 import com.stanleyidesis.quotograph.api.controller.LWQNotificationController;
 import com.stanleyidesis.quotograph.api.controller.LWQNotificationControllerImpl;
 import com.stanleyidesis.quotograph.api.controller.LWQQuoteController;
@@ -71,6 +73,7 @@ public class LWQApplication extends SugarApp {
     LWQImageController imageController;
     LWQQuoteController quoteController;
     LWQNotificationController notificationController;
+    LWQLogger logger;
     NetworkConnectionListener networkConnectionListener;
 
     @Override
@@ -80,6 +83,7 @@ public class LWQApplication extends SugarApp {
         Fabric.with(this, new Crashlytics.Builder().core(core).build());
 
         sApplication = this;
+        logger = new LWQLoggerCrashlyticsImpl();
         wallpaperController = new LWQWallpaperControllerUnsplashImpl();
         imageController = new LWQImageControllerUIL();
         quoteController = new LWQQuoteControllerBrainyQuoteImpl();
@@ -113,10 +117,16 @@ public class LWQApplication extends SugarApp {
         return sApplication.networkConnectionListener;
     }
 
+    public static LWQLogger getLogger() {
+        return sApplication.logger;
+    }
+
     public static boolean isWallpaperActivated() {
         final WallpaperManager wallpaperManager = WallpaperManager.getInstance(sApplication);
         final WallpaperInfo wallpaperInfo = wallpaperManager.getWallpaperInfo();
-        return wallpaperInfo != null && sApplication.getPackageName().equalsIgnoreCase(wallpaperInfo.getPackageName());
+        boolean active = wallpaperInfo != null && sApplication.getPackageName().equalsIgnoreCase(wallpaperInfo.getPackageName());
+        getLogger().logWallpaperActive(active);
+        return active;
     }
 
     public static void setComponentsEnabled(boolean enabled) {

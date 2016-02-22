@@ -40,7 +40,9 @@ public class BaseCallback <Result> implements Callback<Result> {
     }
 
     @Override
-    public void onError(String errorMessage, Throwable throwable) {
-        throwable.printStackTrace();
+    public void onError(LWQError error) {
+        if (error.getErrorThrowable() != null) {
+            error.getErrorThrowable().printStackTrace();
+        }
     }
 }
