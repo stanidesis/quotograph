@@ -1231,26 +1231,23 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             fabAdd.getGlobalVisibleRect(fabRect);
             final Point realScreenSize = UIUtils.getRealScreenSize();
             int radius = Math.max(realScreenSize.x, realScreenSize.y);
-            final Animator circularReveal = ViewAnimationUtils.createCircularReveal(fabBackground,
+            backgroundAnimator = ViewAnimationUtils.createCircularReveal(fabBackground,
                     fabRect.centerX(),
                     fabRect.centerY(),
                     dismiss ? radius : 0,
                     dismiss ? 0 : radius);
-            circularReveal.setDuration(300);
-            circularReveal.setInterpolator(new AccelerateDecelerateInterpolator());
-            circularReveal.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (dismiss) {
-                        fabBackground.setVisibility(View.GONE);
-                    }
-                }
-            });
-            backgroundAnimator = circularReveal;
         } else {
             backgroundAnimator = ObjectAnimator.ofFloat(fabBackground, "alpha", dismiss ? 1f : 0f, dismiss ? 0f : 1f);
-            backgroundAnimator.setDuration(300l).setInterpolator(new AccelerateDecelerateInterpolator());
         }
+        backgroundAnimator.setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator());
+        backgroundAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (dismiss) {
+                    fabBackground.setVisibility(View.GONE);
+                }
+            }
+        });
         final long shortDelay = 50;
         final long longDelay = 100;
         final Animator createAnimator = animateFAB(fabCreate, dismiss);
