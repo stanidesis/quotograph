@@ -353,6 +353,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     ActivityState stateSearchInProgress = new Builder(stateAddReveal)
             .setViewState(R.id.fab_lwq_plus, FLAG_ROTATE | FLAG_DISABLE)
             .setViewState(R.id.group_lwq_settings_fab_screen, FLAG_REVEAL | FLAG_DISABLE)
+            .setViewState(R.id.group_lwq_fab_screen_search, FLAG_REVEAL | FLAG_DISABLE)
             .setViewState(R.id.pb_lwq_settings, FLAG_REVEAL)
             .build();
 

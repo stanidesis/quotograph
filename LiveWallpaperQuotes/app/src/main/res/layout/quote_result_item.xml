@@ -69,6 +69,7 @@
             android:layout_toLeftOf="@+id/add_remove_quote_result_item"
             android:layout_toStartOf="@+id/add_remove_quote_result_item"
             android:layout_below="@+id/tv_quote_result_item_quote"
+            android:inputType="textNoSuggestions"
             android:text="@string/inspirational_author_0"/>
 
         <com.stanleyidesis.quotograph.ui.view.AddRemoveButton
