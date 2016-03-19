@@ -9,6 +9,8 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Tracker;
 import com.orm.SugarApp;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -75,12 +77,17 @@ public class LWQApplication extends SugarApp {
     LWQNotificationController notificationController;
     LWQLogger logger;
     NetworkConnectionListener networkConnectionListener;
+    Tracker tracker;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        // Bug tracking
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
         Fabric.with(this, new Crashlytics.Builder().core(core).build());
+        // Analytics
+        getDefaultTracker().enableAdvertisingIdCollection(true);
+        getDefaultTracker().enableAutoActivityTracking(true);
 
         sApplication = this;
         logger = new LWQLoggerCrashlyticsImpl();
@@ -89,8 +96,15 @@ public class LWQApplication extends SugarApp {
         quoteController = new LWQQuoteControllerBrainyQuoteImpl();
         notificationController = new LWQNotificationControllerImpl();
         networkConnectionListener = new NetworkConnectionListener(this);
-
         setComponentsEnabled(isWallpaperActivated());
+    }
+
+    synchronized public Tracker getDefaultTracker() {
+        if (tracker == null) {
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            tracker = analytics.newTracker(R.xml.global_tracker);
+        }
+        return tracker;
     }
 
     public static LWQApplication get() {
