@@ -29,6 +29,8 @@ import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
 import com.stanleyidesis.quotograph.ui.Fonts;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -233,7 +235,14 @@ public abstract class LWQDrawScript {
         if (wallpaperController.getQuote() != null && !wallpaperController.getQuote().isEmpty()) {
             quote = wallpaperController.getQuote();
         }
-
+        // Sort by word length
+        String[] words = quote.split(" ");
+        Arrays.sort(words, new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+                return rhs.length() - lhs.length();
+            }
+        });
         final int horizontalPadding = (int) (screenWidth * .07);
         final int verticalPadding = (int) (screenHeight * .2);
         final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
@@ -245,7 +254,7 @@ public abstract class LWQDrawScript {
                 drawingArea.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
 
         // Correct the quote height, if necessary
-        quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight());
+        quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight(), words[0]);
 
         // Draw the quote centered vertically
         int centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
@@ -297,9 +306,10 @@ public abstract class LWQDrawScript {
         canvas.translate(-dx, 0);
     }
 
-    StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight) {
+    StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight, String longestWord) {
         final TextPaint textPaint = staticLayout.getPaint();
-        while (staticLayout.getHeight() > maxHeight) {
+        while (staticLayout.getHeight() > maxHeight
+                || staticLayout.getWidth() < StaticLayout.getDesiredWidth(longestWord, textPaint)) {
             textPaint.setTextSize(textPaint.getTextSize() * .95f);
             staticLayout = new StaticLayout(staticLayout.getText(), textPaint,
                     staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),
