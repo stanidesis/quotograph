@@ -391,6 +391,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     Quote editingQuote;
     int editingQuotePosition;
 
+    // Seekbar Status
+    boolean isModifyingSeekSetting;
+
     // Content
     @Bind(R.id.group_lwq_settings_content)
     View content;
@@ -1319,7 +1322,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 firstLaunch = false;
                 scheduleTimer();
                 changeState(stateWallpaper);
-            } else {
+            } else if (!isModifyingSeekSetting){
                 changeState(viewPager.getCurrentItem() == 0 ?
                         stateSaveSkipCompleted : stateSaveSkipCompletedObscured);
             }
@@ -1341,11 +1344,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
+        isModifyingSeekSetting = true;
         changeState(stateWallpaperEdit);
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
+        isModifyingSeekSetting = false;
         changeState(stateSettings);
     }
 
