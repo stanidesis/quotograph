@@ -1305,6 +1305,17 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         if (wallpaperEvent.didFail()) {
             changeState(viewPager.getCurrentItem() == 0 ?
                     stateSaveSkipCompleted : stateSaveSkipCompletedObscured);
+            if (wallpaperEvent.getErrorMessage() == null) {
+                return;
+            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(LWQSettingsActivity.this,
+                            wallpaperEvent.getErrorMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+            });
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RENDERED_WALLPAPER) {
             if (firstLaunch) {
                 firstLaunch = false;
