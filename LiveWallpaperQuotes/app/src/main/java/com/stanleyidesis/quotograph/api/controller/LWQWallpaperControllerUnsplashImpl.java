@@ -97,6 +97,10 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
         @Override
         public void onSuccess(final List<Quote> newQuotes) {
+            if (newQuotes.isEmpty()) {
+                onError(LWQError.create(LWQApplication.get().getString(R.string.failed_to_generate_wallpaper)));
+                return;
+            }
             final UnsplashCategory unsplashCategory =
                     UnsplashCategory.find(LWQPreferences.getImageCategoryPreference());
             new UnsplashRetryableRequest(unsplashCategory, MAX_RETRIES, new BaseCallback<UnsplashPhoto>() {
