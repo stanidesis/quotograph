@@ -359,7 +359,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             @Override
             public void run() {
                 final Object result = unsplashManager.fetchRandomPhoto(category, true, null);
-                if (result instanceof String) {
+                if (result instanceof LWQError) {
                     attempt();
                     return;
                 }
