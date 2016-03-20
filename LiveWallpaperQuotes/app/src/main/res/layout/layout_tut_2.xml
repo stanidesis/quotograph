@@ -26,6 +26,7 @@
         android:layout_alignStart="@id/tv_tut_headline"
         android:text="@string/tutorial_detail_2"
         android:textSize="30sp"
+        android:lines="2"
         app:layout_widthPercent="80%"/>
 
     <TextView

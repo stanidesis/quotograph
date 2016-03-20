@@ -108,10 +108,6 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     @Bind(R.id.button_lwq_activate)
     View activateButton;
     View activePageFiveView;
-    @Bind(R.id.iv_lwq_activate_tutorial_image_1)
-    ImageView tutorialWallpaperOne;
-    @Bind(R.id.iv_lwq_activate_tutorial_image_2)
-    ImageView tutorialWallpaperTwo;
     @Bind({R.id.tv_tut_category, R.id.tv_tut_author, R.id.tv_tut_own_quote})
     List<TextView> sourceBubbles;
     @Bind({R.id.lwq_activate_tut_0,R.id.lwq_activate_tut_1,
@@ -221,17 +217,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
             ButterKnife.findById(nextView, R.id.tv_tut_details).setAlpha(positionOffset);
         }
 
-        if (position == 0) {
-            tutorialWallpaperTwo.setAlpha(positionOffset);
-        } else if (position == 1) {
-            if (wallpaperTop == -1) {
-                wallpaperTop = tutorialWallpaperOne.getTop();
-            }
-            tutorialWallpaperOne.setTop(wallpaperTop + (int) (tutorialWallpaperOne.getMeasuredHeight() * positionOffset));
-            tutorialWallpaperTwo.setTop(wallpaperTop + (int) (tutorialWallpaperOne.getMeasuredHeight() * positionOffset));
-            tutorialWallpaperOne.setAlpha(1f - positionOffset);
-            tutorialWallpaperTwo.setAlpha(1f - positionOffset);
-
+        if (position == 1) {
             fadeBubbles(positionOffset, true);
         } else if (position == 2) {
             fadeBubbles(positionOffset, false);
