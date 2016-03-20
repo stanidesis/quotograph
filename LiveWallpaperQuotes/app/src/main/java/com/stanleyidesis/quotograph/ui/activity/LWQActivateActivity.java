@@ -108,10 +108,6 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     @Bind(R.id.button_lwq_activate)
     View activateButton;
     View activePageFiveView;
-    @Bind(R.id.iv_lwq_activate_tutorial_image_1)
-    ImageView tutorialWallpaperOne;
-    @Bind(R.id.iv_lwq_activate_tutorial_image_2)
-    ImageView tutorialWallpaperTwo;
     @Bind({R.id.tv_tut_category, R.id.tv_tut_author, R.id.tv_tut_own_quote})
     List<TextView> sourceBubbles;
     @Bind({R.id.lwq_activate_tut_0,R.id.lwq_activate_tut_1,
@@ -221,17 +217,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
             ButterKnife.findById(nextView, R.id.tv_tut_details).setAlpha(positionOffset);
         }
 
-        if (position == 0) {
-            tutorialWallpaperTwo.setAlpha(positionOffset);
-        } else if (position == 1) {
-            if (wallpaperTop == -1) {
-                wallpaperTop = tutorialWallpaperOne.getTop();
-            }
-            tutorialWallpaperOne.setTop(wallpaperTop + (int) (tutorialWallpaperOne.getMeasuredHeight() * positionOffset));
-            tutorialWallpaperTwo.setTop(wallpaperTop + (int) (tutorialWallpaperOne.getMeasuredHeight() * positionOffset));
-            tutorialWallpaperOne.setAlpha(1f - positionOffset);
-            tutorialWallpaperTwo.setAlpha(1f - positionOffset);
-
+        if (position == 1) {
             fadeBubbles(positionOffset, true);
         } else if (position == 2) {
             fadeBubbles(positionOffset, false);
@@ -258,7 +244,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         setIndicator(position);
         if (position == viewPages.size() - 1) {
             activePageFiveView.setEnabled(firstLaunchTaskCompleted);
-            if (activeSnackbar != null) {
+            if (activeSnackbar != null && !firstLaunchTaskCompleted) {
                 activeSnackbar = build(latestFirstLaunchTaskUpdate.getUpdate());
                 activeSnackbar.show();
             }
@@ -285,10 +271,14 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
                     .putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
                             new ComponentName(LWQActivateActivity.this, LWQWallpaperService.class))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            Toast.makeText(LWQActivateActivity.this,
+                    getString(R.string.toast_tap_set_wallpaper), Toast.LENGTH_LONG).show();
         } catch (ActivityNotFoundException e) {
             try {
                 startActivity(new Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                Toast.makeText(LWQActivateActivity.this,
+                        getString(R.string.toast_tap_set_wallpaper), Toast.LENGTH_LONG).show();
             } catch (ActivityNotFoundException e2) {
                 Toast.makeText(LWQActivateActivity.this, R.string.error_wallpaper_chooser,
                         Toast.LENGTH_LONG).show();

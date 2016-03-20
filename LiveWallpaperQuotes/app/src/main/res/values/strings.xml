@@ -37,7 +37,7 @@
     <string name="inspirational_author_9">Aristotle Onassis</string>
     <string name="unknown">Unknown</string>
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.</string>
-    <string name="activate">Set</string>
+    <string name="activate">Sweet</string>
     <string name="error_wallpaper_chooser">Couldn\'t launch wallpaper chooser. You can still activate Quotograph by choosing \'Live Wallpapers\' in your home screen wallpaper picker.</string>
     <string name="period_preference_dont_refresh">Never</string>
     <string name="period_preference_half_hour">Every 30 Minutes</string>
@@ -59,15 +59,15 @@
     <string name="notification_title_save_failed">Failed to save Quotograph</string>
     <string name="notification_content_save_failed">Click here to retry.</string>
     <string name="tutorial_headline_0">Welcome,</string>
-    <string name="tutorial_headline_1">…And Sets Them</string>
-    <string name="tutorial_headline_2">Choose Where</string>
-    <string name="tutorial_headline_3">Set How Often</string>
-    <string name="tutorial_headline_4">To Get Started,</string>
-    <string name="tutorial_detail_0">Quotograph generates beautiful images…</string>
-    <string name="tutorial_detail_1">as your wallpaper.</string>
-    <string name="tutorial_detail_2">quotes come from, or write your own.</string>
-    <string name="tutorial_detail_3">Quotograph refreshes your wallpaper.</string>
-    <string name="tutorial_detail_4">set Quotograph as your wallpaper…</string>
+    <string name="tutorial_headline_1">And Sets</string>
+    <string name="tutorial_headline_2">It chooses</string>
+    <string name="tutorial_headline_3">And creates</string>
+    <string name="tutorial_headline_4">Just Tap</string>
+    <string name="tutorial_detail_0">Quotograph makes beautiful images</string>
+    <string name="tutorial_detail_1">them as your wallpaper.</string>
+    <string name="tutorial_detail_2">from your favorite quotes</string>
+    <string name="tutorial_detail_3">new images on a schedule.</string>
+    <string name="tutorial_detail_4">\'Set wallpaper,\' after pressing this sweet button:</string>
     <string name="category">Category</string>
     <string name="author">Author</string>
     <string name="quote">Quote</string>
@@ -83,4 +83,5 @@
     <string name="write_external_permission_denied_toast">Saving a Quotograph requires additional permissions</string>
     <string name="save_failed">Failed to save your Quotograph :(</string>
     <string name="failed_to_generate_wallpaper">Whoops! We couldn\'t make a new Quotograph, please try again.</string>
+    <string name="toast_tap_set_wallpaper">Press, \'Set wallpaper,\' to use Quotograph</string>
 </resources>
