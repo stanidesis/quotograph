@@ -96,7 +96,7 @@ public class LWQApplication extends SugarApp {
         quoteController = new LWQQuoteControllerBrainyQuoteImpl();
         notificationController = new LWQNotificationControllerImpl();
         networkConnectionListener = new NetworkConnectionListener(this);
-        setComponentsEnabled(isWallpaperActivated());
+        setComponentsEnabled(!LWQPreferences.isFirstLaunch());
     }
 
     synchronized public Tracker getDefaultTracker() {

@@ -146,6 +146,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             publishProgress("Setup complete!");
             LWQPreferences.setFirstLaunch(false);
+            LWQApplication.setComponentsEnabled(true);
             EventBus.getDefault().post(FirstLaunchTaskEvent.success());
         }
     }
