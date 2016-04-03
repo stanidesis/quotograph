@@ -40,4 +40,18 @@ public enum Fonts {
     public String getPrettyName(Context context) {
         return context.getString(this.prettyName);
     }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public static Fonts findById(int id) {
+        for (Fonts font : Fonts.values()) {
+            if (font.id == id) {
+                return font;
+            }
+        }
+        // Return default if font not found
+        return Fonts.SYSTEM;
+    }
 }

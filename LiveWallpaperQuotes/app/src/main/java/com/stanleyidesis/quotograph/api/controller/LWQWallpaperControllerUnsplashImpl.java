@@ -3,6 +3,7 @@ package com.stanleyidesis.quotograph.api.controller;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.orm.SugarRecord;
 import com.stanleyidesis.quotograph.LWQApplication;
@@ -22,6 +23,7 @@ import com.stanleyidesis.quotograph.api.db.UserPhoto;
 import com.stanleyidesis.quotograph.api.db.Wallpaper;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.api.network.UnsplashManager;
+import com.stanleyidesis.quotograph.ui.Fonts;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,7 +87,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             }
             activeWallpaper = new Wallpaper(newQuote, true, System.currentTimeMillis(),
                     photoRecord instanceof UnsplashPhoto ? Wallpaper.IMAGE_SOURCE_UNSPLASH : Wallpaper.IMAGE_SOURCE_USER,
-                    ((SugarRecord) photoRecord).getId());
+                    ((SugarRecord) photoRecord).getId(), Fonts.JOSEFIN_BOLD.getId()); // TODO use random from preferences
             activeWallpaper.save();
             LWQApplication.getLogger().logWallpaperCount(activeWallpaper.getId());
             newQuote.used = true;
