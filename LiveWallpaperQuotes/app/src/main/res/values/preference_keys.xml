@@ -6,4 +6,5 @@
     <string name="preference_key_image_category">com.stanleyidesis.quotograph.preference.IMAGE_CATEGORY</string>
     <string name="preference_key_refresh">com.stanleyidesis.quotograph.preference.REFRESH</string>
     <string name="preference_key_double_tap_to_launch">com.stanleyidesis.quotograph.preference.DOUBLE_TAP</string>
+    <string name="preference_key_fonts">com.stanleyidesis.quotograph.preference.FONTS</string>
 </resources>

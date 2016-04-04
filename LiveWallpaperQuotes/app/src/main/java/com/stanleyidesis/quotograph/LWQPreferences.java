@@ -5,6 +5,10 @@ import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
+import com.stanleyidesis.quotograph.ui.Fonts;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import de.greenrobot.event.EventBus;
 
@@ -107,4 +111,13 @@ public class LWQPreferences {
         sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_double_tap_to_launch), enabled).apply();
     }
 
+    public static void setFontSet(Set<String> fontIds) {
+        sharedPreferences.edit().putStringSet(LWQApplication.get().getString(R.string.preference_key_fonts), fontIds).apply();
+    }
+
+    public static Set<String> getFontSet() {
+        Set<String> defaultSet = new HashSet<>();
+        defaultSet.add(String.valueOf(Fonts.SYSTEM.getId()));
+        return sharedPreferences.getStringSet(LWQApplication.get().getString(R.string.preference_key_fonts), defaultSet);
+    }
 }
