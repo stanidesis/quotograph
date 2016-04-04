@@ -31,171 +31,214 @@
 
     Date: 09/05/2015
 -->
-<android.support.percent.PercentRelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="none">
 
-    <android.support.percent.PercentRelativeLayout
-        android:id="@+id/rl_lwq_settings_blur"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="@dimen/lwq_settings_element_min_height"
-        android:layout_centerHorizontal="true">
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-        <TextView
-            style="@style/Theme.LWQ.TextAppearance.Settings.Category"
-            android:id="@+id/tv_lwq_settings_blur"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="Blur"
-            app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
-
-        <SeekBar
-            style="@style/Theme.LWQ.SeekBar"
-            android:id="@+id/sb_lwq_settings_blur"
+        <android.support.percent.PercentRelativeLayout
+            android:id="@+id/rl_lwq_settings_blur"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/tv_lwq_settings_blur"
-            android:layout_toEndOf="@id/tv_lwq_settings_blur"
-            android:max="25"
-            app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"/>
+            android:minHeight="@dimen/lwq_settings_element_min_height"
+            android:layout_centerHorizontal="true">
 
-    </android.support.percent.PercentRelativeLayout>
+            <TextView
+                style="@style/Theme.LWQ.TextAppearance.Settings.Category"
+                android:id="@+id/tv_lwq_settings_blur"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="Blur"
+                app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
 
-    <android.support.percent.PercentRelativeLayout
-        android:id="@+id/rl_lwq_settings_dim"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="@dimen/lwq_settings_element_min_height"
-        android:layout_below="@id/rl_lwq_settings_blur"
-        android:layout_centerHorizontal="true"
-        app:layout_marginTopPercent="@fraction/lwq_settings_element_margin_top_percent"
-        android:layout_alignWithParentIfMissing="false">
+            <SeekBar
+                style="@style/Theme.LWQ.SeekBar"
+                android:id="@+id/sb_lwq_settings_blur"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/tv_lwq_settings_blur"
+                android:layout_toEndOf="@id/tv_lwq_settings_blur"
+                android:max="25"
+                app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"/>
 
-        <TextView
-            style="@style/Theme.LWQ.TextAppearance.Settings.Category"
-            android:id="@+id/tv_lwq_settings_dim"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="dim"
-            app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
+        </android.support.percent.PercentRelativeLayout>
 
-        <SeekBar
-            style="@style/Theme.LWQ.SeekBar"
-            android:id="@+id/sb_lwq_settings_dim"
+        <android.support.percent.PercentRelativeLayout
+            android:id="@+id/rl_lwq_settings_dim"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/tv_lwq_settings_dim"
-            android:layout_toEndOf="@id/tv_lwq_settings_dim"
-            android:max="@integer/max_dim_value"
-            app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"/>
+            android:minHeight="@dimen/lwq_settings_element_min_height"
+            android:layout_below="@id/rl_lwq_settings_blur"
+            android:layout_marginTop="@dimen/lwq_settings_element_margin_top"
+            android:layout_centerHorizontal="true"
+            android:layout_alignWithParentIfMissing="false">
 
-    </android.support.percent.PercentRelativeLayout>
+            <TextView
+                style="@style/Theme.LWQ.TextAppearance.Settings.Category"
+                android:id="@+id/tv_lwq_settings_dim"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="dim"
+                app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
 
-    <android.support.percent.PercentRelativeLayout
-        android:id="@+id/rl_lwq_autopilot_settings_interval"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/rl_lwq_settings_dim"
-        android:minHeight="@dimen/lwq_settings_element_min_height"
-        app:layout_marginTopPercent="@fraction/lwq_settings_element_margin_top_percent">
+            <SeekBar
+                style="@style/Theme.LWQ.SeekBar"
+                android:id="@+id/sb_lwq_settings_dim"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/tv_lwq_settings_dim"
+                android:layout_toEndOf="@id/tv_lwq_settings_dim"
+                android:max="@integer/max_dim_value"
+                app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"/>
 
-        <TextView
-            style="@style/Theme.LWQ.TextAppearance.Settings.Category"
-            android:id="@+id/tv_lwq_autopilot_settings_interval"
-            android:layout_width="wrap_content"
+        </android.support.percent.PercentRelativeLayout>
+
+        <android.support.percent.PercentRelativeLayout
+            android:id="@+id/rl_lwq_fonts_settings"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="refresh"
-            app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
+            android:layout_below="@+id/rl_lwq_settings_dim"
+            android:minHeight="@dimen/lwq_settings_element_min_height"
+            android:layout_marginTop="@dimen/lwq_settings_element_margin_top">
 
-        <Spinner
-            android:id="@+id/spinner_lwq_settings_interval"
-            android:layout_width="fill_parent"
+            <TextView
+                style="@style/Theme.LWQ.TextAppearance.Settings.Category"
+                android:id="@+id/tv_lwq_fonts_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="fonts"
+                app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
+
+            <Button
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:id="@+id/btn_lwq_fonts_settings"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/tv_lwq_fonts_settings"
+                android:layout_toEndOf="@id/tv_lwq_fonts_settings"
+                android:gravity="left|start|center_vertical"
+                android:text="choose"
+                android:textSize="@dimen/abc_text_size_headline_material"
+                android:textColor="@color/palette_400"
+                android:textStyle="normal"
+                app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"
+                app:buttonTint="@color/checked_state_list"/>
+
+        </android.support.percent.PercentRelativeLayout>
+
+        <android.support.percent.PercentRelativeLayout
+            android:id="@+id/rl_lwq_autopilot_settings_interval"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/tv_lwq_autopilot_settings_interval"
-            android:layout_toEndOf="@id/tv_lwq_autopilot_settings_interval"
-            app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width">
+            android:layout_below="@+id/rl_lwq_fonts_settings"
+            android:minHeight="@dimen/lwq_settings_element_min_height"
+            android:layout_marginTop="@dimen/lwq_settings_element_margin_top">
 
-        </Spinner>
+            <TextView
+                style="@style/Theme.LWQ.TextAppearance.Settings.Category"
+                android:id="@+id/tv_lwq_autopilot_settings_interval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="refresh"
+                app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
 
-    </android.support.percent.PercentRelativeLayout>
+            <Spinner
+                android:id="@+id/spinner_lwq_settings_interval"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/tv_lwq_autopilot_settings_interval"
+                android:layout_toEndOf="@id/tv_lwq_autopilot_settings_interval"
+                app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width">
 
-    <android.support.percent.PercentRelativeLayout
-        android:id="@+id/rl_lwq_autopilot_settings_image_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="@dimen/lwq_settings_element_min_height"
-        android:layout_below="@id/rl_lwq_autopilot_settings_interval"
-        android:layout_centerHorizontal="true"
-        app:layout_marginTopPercent="@fraction/lwq_settings_element_margin_top_percent">
+            </Spinner>
 
-        <TextView
-            style="@style/Theme.LWQ.TextAppearance.Settings.Category"
-            android:id="@+id/tv_lwq_autopilot_settings_image_category"
-            android:layout_width="wrap_content"
+        </android.support.percent.PercentRelativeLayout>
+
+        <android.support.percent.PercentRelativeLayout
+            android:id="@+id/rl_lwq_autopilot_settings_image_category"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="Image Category"
-            app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
+            android:minHeight="@dimen/lwq_settings_element_min_height"
+            android:layout_below="@id/rl_lwq_autopilot_settings_interval"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/lwq_settings_element_margin_top">
 
-        <Spinner
-            android:id="@+id/spinner_lwq_settings_image_category"
-            android:layout_width="fill_parent"
+            <TextView
+                style="@style/Theme.LWQ.TextAppearance.Settings.Category"
+                android:id="@+id/tv_lwq_autopilot_settings_image_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="Image Category"
+                app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
+
+            <Spinner
+                android:id="@+id/spinner_lwq_settings_image_category"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/tv_lwq_autopilot_settings_image_category"
+                android:layout_toEndOf="@id/tv_lwq_autopilot_settings_image_category"
+                app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"/>
+
+        </android.support.percent.PercentRelativeLayout>
+
+        <android.support.percent.PercentRelativeLayout
+            android:id="@+id/rl_lwq_settings_double_tap"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/tv_lwq_autopilot_settings_image_category"
-            android:layout_toEndOf="@id/tv_lwq_autopilot_settings_image_category"
-            app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"/>
+            android:minHeight="@dimen/lwq_settings_element_min_height"
+            android:layout_below="@id/rl_lwq_autopilot_settings_image_category"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/lwq_settings_element_margin_top">
 
-    </android.support.percent.PercentRelativeLayout>
+            <TextView
+                style="@style/Theme.LWQ.TextAppearance.Settings.Category"
+                android:id="@+id/tv_lwq_settings_double_tap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="Double-Tap to Launch"
+                app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
 
-    <android.support.percent.PercentRelativeLayout
-        android:id="@+id/rl_lwq_settings_double_tap"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="@dimen/lwq_settings_element_min_height"
-        android:layout_below="@id/rl_lwq_autopilot_settings_image_category"
-        android:layout_centerHorizontal="true"
-        app:layout_marginTopPercent="@fraction/lwq_settings_element_margin_top_percent">
+            <android.support.v7.widget.AppCompatCheckBox
+                android:id="@+id/check_lwq_settings_double_tap"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/tv_lwq_settings_double_tap"
+                android:layout_toEndOf="@id/tv_lwq_settings_double_tap"
+                app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"
+                app:buttonTint="@color/checked_state_list"
+                app:layout_marginLeftPercent="2%"/>
 
-        <TextView
-            style="@style/Theme.LWQ.TextAppearance.Settings.Category"
-            android:id="@+id/tv_lwq_settings_double_tap"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="Double-Tap Wallpaper to Launch"
-            app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
+        </android.support.percent.PercentRelativeLayout>
 
-        <android.support.v7.widget.AppCompatCheckBox
-            android:id="@+id/check_lwq_settings_double_tap"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/tv_lwq_settings_double_tap"
-            android:layout_toEndOf="@id/tv_lwq_settings_double_tap"
-            app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"
-            app:buttonTint="@color/checked_state_list"
-            app:layout_marginLeftPercent="2%"/>
-
-    </android.support.percent.PercentRelativeLayout>
-
-</android.support.percent.PercentRelativeLayout>
+    </RelativeLayout>
+</ScrollView>

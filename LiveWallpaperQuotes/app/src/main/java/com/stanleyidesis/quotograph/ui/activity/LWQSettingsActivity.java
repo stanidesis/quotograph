@@ -42,6 +42,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
@@ -63,6 +64,7 @@ import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.ui.UIUtils;
+import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
 
@@ -118,7 +120,7 @@ import butterknife.OnClick;
 public class LWQSettingsActivity extends LWQWallpaperActivity implements ActivityStateFlags,
         SeekBar.OnSeekBarChangeListener,
         PlaylistAdapter.Delegate,
-        SearchResultsAdapter.Delegate {
+        SearchResultsAdapter.Delegate, MaterialDialog.ListCallback {
 
     static class ActivityState {
         int page = -1;
@@ -932,6 +934,21 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
         AppCompatCheckBox doubleTapCheckbox = ButterKnife.findById(this, R.id.check_lwq_settings_double_tap);
         doubleTapCheckbox.setChecked(LWQPreferences.isDoubleTapEnabled());
+
+        // Fonts
+        ButterKnife.findById(settingsContainer, R.id.btn_lwq_fonts_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new MaterialDialog.Builder(LWQSettingsActivity.this)
+                        .title("Choose Quote Fonts")
+                        .adapter(new FontMultiselectAdapter(LWQSettingsActivity.this),
+                                LWQSettingsActivity.this)
+                        .alwaysCallMultiChoiceCallback()
+                        .autoDismiss(false)
+                        .canceledOnTouchOutside(true)
+                        .show();
+            }
+        });
     }
 
     void updateRefreshSpinner() {
@@ -1423,6 +1440,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             playlistAdapter.insertItem(playlistItem);
         }
         return playlistItem;
+    }
+
+    // MaterialDialog Delegates
+
+    @Override
+    public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+        Toast.makeText(dialog.getContext(), "Which: " + which + ", text: " + text, Toast.LENGTH_SHORT).show();
     }
 
 }
