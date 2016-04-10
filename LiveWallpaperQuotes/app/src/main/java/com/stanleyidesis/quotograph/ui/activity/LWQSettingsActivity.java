@@ -940,7 +940,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void onClick(View v) {
                 new MaterialDialog.Builder(LWQSettingsActivity.this)
-                        .title("Choose Quote Fonts")
+                        .title("Choose Fonts Fonts")
                         .adapter(new FontMultiselectAdapter(LWQSettingsActivity.this),
                                 LWQSettingsActivity.this)
                         .alwaysCallMultiChoiceCallback()
