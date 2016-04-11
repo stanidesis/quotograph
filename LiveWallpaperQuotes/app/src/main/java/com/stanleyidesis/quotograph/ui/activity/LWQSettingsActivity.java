@@ -8,6 +8,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -120,7 +121,9 @@ import butterknife.OnClick;
 public class LWQSettingsActivity extends LWQWallpaperActivity implements ActivityStateFlags,
         SeekBar.OnSeekBarChangeListener,
         PlaylistAdapter.Delegate,
-        SearchResultsAdapter.Delegate, MaterialDialog.ListCallback {
+        SearchResultsAdapter.Delegate,
+        MaterialDialog.ListCallback,
+        DialogInterface.OnCancelListener {
 
     static class ActivityState {
         int page = -1;
@@ -940,12 +943,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void onClick(View v) {
                 new MaterialDialog.Builder(LWQSettingsActivity.this)
-                        .title("Choose Fonts Fonts")
+                        .title("Choose Fonts")
                         .adapter(new FontMultiselectAdapter(LWQSettingsActivity.this),
                                 LWQSettingsActivity.this)
                         .alwaysCallMultiChoiceCallback()
                         .autoDismiss(false)
                         .canceledOnTouchOutside(true)
+                        .cancelListener(LWQSettingsActivity.this)
                         .show();
             }
         });
@@ -1446,7 +1450,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
-        Toast.makeText(dialog.getContext(), "Which: " + which + ", text: " + text, Toast.LENGTH_SHORT).show();
+        FontMultiselectAdapter adapter = (FontMultiselectAdapter) dialog.getListView().getAdapter();
+        adapter.addOrRemoveFont(which);
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        if (!(dialog instanceof MaterialDialog)) {
+            return;
+        }
+        MaterialDialog materialDialog = (MaterialDialog) dialog;
+        if (materialDialog.getListView() != null &&
+                materialDialog.getListView().getAdapter() instanceof FontMultiselectAdapter) {
+            FontMultiselectAdapter adapter = (FontMultiselectAdapter) materialDialog.getListView()
+                    .getAdapter();
+            adapter.setDefaultsIfNecessary();
+        }
     }
 
 }

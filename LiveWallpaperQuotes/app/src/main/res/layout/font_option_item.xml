@@ -14,8 +14,12 @@
         android:paddingRight="@dimen/font_option_item_padding"
         android:paddingEnd="@dimen/font_option_item_padding"
         android:checkMark="?android:attr/listChoiceIndicatorMultiple"
-        android:textSize="@dimen/abc_text_size_display_1_material"
+        android:textSize="48px"
         android:gravity="start|left|center_vertical"
         android:text="Sample"/>
 
 </FrameLayout>
+
+
+
+    <!--android:textSize="@dimen/abc_text_size_display_1_material"-->

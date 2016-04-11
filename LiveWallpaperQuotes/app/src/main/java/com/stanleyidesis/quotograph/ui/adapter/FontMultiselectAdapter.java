@@ -88,4 +88,30 @@ public class FontMultiselectAdapter extends BaseAdapter {
         checkedTextView.setChecked(selectedFonts.contains(String.valueOf(font.getId())));
         return convertView;
     }
+
+    /**
+     * Add or remove the font at this position from the user's preferences.
+     *
+     * @param position
+     */
+    public void addOrRemoveFont(int position) {
+        Fonts selectedFont = allFonts[position];
+        String fontId = String.valueOf(selectedFont.getId());
+        if (selectedFonts.contains(fontId)) {
+            selectedFonts.remove(fontId);
+        } else {
+            selectedFonts.add(fontId);
+        }
+        LWQPreferences.setFontSet(selectedFonts);
+        notifyDataSetChanged();
+    }
+
+    /**
+     * If the user de-selects all fonts, revert to using the System Font
+     */
+    public void setDefaultsIfNecessary() {
+        if (selectedFonts.isEmpty()) {
+            addOrRemoveFont(0);
+        }
+    }
 }
