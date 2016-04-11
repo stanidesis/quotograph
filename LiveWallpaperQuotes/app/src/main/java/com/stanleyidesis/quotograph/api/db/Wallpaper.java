@@ -49,15 +49,17 @@ public class Wallpaper extends SugarRecord<Wallpaper> {
     public long dateCreated;
     public short imageSource;
     public long imageId;
+    public long typefaceId;
 
     public Wallpaper() {}
 
-    public Wallpaper(Quote quote, boolean active, long dateCreated, short imageSource, long imageId) {
+    public Wallpaper(Quote quote, boolean active, long dateCreated, short imageSource, long imageId, int typefaceId) {
         this.quote = quote;
         this.active = active;
         this.dateCreated = dateCreated;
         this.imageSource = imageSource;
         this.imageId = imageId;
+        this.typefaceId = typefaceId;
     }
 
     public UserPhoto recoverUserPhoto() {

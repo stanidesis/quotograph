@@ -84,4 +84,17 @@
     <string name="save_failed">Failed to save your Quotograph :(</string>
     <string name="failed_to_generate_wallpaper">Whoops! We couldn\'t make a new Quotograph, please try again.</string>
     <string name="toast_tap_set_wallpaper">Press, \'Set wallpaper,\' to use Quotograph</string>
+    <!-- Fonts -->
+    <string name="font_amatic_sc">Amatic SC</string>
+    <string name="font_black_ops_one">Black Ops One</string>
+    <string name="font_crafty_girls">Crafty Girls</string>
+    <string name="font_finger_paint">Finger Paint</string>
+    <string name="font_fredericka_the_great">Fredericka The Great</string>
+    <string name="font_indie_flower">Indie Flower</string>
+    <string name="font_josefin_sans_bold">Josefin Sans</string>
+    <string name="font_pacifico">Pacifico</string>
+    <string name="font_press_start_2p">Press Start 2P</string>
+    <string name="font_special_elite">Special Elite</string>
+    <string name="font_system">System Font</string>
+    <string name="font_unica_one">Unica One</string>
 </resources>

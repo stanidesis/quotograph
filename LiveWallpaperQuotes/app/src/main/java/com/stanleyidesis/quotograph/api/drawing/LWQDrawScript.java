@@ -77,14 +77,10 @@ public abstract class LWQDrawScript {
     static final int TEXT_ALPHA = 0xE5FFFFFF;
     static final int STROKE_ALPHA = 0xF2FFFFFF;
     static int swatchIndex;
-    static Typeface quoteTypeFace;
-    static Typeface authorTypeFace;
     static RenderScript renderScript;
 
     static {
         executorService = Executors.newSingleThreadScheduledExecutor();
-        quoteTypeFace = Fonts.JOSEFIN_BOLD.load(LWQApplication.get());
-        authorTypeFace = quoteTypeFace;
         paletteCache = new HashMap<>();
     }
 
@@ -212,6 +208,9 @@ public abstract class LWQDrawScript {
         int authorColor = swatch.getRgb();
         int quoteStrokeColor = swatch.getTitleTextColor();
 
+        // Load Typeface
+        Typeface quoteTypeFace = wallpaperController.getTypeface();
+
         // Setup Quote text
         TextPaint quoteTextPaint = new TextPaint();
         quoteTextPaint.setTextAlign(Paint.Align.LEFT);
@@ -226,7 +225,7 @@ public abstract class LWQDrawScript {
         authorTextPaint.setTextSize(100f);
         authorTextPaint.setTextAlign(Paint.Align.RIGHT);
         authorTextPaint.setColor(authorColor & TEXT_ALPHA);
-        authorTextPaint.setTypeface(authorTypeFace);
+        authorTextPaint.setTypeface(quoteTypeFace);
         String author = context.getString(R.string.unknown);
         if (wallpaperController.getAuthor() != null && !wallpaperController.getAuthor().isEmpty()) {
             author = wallpaperController.getAuthor();
