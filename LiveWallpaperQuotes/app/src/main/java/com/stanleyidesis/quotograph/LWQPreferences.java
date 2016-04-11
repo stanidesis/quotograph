@@ -118,6 +118,9 @@ public class LWQPreferences {
     public static Set<String> getFontSet() {
         Set<String> defaultSet = new HashSet<>();
         defaultSet.add(String.valueOf(Fonts.SYSTEM.getId()));
-        return sharedPreferences.getStringSet(LWQApplication.get().getString(R.string.preference_key_fonts), defaultSet);
+        Set<String> stringSet = sharedPreferences.getStringSet(LWQApplication.get().getString(R.string.preference_key_fonts), defaultSet);
+        Set<String> mutableSet = new HashSet<>();
+        mutableSet.addAll(stringSet);
+        return mutableSet;
     }
 }
