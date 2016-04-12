@@ -62,6 +62,7 @@ import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
+import com.stanleyidesis.quotograph.billing.util.IabConst;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
@@ -510,6 +511,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         if (requestCode == REQUEST_CODE_SAVE) {
             changeState(stateSaveSkipCompleted);
             return;
+        } else if (requestCode == IabConst.PURCHASE_REQUEST_CODE) {
+            LWQApplication.getIabHelper().handleActivityResult(requestCode, resultCode, data);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
