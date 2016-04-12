@@ -3,7 +3,9 @@ package com.stanleyidesis.quotograph.api.controller;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 
+import com.afollestad.materialdialogs.util.TypefaceHelper;
 import com.orm.SugarRecord;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
@@ -22,11 +24,13 @@ import com.stanleyidesis.quotograph.api.db.UserPhoto;
 import com.stanleyidesis.quotograph.api.db.Wallpaper;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.api.network.UnsplashManager;
+import com.stanleyidesis.quotograph.ui.Fonts;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -77,15 +81,36 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     Callback<List<Quote>> generateNewWallpaperCallback = new Callback<List<Quote>>() {
 
         void finishUp(List<Quote> newQuotes, Object photoRecord) {
-            Quote newQuote = newQuotes.get(new Random().nextInt(newQuotes.size()));
+            // Get the font set first
+            Set<String> fontPreferenceSet = LWQPreferences.getFontSet();
+            // Discard active wallpaper
             if (activeWallpaper != null) {
                 activeWallpaper.active = false;
                 activeWallpaper.save();
+                // Remove the previously-used font if the set has more than one font in it
+                // This prevents reusing the same font twice
+                if (fontPreferenceSet.size() > 1) {
+                    fontPreferenceSet.remove(String.valueOf(activeWallpaper.typefaceId));
+                }
                 discardActiveWallpaper();
+            }
+
+            // Get a new quote
+            Quote newQuote = newQuotes.get(new Random().nextInt(newQuotes.size()));
+
+            // Choose new font, if possible
+            int newFontId = Fonts.SYSTEM.getId();
+            String[] fontPreferenceArray = new String[fontPreferenceSet.size()];
+            fontPreferenceSet.toArray(fontPreferenceArray);
+            if (fontPreferenceArray.length == 1) {
+                newFontId = Integer.parseInt(fontPreferenceArray[0]);
+            } else {
+                newFontId = Integer.parseInt
+                        (fontPreferenceArray[(new Random()).nextInt(fontPreferenceArray.length)]);
             }
             activeWallpaper = new Wallpaper(newQuote, true, System.currentTimeMillis(),
                     photoRecord instanceof UnsplashPhoto ? Wallpaper.IMAGE_SOURCE_UNSPLASH : Wallpaper.IMAGE_SOURCE_USER,
-                    ((SugarRecord) photoRecord).getId());
+                    ((SugarRecord) photoRecord).getId(), newFontId);
             activeWallpaper.save();
             LWQApplication.getLogger().logWallpaperCount(activeWallpaper.getId());
             newQuote.used = true;
@@ -142,6 +167,15 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     @Override
     public Bitmap getBackgroundImage() {
         return activeBackgroundImage;
+    }
+
+    @Override
+    public Typeface getTypeface() {
+        if (activeWallpaper == null) {
+            return null;
+        }
+        Fonts fontById = Fonts.findById((int) activeWallpaper.typefaceId);
+        return TypefaceHelper.get(LWQApplication.get(), fontById.getFileName());
     }
 
     @Override

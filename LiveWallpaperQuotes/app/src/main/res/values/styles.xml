@@ -15,10 +15,23 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowShowWallpaper">true</item>
         <item name="colorAccent">@color/palette_500</item>
+
+        <!-- Material Dialog Theme -->
+        <item name="md_background_color">@color/palette_A100</item>
+        <item name="md_title_color">@color/palette_50</item>
     </style>
 
     <style name="Theme.LWQ.Wallpaper" parent="Theme.LWQ.Wallpaper.Base">
         <item name="colorAccent">@color/palette_500</item>
+        <!-- Works on v19+ -->
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <!-- Works on v21+ -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Works on v23+ -->
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="Theme.LWQ.TextAppearance.Settings.Category" parent="Base.TextAppearance.AppCompat.Headline">
@@ -38,10 +51,10 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:gravity">start|center_vertical</item>
         <item name="android:padding">8dp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="Theme.LWQ.SeekBar">
+        <!-- Works on v21+ -->
         <item name="android:progressTint">@color/palette_500</item>
         <item name="android:thumbTint">@color/palette_400</item>
     </style>
@@ -73,6 +86,9 @@
         <item name="android:windowContentOverlay">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowIsTranslucent">true</item>
+        <!-- Works on v19+ -->
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
 </resources>

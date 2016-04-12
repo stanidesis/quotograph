@@ -8,6 +8,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -42,6 +43,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
@@ -64,6 +66,7 @@ import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.billing.util.IabConst;
 import com.stanleyidesis.quotograph.ui.UIUtils;
+import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
 
@@ -119,7 +122,9 @@ import butterknife.OnClick;
 public class LWQSettingsActivity extends LWQWallpaperActivity implements ActivityStateFlags,
         SeekBar.OnSeekBarChangeListener,
         PlaylistAdapter.Delegate,
-        SearchResultsAdapter.Delegate {
+        SearchResultsAdapter.Delegate,
+        MaterialDialog.ListCallback,
+        DialogInterface.OnCancelListener {
 
     static class ActivityState {
         int page = -1;
@@ -935,6 +940,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
         AppCompatCheckBox doubleTapCheckbox = ButterKnife.findById(this, R.id.check_lwq_settings_double_tap);
         doubleTapCheckbox.setChecked(LWQPreferences.isDoubleTapEnabled());
+
+        // Fonts
+        ButterKnife.findById(settingsContainer, R.id.btn_lwq_fonts_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new MaterialDialog.Builder(LWQSettingsActivity.this)
+                        .title("Choose Fonts")
+                        .adapter(new FontMultiselectAdapter(LWQSettingsActivity.this),
+                                LWQSettingsActivity.this)
+                        .alwaysCallMultiChoiceCallback()
+                        .autoDismiss(false)
+                        .canceledOnTouchOutside(true)
+                        .cancelListener(LWQSettingsActivity.this)
+                        .show();
+            }
+        });
     }
 
     void updateRefreshSpinner() {
@@ -1426,6 +1447,28 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             playlistAdapter.insertItem(playlistItem);
         }
         return playlistItem;
+    }
+
+    // MaterialDialog Delegates
+
+    @Override
+    public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+        FontMultiselectAdapter adapter = (FontMultiselectAdapter) dialog.getListView().getAdapter();
+        adapter.addOrRemoveFont(which);
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        if (!(dialog instanceof MaterialDialog)) {
+            return;
+        }
+        MaterialDialog materialDialog = (MaterialDialog) dialog;
+        if (materialDialog.getListView() != null &&
+                materialDialog.getListView().getAdapter() instanceof FontMultiselectAdapter) {
+            FontMultiselectAdapter adapter = (FontMultiselectAdapter) materialDialog.getListView()
+                    .getAdapter();
+            adapter.setDefaultsIfNecessary();
+        }
     }
 
 }
