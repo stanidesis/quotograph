@@ -1,9 +1,9 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ import java.util.List;
  *
  * Date: 10/03/2015
  */
-public class Playlist extends SugarRecord<Playlist> {
+public class Playlist extends SugarRecord {
     public String name;
     public boolean active;
 
@@ -53,20 +53,20 @@ public class Playlist extends SugarRecord<Playlist> {
 
     public List<PlaylistQuote> quotes() {
         return Select.from(PlaylistQuote.class)
-                .where(Condition.prop(StringUtil.toSQLName("playlist")).eq(getId())).list();
+                .where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(getId())).list();
     }
 
     public List<PlaylistAuthor> authors() {
         return Select.from(PlaylistAuthor.class)
-                .where(Condition.prop(StringUtil.toSQLName("playlist")).eq(getId())).list();
+                .where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(getId())).list();
     }
 
     public List<PlaylistCategory> categories() {
         return Select.from(PlaylistCategory.class)
-                .where(Condition.prop(StringUtil.toSQLName("playlist")).eq(getId())).list();
+                .where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(getId())).list();
     }
 
     public static Playlist active() {
-        return Select.from(Playlist.class).where(Condition.prop(StringUtil.toSQLName("active")).eq("1")).first();
+        return Select.from(Playlist.class).where(Condition.prop(NamingHelper.toSQLNameDefault("active")).eq("1")).first();
     }
 }

@@ -1,9 +1,9 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -38,7 +38,7 @@ import com.orm.query.Select;
  *
  * Date: 08/01/2015
  */
-public class Wallpaper extends SugarRecord<Wallpaper> {
+public class Wallpaper extends SugarRecord {
 
     public static final short IMAGE_SOURCE_RESOURCE = 0;
     public static final short IMAGE_SOURCE_USER = 1;
@@ -64,14 +64,14 @@ public class Wallpaper extends SugarRecord<Wallpaper> {
         if (imageSource != IMAGE_SOURCE_USER) {
             return null;
         }
-        return Select.from(UserPhoto.class).where(Condition.prop(StringUtil.toSQLName("id")).eq(imageId)).first();
+        return Select.from(UserPhoto.class).where(Condition.prop(NamingHelper.toSQLNameDefault("id")).eq(imageId)).first();
     }
 
     public UnsplashPhoto recoverUnsplashPhoto() {
         if (imageSource != IMAGE_SOURCE_UNSPLASH) {
             return null;
         }
-        return Select.from(UnsplashPhoto.class).where(Condition.prop(StringUtil.toSQLName("id")).eq(imageId)).first();
+        return Select.from(UnsplashPhoto.class).where(Condition.prop(NamingHelper.toSQLNameDefault("id")).eq(imageId)).first();
     }
 
     public static Wallpaper active() {
@@ -79,7 +79,7 @@ public class Wallpaper extends SugarRecord<Wallpaper> {
     }
 
     public static boolean exists(short source, long id) {
-        return Select.from(Wallpaper.class).where(Condition.prop(StringUtil.toSQLName("imageSource")).eq(source),
-                Condition.prop(StringUtil.toSQLName("imageId")).eq(id)).first() != null;
+        return Select.from(Wallpaper.class).where(Condition.prop(NamingHelper.toSQLNameDefault("imageSource")).eq(source),
+                Condition.prop(NamingHelper.toSQLNameDefault("imageId")).eq(id)).first() != null;
     }
 }

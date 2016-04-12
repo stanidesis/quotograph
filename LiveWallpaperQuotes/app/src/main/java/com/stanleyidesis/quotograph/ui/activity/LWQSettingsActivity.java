@@ -42,9 +42,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -780,7 +780,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void run() {
                 Activity context = LWQSettingsActivity.this;
-                final List<Author> list = Select.from(Author.class).orderBy(StringUtil.toSQLName("name")).list();
+                final List<Author> list = Select.from(Author.class).orderBy(NamingHelper.toSQLNameDefault("name")).list();
                 String [] allAuthors = new String[list.size()];
                 for (int i = 0; i < list.size(); i++) {
                     allAuthors[i] = list.get(i).name;

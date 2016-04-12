@@ -1,9 +1,9 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 
 import java.util.Random;
 
@@ -40,7 +40,7 @@ import java.util.Random;
  *
  * Date: 07/11/2015
  */
-public class Category extends SugarRecord<Category> {
+public class Category extends SugarRecord {
     public enum Source {
         DEFAULT,
         BRAINY_QUOTE;
@@ -58,8 +58,8 @@ public class Category extends SugarRecord<Category> {
 
     public static boolean hasCategory(String name, Source source) {
         final long count = Select.from(Category.class)
-                .where(Condition.prop(StringUtil.toSQLName("name")).eq(name),
-                        Condition.prop(StringUtil.toSQLName("source")).eq(source)).count();
+                .where(Condition.prop(NamingHelper.toSQLNameDefault("name")).eq(name),
+                        Condition.prop(NamingHelper.toSQLNameDefault("source")).eq(source)).count();
         return count > 0;
     }
 
@@ -70,6 +70,6 @@ public class Category extends SugarRecord<Category> {
     }
 
     public static Category findWithName(String name) {
-        return Select.from(Category.class).where(Condition.prop(StringUtil.toSQLName("name")).eq(name)).first();
+        return Select.from(Category.class).where(Condition.prop(NamingHelper.toSQLNameDefault("name")).eq(name)).first();
     }
 }

@@ -1,9 +1,9 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -38,7 +38,7 @@ import com.orm.query.Select;
  *
  * Date: 11/29/2015
  */
-public class UnsplashCategory extends SugarRecord<UnsplashCategory> {
+public class UnsplashCategory extends SugarRecord {
 
     public int unsplashId;
     public String title;
@@ -51,10 +51,10 @@ public class UnsplashCategory extends SugarRecord<UnsplashCategory> {
     }
 
     public static UnsplashCategory find(int id) {
-        return Select.from(UnsplashCategory.class).where(Condition.prop(StringUtil.toSQLName("unsplashId")).eq(id)).first();
+        return Select.from(UnsplashCategory.class).where(Condition.prop(NamingHelper.toSQLNameDefault("unsplashId")).eq(id)).first();
     }
 
     public static UnsplashCategory find(String title) {
-        return Select.from(UnsplashCategory.class).where(Condition.prop(StringUtil.toSQLName("title")).eq(title)).first();
+        return Select.from(UnsplashCategory.class).where(Condition.prop(NamingHelper.toSQLNameDefault("title")).eq(title)).first();
     }
 }

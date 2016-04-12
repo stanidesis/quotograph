@@ -1,9 +1,9 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ import java.util.List;
  *
  * Date: 10/03/2015
  */
-public class PlaylistAuthor extends SugarRecord<PlaylistAuthor> implements Comparable<PlaylistAuthor> {
+public class PlaylistAuthor extends SugarRecord implements Comparable<PlaylistAuthor> {
     public Playlist playlist;
     public Author author;
 
@@ -52,12 +52,12 @@ public class PlaylistAuthor extends SugarRecord<PlaylistAuthor> implements Compa
     }
 
     public static List<PlaylistAuthor> forPlaylist(Playlist playlist) {
-        return Select.from(PlaylistAuthor.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId())).list();
+        return Select.from(PlaylistAuthor.class).where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(playlist.getId())).list();
     }
 
     public static PlaylistAuthor find(Playlist playlist, Author author) {
-        return Select.from(PlaylistAuthor.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId()),
-                Condition.prop(StringUtil.toSQLName("author")).eq(author.getId())).first();
+        return Select.from(PlaylistAuthor.class).where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(playlist.getId()),
+                Condition.prop(NamingHelper.toSQLNameDefault("author")).eq(author.getId())).first();
     }
 
     @Override
