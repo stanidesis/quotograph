@@ -1,8 +1,8 @@
 package com.stanleyidesis.quotograph.api.controller;
 
-import com.orm.StringUtil;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.db.Author;
@@ -126,8 +126,8 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
     @Override
     public void fetchUnusedQuotes(final Category category, final Callback<List<Quote>> callback) {
         Condition [] conditions = new Condition[2];
-        conditions[0] = Condition.prop(StringUtil.toSQLName("used")).eq("0");
-        conditions[1] = Condition.prop(StringUtil.toSQLName("category")).eq(category.getId());
+        conditions[0] = Condition.prop(NamingHelper.toSQLNameDefault("used")).eq("0");
+        conditions[1] = Condition.prop(NamingHelper.toSQLNameDefault("category")).eq(category.getId());
         final List<Quote> unusedQuotesFromCategory = Select.from(Quote.class).where(conditions).list();
         if (unusedQuotesFromCategory != null && !unusedQuotesFromCategory.isEmpty()) {
             callback.onSuccess(unusedQuotesFromCategory);
@@ -152,8 +152,8 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
     @Override
     public void fetchUnusedQuotesBy(final Author author, final Callback<List<Quote>> callback) {
         Condition [] conditions = new Condition[2];
-        conditions[0] = Condition.prop(StringUtil.toSQLName("used")).eq("0");
-        conditions[1] = Condition.prop(StringUtil.toSQLName("author")).eq(author.getId());
+        conditions[0] = Condition.prop(NamingHelper.toSQLNameDefault("used")).eq("0");
+        conditions[1] = Condition.prop(NamingHelper.toSQLNameDefault("author")).eq(author.getId());
         final List<Quote> unusedQuotesFromAuthor = Select.from(Quote.class).where(conditions).list();
         if (unusedQuotesFromAuthor != null && !unusedQuotesFromAuthor.isEmpty()) {
             callback.onSuccess(unusedQuotesFromAuthor);

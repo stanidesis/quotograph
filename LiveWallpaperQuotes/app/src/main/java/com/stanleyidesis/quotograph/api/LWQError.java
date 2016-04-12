@@ -55,6 +55,10 @@ public class LWQError {
         return lwqError;
     }
 
+    public static void log(String errorMessage) {
+        LWQApplication.getLogger().logError(LWQError.create(errorMessage));
+    }
+
     final String errorMessage;
     final Throwable errorThrowable;
 

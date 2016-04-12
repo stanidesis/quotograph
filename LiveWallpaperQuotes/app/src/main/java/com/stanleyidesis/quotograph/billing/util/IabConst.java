@@ -1,11 +1,4 @@
-package com.stanleyidesis.quotograph.api.db;
-
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-import com.orm.util.NamingHelper;
-
-import java.util.List;
+package com.stanleyidesis.quotograph.billing.util;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -29,7 +22,7 @@ import java.util.List;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Playlist.java
+ * IabConst.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -38,35 +31,9 @@ import java.util.List;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 10/03/2015
+ * Date: 03/26/2016
  */
-public class Playlist extends SugarRecord {
-    public String name;
-    public boolean active;
-
-    public Playlist() {}
-
-    public Playlist(String name, boolean active) {
-        this.name = name;
-        this.active = active;
-    }
-
-    public List<PlaylistQuote> quotes() {
-        return Select.from(PlaylistQuote.class)
-                .where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(getId())).list();
-    }
-
-    public List<PlaylistAuthor> authors() {
-        return Select.from(PlaylistAuthor.class)
-                .where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(getId())).list();
-    }
-
-    public List<PlaylistCategory> categories() {
-        return Select.from(PlaylistCategory.class)
-                .where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(getId())).list();
-    }
-
-    public static Playlist active() {
-        return Select.from(Playlist.class).where(Condition.prop(NamingHelper.toSQLNameDefault("active")).eq("1")).first();
-    }
+public class IabConst {
+    public static final String SKU_PREMIUM = "quotograph_premium";
+    public static final int PURCHASE_REQUEST_CODE = 1001;
 }

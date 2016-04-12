@@ -301,7 +301,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         } else if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_RESOURCE) {
             // TODO use a good background image for the default
             Resources resources = LWQApplication.get().getResources();
-            activeBackgroundImage = BitmapFactory.decodeResource(resources, R.drawable.ic_launcher);
+            activeBackgroundImage = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher);
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
             setRetrievalState(RetrievalState.NONE);
         } else if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_USER) {

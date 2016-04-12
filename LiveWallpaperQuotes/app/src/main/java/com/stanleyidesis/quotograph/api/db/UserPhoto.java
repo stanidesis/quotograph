@@ -35,7 +35,7 @@ import com.orm.SugarRecord;
  *
  * Date: 12/05/2015
  */
-public class UserPhoto extends SugarRecord<UserPhoto> {
+public class UserPhoto extends SugarRecord {
     public String uri;
 
     public UserPhoto() {}

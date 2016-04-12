@@ -1,11 +1,6 @@
-package com.stanleyidesis.quotograph.api.db;
+package com.stanleyidesis.quotograph.api.event;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-import com.orm.util.NamingHelper;
-
-import java.util.List;
+import com.stanleyidesis.quotograph.api.LWQError;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -29,7 +24,7 @@ import java.util.List;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Playlist.java
+ * IabPurchaseEvent.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -38,35 +33,25 @@ import java.util.List;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 10/03/2015
+ * Date: 03/26/2016
  */
-public class Playlist extends SugarRecord {
-    public String name;
-    public boolean active;
+public class IabPurchaseEvent extends FailableEvent {
 
-    public Playlist() {}
-
-    public Playlist(String name, boolean active) {
-        this.name = name;
-        this.active = active;
+    public static IabPurchaseEvent success(String skuPurchased) {
+        return new IabPurchaseEvent(skuPurchased);
     }
 
-    public List<PlaylistQuote> quotes() {
-        return Select.from(PlaylistQuote.class)
-                .where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(getId())).list();
+    public static IabPurchaseEvent failed(String errorMessage) {
+        IabPurchaseEvent iabPurchaseEvent = new IabPurchaseEvent();
+        iabPurchaseEvent.error = LWQError.create(errorMessage);
+        return iabPurchaseEvent;
     }
 
-    public List<PlaylistAuthor> authors() {
-        return Select.from(PlaylistAuthor.class)
-                .where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(getId())).list();
-    }
+    public String skuPurchased;
 
-    public List<PlaylistCategory> categories() {
-        return Select.from(PlaylistCategory.class)
-                .where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(getId())).list();
-    }
+    IabPurchaseEvent() {}
 
-    public static Playlist active() {
-        return Select.from(Playlist.class).where(Condition.prop(NamingHelper.toSQLNameDefault("active")).eq("1")).first();
+    IabPurchaseEvent(String skuPurchased) {
+        this.skuPurchased = skuPurchased;
     }
 }

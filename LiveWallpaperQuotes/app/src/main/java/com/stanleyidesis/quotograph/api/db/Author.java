@@ -1,9 +1,9 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -39,7 +39,7 @@ import com.orm.query.Select;
  * Date: 07/11/2015
  */
 
-public class Author extends SugarRecord<Author> {
+public class Author extends SugarRecord {
 
     public String name;
     public boolean userGenerated;
@@ -52,6 +52,6 @@ public class Author extends SugarRecord<Author> {
     }
 
     public static Author findAuthor(String name) {
-        return Select.from(Author.class).where(Condition.prop(StringUtil.toSQLName("name")).eq(name)).first();
+        return Select.from(Author.class).where(Condition.prop(NamingHelper.toSQLNameDefault("name")).eq(name)).first();
     }
 }

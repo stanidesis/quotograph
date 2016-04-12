@@ -1,8 +1,10 @@
 package com.stanleyidesis.quotograph;
 
+import android.app.Activity;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.util.Log;
@@ -14,6 +16,7 @@ import com.google.android.gms.analytics.Tracker;
 import com.orm.SugarApp;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.controller.LWQImageController;
 import com.stanleyidesis.quotograph.api.controller.LWQImageControllerUIL;
 import com.stanleyidesis.quotograph.api.controller.LWQLogger;
@@ -27,11 +30,20 @@ import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerUnsplas
 import com.stanleyidesis.quotograph.api.db.Author;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Quote;
+import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
 import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
 import com.stanleyidesis.quotograph.api.receiver.LWQReceiver;
 import com.stanleyidesis.quotograph.api.service.LWQWallpaperService;
+import com.stanleyidesis.quotograph.billing.util.IabBroadcastReceiver;
+import com.stanleyidesis.quotograph.billing.util.IabConst;
+import com.stanleyidesis.quotograph.billing.util.IabHelper;
+import com.stanleyidesis.quotograph.billing.util.IabLic;
+import com.stanleyidesis.quotograph.billing.util.IabResult;
+import com.stanleyidesis.quotograph.billing.util.Inventory;
+import com.stanleyidesis.quotograph.billing.util.Purchase;
 import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
 
+import de.greenrobot.event.EventBus;
 import io.fabric.sdk.android.Fabric;
 
 /**
@@ -67,7 +79,10 @@ import io.fabric.sdk.android.Fabric;
  *
  * Date: 07/11/2015
  */
-public class LWQApplication extends SugarApp {
+public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFinishedListener,
+        IabBroadcastReceiver.IabBroadcastListener,
+        IabHelper.QueryInventoryFinishedListener,
+        IabHelper.OnIabPurchaseFinishedListener {
 
     static LWQApplication sApplication;
 
@@ -78,6 +93,9 @@ public class LWQApplication extends SugarApp {
     LWQLogger logger;
     NetworkConnectionListener networkConnectionListener;
     Tracker tracker;
+    IabHelper iabHelper;
+    IabBroadcastReceiver iabBroadcastReceiver;
+    boolean hasPremium;
 
     @Override
     public void onCreate() {
@@ -88,6 +106,10 @@ public class LWQApplication extends SugarApp {
         // Analytics
         getDefaultTracker().enableAdvertisingIdCollection(true);
         getDefaultTracker().enableAutoActivityTracking(true);
+        // Billing
+        iabHelper = new IabHelper(this, IabLic.retrieveLic());
+        iabHelper.enableDebugLogging(BuildConfig.DEBUG, getString(R.string.app_name) + ".BILLING");
+        iabHelper.startSetup(this);
 
         sApplication = this;
         logger = new LWQLoggerCrashlyticsImpl();
@@ -97,6 +119,14 @@ public class LWQApplication extends SugarApp {
         notificationController = new LWQNotificationControllerImpl();
         networkConnectionListener = new NetworkConnectionListener(this);
         setComponentsEnabled(!LWQPreferences.isFirstLaunch());
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        if (getIabHelper() != null) {
+            getIabHelper().dispose();
+        }
     }
 
     synchronized public Tracker getDefaultTracker() {
@@ -133,6 +163,19 @@ public class LWQApplication extends SugarApp {
 
     public static LWQLogger getLogger() {
         return sApplication.logger;
+    }
+
+    public static IabHelper getIabHelper() {
+        return get().iabHelper;
+    }
+
+    public static boolean hasPremium() {
+        return get().hasPremium;
+    }
+
+    public static void purchasePremium(Activity activity) {
+        getIabHelper().launchPurchaseFlow(activity, IabConst.SKU_PREMIUM,
+                IabConst.PURCHASE_REQUEST_CODE, get());
     }
 
     public static boolean isWallpaperActivated() {
@@ -191,5 +234,57 @@ public class LWQApplication extends SugarApp {
         }
         defaultCategoryQuoteMap.recycle();
         defaultCategoryAuthorMap.recycle();
+    }
+
+    ////////////////////////////////////////////////////////////
+    // IAB Interfaces
+    ////////////////////////////////////////////////////////////
+
+    @Override
+    public void onIabSetupFinished(IabResult result) {
+        // Check for failure
+        if (result.isFailure()) {
+            LWQError.log(result.getMessage());
+            return;
+        }
+        // If we've detached, return
+        if (iabHelper == null) {
+            return;
+        }
+        // Register a receiver
+        iabBroadcastReceiver = new IabBroadcastReceiver(this);
+        IntentFilter broadcastFilter = new IntentFilter(IabBroadcastReceiver.ACTION);
+        registerReceiver(iabBroadcastReceiver, broadcastFilter);
+        // Setup complete, register inventory
+        iabHelper.queryInventoryAsync(this);
+    }
+
+    @Override
+    public void receivedBroadcast() {
+        // Something has changed, refresh inventory
+        getIabHelper().queryInventoryAsync(this);
+    }
+
+    @Override
+    public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+        if (result.isFailure()) {
+            LWQError.log(result.getMessage());
+            return;
+        }
+
+        hasPremium = inventory.hasPurchase(IabConst.SKU_PREMIUM);
+    }
+
+    @Override
+    public void onIabPurchaseFinished(IabResult result, Purchase info) {
+        if (getIabHelper() == null) {
+            return;
+        }
+        if (result.isFailure()) {
+            EventBus.getDefault().post(IabPurchaseEvent.failed(result.getMessage()));
+            return;
+        }
+        hasPremium = info.getSku().equals(IabConst.SKU_PREMIUM);
+        EventBus.getDefault().post(IabPurchaseEvent.success(info.getSku()));
     }
 }

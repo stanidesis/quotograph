@@ -44,9 +44,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -64,6 +64,7 @@ import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
+import com.stanleyidesis.quotograph.billing.util.IabConst;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
@@ -515,6 +516,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         if (requestCode == REQUEST_CODE_SAVE) {
             changeState(stateSaveSkipCompleted);
             return;
+        } else if (requestCode == IabConst.PURCHASE_REQUEST_CODE) {
+            LWQApplication.getIabHelper().handleActivityResult(requestCode, resultCode, data);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -785,7 +788,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void run() {
                 Activity context = LWQSettingsActivity.this;
-                final List<Author> list = Select.from(Author.class).orderBy(StringUtil.toSQLName("name")).list();
+                final List<Author> list = Select.from(Author.class).orderBy(NamingHelper.toSQLNameDefault("name")).list();
                 String [] allAuthors = new String[list.size()];
                 for (int i = 0; i < list.size(); i++) {
                     allAuthors[i] = list.get(i).name;
