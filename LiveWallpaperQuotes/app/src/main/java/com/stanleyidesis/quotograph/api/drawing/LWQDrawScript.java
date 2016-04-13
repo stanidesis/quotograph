@@ -252,8 +252,9 @@ public abstract class LWQDrawScript {
         StaticLayout authorLayout = new StaticLayout(author, authorTextPaint,
                 drawingArea.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
 
-        // Correct the quote height, if necessary
+        // Correct the quote and author height, if necessary
         quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight(), words[0]);
+        authorLayout = correctFontSize(authorLayout, Integer.MAX_VALUE, author);
 
         // Draw the quote centered vertically
         int centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
