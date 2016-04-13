@@ -199,7 +199,15 @@ public abstract class LWQDrawScript {
 
     }
 
-    void drawText(Canvas canvas, int screenWidth, int screenHeight) {
+    /**
+     * Draws the quote and author text
+     *
+     * @param canvas
+     * @param screenWidth
+     * @param screenHeight
+     * @return the rect surrounding both the quote and author
+     */
+    Rect drawText(Canvas canvas, int screenWidth, int screenHeight) {
         Context context = LWQApplication.get();
         final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
 
@@ -234,7 +242,8 @@ public abstract class LWQDrawScript {
         if (wallpaperController.getQuote() != null && !wallpaperController.getQuote().isEmpty()) {
             quote = wallpaperController.getQuote();
         }
-        // Sort by word length
+
+        // Find the longest word
         String[] words = quote.split(" ");
         Arrays.sort(words, new Comparator<String>() {
             @Override
@@ -255,6 +264,13 @@ public abstract class LWQDrawScript {
         // Correct the quote and author height, if necessary
         quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight(), words[0]);
         authorLayout = correctFontSize(authorLayout, Integer.MAX_VALUE, author);
+        if (authorLayout.getPaint().getTextSize() > quoteLayout.getPaint().getTextSize()) {
+            TextPaint paint = authorLayout.getPaint();
+            paint.setTextSize(quoteLayout.getPaint().getTextSize());
+            authorLayout = new StaticLayout(authorLayout.getText(), paint,
+                    authorLayout.getWidth(), authorLayout.getAlignment(), authorLayout.getSpacingMultiplier(),
+                    authorLayout.getSpacingAdd(), true);
+        }
 
         // Draw the quote centered vertically
         int centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
@@ -262,9 +278,18 @@ public abstract class LWQDrawScript {
         quoteLayout.draw(canvas);
         strokeText(quoteLayout, quoteStrokeColor & STROKE_ALPHA, 3f, canvas);
 
-        canvas.translate(drawingArea.width(), quoteLayout.getHeight());
+        canvas.translate(drawingArea.width(), quoteLayout.getHeight() + (authorLayout.getHeight() / 4));
         authorLayout.draw(canvas);
         strokeText(authorLayout, quoteStrokeColor & STROKE_ALPHA, 3f, canvas);
+
+        // Re-set the x/y translation
+        canvas.setMatrix(null);
+
+        // Crop the rect to quote and author
+        drawingArea.top += centerQuoteOffset;
+        drawingArea.bottom = drawingArea.top + quoteLayout.getHeight()
+                + (int) (1.25 * authorLayout.getHeight());
+        return drawingArea;
     }
 
     void drawDimmer(Canvas canvas, int dimPreference) {
