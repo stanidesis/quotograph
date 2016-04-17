@@ -2,6 +2,7 @@ package com.stanleyidesis.quotograph.api.drawing;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -185,8 +186,8 @@ public abstract class LWQDrawScript {
         try {
             final int blurPreference = LWQPreferences.getBlurPreference();
             final int dimPreference = LWQPreferences.getDimPreference();
-            // Determine cache validity
-            Bitmap toDraw = blurPreference > 0f ? generateBitmap(blurPreference, backgroundImage) : backgroundImage;
+            // Blur or choose the raw background image
+            Bitmap toDraw = blurPreference > 0.5f ? generateBitmap(blurPreference, backgroundImage) : backgroundImage;
             drawBitmap(canvas, screenWidth, surfaceFrame, toDraw);
             drawDimmer(canvas, dimPreference);
             drawText(canvas, screenWidth, screenHeight);
@@ -329,6 +330,33 @@ public abstract class LWQDrawScript {
         canvas.translate(dx, 0);
         canvas.drawBitmap(bitmapToDraw, scaleMatrix, bitmapPaint);
         canvas.translate(-dx, 0);
+    }
+
+    /**
+     * For now, disabled. Scrapping Issue #148
+     * @param canvas
+     * @param screenWidth
+     * @param screenHeight
+     * @param quoteAndAuthorRect
+     */
+    void drawWatermark(Canvas canvas, int screenWidth, int screenHeight, Rect quoteAndAuthorRect) {
+        if (!LWQPreferences.isWatermarkEnabled()) {
+            return;
+        }
+        Bitmap icon = BitmapFactory.decodeResource(LWQApplication.get().getResources(),
+                R.mipmap.ic_launcher);
+        // Let's make the icon no more than 10% of the screen size at most
+        float maxPixelHeight = ((float) Math.max(screenWidth, screenHeight)) * .1f;
+        float scale = maxPixelHeight / (float) icon.getHeight();
+        Matrix scaleMatrix = new Matrix();
+        scaleMatrix.postScale(scale, scale);
+        Paint iconPaint = new Paint();
+        iconPaint.setAntiAlias(true);
+        iconPaint.setFilterBitmap(true);
+        iconPaint.setDither(true);
+        iconPaint.setAlpha(100);
+        canvas.translate(quoteAndAuthorRect.left, screenHeight - maxPixelHeight);
+        canvas.drawBitmap(icon, scaleMatrix, iconPaint);
     }
 
     StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight, String longestWord) {
