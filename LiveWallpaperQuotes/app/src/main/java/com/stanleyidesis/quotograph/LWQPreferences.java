@@ -123,4 +123,12 @@ public class LWQPreferences {
         mutableSet.addAll(stringSet);
         return mutableSet;
     }
+
+    public static void setWatermarkEnabled(boolean enabled) {
+        sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_watermark), enabled).apply();
+    }
+
+    public static boolean isWatermarkEnabled() {
+        return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_watermark), true);
+    }
 }
