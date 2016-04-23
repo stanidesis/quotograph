@@ -1,6 +1,8 @@
-package com.stanleyidesis.quotograph.api.db;
+package com.stanleyidesis.quotograph.ui.view;
 
-import com.orm.SugarRecord;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.widget.ImageView;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -24,7 +26,7 @@ import com.orm.SugarRecord;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * UserPhoto.java
+ * SquareImageView.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -33,16 +35,31 @@ import com.orm.SugarRecord;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 12/05/2015
+ * Date: 04/23/2016
  */
-public class UserPhoto extends SugarRecord {
-    public String uri;
-    public UserAlbum album;
+public class SquareImageView extends ImageView {
 
-    public UserPhoto() {}
+    public SquareImageView(final Context context)  {
+        super(context);
+    }
 
-    public UserPhoto(String uri, UserAlbum album) {
-        this.uri = uri;
-        this.album = album;
+    public SquareImageView(final Context context, final AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public SquareImageView(final Context context, final AttributeSet attrs, final int defStyle) {
+        super(context, attrs, defStyle);
+    }
+
+
+    @Override
+    protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
+        final int width = getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec);
+        setMeasuredDimension(width, width);
+    }
+
+    @Override
+    protected void onSizeChanged(final int w, final int h, final int oldw, final int oldh) {
+        super.onSizeChanged(w, w, oldw, oldh);
     }
 }

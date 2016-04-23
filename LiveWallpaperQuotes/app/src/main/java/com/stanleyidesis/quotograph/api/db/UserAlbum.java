@@ -24,7 +24,7 @@ import com.orm.SugarRecord;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * UserPhoto.java
+ * UserAlbum.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -33,16 +33,16 @@ import com.orm.SugarRecord;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 12/05/2015
+ * Date: 04/17/2016
  */
-public class UserPhoto extends SugarRecord {
-    public String uri;
-    public UserAlbum album;
+public class UserAlbum extends SugarRecord {
+    public String name;
+    public boolean active;
 
-    public UserPhoto() {}
+    public UserAlbum() {}
 
-    public UserPhoto(String uri, UserAlbum album) {
-        this.uri = uri;
-        this.album = album;
+    public UserAlbum(String name, boolean active) {
+        this.name = name;
+        this.active = active;
     }
 }

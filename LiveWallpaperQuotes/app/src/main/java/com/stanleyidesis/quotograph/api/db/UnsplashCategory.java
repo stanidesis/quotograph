@@ -42,12 +42,14 @@ public class UnsplashCategory extends SugarRecord {
 
     public int unsplashId;
     public String title;
+    public boolean active;
 
     public UnsplashCategory() {}
 
-    public UnsplashCategory(int unsplashId, String title) {
+    public UnsplashCategory(int unsplashId, String title, boolean active) {
         this.unsplashId = unsplashId;
         this.title = title;
+        this.active = active;
     }
 
     public static UnsplashCategory find(int id) {

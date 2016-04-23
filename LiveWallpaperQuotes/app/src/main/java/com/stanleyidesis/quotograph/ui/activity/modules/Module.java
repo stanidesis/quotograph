@@ -1,6 +1,7 @@
-package com.stanleyidesis.quotograph.api.db;
+package com.stanleyidesis.quotograph.ui.activity.modules;
 
-import com.orm.SugarRecord;
+import android.content.Context;
+import android.view.View;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -24,7 +25,7 @@ import com.orm.SugarRecord;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * UserPhoto.java
+ * Module.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -33,16 +34,14 @@ import com.orm.SugarRecord;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 12/05/2015
+ * Date: 04/17/2015
  */
-public class UserPhoto extends SugarRecord {
-    public String uri;
-    public UserAlbum album;
+public interface Module {
 
-    public UserPhoto() {}
+    void initialize(Context context, View root);
 
-    public UserPhoto(String uri, UserAlbum album) {
-        this.uri = uri;
-        this.album = album;
-    }
+    void changeVisibility(View anchor, boolean visible);
+
+    void setEnabled(boolean enabled);
+
 }
