@@ -148,7 +148,7 @@ public class LWQChooseImageSourceModule implements Module {
     }
 
     public void onImagesRecovered(List<String> imageURIs) {
-        UserAlbum newAlbum = new UserAlbum("TOUCH TO NAME", true);
+        UserAlbum newAlbum = new UserAlbum("{TAP TO EDIT}", true);
         newAlbum.save();
         for (String imageUri : imageURIs) {
             new UserPhoto(imageUri, newAlbum).save();

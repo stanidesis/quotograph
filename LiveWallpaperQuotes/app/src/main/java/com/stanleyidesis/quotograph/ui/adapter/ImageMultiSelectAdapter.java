@@ -121,6 +121,8 @@ public class ImageMultiSelectAdapter extends RecyclerView.Adapter<ImageMultiSele
         CheckBox useImageSource;
         @Bind(R.id.et_image_source)
         EditText imageSourceName;
+        @Bind(R.id.v_remove_image_source)
+        View removeSource;
 
         SugarRecord boundTo;
 
@@ -136,6 +138,7 @@ public class ImageMultiSelectAdapter extends RecyclerView.Adapter<ImageMultiSele
             imageSourceName.setText(unsplashCategory.title);
             imageSourceName.setFocusable(false);
             imageSourceName.setFocusableInTouchMode(false);
+            removeSource.setVisibility(View.GONE);
             switch (unsplashCategory.unsplashId) {
                 // Buildings
                 case 2:
@@ -168,6 +171,7 @@ public class ImageMultiSelectAdapter extends RecyclerView.Adapter<ImageMultiSele
             imageSourceName.setText(userAlbum.name);
             imageSourceName.setFocusable(true);
             imageSourceName.setFocusableInTouchMode(true);
+            removeSource.setVisibility(View.VISIBLE);
             useImageSource.setChecked(userAlbum.active);
             imageSource.setImageBitmap(
                     ImageLoader.getInstance().loadImageSync(
@@ -196,6 +200,18 @@ public class ImageMultiSelectAdapter extends RecyclerView.Adapter<ImageMultiSele
         @OnClick(R.id.btn_image_source)
         public void onClick() {
             useImageSource.performClick();
+        }
+
+        @OnClick(R.id.v_remove_image_source)
+        public void removeImageSource() {
+            if (!(boundTo instanceof UserAlbum)) {
+                // Error!
+                return;
+            }
+            int index = imageSources.indexOf(boundTo);
+            imageSources.remove(index);
+            boundTo.delete();
+            notifyItemRemoved(index);
         }
 
         @Override

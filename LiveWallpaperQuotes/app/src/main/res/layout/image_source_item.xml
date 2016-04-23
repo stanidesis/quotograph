@@ -65,14 +65,13 @@
         android:paddingBottom="8dp"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textAllCaps="true"
         android:gravity="center"
         android:lines="2"
         android:text="Buildings"
         android:background="#88000000"
         android:imeActionLabel="Save"
         android:imeOptions="actionDone"
-        android:inputType="text|textAutoComplete|textAutoCorrect|textCapCharacters"/>
+        android:inputType="text|textAutoComplete|textAutoCorrect"/>
 
     <CheckBox
         android:id="@+id/check_use_image_source"
@@ -82,5 +81,17 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         app:layout_marginPercent="4%"/>
+
+    <ImageView
+        android:id="@+id/v_remove_image_source"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@+id/check_use_image_source"
+        android:layout_alignBottom="@+id/check_use_image_source"
+        android:src="@mipmap/ic_remove_circle_white"
+        android:scaleType="fitCenter"
+        app:layout_marginLeftPercent="4%"/>
 
 </android.support.percent.PercentRelativeLayout>
