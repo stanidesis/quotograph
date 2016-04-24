@@ -207,6 +207,7 @@ public class ImageMultiSelectAdapter extends RecyclerView.Adapter<ImageMultiSele
             }
             int index = imageSources.indexOf(boundTo);
             imageSources.remove(index);
+            UserPhoto.deletePhotosFromAlbum((UserAlbum) boundTo);
             boundTo.delete();
             notifyItemRemoved(index);
         }

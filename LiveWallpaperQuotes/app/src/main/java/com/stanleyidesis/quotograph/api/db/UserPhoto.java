@@ -57,4 +57,10 @@ public class UserPhoto extends SugarRecord {
                         NamingHelper.toSQLNameDefault("album"))
                         .eq(userAlbum)).list();
     }
+
+    public static boolean deletePhotosFromAlbum(UserAlbum userAlbum) {
+        return SugarRecord.deleteAll(UserPhoto.class,
+                NamingHelper.toSQLNameDefault("album") + "=?",
+                String.valueOf(userAlbum.getId())) > 0;
+    }
 }
