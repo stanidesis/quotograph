@@ -543,28 +543,31 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         } else if (requestCode == IabConst.PURCHASE_REQUEST_CODE) {
             LWQApplication.getIabHelper().handleActivityResult(requestCode, resultCode, data);
         } else if (requestCode == Define.ALBUM_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                List<String> resultUris = new ArrayList<>();
-                if (data.hasExtra(Define.INTENT_PATH)) {
-                    resultUris = data.getStringArrayListExtra(Define.INTENT_PATH);
-                } else {
-                    final int takeFlags = data.getFlags()
-                            & Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                    if (data.getClipData() != null) {
-                        ClipData clipData = data.getClipData();
-                        for (int i = 0; i < clipData.getItemCount(); i++) {
-                            Uri imageUri = clipData.getItemAt(i).getUri();
-                            getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
-                            resultUris.add(imageUri.toString());
-                        }
-                    } else if (data.getData() != null) {
-                        Uri imageUri = data.getData();
+            if (resultCode != RESULT_OK) {
+                return;
+            }
+            List<String> resultUris = new ArrayList<>();
+            if (data.hasExtra(Define.INTENT_PATH)) {
+                for (String localPath : data.getStringArrayListExtra(Define.INTENT_PATH)) {
+                    resultUris.add("file://" + localPath);
+                }
+            } else {
+                final int takeFlags = data.getFlags()
+                        & Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                if (data.getClipData() != null) {
+                    ClipData clipData = data.getClipData();
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        Uri imageUri = clipData.getItemAt(i).getUri();
                         getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
                         resultUris.add(imageUri.toString());
                     }
-                    chooseImageSourceModule.onImagesRecovered(resultUris);
+                } else if (data.getData() != null) {
+                    Uri imageUri = data.getData();
+                    getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
+                    resultUris.add(imageUri.toString());
                 }
             }
+            chooseImageSourceModule.onImagesRecovered(resultUris);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -1533,8 +1536,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             // Use FishBun
             FishBun.with(this)
                     .setCamera(false)
-                    .setPickerCount(-1)
-                    .setActionBarColor(getResources().getColor(R.color.palette_400))
+                    .setPickerCount(120)
+                    .setButtonInAlbumActiviy(true)
+                    .setActionBarColor(getResources().getColor(R.color.palette_400),
+                            getResources().getColor(R.color.palette_700))
                     .startAlbum();
         }
     }

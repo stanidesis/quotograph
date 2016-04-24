@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
@@ -180,9 +179,7 @@ public class ImageMultiSelectAdapter extends RecyclerView.Adapter<ImageMultiSele
                                         Condition.prop(
                                                 NamingHelper.toSQLNameDefault("album")
                                         ).eq(userAlbum)
-                                    ).first().uri,
-                                    new ImageSize(100, 100),null
-                            )
+                                    ).first().uri)
                     );
         }
 
