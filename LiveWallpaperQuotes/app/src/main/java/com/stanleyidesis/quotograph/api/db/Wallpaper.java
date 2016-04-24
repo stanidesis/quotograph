@@ -66,14 +66,14 @@ public class Wallpaper extends SugarRecord {
         if (imageSource != IMAGE_SOURCE_USER) {
             return null;
         }
-        return Select.from(UserPhoto.class).where(Condition.prop(NamingHelper.toSQLNameDefault("id")).eq(imageId)).first();
+        return SugarRecord.findById(UserPhoto.class, imageId);
     }
 
     public UnsplashPhoto recoverUnsplashPhoto() {
         if (imageSource != IMAGE_SOURCE_UNSPLASH) {
             return null;
         }
-        return Select.from(UnsplashPhoto.class).where(Condition.prop(NamingHelper.toSQLNameDefault("id")).eq(imageId)).first();
+        return SugarRecord.findById(UnsplashPhoto.class, imageId);
     }
 
     public static Wallpaper active() {

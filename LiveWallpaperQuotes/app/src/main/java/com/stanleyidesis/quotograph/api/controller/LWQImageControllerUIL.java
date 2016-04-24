@@ -88,6 +88,11 @@ public class LWQImageControllerUIL implements LWQImageController {
     }
 
     @Override
+    public Bitmap retrieveBitmapSync(String uri) {
+        return ImageLoader.getInstance().loadImageSync(uri);
+    }
+
+    @Override
     public void clearBitmap(String uri) {
         ImageLoader.getInstance().getMemoryCache().remove(uri);
         ImageLoader.getInstance().getDiskCache().remove(uri);

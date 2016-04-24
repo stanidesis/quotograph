@@ -5,6 +5,9 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
 
+import java.util.List;
+import java.util.Random;
+
 /**
  * Copyright (c) 2016 Stanley Idesis
  *
@@ -58,5 +61,18 @@ public class UnsplashCategory extends SugarRecord {
 
     public static UnsplashCategory find(String title) {
         return Select.from(UnsplashCategory.class).where(Condition.prop(NamingHelper.toSQLNameDefault("title")).eq(title)).first();
+    }
+
+    public static List<UnsplashCategory> active() {
+        return Select.from(UnsplashCategory.class).where(Condition.prop(NamingHelper.toSQLNameDefault("active")).eq("1")).list();
+    }
+
+    public static UnsplashCategory random() {
+        final long count = Select.from(UnsplashCategory.class).count();
+        final int offset = new Random().nextInt((int) count);
+        return SugarRecord.findWithQuery(
+                UnsplashCategory.class,
+                "Select * from " + NamingHelper.toSQLName(UnsplashCategory.class) + " LIMIT 1 OFFSET " + offset,
+                (String []) null).get(0);
     }
 }

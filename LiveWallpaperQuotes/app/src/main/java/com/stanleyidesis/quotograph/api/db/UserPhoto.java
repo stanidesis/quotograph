@@ -1,6 +1,11 @@
 package com.stanleyidesis.quotograph.api.db;
 
 import com.orm.SugarRecord;
+import com.orm.query.Condition;
+import com.orm.query.Select;
+import com.orm.util.NamingHelper;
+
+import java.util.List;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -44,5 +49,12 @@ public class UserPhoto extends SugarRecord {
     public UserPhoto(String uri, UserAlbum album) {
         this.uri = uri;
         this.album = album;
+    }
+
+    public static List<UserPhoto> photosFromAlbum(UserAlbum userAlbum) {
+        return Select.from(UserPhoto.class).where(
+                Condition.prop(
+                        NamingHelper.toSQLNameDefault("album"))
+                        .eq(userAlbum)).list();
     }
 }
