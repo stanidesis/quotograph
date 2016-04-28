@@ -114,10 +114,17 @@
             </android.support.v4.view.ViewPager>
         </android.support.design.widget.CoordinatorLayout>
 
-        <!-- FABs & Quote Edit & Search -->
+        <!-- FABs & Quote Edit, Search -->
 
         <include layout="@layout/layout_fab_screen"
             android:id="@+id/group_lwq_settings_fab_screen"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
+
+        <!-- Choose Image Sources -->
+
+        <include layout="@layout/layout_choose_image_sources"
+            android:id="@+id/group_lwq_settings_choose_image_source"
             android:layout_height="match_parent"
             android:layout_width="match_parent"/>
 

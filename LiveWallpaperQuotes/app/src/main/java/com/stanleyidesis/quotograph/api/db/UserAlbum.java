@@ -5,6 +5,8 @@ import com.orm.query.Condition;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
 
+import java.util.List;
+
 /**
  * Copyright (c) 2016 Stanley Idesis
  *
@@ -27,7 +29,7 @@ import com.orm.util.NamingHelper;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Wallpaper.java
+ * UserAlbum.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -36,52 +38,23 @@ import com.orm.util.NamingHelper;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 08/01/2015
+ * Date: 04/17/2016
  */
-public class Wallpaper extends SugarRecord {
-
-    public static final short IMAGE_SOURCE_RESOURCE = 0;
-    public static final short IMAGE_SOURCE_USER = 1;
-    public static final short IMAGE_SOURCE_UNSPLASH = 2;
-
-    public Quote quote;
+public class UserAlbum extends SugarRecord {
+    public String name;
     public boolean active;
-    public long dateCreated;
-    public short imageSource;
-    public long imageId;
-    public long typefaceId;
 
-    public Wallpaper() {}
+    public UserAlbum() {}
 
-    public Wallpaper(Quote quote, boolean active, long dateCreated, short imageSource, long imageId, int typefaceId) {
-        this.quote = quote;
+    public UserAlbum(String name, boolean active) {
+        this.name = name;
         this.active = active;
-        this.dateCreated = dateCreated;
-        this.imageSource = imageSource;
-        this.imageId = imageId;
-        this.typefaceId = typefaceId;
     }
 
-    public UserPhoto recoverUserPhoto() {
-        if (imageSource != IMAGE_SOURCE_USER) {
-            return null;
-        }
-        return SugarRecord.findById(UserPhoto.class, imageId);
-    }
-
-    public UnsplashPhoto recoverUnsplashPhoto() {
-        if (imageSource != IMAGE_SOURCE_UNSPLASH) {
-            return null;
-        }
-        return SugarRecord.findById(UnsplashPhoto.class, imageId);
-    }
-
-    public static Wallpaper active() {
-        return Select.from(Wallpaper.class).where(Condition.prop("active").eq("1")).first();
-    }
-
-    public static boolean exists(short source, long id) {
-        return Select.from(Wallpaper.class).where(Condition.prop(NamingHelper.toSQLNameDefault("imageSource")).eq(source),
-                Condition.prop(NamingHelper.toSQLNameDefault("imageId")).eq(id)).first() != null;
+    public static List<UserAlbum> active() {
+        return Select.from(UserAlbum.class).where(
+                Condition.prop(
+                        NamingHelper.toSQLNameDefault("active"))
+                        .eq("1")).list();
     }
 }

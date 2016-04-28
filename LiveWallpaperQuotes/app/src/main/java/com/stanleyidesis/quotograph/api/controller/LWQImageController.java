@@ -53,6 +53,14 @@ public interface LWQImageController {
     void retrieveBitmap(String uri, Callback<Bitmap> callback);
 
     /**
+     * A synchronous retrieval of a Uri
+     * 
+     * @param uri
+     * @return
+     */
+    Bitmap retrieveBitmapSync(String uri);
+
+    /**
      * Clean up memory, recycle, and in general release the bitmap associated with this uri.
      *
      * @param uri

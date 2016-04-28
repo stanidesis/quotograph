@@ -6,12 +6,15 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -47,6 +50,8 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
+import com.sangcomz.fishbun.FishBun;
+import com.sangcomz.fishbun.define.Define;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -61,11 +66,11 @@ import com.stanleyidesis.quotograph.api.db.PlaylistAuthor;
 import com.stanleyidesis.quotograph.api.db.PlaylistCategory;
 import com.stanleyidesis.quotograph.api.db.PlaylistQuote;
 import com.stanleyidesis.quotograph.api.db.Quote;
-import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.billing.util.IabConst;
 import com.stanleyidesis.quotograph.ui.UIUtils;
+import com.stanleyidesis.quotograph.ui.activity.modules.LWQChooseImageSourceModule;
 import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
@@ -124,7 +129,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         PlaylistAdapter.Delegate,
         SearchResultsAdapter.Delegate,
         MaterialDialog.ListCallback,
-        DialogInterface.OnCancelListener {
+        DialogInterface.OnCancelListener,
+        LWQChooseImageSourceModule.Delegate {
 
     static class ActivityState {
         int page = -1;
@@ -285,6 +291,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setViewState(R.id.btn_wallpaper_actions_skip, FLAG_DISABLE)
             .setViewState(R.id.btn_wallpaper_actions_save, FLAG_DISABLE)
             .setViewState(R.id.btn_wallpaper_actions_share, FLAG_DISABLE)
+            .setViewState(R.id.group_lwq_settings_choose_image_source, FLAG_HIDE | FLAG_DISABLE)
             .build();
 
     ActivityState stateSkipWallpaper = new Builder()
@@ -319,6 +326,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setViewState(R.id.group_lwq_settings_fab_screen, FLAG_HIDE)
             .setViewState(R.id.group_lwq_fab_screen_add_edit_quote, FLAG_HIDE | FLAG_DISABLE)
             .setViewState(R.id.group_lwq_fab_screen_search, FLAG_HIDE | FLAG_DISABLE)
+            .setViewState(R.id.group_lwq_settings_choose_image_source, FLAG_HIDE | FLAG_DISABLE)
             .setViewState(R.id.pb_lwq_settings, FLAG_HIDE)
             .build();
 
@@ -344,6 +352,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setViewState(R.id.group_lwq_settings_fab_screen, FLAG_REVEAL | FLAG_ENABLE)
             .setViewState(R.id.group_lwq_fab_screen_add_edit_quote, FLAG_HIDE | FLAG_DISABLE)
             .setViewState(R.id.group_lwq_fab_screen_search, FLAG_HIDE | FLAG_DISABLE)
+            .setViewState(R.id.group_lwq_settings_choose_image_source, FLAG_HIDE | FLAG_DISABLE)
             .build();
 
     ActivityState stateAddEditQuote = new Builder(stateAddReveal)
@@ -361,6 +370,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .setViewState(R.id.group_lwq_settings_fab_screen, FLAG_REVEAL | FLAG_DISABLE)
             .setViewState(R.id.group_lwq_fab_screen_search, FLAG_REVEAL | FLAG_DISABLE)
             .setViewState(R.id.pb_lwq_settings, FLAG_REVEAL)
+            .build();
+
+    ActivityState stateChooseImageSources = new Builder(stateSettings)
+            .setViewState(R.id.group_lwq_settings_choose_image_source, FLAG_REVEAL | FLAG_ENABLE)
             .build();
 
     private static final int REQUEST_CODE_SAVE = 0;
@@ -430,6 +443,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @Bind(R.id.pb_lwq_settings)
     ProgressBar progressBar;
 
+    // Choose Images
+    @Bind(R.id.group_lwq_settings_choose_image_source)
+    View chooseImagesContainer;
+    // This is a slight departure from the way this class currently handles UI elements.
+    // This module encapsulates some functionality, thereby hiding it from this class.
+    LWQChooseImageSourceModule chooseImageSourceModule;
+
     // FAB
     @Bind(R.id.group_lwq_settings_fab_screen)
     View fabContainer;
@@ -497,6 +517,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         setupWallpaperActions();
         // Setup progress bar
         setupProgressBar();
+        // Setup image source chooser
+        setupChooseImageSources();
     }
 
     @Override
@@ -511,6 +533,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
+    @SuppressWarnings("WrongConstant")
+    @SuppressLint("NewApi")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_SAVE) {
@@ -518,6 +542,32 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             return;
         } else if (requestCode == IabConst.PURCHASE_REQUEST_CODE) {
             LWQApplication.getIabHelper().handleActivityResult(requestCode, resultCode, data);
+        } else if (requestCode == Define.ALBUM_REQUEST_CODE) {
+            if (resultCode != RESULT_OK) {
+                return;
+            }
+            List<String> resultUris = new ArrayList<>();
+            if (data.hasExtra(Define.INTENT_PATH)) {
+                for (String localPath : data.getStringArrayListExtra(Define.INTENT_PATH)) {
+                    resultUris.add("file://" + localPath);
+                }
+            } else {
+                final int takeFlags = data.getFlags()
+                        & Intent.FLAG_GRANT_READ_URI_PERMISSION;
+                if (data.getClipData() != null) {
+                    ClipData clipData = data.getClipData();
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        Uri imageUri = clipData.getItemAt(i).getUri();
+                        getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
+                        resultUris.add(imageUri.toString());
+                    }
+                } else if (data.getData() != null) {
+                    Uri imageUri = data.getData();
+                    getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
+                    resultUris.add(imageUri.toString());
+                }
+            }
+            chooseImageSourceModule.onImagesRecovered(resultUris);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -539,6 +589,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             changeState(statePlaylist);
         } else if (activityState == stateSearch || activityState == stateAddEditQuote) {
             changeState(stateAddReveal);
+        } else if (activityState == stateChooseImageSources) {
+            changeState(stateSettings);
         } else {
             if (activityState == stateSkipWallpaper || activityState == stateSaveWallpaper) {
                 changeState(stateSaveSkipCompleted);
@@ -874,36 +926,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     void setupSettings() {
-        final List<String> backgroundCategories = LWQApplication.getWallpaperController().getBackgroundCategories();
-        UnsplashCategory unsplashCategory = UnsplashCategory.find(LWQPreferences.getImageCategoryPreference());
-        int currentSelection = 0;
-        if (unsplashCategory != null) {
-            for (String category : backgroundCategories) {
-                if (category.equalsIgnoreCase(unsplashCategory.title)) {
-                    currentSelection = backgroundCategories.indexOf(category);
-                    break;
-                }
-            }
-        }
-        ArrayAdapter<String> imageCategoryAdapter = new ArrayAdapter<>(this,
-                R.layout.spinner_item,
-                backgroundCategories);
-        imageCategoryAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
-        Spinner imageCategorySpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_image_category);
-        imageCategorySpinner.setAdapter(imageCategoryAdapter);
-        imageCategorySpinner.setSelection(currentSelection);
-        imageCategorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
-                UnsplashCategory unsplashCategory = UnsplashCategory.find((String) adapterView.getAdapter().getItem(index));
-                LWQPreferences.setImageCategoryPreference(unsplashCategory.unsplashId);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
-
         final String [] refreshPreferenceOptions = getResources().getStringArray(R.array.refresh_preference_options);
         ArrayAdapter<String> refreshOptionsAdapter = new ArrayAdapter<>(this,
                 R.layout.spinner_item,
@@ -956,6 +978,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                         .show();
             }
         });
+
+        // Images
+        ButterKnife.findById(settingsContainer, R.id.btn_lwq_images_settings)
+                .setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeState(stateChooseImageSources);
+            }
+        });
     }
 
     void updateRefreshSpinner() {
@@ -986,6 +1017,30 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void run() {
                 animateProgressBar(true);
+            }
+        });
+    }
+
+    void setupChooseImageSources() {
+        chooseImageSourceModule = new LWQChooseImageSourceModule();
+        chooseImageSourceModule.initialize(this, chooseImagesContainer);
+        chooseImagesContainer.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE);
+        chooseImagesContainer.setTag(R.id.view_tag_animator_hide, new Runnable() {
+            @Override
+            public void run() {
+                chooseImageSourceModule.changeVisibility(
+                        ButterKnife.findById(LWQSettingsActivity.this,
+                                R.id.btn_lwq_images_settings),
+                        false);
+            }
+        });
+        chooseImagesContainer.setTag(R.id.view_tag_animator_reveal, new Runnable() {
+            @Override
+            public void run() {
+                chooseImageSourceModule.changeVisibility(
+                        ButterKnife.findById(LWQSettingsActivity.this,
+                                R.id.btn_lwq_images_settings),
+                        true);
             }
         });
     }
@@ -1471,4 +1526,27 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
+
+    // LWQChooseImageSourceModule delegate
+
+    @Override
+    public void addPhotoAlbum(LWQChooseImageSourceModule module) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // Use DocumentsProvider
+            Intent documentPicker = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            documentPicker.setType("image/*");
+            documentPicker.addCategory(Intent.CATEGORY_OPENABLE);
+            documentPicker.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            startActivityForResult(documentPicker, Define.ALBUM_REQUEST_CODE);
+        } else {
+            // Use FishBun
+            FishBun.with(this)
+                    .setCamera(false)
+                    .setPickerCount(120)
+                    .setButtonInAlbumActiviy(true)
+                    .setActionBarColor(getResources().getColor(R.color.palette_400),
+                            getResources().getColor(R.color.palette_700))
+                    .startAlbum();
+        }
+    }
 }

@@ -20,6 +20,7 @@ import com.stanleyidesis.quotograph.api.db.PlaylistQuote;
 import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
 import com.stanleyidesis.quotograph.api.db.UnsplashPhoto;
+import com.stanleyidesis.quotograph.api.db.UserAlbum;
 import com.stanleyidesis.quotograph.api.db.UserPhoto;
 import com.stanleyidesis.quotograph.api.db.Wallpaper;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
@@ -126,9 +127,47 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 onError(LWQError.create(LWQApplication.get().getString(R.string.failed_to_generate_wallpaper)));
                 return;
             }
-            final UnsplashCategory unsplashCategory =
-                    UnsplashCategory.find(LWQPreferences.getImageCategoryPreference());
-            new UnsplashRetryableRequest(unsplashCategory, MAX_RETRIES, new BaseCallback<UnsplashPhoto>() {
+            List<UnsplashCategory> activeCategories = UnsplashCategory.active();
+            List<UserAlbum> activeAlbums = UserAlbum.active();
+            boolean useAlbums = activeAlbums.size() > 0;
+            if (activeCategories.size() > 0
+                    && useAlbums) {
+                // Randomness will determine whether we still use an album
+                useAlbums = new Random().nextBoolean();
+            }
+            if (useAlbums) {
+                // Get a random album
+                UserAlbum albumToTry = activeAlbums.get(
+                        new Random().nextInt(activeAlbums.size()));
+                // Find all photos in the album
+                List<UserPhoto> userPhotos = UserPhoto.photosFromAlbum(albumToTry);
+                // Remove the active userPhoto, if possible
+                UserPhoto userPhoto = activeWallpaper.recoverUserPhoto();
+                if (userPhoto != null) {
+                    userPhotos.remove(userPhoto);
+                }
+                // Choose a random photo from the album
+                UserPhoto photoToUse = userPhotos.get(
+                        new Random().nextInt(userPhotos.size()));
+                if (photoToUse == null
+                        && activeCategories.size() == 0
+                        && userPhoto != null) {
+                    // The user wants to use this and ONLY this photo
+                    photoToUse = userPhoto;
+                }
+                if (photoToUse != null) {
+                    finishUp(newQuotes, photoToUse);
+                    return;
+                }
+            }
+            // Fallback to categories
+            UnsplashCategory categoryToUse = UnsplashCategory.random();;
+            if (activeCategories.size() > 0) {
+                categoryToUse = activeCategories.get(
+                        new Random().nextInt(
+                                activeCategories.size()));
+            }
+            new UnsplashRetryableRequest(categoryToUse, MAX_RETRIES, new BaseCallback<UnsplashPhoto>() {
                 @Override
                 public void onSuccess(UnsplashPhoto unsplashPhoto) {
                     finishUp(newQuotes, unsplashPhoto == null ? UnsplashPhoto.random() : unsplashPhoto);
@@ -306,7 +345,8 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             setRetrievalState(RetrievalState.NONE);
         } else if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_USER) {
             UserPhoto userPhoto = activeWallpaper.recoverUserPhoto();
-            activeBackgroundImage = BitmapFactory.decodeFile(userPhoto.uri);
+            activeBackgroundImage = LWQApplication.getImageController()
+                    .retrieveBitmapSync(userPhoto.uri);
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
             setRetrievalState(RetrievalState.NONE);
         }

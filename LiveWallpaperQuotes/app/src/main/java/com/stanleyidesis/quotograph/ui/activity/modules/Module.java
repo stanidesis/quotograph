@@ -1,11 +1,7 @@
-package com.stanleyidesis.quotograph.api.db;
+package com.stanleyidesis.quotograph.ui.activity.modules;
 
-import com.orm.SugarRecord;
-import com.orm.query.Condition;
-import com.orm.query.Select;
-import com.orm.util.NamingHelper;
-
-import java.util.List;
+import android.content.Context;
+import android.view.View;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -29,7 +25,7 @@ import java.util.List;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * UserPhoto.java
+ * Module.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -38,29 +34,14 @@ import java.util.List;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 12/05/2015
+ * Date: 04/17/2015
  */
-public class UserPhoto extends SugarRecord {
-    public String uri;
-    public UserAlbum album;
+public interface Module {
 
-    public UserPhoto() {}
+    void initialize(Context context, View root);
 
-    public UserPhoto(String uri, UserAlbum album) {
-        this.uri = uri;
-        this.album = album;
-    }
+    void changeVisibility(View anchor, boolean visible);
 
-    public static List<UserPhoto> photosFromAlbum(UserAlbum userAlbum) {
-        return Select.from(UserPhoto.class).where(
-                Condition.prop(
-                        NamingHelper.toSQLNameDefault("album"))
-                        .eq(userAlbum)).list();
-    }
+    void setEnabled(boolean enabled);
 
-    public static boolean deletePhotosFromAlbum(UserAlbum userAlbum) {
-        return SugarRecord.deleteAll(UserPhoto.class,
-                NamingHelper.toSQLNameDefault("album") + "=?",
-                String.valueOf(userAlbum.getId())) > 0;
-    }
 }
