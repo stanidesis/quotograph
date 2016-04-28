@@ -27,7 +27,6 @@ import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -79,8 +78,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -90,6 +87,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
+import it.sephiroth.android.library.tooltip.Tooltip;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -130,7 +128,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         SearchResultsAdapter.Delegate,
         MaterialDialog.ListCallback,
         DialogInterface.OnCancelListener,
-        LWQChooseImageSourceModule.Delegate {
+        LWQChooseImageSourceModule.Delegate,
+        Tooltip.Callback {
 
     static class ActivityState {
         int page = -1;
@@ -387,22 +386,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // Executes state changes
     ExecutorService changeStateExecutorService = Executors.newSingleThreadScheduledExecutor();
 
-    // Timer Task to reveal controls
-    boolean firstLaunch;
-    boolean timerCancelled;
-    Timer revealControlsTimer;
-    TimerTask revealControlsTimerTask = new TimerTask() {
-        @Override
-        public void run() {
-            revealControlsTimer = null;
-            if (timerCancelled) {
-                timerCancelled = false;
-                return;
-            }
-            changeState(statePlaylist);
-        }
-    };
-
     // PlaylistAdapter
     PlaylistAdapter playlistAdapter;
 
@@ -526,11 +509,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         super.onPostCreate(savedInstanceState);
         if (LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
             changeState(stateWallpaper);
-            scheduleTimer();
         } else {
             changeState(stateInitial);
-            firstLaunch = true;
         }
+
+       showPageOneTooltips();
     }
 
     @SuppressWarnings("WrongConstant")
@@ -682,6 +665,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             public void onPageSelected(int position) {
                 // Content
                 content.setAlpha(position == 0 ? 0f : 1f);
+
+                // Tooltips
+                if (position == 1) showPageTwoTooltips();
 
                 // Add Fab
                 fabAdd.setScaleX(position == 1 ? 1f : 0f);
@@ -1045,22 +1031,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         });
     }
 
-    void scheduleTimer() {
-        timerCancelled = false;
-        if (revealControlsTimer == null) {
-            revealControlsTimer = new Timer();
-        }
-        try {
-            revealControlsTimer.schedule(revealControlsTimerTask, DateUtils.SECOND_IN_MILLIS * 2);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    void cancelTimer() {
-        timerCancelled = true;
-    }
-
     // Click Handling
 
     @OnClick(R.id.btn_fab_screen_search) void performSearch() {
@@ -1151,6 +1121,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             changeState(statePlaylist);
         } else {
             changeState(stateAddReveal);
+            showAddPageTooltips();
         }
     }
 
@@ -1167,17 +1138,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @OnClick(R.id.btn_wallpaper_actions_skip) void skipWallpaperClick() {
         LWQApplication.getWallpaperController().generateNewWallpaper();
-        cancelTimer();
     }
 
     @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperClick() {
-        cancelTimer();
         startActivityForResult(new Intent(this, LWQSaveWallpaperActivity.class), REQUEST_CODE_SAVE);
         changeState(stateSaveWallpaper);
     }
 
     @OnClick(R.id.btn_wallpaper_actions_share) void shareWallpaperClick() {
-        cancelTimer();
         sendBroadcast(new Intent(getString(R.string.action_share)));
     }
 
@@ -1397,11 +1365,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 }
             });
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RENDERED_WALLPAPER) {
-            if (firstLaunch) {
-                firstLaunch = false;
-                scheduleTimer();
-                changeState(stateWallpaper);
-            } else if (!isModifyingSeekSetting){
+            if (!isModifyingSeekSetting) {
                 changeState(viewPager.getCurrentItem() == 0 ?
                         stateSaveSkipCompleted : stateSaveSkipCompletedObscured);
             }
@@ -1549,4 +1513,116 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     .startAlbum();
         }
     }
+
+    // Tooltip Sequence
+
+    private enum TutorialTooltips {
+        SHARE(R.string.tt_share_quotograph,
+                R.id.btn_wallpaper_actions_share,
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME),
+        SAVE(R.string.tt_save_quotograph,
+                R.id.btn_wallpaper_actions_save,
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME),
+        SKIP(R.string.tt_skip_quotograph,
+                R.id.btn_wallpaper_actions_skip,
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME),
+        SWIPE(R.string.tt_swipe_left_wallpaper,
+                R.id.viewpager_lwq_settings,
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME,
+                Tooltip.Gravity.CENTER,
+                true),
+        ADD(R.string.tt_add_quotes,
+                R.id.fab_lwq_plus,
+                Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
+                Tooltip.Gravity.LEFT,
+                true),
+        SEARCH(R.string.tt_search_for_quotes,
+                R.id.fab_lwq_search,
+                Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
+                Tooltip.Gravity.LEFT),
+        WRITE(R.string.tt_write_quotes,
+                R.id.fab_lwq_create_quote,
+                Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
+                Tooltip.Gravity.LEFT),
+        EXIT(R.string.tt_exit_add,
+                R.id.fab_lwq_plus,
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME,
+                Tooltip.Gravity.LEFT,
+                true);
+
+        int stringId;
+        boolean stop;
+        int anchorId;
+        Tooltip.ClosePolicy closePolicy;
+        Tooltip.Gravity gravity;
+
+        TutorialTooltips(int stringId, int anchorId, Tooltip.ClosePolicy closePolicy) {
+            this(stringId, anchorId, closePolicy, Tooltip.Gravity.TOP);
+        }
+
+        TutorialTooltips(int stringId, int anchorId, Tooltip.ClosePolicy closePolicy, Tooltip.Gravity gravity) {
+            this(stringId, anchorId, closePolicy, gravity, false);
+        }
+
+        TutorialTooltips(int stringId, int anchorId, Tooltip.ClosePolicy closePolicy, Tooltip.Gravity gravity, boolean stop) {
+            this.stringId = stringId;
+            this.anchorId = anchorId;
+            this.closePolicy = closePolicy;
+            this.gravity = gravity;
+            this.stop = stop;
+        }
+    }
+
+    void showPageOneTooltips() {
+        if (LWQPreferences.viewedTutorial()) return;
+        showTip(TutorialTooltips.SHARE);
+    }
+
+    void showPageTwoTooltips() {
+        if (LWQPreferences.viewedTutorial()) return;
+        showTip(TutorialTooltips.ADD);
+    }
+
+    void showAddPageTooltips() {
+        if (LWQPreferences.viewedTutorial()) return;
+        showTip(TutorialTooltips.SEARCH);
+    }
+
+    void showTip(TutorialTooltips tooltip) {
+        Tooltip.make(this,
+                new Tooltip.Builder(tooltip.ordinal())
+                        .activateDelay(500)
+                        .anchor(ButterKnife.findById(this, tooltip.anchorId), Tooltip.Gravity.TOP)
+                        .closePolicy(tooltip.closePolicy, 0)
+                        .fadeDuration(200)
+                        .fitToScreen(true)
+                        .floatingAnimation(Tooltip.AnimationBuilder.DEFAULT)
+                        .showDelay(500)
+                        .text(getResources(), tooltip.stringId)
+                        .withCallback(this)
+                        .build()
+        ).show();
+    }
+
+    @Override
+    public void onTooltipClose(Tooltip.TooltipView tooltipView, boolean b, boolean b1) {
+        TutorialTooltips[] allTips = TutorialTooltips.values();
+        // Reached the end of the tips?
+        if (allTips.length == tooltipView.getTooltipId() + 1) return;
+
+        // Should stop?
+        if (allTips[tooltipView.getTooltipId()].stop) return;
+
+        // Show the next one!
+        showTip(allTips[tooltipView.getTooltipId() + 1]);
+    }
+
+    @Override
+    public void onTooltipFailed(Tooltip.TooltipView tooltipView) {}
+
+    @Override
+    public void onTooltipShown(Tooltip.TooltipView tooltipView) {}
+
+    @Override
+    public void onTooltipHidden(Tooltip.TooltipView tooltipView) {}
 }

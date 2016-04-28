@@ -98,4 +98,13 @@
     <string name="font_system">System Font</string>
     <string name="font_unica_one">Unica One</string>
     <string name="font_vt323">VT323</string>
+    <!-- Tooltips -->
+    <string name="tt_swipe_left_wallpaper">Swipe left (←) to access settings</string>
+    <string name="tt_share_quotograph">Share the quote with your favorite apps</string>
+    <string name="tt_save_quotograph">Save the Quotograph as an image</string>
+    <string name="tt_skip_quotograph">Don\'t like this quote? Skip to the next one</string>
+    <string name="tt_add_quotes">Tap here to add more quotes</string>
+    <string name="tt_search_for_quotes">And here to search for quotes, authors, and categories</string>
+    <string name="tt_write_quotes">Tap here to add custom qutoes</string>
+    <string name="tt_exit_add">And finally, exit here</string>
 </resources>

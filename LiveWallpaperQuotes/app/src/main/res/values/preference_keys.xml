@@ -8,4 +8,6 @@
     <string name="preference_key_double_tap_to_launch">com.stanleyidesis.quotograph.preference.DOUBLE_TAP</string>
     <string name="preference_key_fonts">com.stanleyidesis.quotograph.preference.FONTS</string>
     <string name="preference_key_watermark">com.stanleyidesis.quotograph.preference.WATERMARK</string>
+    <string name="preference_key_tutorial">com.stanleyidesis.quotograph.preference.TUTORIAL</string>
+    <string name="preference_key_did_swipe_wallpaper">com.stanleyidesis.quotograph.preference.SWIPED_WALLPAPER</string>
 </resources>

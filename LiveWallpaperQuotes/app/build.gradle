@@ -60,6 +60,7 @@ dependencies {
     compile('com.sangcomz:FishBun:0.4.4@aar') {
         transitive = true
     }
+    compile 'it.sephiroth.android.library.targettooltip:target-tooltip-library:+'
 }
 
 apply plugin: 'com.google.gms.google-services'
