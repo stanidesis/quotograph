@@ -22,7 +22,7 @@ public enum Fonts {
     FREDERICKA_THE_GREAT(14, R.string.font_fredericka_the_great, "FrederickatheGreat-Regular.ttf"),
     JOSEFIN_BOLD(6, R.string.font_josefin_sans_bold, "JosefinSans-Bold.ttf"),
     SPECIAL_ELITE(9, R.string.font_special_elite, "SpecialElite.ttf"),
-    SPIRAX(15, R.string.font_special_elite, "Spirax-Regular.ttf"),
+    SPIRAX(15, R.string.font_spirax, "Spirax-Regular.ttf"),
     UNICA_ONE(10, R.string.font_unica_one, "UnicaOne-Regular.ttf"),
     VT323(16, R.string.font_vt323, "VT323-Regular.ttf");
 
