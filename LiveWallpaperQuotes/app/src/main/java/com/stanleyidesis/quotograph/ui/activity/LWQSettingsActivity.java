@@ -1028,13 +1028,19 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         chooseImagesContainer.setTag(R.id.view_tag_animator_hide, new Runnable() {
             @Override
             public void run() {
-                chooseImageSourceModule.changeVisibility(null, false);
+                chooseImageSourceModule.changeVisibility(
+                        ButterKnife.findById(LWQSettingsActivity.this,
+                                R.id.btn_lwq_images_settings),
+                        false);
             }
         });
         chooseImagesContainer.setTag(R.id.view_tag_animator_reveal, new Runnable() {
             @Override
             public void run() {
-                chooseImageSourceModule.changeVisibility(null, true);
+                chooseImageSourceModule.changeVisibility(
+                        ButterKnife.findById(LWQSettingsActivity.this,
+                                R.id.btn_lwq_images_settings),
+                        true);
             }
         });
     }
