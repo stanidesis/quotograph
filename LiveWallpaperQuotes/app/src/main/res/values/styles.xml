@@ -34,6 +34,13 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
+    <style name="Theme.LWQ.TextAppearance.Settings.CategoryButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:gravity">end|center_vertical</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/palette_50</item>
+        <item name="android:textSize">@dimen/abc_text_size_headline_material</item>
+    </style>
+
     <style name="Theme.LWQ.TextAppearance.Settings.Category" parent="Base.TextAppearance.AppCompat.Headline">
         <item name="android:gravity">end|center_vertical</item>
         <item name="android:textAllCaps">true</item>

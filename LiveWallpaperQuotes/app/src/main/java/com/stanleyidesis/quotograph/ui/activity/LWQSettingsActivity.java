@@ -932,7 +932,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 R.layout.spinner_item,
                 refreshPreferenceOptions);
         refreshOptionsAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
-        Spinner refreshSpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_interval);
+        Spinner refreshSpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_refresh);
         refreshSpinner.setAdapter(refreshOptionsAdapter);
         refreshSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -965,7 +965,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         doubleTapCheckbox.setChecked(LWQPreferences.isDoubleTapEnabled());
 
         // Fonts
-        ButterKnife.findById(settingsContainer, R.id.btn_lwq_fonts_settings).setOnClickListener(new View.OnClickListener() {
+        ButterKnife.findById(settingsContainer, R.id.btn_lwq_settings_fonts).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new MaterialDialog.Builder(LWQSettingsActivity.this)
@@ -981,7 +981,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         });
 
         // Images
-        ButterKnife.findById(settingsContainer, R.id.btn_lwq_images_settings)
+        ButterKnife.findById(settingsContainer, R.id.btn_lwq_settings_images)
                 .setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -991,7 +991,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     void updateRefreshSpinner() {
-        Spinner refreshSpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_interval);
+        Spinner refreshSpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_refresh);
         final AdapterView.OnItemSelectedListener onItemSelectedListener = refreshSpinner.getOnItemSelectedListener();
         refreshSpinner.setOnItemSelectedListener(null);
         final long refreshPreference = LWQPreferences.getRefreshPreference();
@@ -1031,7 +1031,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             public void run() {
                 chooseImageSourceModule.changeVisibility(
                         ButterKnife.findById(LWQSettingsActivity.this,
-                                R.id.btn_lwq_images_settings),
+                                R.id.btn_lwq_settings_images),
                         false);
             }
         });
@@ -1040,13 +1040,40 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             public void run() {
                 chooseImageSourceModule.changeVisibility(
                         ButterKnife.findById(LWQSettingsActivity.this,
-                                R.id.btn_lwq_images_settings),
+                                R.id.btn_lwq_settings_images),
                         true);
             }
         });
     }
 
     // Click Handling
+
+    // Hanlde the click for every settings option
+    @OnClick({R.id.tv_lwq_settings_blur, R.id.tv_lwq_settings_dim,
+    R.id.tv_lwq_settings_double_tap, R.id.tv_lwq_settings_fonts,
+    R.id.tv_lwq_settings_images, R.id.tv_lwq_settings_refresh})
+    void showSettingsTooltip(View view) {
+        switch (view.getId()) {
+            case R.id.tv_lwq_settings_blur:
+                showToolTip(SettingsTooltips.BLUR, null);
+                break;
+            case R.id.tv_lwq_settings_dim:
+                showToolTip(SettingsTooltips.DIM, null);
+                break;
+            case R.id.tv_lwq_settings_double_tap:
+                showToolTip(SettingsTooltips.DOUBLE_TAP, null);
+                break;
+            case R.id.tv_lwq_settings_fonts:
+                showToolTip(SettingsTooltips.FONTS, null);
+                break;
+            case R.id.tv_lwq_settings_images:
+                showToolTip(SettingsTooltips.IMAGES, null);
+                break;
+            case R.id.tv_lwq_settings_refresh:
+                showToolTip(SettingsTooltips.REFRESH, null);
+                break;
+        }
+    }
 
     @OnClick(R.id.btn_fab_screen_search) void performSearch() {
         dismissKeyboard(editableQuery);
@@ -1550,6 +1577,24 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Tooltip Sequence
 
+    private enum SettingsTooltips {
+
+        BLUR(R.string.tt_setting_blur, R.id.sb_lwq_settings_blur),
+        DIM(R.string.tt_setting_dim, R.id.sb_lwq_settings_dim),
+        FONTS(R.string.tt_setting_fonts, R.id.btn_lwq_settings_fonts),
+        IMAGES(R.string.tt_setting_images, R.id.btn_lwq_settings_images),
+        REFRESH(R.string.tt_setting_refresh, R.id.spinner_lwq_settings_refresh),
+        DOUBLE_TAP(R.string.tt_setting_double_tap, R.id.check_lwq_settings_double_tap);
+
+        int stringId;
+        int anchorId;
+
+        SettingsTooltips(int stringId, int anchorId) {
+            this.stringId = stringId;
+            this.anchorId = anchorId;
+        }
+    }
+
     private enum TutorialTooltips {
         SHARE(R.string.tt_share_quotograph,
                 R.id.btn_wallpaper_actions_share,
@@ -1573,11 +1618,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         SEARCH(R.string.tt_search_for_quotes,
                 R.id.fab_lwq_search,
                 Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
-                Tooltip.Gravity.LEFT),
+                Tooltip.Gravity.LEFT,
+                false),
         WRITE(R.string.tt_write_quotes,
                 R.id.fab_lwq_create_quote,
                 Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
-                Tooltip.Gravity.LEFT),
+                Tooltip.Gravity.LEFT,
+                false),
         EXIT(R.string.tt_exit_add,
                 R.id.fab_lwq_plus,
                 Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
@@ -1591,21 +1638,17 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         SETTING(R.string.tt_setting_info,
                 R.id.tv_lwq_settings_dim,
                 Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
-                Tooltip.Gravity.BOTTOM);
+                Tooltip.Gravity.BOTTOM,
+                false);
 
         int stringId;
         boolean stop;
         int anchorId;
         Tooltip.ClosePolicy closePolicy;
         Tooltip.Gravity gravity;
-        float xPercent, yPercent;
 
         TutorialTooltips(int stringId, int anchorId, Tooltip.ClosePolicy closePolicy) {
-            this(stringId, anchorId, closePolicy, Tooltip.Gravity.TOP);
-        }
-
-        TutorialTooltips(int stringId, int anchorId, Tooltip.ClosePolicy closePolicy, Tooltip.Gravity gravity) {
-            this(stringId, anchorId, closePolicy, gravity, false);
+            this(stringId, anchorId, closePolicy, Tooltip.Gravity.TOP, false);
         }
 
         TutorialTooltips(int stringId, int anchorId, Tooltip.ClosePolicy closePolicy, Tooltip.Gravity gravity, boolean stop) {
@@ -1615,37 +1658,43 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             this.gravity = gravity;
             this.stop = stop;
         }
-
-        TutorialTooltips(int stringId, float xPercent, float yPercent, Tooltip.ClosePolicy closePolicy, Tooltip.Gravity gravity, boolean stop) {
-            this.stringId = stringId;
-            this.xPercent = xPercent;
-            this.yPercent = yPercent;
-            this. closePolicy = closePolicy;
-            this.gravity = gravity;
-            this.stop = stop;
-        }
     }
 
     void showTutorialTip(TutorialTooltips tooltip) {
         if (!showTutorialTips) return;
-        Tooltip.Builder builder = new Tooltip.Builder(tooltip.ordinal())
+        showToolTip(tooltip, this);
+    }
+
+    void showToolTip(Object tooltipObj, Tooltip.Callback callback) {
+        int id = 0;
+        int stringId = 0;
+        int anchorId = 0;
+        Tooltip.ClosePolicy closePolicy =
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_CONSUME;
+        Tooltip.Gravity gravity = Tooltip.Gravity.BOTTOM;
+        if (tooltipObj instanceof TutorialTooltips) {
+            TutorialTooltips tooltip = (TutorialTooltips) tooltipObj;
+            id = tooltip.ordinal();
+            stringId = tooltip.stringId;
+            anchorId = tooltip.anchorId;
+            closePolicy = tooltip.closePolicy;
+            gravity = tooltip.gravity;
+        } else {
+            SettingsTooltips tooltip = (SettingsTooltips) tooltipObj;
+            stringId = tooltip.stringId;
+            anchorId = tooltip.anchorId;
+        }
+        Tooltip.Builder builder = new Tooltip.Builder(id)
                 .activateDelay(500)
-                .closePolicy(tooltip.closePolicy, 0)
+                .closePolicy(closePolicy, 0)
                 .fadeDuration(200)
                 .fitToScreen(true)
                 .floatingAnimation(Tooltip.AnimationBuilder.SLOW)
                 .showDelay(500)
-                .text(getResources(), tooltip.stringId)
-                .withCallback(this);
-        if (tooltip.anchorId > 0) {
-            builder.anchor(ButterKnife.findById(this, tooltip.anchorId), tooltip.gravity);
-        } else {
-            Point anchorPoint = UIUtils.getRealScreenSize();
-            anchorPoint.offset(
-                    (int)((float)-anchorPoint.x * tooltip.xPercent),
-                    (int)((float)-anchorPoint.y * tooltip.yPercent)
-            );
-            builder.anchor(anchorPoint, tooltip.gravity);
+                .text(getResources(), stringId)
+                .withCallback(callback);
+        if (anchorId > 0) {
+            builder.anchor(ButterKnife.findById(this, anchorId), gravity);
         }
         Tooltip.make(this, builder.build()).show();
     }
