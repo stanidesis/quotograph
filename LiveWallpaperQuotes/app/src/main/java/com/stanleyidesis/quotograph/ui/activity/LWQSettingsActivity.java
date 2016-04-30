@@ -17,6 +17,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.percent.PercentFrameLayout;
 import android.support.percent.PercentRelativeLayout;
@@ -462,6 +463,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     AppCompatAutoCompleteTextView editableQuery;
     SearchResultsAdapter searchResultsAdapter;
 
+    // Should we show tooltips?
+    boolean showTutorialTips = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -481,6 +485,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 animateWallpaperActions(false);
             }
         });
+
+        showTutorialTips = !LWQPreferences.viewedTutorial();
 
         // Setup content
         setupContent();
@@ -512,8 +518,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         } else {
             changeState(stateInitial);
         }
-
-       showPageOneTooltips();
     }
 
     @SuppressWarnings("WrongConstant")
@@ -666,14 +670,25 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 // Content
                 content.setAlpha(position == 0 ? 0f : 1f);
 
-                // Tooltips
-                if (position == 1) showPageTwoTooltips();
-
                 // Add Fab
                 fabAdd.setScaleX(position == 1 ? 1f : 0f);
                 fabAdd.setScaleY(position == 1 ? 1f : 0f);
                 fabAdd.setAlpha(position == 1 ? 1f : 0f);
                 fabAdd.setEnabled(position == 1);
+
+
+                // Tooltips
+                if (position == 1) {
+                    showTutorialTip(TutorialTooltips.ADD);
+                } else if (position == 2) {
+                    // Delay it just a little because the view messes up otherwise
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            showTutorialTip(TutorialTooltips.SETTING);
+                        }
+                    }, 200);
+                }
 
                 // Action Buttons
                 View [] buttons = new View[] {shareButton, saveButton, skipButton};
@@ -1121,7 +1136,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             changeState(statePlaylist);
         } else {
             changeState(stateAddReveal);
-            showAddPageTooltips();
         }
     }
 
@@ -1170,7 +1184,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     void animateWallpaperActions(final boolean dismiss) {
         AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(generateAnimator(shareButton, dismiss, 0),
+        Animator shareButtonAnimator = generateAnimator(shareButton, dismiss, 0);
+        if (!dismiss) {
+            // Delay the tooltip a bit to make sure it lines up right
+            shareButtonAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            showTutorialTip(TutorialTooltips.SHARE);
+                        }
+                    }, 500);
+                }
+            });
+        }
+        animatorSet.playTogether(shareButtonAnimator,
                 generateAnimator(saveButton, dismiss, 20),
                 generateAnimator(skipButton, dismiss, 35));
         animatorSet.start();
@@ -1296,6 +1325,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             public void onAnimationEnd(Animator animation) {
                 if (dismiss) {
                     fabBackground.setVisibility(View.GONE);
+                    // Tell them to swipe again for settings!
+                    showTutorialTip(TutorialTooltips.SWIPE_AGAIN);
+                } else {
+                    // Tell them about search!
+                    showTutorialTip(TutorialTooltips.SEARCH);
                 }
             }
         });
@@ -1519,13 +1553,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     private enum TutorialTooltips {
         SHARE(R.string.tt_share_quotograph,
                 R.id.btn_wallpaper_actions_share,
-                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME),
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_CONSUME),
         SAVE(R.string.tt_save_quotograph,
                 R.id.btn_wallpaper_actions_save,
-                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME),
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_CONSUME),
         SKIP(R.string.tt_skip_quotograph,
                 R.id.btn_wallpaper_actions_skip,
-                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME),
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_CONSUME),
         SWIPE(R.string.tt_swipe_left_wallpaper,
                 R.id.viewpager_lwq_settings,
                 Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME,
@@ -1533,7 +1567,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 true),
         ADD(R.string.tt_add_quotes,
                 R.id.fab_lwq_plus,
-                Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_CONSUME,
                 Tooltip.Gravity.LEFT,
                 true),
         SEARCH(R.string.tt_search_for_quotes,
@@ -1546,15 +1580,25 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 Tooltip.Gravity.LEFT),
         EXIT(R.string.tt_exit_add,
                 R.id.fab_lwq_plus,
-                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME,
+                Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
                 Tooltip.Gravity.LEFT,
-                true);
+                true),
+        SWIPE_AGAIN(R.string.tt_swipe_left_playlist,
+                R.id.viewpager_lwq_settings,
+                Tooltip.ClosePolicy.TOUCH_ANYWHERE_NO_CONSUME,
+                Tooltip.Gravity.CENTER,
+                true),
+        SETTING(R.string.tt_setting_info,
+                R.id.tv_lwq_settings_dim,
+                Tooltip.ClosePolicy.TOUCH_INSIDE_NO_CONSUME,
+                Tooltip.Gravity.BOTTOM);
 
         int stringId;
         boolean stop;
         int anchorId;
         Tooltip.ClosePolicy closePolicy;
         Tooltip.Gravity gravity;
+        float xPercent, yPercent;
 
         TutorialTooltips(int stringId, int anchorId, Tooltip.ClosePolicy closePolicy) {
             this(stringId, anchorId, closePolicy, Tooltip.Gravity.TOP);
@@ -1571,50 +1615,56 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             this.gravity = gravity;
             this.stop = stop;
         }
+
+        TutorialTooltips(int stringId, float xPercent, float yPercent, Tooltip.ClosePolicy closePolicy, Tooltip.Gravity gravity, boolean stop) {
+            this.stringId = stringId;
+            this.xPercent = xPercent;
+            this.yPercent = yPercent;
+            this. closePolicy = closePolicy;
+            this.gravity = gravity;
+            this.stop = stop;
+        }
     }
 
-    void showPageOneTooltips() {
-        if (LWQPreferences.viewedTutorial()) return;
-        showTip(TutorialTooltips.SHARE);
-    }
-
-    void showPageTwoTooltips() {
-        if (LWQPreferences.viewedTutorial()) return;
-        showTip(TutorialTooltips.ADD);
-    }
-
-    void showAddPageTooltips() {
-        if (LWQPreferences.viewedTutorial()) return;
-        showTip(TutorialTooltips.SEARCH);
-    }
-
-    void showTip(TutorialTooltips tooltip) {
-        Tooltip.make(this,
-                new Tooltip.Builder(tooltip.ordinal())
-                        .activateDelay(500)
-                        .anchor(ButterKnife.findById(this, tooltip.anchorId), Tooltip.Gravity.TOP)
-                        .closePolicy(tooltip.closePolicy, 0)
-                        .fadeDuration(200)
-                        .fitToScreen(true)
-                        .floatingAnimation(Tooltip.AnimationBuilder.DEFAULT)
-                        .showDelay(500)
-                        .text(getResources(), tooltip.stringId)
-                        .withCallback(this)
-                        .build()
-        ).show();
+    void showTutorialTip(TutorialTooltips tooltip) {
+        if (!showTutorialTips) return;
+        Tooltip.Builder builder = new Tooltip.Builder(tooltip.ordinal())
+                .activateDelay(500)
+                .closePolicy(tooltip.closePolicy, 0)
+                .fadeDuration(200)
+                .fitToScreen(true)
+                .floatingAnimation(Tooltip.AnimationBuilder.SLOW)
+                .showDelay(500)
+                .text(getResources(), tooltip.stringId)
+                .withCallback(this);
+        if (tooltip.anchorId > 0) {
+            builder.anchor(ButterKnife.findById(this, tooltip.anchorId), tooltip.gravity);
+        } else {
+            Point anchorPoint = UIUtils.getRealScreenSize();
+            anchorPoint.offset(
+                    (int)((float)-anchorPoint.x * tooltip.xPercent),
+                    (int)((float)-anchorPoint.y * tooltip.yPercent)
+            );
+            builder.anchor(anchorPoint, tooltip.gravity);
+        }
+        Tooltip.make(this, builder.build()).show();
     }
 
     @Override
     public void onTooltipClose(Tooltip.TooltipView tooltipView, boolean b, boolean b1) {
         TutorialTooltips[] allTips = TutorialTooltips.values();
         // Reached the end of the tips?
-        if (allTips.length == tooltipView.getTooltipId() + 1) return;
+        if (allTips.length == tooltipView.getTooltipId() + 1) {
+            LWQPreferences.setViewedTutorial(true);
+            showTutorialTips = false;
+            return;
+        }
 
         // Should stop?
         if (allTips[tooltipView.getTooltipId()].stop) return;
 
         // Show the next one!
-        showTip(allTips[tooltipView.getTooltipId() + 1]);
+        showTutorialTip(allTips[tooltipView.getTooltipId() + 1]);
     }
 
     @Override

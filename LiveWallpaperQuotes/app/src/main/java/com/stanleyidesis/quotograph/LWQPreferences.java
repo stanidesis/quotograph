@@ -123,7 +123,7 @@ public class LWQPreferences {
         return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_watermark), true);
     }
 
-    public static void setFinishedTutorial(boolean finishedTutorial) {
+    public static void setViewedTutorial(boolean finishedTutorial) {
         sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial), finishedTutorial).apply();
     }
 
