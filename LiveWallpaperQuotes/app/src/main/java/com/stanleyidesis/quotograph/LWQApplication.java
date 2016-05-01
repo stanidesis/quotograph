@@ -100,24 +100,30 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
     @Override
     public void onCreate() {
         super.onCreate();
+        sApplication = this;
+
         // Bug tracking
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
         Fabric.with(this, new Crashlytics.Builder().core(core).build());
+
         // Analytics
         getDefaultTracker().enableAdvertisingIdCollection(true);
         getDefaultTracker().enableAutoActivityTracking(true);
+
         // Billing
         iabHelper = new IabHelper(this, IabLic.retrieveLic());
         iabHelper.enableDebugLogging(BuildConfig.DEBUG, getString(R.string.app_name) + ".BILLING");
         iabHelper.startSetup(this);
 
-        sApplication = this;
+        // Application controllers
         logger = new LWQLoggerCrashlyticsImpl();
         wallpaperController = new LWQWallpaperControllerUnsplashImpl();
         imageController = new LWQImageControllerUIL();
         quoteController = new LWQQuoteControllerBrainyQuoteImpl();
         notificationController = new LWQNotificationControllerImpl();
         networkConnectionListener = new NetworkConnectionListener(this);
+
+        // Enable
         setComponentsEnabled(!LWQPreferences.isFirstLaunch());
     }
 
