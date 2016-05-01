@@ -130,12 +130,4 @@ public class LWQPreferences {
     public static boolean viewedTutorial() {
         return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial), false);
     }
-
-    public static void setSwipedWallpaper(boolean swipedWallpaper) {
-        sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_did_swipe_wallpaper), swipedWallpaper).apply();
-    }
-
-    public static boolean didSwipeWallpaper() {
-        return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_did_swipe_wallpaper), false);
-    }
 }
