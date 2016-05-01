@@ -122,4 +122,12 @@ public class LWQPreferences {
     public static boolean isWatermarkEnabled() {
         return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_watermark), true);
     }
+
+    public static void setViewedTutorial(boolean finishedTutorial) {
+        sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial), finishedTutorial).apply();
+    }
+
+    public static boolean viewedTutorial() {
+        return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial), false);
+    }
 }

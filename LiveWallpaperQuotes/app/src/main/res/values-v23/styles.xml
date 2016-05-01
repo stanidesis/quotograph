@@ -1,0 +1,12 @@
+<resources>
+     <style name="Theme.LWQ.Wallpaper" parent="Theme.LWQ.Wallpaper.Base">
+        <item name="colorAccent">@color/palette_500</item>
+        <!-- Works on v21+ -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Works on v23+ -->
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+</resources>
