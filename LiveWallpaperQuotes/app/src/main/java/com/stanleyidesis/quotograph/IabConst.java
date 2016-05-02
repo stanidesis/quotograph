@@ -1,6 +1,4 @@
-package com.stanleyidesis.quotograph.billing.util;
-
-import com.stanleyidesis.quotograph.R;
+package com.stanleyidesis.quotograph;
 
 /**
  * Copyright (c) 2016 Stanley Idesis

@@ -28,7 +28,6 @@ import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
 import com.stanleyidesis.quotograph.api.receiver.LWQReceiver;
 import com.stanleyidesis.quotograph.api.service.LWQWallpaperService;
 import com.stanleyidesis.quotograph.billing.util.IabBroadcastReceiver;
-import com.stanleyidesis.quotograph.billing.util.IabConst;
 import com.stanleyidesis.quotograph.billing.util.IabHelper;
 import com.stanleyidesis.quotograph.billing.util.IabLic;
 import com.stanleyidesis.quotograph.billing.util.IabResult;
@@ -286,6 +285,7 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
             EventBus.getDefault().post(IabPurchaseEvent.failed(result.getMessage()));
             return;
         }
+        AnalyticsUtils.trackProductPurchased(result, info);
         String purchasedSku = info.getSku();
         IabConst.Product purchased = null;
         for (IabConst.Product product : IabConst.Product.values()) {
@@ -295,7 +295,7 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
             }
         }
         if (purchased == null) {
-            EventBus.getDefault().post(IabPurchaseEvent.failed("Unknown SKU"));
+            // Huh?
             return;
         }
         EventBus.getDefault().post(IabPurchaseEvent.success(purchased));

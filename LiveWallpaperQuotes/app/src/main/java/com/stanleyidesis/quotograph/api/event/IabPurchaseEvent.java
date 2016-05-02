@@ -1,7 +1,7 @@
 package com.stanleyidesis.quotograph.api.event;
 
 import com.stanleyidesis.quotograph.api.LWQError;
-import com.stanleyidesis.quotograph.billing.util.IabConst;
+import com.stanleyidesis.quotograph.IabConst;
 
 /**
  * Copyright (c) 2016 Stanley Idesis

@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
-import com.stanleyidesis.quotograph.billing.util.IabConst;
+import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.billing.util.SkuDetails;
 
 import butterknife.Bind;

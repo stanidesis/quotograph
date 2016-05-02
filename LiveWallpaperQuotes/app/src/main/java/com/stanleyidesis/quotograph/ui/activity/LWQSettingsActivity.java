@@ -52,6 +52,7 @@ import com.orm.query.Select;
 import com.orm.util.NamingHelper;
 import com.sangcomz.fishbun.FishBun;
 import com.sangcomz.fishbun.define.Define;
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -69,7 +70,7 @@ import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
-import com.stanleyidesis.quotograph.billing.util.IabConst;
+import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQChooseImageSourceModule;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQStoreDialogModule;
@@ -1556,6 +1557,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @Override
     public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
         if (!LWQApplication.ownsFontAccess()) {
+            AnalyticsUtils.trackAttemptedAccess(IabConst.Product.FONTS, "fonts_dialog");
             LWQStoreDialogModule lwqStoreDialogModule = new LWQStoreDialogModule();
             lwqStoreDialogModule.initialize(this, null);
             lwqStoreDialogModule.changeVisibility(null, true);
@@ -1586,6 +1588,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @Override
     public void addPhotoAlbum(LWQChooseImageSourceModule module) {
         if (!LWQApplication.ownsImageAccess()) {
+            AnalyticsUtils.trackAttemptedAccess(IabConst.Product.IMAGES, "images_dialog");
             LWQStoreDialogModule lwqStoreDialogModule = new LWQStoreDialogModule();
             lwqStoreDialogModule.initialize(this, null);
             lwqStoreDialogModule.changeVisibility(null, true);

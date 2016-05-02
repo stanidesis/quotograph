@@ -7,10 +7,11 @@ import android.view.View;
 
 import com.afollestad.materialdialogs.GravityEnum;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
-import com.stanleyidesis.quotograph.billing.util.IabConst;
+import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.ui.adapter.IapProductAdapter;
 
 import de.greenrobot.event.EventBus;
@@ -55,6 +56,7 @@ public class LWQStoreDialogModule implements Module,
 
     Activity activity;
     MaterialDialog dialog;
+    private IabConst.Product attemptedPurchase;
 
     @Override
     public void initialize(Context context, View root) {
@@ -111,7 +113,13 @@ public class LWQStoreDialogModule implements Module,
     // Listen for Purchase Events
 
     public void onEvent(IabPurchaseEvent iabPurchaseEvent) {
-        if (iabPurchaseEvent.didFail() || dialog == null || !dialog.isShowing()) {
+        if (iabPurchaseEvent.didFail() || dialog == null
+                || !dialog.isShowing()
+                || activity == null) {
+            if (iabPurchaseEvent.didFail() && attemptedPurchase != null) {
+                AnalyticsUtils.trackFailedPurchase(attemptedPurchase);
+                attemptedPurchase = null;
+            }
             return;
         }
         activity.runOnUiThread(new Runnable() {
@@ -129,6 +137,8 @@ public class LWQStoreDialogModule implements Module,
 
     @Override
     public void purchaseProduct(IabConst.Product product) {
+        attemptedPurchase = product;
+        AnalyticsUtils.trackTappedProduct(product);
         LWQApplication.purchaseProduct(activity, product);
     }
 }
