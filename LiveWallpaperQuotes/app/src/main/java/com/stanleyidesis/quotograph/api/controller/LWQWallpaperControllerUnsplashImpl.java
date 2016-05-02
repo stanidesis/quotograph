@@ -129,7 +129,8 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             }
             List<UnsplashCategory> activeCategories = UnsplashCategory.active();
             List<UserAlbum> activeAlbums = UserAlbum.active();
-            boolean useAlbums = activeAlbums.size() > 0;
+            boolean useAlbums = activeAlbums.size() > 0
+                    && LWQApplication.ownsImageAccess();
             if (activeCategories.size() > 0
                     && useAlbums) {
                 // Randomness will determine whether we still use an album

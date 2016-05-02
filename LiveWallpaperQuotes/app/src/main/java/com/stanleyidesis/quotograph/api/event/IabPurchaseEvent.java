@@ -1,6 +1,7 @@
 package com.stanleyidesis.quotograph.api.event;
 
 import com.stanleyidesis.quotograph.api.LWQError;
+import com.stanleyidesis.quotograph.billing.util.IabConst;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -37,8 +38,8 @@ import com.stanleyidesis.quotograph.api.LWQError;
  */
 public class IabPurchaseEvent extends FailableEvent {
 
-    public static IabPurchaseEvent success(String skuPurchased) {
-        return new IabPurchaseEvent(skuPurchased);
+    public static IabPurchaseEvent success(IabConst.Product purchased) {
+        return new IabPurchaseEvent(purchased);
     }
 
     public static IabPurchaseEvent failed(String errorMessage) {
@@ -47,11 +48,11 @@ public class IabPurchaseEvent extends FailableEvent {
         return iabPurchaseEvent;
     }
 
-    public String skuPurchased;
+    public IabConst.Product purchased;
 
     IabPurchaseEvent() {}
 
-    IabPurchaseEvent(String skuPurchased) {
-        this.skuPurchased = skuPurchased;
+    IabPurchaseEvent(IabConst.Product purchased) {
+        this.purchased = purchased;
     }
 }

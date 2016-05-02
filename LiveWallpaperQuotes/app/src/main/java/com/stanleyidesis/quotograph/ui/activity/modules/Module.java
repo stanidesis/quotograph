@@ -42,6 +42,8 @@ public interface Module {
 
     void changeVisibility(View anchor, boolean visible);
 
+    boolean isVisible();
+
     void setEnabled(boolean enabled);
 
 }

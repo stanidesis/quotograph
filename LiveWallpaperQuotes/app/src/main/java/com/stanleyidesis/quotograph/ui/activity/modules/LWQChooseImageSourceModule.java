@@ -136,6 +136,11 @@ public class LWQChooseImageSourceModule implements Module {
     }
 
     @Override
+    public boolean isVisible() {
+        return root.getVisibility() == View.VISIBLE;
+    }
+
+    @Override
     public void setEnabled(boolean enabled) {
         UIUtils.setViewAndChildrenEnabled(root, enabled);
     }

@@ -6,16 +6,12 @@ import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.TypedArray;
-import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 import com.orm.SugarApp;
-import com.orm.query.Condition;
-import com.orm.query.Select;
 import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.controller.LWQImageController;
 import com.stanleyidesis.quotograph.api.controller.LWQImageControllerUIL;
@@ -27,9 +23,6 @@ import com.stanleyidesis.quotograph.api.controller.LWQQuoteController;
 import com.stanleyidesis.quotograph.api.controller.LWQQuoteControllerBrainyQuoteImpl;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerUnsplashImpl;
-import com.stanleyidesis.quotograph.api.db.Author;
-import com.stanleyidesis.quotograph.api.db.Category;
-import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
 import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
 import com.stanleyidesis.quotograph.api.receiver.LWQReceiver;
@@ -41,7 +34,15 @@ import com.stanleyidesis.quotograph.billing.util.IabLic;
 import com.stanleyidesis.quotograph.billing.util.IabResult;
 import com.stanleyidesis.quotograph.billing.util.Inventory;
 import com.stanleyidesis.quotograph.billing.util.Purchase;
+import com.stanleyidesis.quotograph.billing.util.SkuDetails;
 import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import de.greenrobot.event.EventBus;
 import io.fabric.sdk.android.Fabric;
@@ -95,7 +96,8 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
     Tracker tracker;
     IabHelper iabHelper;
     IabBroadcastReceiver iabBroadcastReceiver;
-    boolean hasPremium;
+    Set<IabConst.Product> ownedProducts = new HashSet<>();
+    Map<IabConst.Product, SkuDetails> productDetails = new HashMap<>();
 
     @Override
     public void onCreate() {
@@ -175,12 +177,28 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         return get().iabHelper;
     }
 
-    public static boolean hasPremium() {
-        return get().hasPremium;
+    public static boolean ownsFontAccess() {
+        return ownsProduct(IabConst.Product.FONTS)
+                || ownsProduct(IabConst.Product.FONTS_IMAGES)
+                || ownsProduct(IabConst.Product.QUOTOGRAPH_INSPIRED);
     }
 
-    public static void purchasePremium(Activity activity) {
-        getIabHelper().launchPurchaseFlow(activity, IabConst.SKU_PREMIUM,
+    public static boolean ownsImageAccess() {
+        return ownsProduct(IabConst.Product.IMAGES)
+                || ownsProduct(IabConst.Product.FONTS_IMAGES)
+                || ownsProduct(IabConst.Product.QUOTOGRAPH_INSPIRED);
+    }
+
+    public static boolean ownsProduct(IabConst.Product product) {
+        return get().ownedProducts.contains(product);
+    }
+
+    public static SkuDetails getProductDetails(IabConst.Product product) {
+        return get().productDetails.get(product);
+    }
+
+    public static void purchaseProduct(Activity activity, IabConst.Product product) {
+        getIabHelper().launchPurchaseFlow(activity, product.sku,
                 IabConst.PURCHASE_REQUEST_CODE, get());
     }
 
@@ -211,37 +229,6 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
                 PackageManager.DONT_KILL_APP);
     }
 
-    private void populateDefaults() {
-        final String[] defaultCategoryArray = getResources().getStringArray(R.array.default_category_titles);
-        final TypedArray defaultCategoryQuoteMap = getResources().obtainTypedArray(R.array.default_category_quote_map);
-        final TypedArray defaultCategoryAuthorMap = getResources().obtainTypedArray(R.array.default_category_author_map);
-        for (int i = 0; i < defaultCategoryArray.length; i++) {
-            Category defaultCategory = new Category(defaultCategoryArray[i], Category.Source.DEFAULT);
-            defaultCategory.save();
-            final int quoteArrayResourceId = defaultCategoryQuoteMap.getResourceId(i, -1);
-            final int authorArrayResourceId = defaultCategoryAuthorMap.getResourceId(i, -1);
-            if (quoteArrayResourceId == -1 || authorArrayResourceId == -1) {
-                // Uh-oh…
-                Log.e(getClass().getSimpleName(), "Missing quote / author array", new Throwable());
-                continue;
-            }
-            final String[] defaultCategoryQuotes = getResources().getStringArray(quoteArrayResourceId);
-            final String[] defaultCategoryAuthors = getResources().getStringArray(authorArrayResourceId);
-
-            // Populate DB with default quotes and authors (repeat authors accounted for)
-            for (int j = 0; j < defaultCategoryQuotes.length; j++) {
-                Author defaultAuthor = Select.from(Author.class).where(Condition.prop("name").eq(defaultCategoryAuthors[j])).first();
-                if (defaultAuthor == null) {
-                    defaultAuthor = new Author(defaultCategoryAuthors[j], false);
-                    defaultAuthor.save();
-                }
-                new Quote(defaultCategoryQuotes[j], defaultAuthor, defaultCategory).save();
-            }
-        }
-        defaultCategoryQuoteMap.recycle();
-        defaultCategoryAuthorMap.recycle();
-    }
-
     ////////////////////////////////////////////////////////////
     // IAB Interfaces
     ////////////////////////////////////////////////////////////
@@ -261,8 +248,12 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         iabBroadcastReceiver = new IabBroadcastReceiver(this);
         IntentFilter broadcastFilter = new IntentFilter(IabBroadcastReceiver.ACTION);
         registerReceiver(iabBroadcastReceiver, broadcastFilter);
-        // Setup complete, register inventory
-        iabHelper.queryInventoryAsync(this);
+        // Setup complete, query inventory
+        List<String> skus = new ArrayList<>(IabConst.Product.values().length);
+        for (IabConst.Product product : IabConst.Product.values()) {
+            skus.add(product.sku);
+        }
+        iabHelper.queryInventoryAsync(true, skus, this);
     }
 
     @Override
@@ -277,8 +268,13 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
             LWQError.log(result.getMessage());
             return;
         }
-
-        hasPremium = inventory.hasPurchase(IabConst.SKU_PREMIUM);
+        ownedProducts.clear();
+        for (IabConst.Product product : IabConst.Product.values()) {
+            if (inventory.hasPurchase(product.sku)) {
+                ownedProducts.add(product);
+            }
+            productDetails.put(product, inventory.getSkuDetails(product.sku));
+        }
     }
 
     @Override
@@ -290,7 +286,18 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
             EventBus.getDefault().post(IabPurchaseEvent.failed(result.getMessage()));
             return;
         }
-        hasPremium = info.getSku().equals(IabConst.SKU_PREMIUM);
-        EventBus.getDefault().post(IabPurchaseEvent.success(info.getSku()));
+        String purchasedSku = info.getSku();
+        IabConst.Product purchased = null;
+        for (IabConst.Product product : IabConst.Product.values()) {
+            if (product.sku.equalsIgnoreCase(purchasedSku)) {
+                purchased = product;
+                ownedProducts.add(product);
+            }
+        }
+        if (purchased == null) {
+            EventBus.getDefault().post(IabPurchaseEvent.failed("Unknown SKU"));
+            return;
+        }
+        EventBus.getDefault().post(IabPurchaseEvent.success(purchased));
     }
 }

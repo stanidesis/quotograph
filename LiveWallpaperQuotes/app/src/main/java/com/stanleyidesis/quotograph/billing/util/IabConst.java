@@ -1,5 +1,7 @@
 package com.stanleyidesis.quotograph.billing.util;
 
+import com.stanleyidesis.quotograph.R;
+
 /**
  * Copyright (c) 2016 Stanley Idesis
  *
@@ -34,6 +36,40 @@ package com.stanleyidesis.quotograph.billing.util;
  * Date: 03/26/2016
  */
 public class IabConst {
-    public static final String SKU_PREMIUM = "quotograph_premium";
+
+    public enum Product {
+
+        FONTS("fonts",
+                R.string.iap_fonts_title,
+                R.string.iap_fonts,
+                R.mipmap.img_fonts),
+        IMAGES("images",
+                R.string.iap_photos_title,
+                R.string.iap_photos,
+                R.mipmap.img_photos),
+        FONTS_IMAGES("fonts_and_images",
+                R.string.iap_fonts_photos_title,
+                R.string.iap_fonts_photos,
+                R.mipmap.img_fonts_photos),
+        QUOTOGRAPH_INSPIRED("quotograph_inspired",
+                R.string.iap_inspired_title,
+                R.string.iap_inspired,
+                R.mipmap.img_inspired);
+
+        Product(String sku, int titleRes, int descriptionRes, int imgRes) {
+            this.sku = sku;
+            this.titleRes = titleRes;
+            this.descriptionRes = descriptionRes;
+            this.imgRes = imgRes;
+        }
+
+        public String sku;
+        public int titleRes;
+        public int descriptionRes;
+        public int imgRes;
+
+    }
+
     public static final int PURCHASE_REQUEST_CODE = 1001;
+
 }
