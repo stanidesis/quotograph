@@ -23,6 +23,7 @@
 
     <style name="Theme.LWQ.Wallpaper" parent="Theme.LWQ.Wallpaper.Base">
         <item name="colorAccent">@color/palette_500</item>
+        <!-- More on v19, v21, and v23 -->
     </style>
 
     <style name="Theme.LWQ.TextAppearance.Settings.CategoryButton" parent="Widget.AppCompat.Button.Borderless">

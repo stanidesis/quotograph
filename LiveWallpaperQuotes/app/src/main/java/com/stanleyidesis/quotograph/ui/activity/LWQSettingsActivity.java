@@ -52,6 +52,7 @@ import com.orm.query.Select;
 import com.orm.util.NamingHelper;
 import com.sangcomz.fishbun.FishBun;
 import com.sangcomz.fishbun.define.Define;
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -66,11 +67,13 @@ import com.stanleyidesis.quotograph.api.db.PlaylistAuthor;
 import com.stanleyidesis.quotograph.api.db.PlaylistCategory;
 import com.stanleyidesis.quotograph.api.db.PlaylistQuote;
 import com.stanleyidesis.quotograph.api.db.Quote;
+import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
-import com.stanleyidesis.quotograph.billing.util.IabConst;
+import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQChooseImageSourceModule;
+import com.stanleyidesis.quotograph.ui.activity.modules.LWQStoreDialogModule;
 import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
@@ -433,6 +436,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // This is a slight departure from the way this class currently handles UI elements.
     // This module encapsulates some functionality, thereby hiding it from this class.
     LWQChooseImageSourceModule chooseImageSourceModule;
+
+    // Choose Fonts
+    MaterialDialog chooseFontsDialog;
 
     // FAB
     @Bind(R.id.group_lwq_settings_fab_screen)
@@ -968,7 +974,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         ButterKnife.findById(settingsContainer, R.id.btn_lwq_settings_fonts).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new MaterialDialog.Builder(LWQSettingsActivity.this)
+                chooseFontsDialog = new MaterialDialog.Builder(LWQSettingsActivity.this)
                         .title("Choose Fonts")
                         .adapter(new FontMultiselectAdapter(LWQSettingsActivity.this),
                                 LWQSettingsActivity.this)
@@ -976,7 +982,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                         .autoDismiss(false)
                         .canceledOnTouchOutside(true)
                         .cancelListener(LWQSettingsActivity.this)
-                        .show();
+                        .build();
+                chooseFontsDialog.show();
             }
         });
 
@@ -1399,6 +1406,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Event Handling
 
+    public void onEvent(final IabPurchaseEvent purchaseEvent) {
+        if (purchaseEvent.didFail()) {
+            return;
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Let them continue choosing images
+                if (chooseImageSourceModule != null
+                        && chooseImageSourceModule.isVisible()) {
+                    addPhotoAlbum(chooseImageSourceModule);
+                }
+            }
+        });
+    }
+
     public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
         if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_refresh) {
             runOnUiThread(new Runnable() {
@@ -1533,6 +1556,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+        if (!LWQApplication.ownsFontAccess()) {
+            AnalyticsUtils.trackAttemptedAccess(IabConst.Product.FONTS, "fonts_dialog");
+            LWQStoreDialogModule lwqStoreDialogModule = new LWQStoreDialogModule();
+            lwqStoreDialogModule.initialize(this, null);
+            lwqStoreDialogModule.changeVisibility(null, true);
+            return;
+        }
         FontMultiselectAdapter adapter = (FontMultiselectAdapter) dialog.getListView().getAdapter();
         adapter.addOrRemoveFont(which);
     }
@@ -1549,6 +1579,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     .getAdapter();
             adapter.setDefaultsIfNecessary();
         }
+        chooseFontsDialog = null;
     }
 
 
@@ -1556,6 +1587,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void addPhotoAlbum(LWQChooseImageSourceModule module) {
+        if (!LWQApplication.ownsImageAccess()) {
+            AnalyticsUtils.trackAttemptedAccess(IabConst.Product.IMAGES, "images_dialog");
+            LWQStoreDialogModule lwqStoreDialogModule = new LWQStoreDialogModule();
+            lwqStoreDialogModule.initialize(this, null);
+            lwqStoreDialogModule.changeVisibility(null, true);
+            return;
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             // Use DocumentsProvider
             Intent documentPicker = new Intent(Intent.ACTION_OPEN_DOCUMENT);

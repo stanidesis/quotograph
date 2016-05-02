@@ -111,7 +111,7 @@ public class FontMultiselectAdapter extends BaseAdapter {
      */
     public void setDefaultsIfNecessary() {
         if (selectedFonts.isEmpty()) {
-            addOrRemoveFont(0);
+            addOrRemoveFont(Fonts.JOSEFIN_BOLD.ordinal());
         }
     }
 }
