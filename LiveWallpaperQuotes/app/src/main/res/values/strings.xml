@@ -84,4 +84,46 @@
     <string name="save_failed">Failed to save your Quotograph :(</string>
     <string name="failed_to_generate_wallpaper">Whoops! We couldn\'t make a new Quotograph, please try again.</string>
     <string name="toast_tap_set_wallpaper">Press, \'Set wallpaper,\' to use Quotograph</string>
+    <!-- Fonts -->
+    <string name="font_abril_fatface">Abril</string>
+    <string name="font_amatic_sc">Amatic SC</string>
+    <string name="font_anton">Anton</string>
+    <string name="font_black_ops_one">Black Ops One</string>
+    <string name="font_cabin_sketch">Cabin Sketch</string>
+    <string name="font_finger_paint">Finger Paint</string>
+    <string name="font_fredericka_the_great">Fredericka The Great</string>
+    <string name="font_josefin_sans_bold">Josefin Sans</string>
+    <string name="font_special_elite">Special Elite</string>
+    <string name="font_spirax">Spirax</string>
+    <string name="font_system">System Font</string>
+    <string name="font_unica_one">Unica One</string>
+    <string name="font_vt323">VT323</string>
+    <!-- Tooltips -->
+    <string name="tt_swipe_left_wallpaper">Swipe left (←) for quotes</string>
+    <string name="tt_swipe_left_playlist">Swipe left (←) again for settings</string>
+    <string name="tt_share_quotograph">Share the quote with your favorite apps</string>
+    <string name="tt_save_quotograph">Save the Quotograph as an image</string>
+    <string name="tt_skip_quotograph">Don\'t like this Quotagraph? Skip it</string>
+    <string name="tt_add_quotes">Add more quotes</string>
+    <string name="tt_search_for_quotes">Search for quotes, authors, and categories</string>
+    <string name="tt_write_quotes">Or type in your favorites</string>
+    <string name="tt_exit_add">Tap again to exit</string>
+    <string name="tt_setting_info">Touch any setting to learn more</string>
+    <string name="tt_setting_blur">Blurry images make reading the quote even easier. Blurring requires extra memory</string>
+    <string name="tt_setting_dim">Dim the image to make the quote stand out</string>
+    <string name="tt_setting_fonts">Select your favorite fonts and Quotograph will pick one at random</string>
+    <string name="tt_setting_images">Select photo categories and your own photos to use as background</string>
+    <string name="tt_setting_refresh">Choose how often you want Quotograph to make a new wallpaper</string>
+    <string name="tt_setting_double_tap">This option lets you double-tap your home screen to launch Quotograph</string>
+    <string name="tt_setting_whats_new">Tap here to read about the newest features</string>
+    <!-- Product Stuff -->
+    <string name="iap_dialog_title">Quotograph Store</string>
+    <string name="iap_fonts">Make your quotes stand out! Get access to all fonts.</string>
+    <string name="iap_fonts_title">Fonts</string>
+    <string name="iap_photos">Have beautiful photos of your own? Use them in Quotograph.</string>
+    <string name="iap_photos_title">Images</string>
+    <string name="iap_fonts_photos">Double whammy: get access to fonts and custom images.</string>
+    <string name="iap_fonts_photos_title">Appearance Pack</string>
+    <string name="iap_inspired">Get everything, including the features above, future features, and my personal thanks, forever.</string>
+    <string name="iap_inspired_title">Quotograph Inspired</string>
 </resources>

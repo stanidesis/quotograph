@@ -5,6 +5,10 @@ import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
+import com.stanleyidesis.quotograph.ui.Fonts;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import de.greenrobot.event.EventBus;
 
@@ -81,15 +85,6 @@ public class LWQPreferences {
         sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_first_launch), firstLaunch).apply();
     }
 
-    public static int getImageCategoryPreference() {
-        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_image_category), 0);
-    }
-
-    public static void setImageCategoryPreference(int imageCategoryId) {
-        sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_image_category), imageCategoryId).apply();
-        EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_image_category, imageCategoryId));
-    }
-
     public static long getRefreshPreference() {
         return sharedPreferences.getLong(LWQApplication.get().getString(R.string.preference_key_refresh), DateUtils.DAY_IN_MILLIS);
     }
@@ -107,4 +102,45 @@ public class LWQPreferences {
         sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_double_tap_to_launch), enabled).apply();
     }
 
+    public static void setFontSet(Set<String> fontIds) {
+        sharedPreferences.edit().putStringSet(LWQApplication.get().getString(R.string.preference_key_fonts), fontIds).apply();
+    }
+
+    public static Set<String> getFontSet() {
+        Set<String> defaultSet = new HashSet<>();
+        defaultSet.add(String.valueOf(Fonts.JOSEFIN_BOLD.getId()));
+        if (!LWQApplication.ownsFontAccess()) {
+            return defaultSet;
+        }
+        Set<String> stringSet = sharedPreferences.getStringSet(LWQApplication.get().getString(R.string.preference_key_fonts), defaultSet);
+        Set<String> mutableSet = new HashSet<>();
+        mutableSet.addAll(stringSet);
+        return mutableSet;
+    }
+
+    public static void setWatermarkEnabled(boolean enabled) {
+        sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_watermark), enabled).apply();
+    }
+
+    public static boolean isWatermarkEnabled() {
+        return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_watermark), true);
+    }
+
+    public static void setViewedTutorial(boolean finishedTutorial) {
+        sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial), finishedTutorial).apply();
+    }
+
+    public static boolean viewedTutorial() {
+        return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial), false);
+    }
+
+    public static int getLatestVersionCode() {
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_whats_new_dialog), 0);
+    }
+
+    public static void setLatestVersionCode() {
+        sharedPreferences.edit().putInt(
+                LWQApplication.get().getString(R.string.preference_key_whats_new_dialog),
+                LWQApplication.getVersionCode()).apply();
+    }
 }

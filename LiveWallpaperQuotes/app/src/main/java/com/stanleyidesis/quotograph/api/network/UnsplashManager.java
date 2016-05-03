@@ -106,7 +106,7 @@ public class UnsplashManager {
                 UnsplashCategory unsplashCategory = UnsplashCategory.find(categoryJSON.getInt(JSONCategoryKeys.KEY_ID));
                 if (unsplashCategory == null) {
                     unsplashCategory = new UnsplashCategory(categoryJSON.getInt(JSONCategoryKeys.KEY_ID),
-                            categoryJSON.getString(JSONCategoryKeys.KEY_TITLE));
+                            categoryJSON.getString(JSONCategoryKeys.KEY_TITLE), false);
                     unsplashCategory.save();
                 }
                 unsplashCategories.add(unsplashCategory);

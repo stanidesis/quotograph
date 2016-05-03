@@ -1,0 +1,146 @@
+<!--
+    Copyright (c) 2016 Stanley Idesis
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    iap_product_item.xml
+    @author Stanley Idesis
+
+    From Quotograph
+    https://github.com/stanidesis/quotograph
+
+    Please report any issues
+    https://github.com/stanidesis/quotograph/issues
+
+    Date: 05/01/2015
+-->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/iv_product_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/img_inspired"
+        android:adjustViewBounds="true"/>
+
+    <!-- Acts as a dark screen -->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/iv_product_item"
+        android:layout_alignTop="@+id/iv_product_item"
+        android:background="#66000000"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/iv_product_item"
+        android:layout_alignTop="@+id/iv_product_item"
+        android:layout_margin="12dp">
+
+        <TextView
+            style="@style/Base.TextAppearance.AppCompat.Headline"
+            android:id="@+id/tv_product_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/tv_product_item_description"
+            android:text="Quotograph Inspired"
+            android:shadowColor="#DD000000"
+            android:shadowRadius="4"/>
+
+        <TextView
+            style="@style/Base.TextAppearance.AppCompat.Body2"
+            android:id="@+id/tv_product_item_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="@string/iap_inspired"
+            android:shadowColor="#DD000000"
+            android:shadowRadius="4"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Display1"
+            android:id="@+id/tv_product_item_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right|end|top"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:text="$2.99"
+            android:textStyle="italic|bold"
+            android:clickable="true"/>
+
+    </RelativeLayout>
+
+    <Button
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:id="@+id/btn_product_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/iv_product_item"
+        android:layout_alignBottom="@+id/iv_product_item"/>
+
+    <LinearLayout
+        android:id="@+id/ll_product_item_screen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/iv_product_item"
+        android:layout_alignRight="@+id/iv_product_item"
+        android:layout_alignEnd="@+id/iv_product_item"
+        android:layout_alignLeft="@+id/iv_product_item"
+        android:layout_alignStart="@+id/iv_product_item"
+        android:layout_alignBottom="@+id/iv_product_item"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#BBFFFFFF"
+        android:visibility="gone">
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Display2"
+            android:id="@+id/tv_product_item_screen_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Purchased"
+            android:textAllCaps="true"
+            android:textColor="@color/palette_600"
+            android:textStyle="italic"
+            android:clickable="true"/>
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Display1"
+            android:id="@+id/tv_product_item_screen_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Thank you!"
+            android:textColor="@color/palette_400"
+            android:textStyle="italic"
+            android:clickable="true"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

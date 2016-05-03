@@ -2,6 +2,7 @@ package com.stanleyidesis.quotograph.api;
 
 import android.os.AsyncTask;
 
+import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
@@ -56,8 +57,10 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
     Callback<List<String>> fetchImageCategoriesCallback = new Callback<List<String>>() {
         @Override
         public void onSuccess(List<String> strings) {
-            // TODO I'm not in <3 with this…
-            LWQPreferences.setImageCategoryPreference(UnsplashCategory.listAll(UnsplashCategory.class).get(0).unsplashId);
+            // Only one category selected by default
+            UnsplashCategory category = SugarRecord.listAll(UnsplashCategory.class).get(0);
+            category.active = true;
+            category.save();
             LWQApplication.getQuoteController().fetchCategories(fetchQuoteCategoriesCallback);
         }
 

@@ -3,7 +3,9 @@ package com.stanleyidesis.quotograph.api.controller;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 
+import com.afollestad.materialdialogs.util.TypefaceHelper;
 import com.orm.SugarRecord;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
@@ -18,15 +20,18 @@ import com.stanleyidesis.quotograph.api.db.PlaylistQuote;
 import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
 import com.stanleyidesis.quotograph.api.db.UnsplashPhoto;
+import com.stanleyidesis.quotograph.api.db.UserAlbum;
 import com.stanleyidesis.quotograph.api.db.UserPhoto;
 import com.stanleyidesis.quotograph.api.db.Wallpaper;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.api.network.UnsplashManager;
+import com.stanleyidesis.quotograph.ui.Fonts;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -77,15 +82,36 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     Callback<List<Quote>> generateNewWallpaperCallback = new Callback<List<Quote>>() {
 
         void finishUp(List<Quote> newQuotes, Object photoRecord) {
-            Quote newQuote = newQuotes.get(new Random().nextInt(newQuotes.size()));
+            // Get the font set first
+            Set<String> fontPreferenceSet = LWQPreferences.getFontSet();
+            // Discard active wallpaper
             if (activeWallpaper != null) {
                 activeWallpaper.active = false;
                 activeWallpaper.save();
+                // Remove the previously-used font if the set has more than one font in it
+                // This prevents reusing the same font twice
+                if (fontPreferenceSet.size() > 1) {
+                    fontPreferenceSet.remove(String.valueOf(activeWallpaper.typefaceId));
+                }
                 discardActiveWallpaper();
+            }
+
+            // Get a new quote
+            Quote newQuote = newQuotes.get(new Random().nextInt(newQuotes.size()));
+
+            // Choose new font, if possible
+            int newFontId;
+            String[] fontPreferenceArray = new String[fontPreferenceSet.size()];
+            fontPreferenceSet.toArray(fontPreferenceArray);
+            if (fontPreferenceArray.length == 1) {
+                newFontId = Integer.parseInt(fontPreferenceArray[0]);
+            } else {
+                newFontId = Integer.parseInt
+                        (fontPreferenceArray[(new Random()).nextInt(fontPreferenceArray.length)]);
             }
             activeWallpaper = new Wallpaper(newQuote, true, System.currentTimeMillis(),
                     photoRecord instanceof UnsplashPhoto ? Wallpaper.IMAGE_SOURCE_UNSPLASH : Wallpaper.IMAGE_SOURCE_USER,
-                    ((SugarRecord) photoRecord).getId());
+                    ((SugarRecord) photoRecord).getId(), newFontId);
             activeWallpaper.save();
             LWQApplication.getLogger().logWallpaperCount(activeWallpaper.getId());
             newQuote.used = true;
@@ -101,9 +127,48 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 onError(LWQError.create(LWQApplication.get().getString(R.string.failed_to_generate_wallpaper)));
                 return;
             }
-            final UnsplashCategory unsplashCategory =
-                    UnsplashCategory.find(LWQPreferences.getImageCategoryPreference());
-            new UnsplashRetryableRequest(unsplashCategory, MAX_RETRIES, new BaseCallback<UnsplashPhoto>() {
+            List<UnsplashCategory> activeCategories = UnsplashCategory.active();
+            List<UserAlbum> activeAlbums = UserAlbum.active();
+            boolean useAlbums = activeAlbums.size() > 0
+                    && LWQApplication.ownsImageAccess();
+            if (activeCategories.size() > 0
+                    && useAlbums) {
+                // Randomness will determine whether we still use an album
+                useAlbums = new Random().nextBoolean();
+            }
+            if (useAlbums) {
+                // Get a random album
+                UserAlbum albumToTry = activeAlbums.get(
+                        new Random().nextInt(activeAlbums.size()));
+                // Find all photos in the album
+                List<UserPhoto> userPhotos = UserPhoto.photosFromAlbum(albumToTry);
+                // Remove the active currentPhoto, if possible
+                UserPhoto currentPhoto = activeWallpaper.recoverUserPhoto();
+                if (currentPhoto != null) {
+                    userPhotos.remove(currentPhoto);
+                }
+                // Choose a random photo from the album
+                UserPhoto photoToUse = userPhotos.get(
+                        new Random().nextInt(userPhotos.size()));
+                if (photoToUse == null
+                        && activeCategories.size() == 0
+                        && currentPhoto != null) {
+                    // The user wants to use this and ONLY this photo
+                    photoToUse = currentPhoto;
+                }
+                if (photoToUse != null) {
+                    finishUp(newQuotes, photoToUse);
+                    return;
+                }
+            }
+            // Fallback to categories
+            UnsplashCategory categoryToUse = UnsplashCategory.random();
+            if (activeCategories.size() > 0) {
+                categoryToUse = activeCategories.get(
+                        new Random().nextInt(
+                                activeCategories.size()));
+            }
+            new UnsplashRetryableRequest(categoryToUse, MAX_RETRIES, new BaseCallback<UnsplashPhoto>() {
                 @Override
                 public void onSuccess(UnsplashPhoto unsplashPhoto) {
                     finishUp(newQuotes, unsplashPhoto == null ? UnsplashPhoto.random() : unsplashPhoto);
@@ -142,6 +207,15 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     @Override
     public Bitmap getBackgroundImage() {
         return activeBackgroundImage;
+    }
+
+    @Override
+    public Typeface getTypeface() {
+        if (activeWallpaper == null) {
+            return null;
+        }
+        Fonts fontById = Fonts.findById((int) activeWallpaper.typefaceId);
+        return TypefaceHelper.get(LWQApplication.get(), fontById.getFileName());
     }
 
     @Override
@@ -267,12 +341,13 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         } else if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_RESOURCE) {
             // TODO use a good background image for the default
             Resources resources = LWQApplication.get().getResources();
-            activeBackgroundImage = BitmapFactory.decodeResource(resources, R.drawable.ic_launcher);
+            activeBackgroundImage = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher);
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
             setRetrievalState(RetrievalState.NONE);
         } else if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_USER) {
             UserPhoto userPhoto = activeWallpaper.recoverUserPhoto();
-            activeBackgroundImage = BitmapFactory.decodeFile(userPhoto.uri);
+            activeBackgroundImage = LWQApplication.getImageController()
+                    .retrieveBitmapSync(userPhoto.uri);
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
             setRetrievalState(RetrievalState.NONE);
         }
