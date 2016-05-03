@@ -9,4 +9,5 @@
     <string name="preference_key_fonts">com.stanleyidesis.quotograph.preference.FONTS</string>
     <string name="preference_key_watermark">com.stanleyidesis.quotograph.preference.WATERMARK</string>
     <string name="preference_key_tutorial">com.stanleyidesis.quotograph.preference.TUTORIAL</string>
+    <string name="preference_key_whats_new_dialog">com.stanleyidesis.quotograph.preference.WHATS_NEW_DIALOG</string>
 </resources>

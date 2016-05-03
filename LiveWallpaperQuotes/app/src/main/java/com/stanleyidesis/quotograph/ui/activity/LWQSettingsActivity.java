@@ -74,6 +74,7 @@ import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQChooseImageSourceModule;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQStoreDialogModule;
+import com.stanleyidesis.quotograph.ui.activity.modules.WhatsNewDialog;
 import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
@@ -523,6 +524,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             changeState(stateWallpaper);
         } else {
             changeState(stateInitial);
+        }
+        if (WhatsNewDialog.shouldShowDialog()) {
+            showWhatsNewDialog();
         }
     }
 
@@ -1058,7 +1062,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // Hanlde the click for every settings option
     @OnClick({R.id.tv_lwq_settings_blur, R.id.tv_lwq_settings_dim,
     R.id.tv_lwq_settings_double_tap, R.id.tv_lwq_settings_fonts,
-    R.id.tv_lwq_settings_images, R.id.tv_lwq_settings_refresh})
+    R.id.tv_lwq_settings_images, R.id.tv_lwq_settings_refresh,
+    R.id.tv_lwq_settings_whats_new})
     void showSettingsTooltip(View view) {
         switch (view.getId()) {
             case R.id.tv_lwq_settings_blur:
@@ -1079,7 +1084,16 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             case R.id.tv_lwq_settings_refresh:
                 showToolTip(SettingsTooltips.REFRESH, null);
                 break;
+            case R.id.tv_lwq_settings_whats_new:
+                showToolTip(SettingsTooltips.WHATS_NEW, null);
+                break;
         }
+    }
+
+    @OnClick(R.id.btn_lwq_settings_whats_new) void showWhatsNewDialog() {
+        WhatsNewDialog dialog = new WhatsNewDialog();
+        dialog.initialize(this, null);
+        dialog.changeVisibility(null, true);
     }
 
     @OnClick(R.id.btn_fab_screen_search) void performSearch() {
@@ -1622,7 +1636,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         FONTS(R.string.tt_setting_fonts, R.id.btn_lwq_settings_fonts),
         IMAGES(R.string.tt_setting_images, R.id.btn_lwq_settings_images),
         REFRESH(R.string.tt_setting_refresh, R.id.spinner_lwq_settings_refresh),
-        DOUBLE_TAP(R.string.tt_setting_double_tap, R.id.check_lwq_settings_double_tap);
+        DOUBLE_TAP(R.string.tt_setting_double_tap, R.id.check_lwq_settings_double_tap),
+        WHATS_NEW(R.string.tt_setting_whats_new, R.id.btn_lwq_settings_whats_new);
 
         int stringId;
         int anchorId;

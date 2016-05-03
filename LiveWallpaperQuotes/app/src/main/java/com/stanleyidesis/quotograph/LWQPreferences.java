@@ -133,4 +133,14 @@ public class LWQPreferences {
     public static boolean viewedTutorial() {
         return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial), false);
     }
+
+    public static int getLatestVersionCode() {
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_whats_new_dialog), 0);
+    }
+
+    public static void setLatestVersionCode() {
+        sharedPreferences.edit().putInt(
+                LWQApplication.get().getString(R.string.preference_key_whats_new_dialog),
+                LWQApplication.getVersionCode()).apply();
+    }
 }

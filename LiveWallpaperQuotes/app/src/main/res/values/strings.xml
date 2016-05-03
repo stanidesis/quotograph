@@ -114,7 +114,8 @@
     <string name="tt_setting_fonts">Select your favorite fonts and Quotograph will pick one at random</string>
     <string name="tt_setting_images">Select photo categories and your own photos to use as background</string>
     <string name="tt_setting_refresh">Choose how often you want Quotograph to make a new wallpaper</string>
-    <string name="tt_setting_double_tap">This option lets you double-tap your home screen to launch Quotograph </string>
+    <string name="tt_setting_double_tap">This option lets you double-tap your home screen to launch Quotograph</string>
+    <string name="tt_setting_whats_new">Tap here to read about the newest features</string>
     <!-- Product Stuff -->
     <string name="iap_dialog_title">Quotograph Store</string>
     <string name="iap_fonts">Make your quotes stand out! Get access to all fonts.</string>

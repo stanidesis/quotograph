@@ -246,5 +246,42 @@
 
         </android.support.percent.PercentRelativeLayout>
 
+        <android.support.percent.PercentRelativeLayout
+            android:id="@+id/rl_lwq_settings_whats_new"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rl_lwq_settings_double_tap"
+            android:minHeight="@dimen/lwq_settings_element_min_height"
+            android:layout_marginTop="@dimen/lwq_settings_element_margin_top">
+
+            <Button
+                style="@style/Theme.LWQ.TextAppearance.Settings.CategoryButton"
+                android:id="@+id/tv_lwq_settings_whats_new"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:text="What's New"
+                app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
+
+            <Button
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:id="@+id/btn_lwq_settings_whats_new"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/tv_lwq_settings_whats_new"
+                android:layout_toEndOf="@id/tv_lwq_settings_whats_new"
+                android:gravity="left|start|center_vertical"
+                android:text="TAP TO LEARN"
+                android:textSize="@dimen/abc_text_size_headline_material"
+                android:textColor="@color/palette_400"
+                android:textStyle="normal"
+                app:layout_widthPercent="@fraction/lwq_settings_element_interface_percent_width"
+                app:buttonTint="@color/checked_state_list"/>
+
+        </android.support.percent.PercentRelativeLayout>
+
     </RelativeLayout>
 </ScrollView>

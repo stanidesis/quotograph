@@ -228,6 +228,16 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
                 PackageManager.DONT_KILL_APP);
     }
 
+    public static int getVersionCode() {
+        try {
+            return get().getPackageManager()
+                    .getPackageInfo(get().getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     ////////////////////////////////////////////////////////////
     // IAB Interfaces
     ////////////////////////////////////////////////////////////
