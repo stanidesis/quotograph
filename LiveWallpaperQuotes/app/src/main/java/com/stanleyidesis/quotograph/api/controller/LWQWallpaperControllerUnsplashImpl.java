@@ -100,7 +100,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             Quote newQuote = newQuotes.get(new Random().nextInt(newQuotes.size()));
 
             // Choose new font, if possible
-            int newFontId = Fonts.SYSTEM.getId();
+            int newFontId;
             String[] fontPreferenceArray = new String[fontPreferenceSet.size()];
             fontPreferenceSet.toArray(fontPreferenceArray);
             if (fontPreferenceArray.length == 1) {
@@ -142,19 +142,19 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                         new Random().nextInt(activeAlbums.size()));
                 // Find all photos in the album
                 List<UserPhoto> userPhotos = UserPhoto.photosFromAlbum(albumToTry);
-                // Remove the active userPhoto, if possible
-                UserPhoto userPhoto = activeWallpaper.recoverUserPhoto();
-                if (userPhoto != null) {
-                    userPhotos.remove(userPhoto);
+                // Remove the active currentPhoto, if possible
+                UserPhoto currentPhoto = activeWallpaper.recoverUserPhoto();
+                if (currentPhoto != null) {
+                    userPhotos.remove(currentPhoto);
                 }
                 // Choose a random photo from the album
                 UserPhoto photoToUse = userPhotos.get(
                         new Random().nextInt(userPhotos.size()));
                 if (photoToUse == null
                         && activeCategories.size() == 0
-                        && userPhoto != null) {
+                        && currentPhoto != null) {
                     // The user wants to use this and ONLY this photo
-                    photoToUse = userPhoto;
+                    photoToUse = currentPhoto;
                 }
                 if (photoToUse != null) {
                     finishUp(newQuotes, photoToUse);
@@ -162,7 +162,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 }
             }
             // Fallback to categories
-            UnsplashCategory categoryToUse = UnsplashCategory.random();;
+            UnsplashCategory categoryToUse = UnsplashCategory.random();
             if (activeCategories.size() > 0) {
                 categoryToUse = activeCategories.get(
                         new Random().nextInt(

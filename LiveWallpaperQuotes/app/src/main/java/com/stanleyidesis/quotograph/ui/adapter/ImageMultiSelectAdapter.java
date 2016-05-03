@@ -187,11 +187,10 @@ public class ImageMultiSelectAdapter extends RecyclerView.Adapter<ImageMultiSele
         public void onCheckedChange(CheckBox check, boolean newValue) {
             if (boundTo instanceof UnsplashCategory) {
                 ((UnsplashCategory) boundTo).active = newValue;
-                boundTo.save();
             } else if (boundTo instanceof UserAlbum) {
                 ((UserAlbum) boundTo).active = newValue;
-                boundTo.save();
             }
+            boundTo.save();
         }
 
         @OnClick(R.id.btn_image_source)

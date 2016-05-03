@@ -257,18 +257,18 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         iabBroadcastReceiver = new IabBroadcastReceiver(this);
         IntentFilter broadcastFilter = new IntentFilter(IabBroadcastReceiver.ACTION);
         registerReceiver(iabBroadcastReceiver, broadcastFilter);
-        // Setup complete, query inventory
-        List<String> skus = new ArrayList<>(IabConst.Product.values().length);
-        for (IabConst.Product product : IabConst.Product.values()) {
-            skus.add(product.sku);
-        }
-        iabHelper.queryInventoryAsync(true, skus, this);
+        // Query inventory
+        receivedBroadcast();
     }
 
     @Override
     public void receivedBroadcast() {
         // Something has changed, refresh inventory
-        getIabHelper().queryInventoryAsync(this);
+        List<String> skus = new ArrayList<>(IabConst.Product.values().length);
+        for (IabConst.Product product : IabConst.Product.values()) {
+            skus.add(product.sku);
+        }
+        getIabHelper().queryInventoryAsync(true, skus, this);
     }
 
     @Override
