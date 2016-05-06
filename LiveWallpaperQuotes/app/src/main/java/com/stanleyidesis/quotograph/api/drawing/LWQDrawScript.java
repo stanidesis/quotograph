@@ -2,6 +2,7 @@ package com.stanleyidesis.quotograph.api.drawing;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -29,6 +30,8 @@ import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
 import com.stanleyidesis.quotograph.ui.Fonts;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,14 +78,10 @@ public abstract class LWQDrawScript {
     static final int TEXT_ALPHA = 0xE5FFFFFF;
     static final int STROKE_ALPHA = 0xF2FFFFFF;
     static int swatchIndex;
-    static Typeface quoteTypeFace;
-    static Typeface authorTypeFace;
     static RenderScript renderScript;
 
     static {
         executorService = Executors.newSingleThreadScheduledExecutor();
-        quoteTypeFace = Fonts.JOSEFIN_BOLD.load(LWQApplication.get());
-        authorTypeFace = quoteTypeFace;
         paletteCache = new HashMap<>();
     }
 
@@ -187,8 +186,8 @@ public abstract class LWQDrawScript {
         try {
             final int blurPreference = LWQPreferences.getBlurPreference();
             final int dimPreference = LWQPreferences.getDimPreference();
-            // Determine cache validity
-            Bitmap toDraw = blurPreference > 0f ? generateBitmap(blurPreference, backgroundImage) : backgroundImage;
+            // Blur or choose the raw background image
+            Bitmap toDraw = blurPreference > 0.5f ? generateBitmap(blurPreference, backgroundImage) : backgroundImage;
             drawBitmap(canvas, screenWidth, surfaceFrame, toDraw);
             drawDimmer(canvas, dimPreference);
             drawText(canvas, screenWidth, screenHeight);
@@ -201,7 +200,15 @@ public abstract class LWQDrawScript {
 
     }
 
-    void drawText(Canvas canvas, int screenWidth, int screenHeight) {
+    /**
+     * Draws the quote and author text
+     *
+     * @param canvas
+     * @param screenWidth
+     * @param screenHeight
+     * @return the rect surrounding both the quote and author
+     */
+    Rect drawText(Canvas canvas, int screenWidth, int screenHeight) {
         Context context = LWQApplication.get();
         final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
 
@@ -209,6 +216,9 @@ public abstract class LWQDrawScript {
         int quoteColor = swatch.getRgb();
         int authorColor = swatch.getRgb();
         int quoteStrokeColor = swatch.getTitleTextColor();
+
+        // Load Typeface
+        Typeface quoteTypeFace = wallpaperController.getTypeface();
 
         // Setup Quote text
         TextPaint quoteTextPaint = new TextPaint();
@@ -224,7 +234,7 @@ public abstract class LWQDrawScript {
         authorTextPaint.setTextSize(100f);
         authorTextPaint.setTextAlign(Paint.Align.RIGHT);
         authorTextPaint.setColor(authorColor & TEXT_ALPHA);
-        authorTextPaint.setTypeface(authorTypeFace);
+        authorTextPaint.setTypeface(quoteTypeFace);
         String author = context.getString(R.string.unknown);
         if (wallpaperController.getAuthor() != null && !wallpaperController.getAuthor().isEmpty()) {
             author = wallpaperController.getAuthor();
@@ -234,6 +244,14 @@ public abstract class LWQDrawScript {
             quote = wallpaperController.getQuote();
         }
 
+        // Find the longest word
+        String[] words = quote.split(" ");
+        Arrays.sort(words, new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+                return rhs.length() - lhs.length();
+            }
+        });
         final int horizontalPadding = (int) (screenWidth * .07);
         final int verticalPadding = (int) (screenHeight * .2);
         final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
@@ -244,8 +262,16 @@ public abstract class LWQDrawScript {
         StaticLayout authorLayout = new StaticLayout(author, authorTextPaint,
                 drawingArea.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
 
-        // Correct the quote height, if necessary
-        quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight());
+        // Correct the quote and author height, if necessary
+        quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight(), words[0]);
+        authorLayout = correctFontSize(authorLayout, Integer.MAX_VALUE, author);
+        if (authorLayout.getPaint().getTextSize() > quoteLayout.getPaint().getTextSize()) {
+            TextPaint paint = authorLayout.getPaint();
+            paint.setTextSize(quoteLayout.getPaint().getTextSize());
+            authorLayout = new StaticLayout(authorLayout.getText(), paint,
+                    authorLayout.getWidth(), authorLayout.getAlignment(), authorLayout.getSpacingMultiplier(),
+                    authorLayout.getSpacingAdd(), true);
+        }
 
         // Draw the quote centered vertically
         int centerQuoteOffset = (int)(.5 * (drawingArea.height() - quoteLayout.getHeight()));
@@ -253,9 +279,18 @@ public abstract class LWQDrawScript {
         quoteLayout.draw(canvas);
         strokeText(quoteLayout, quoteStrokeColor & STROKE_ALPHA, 3f, canvas);
 
-        canvas.translate(drawingArea.width(), quoteLayout.getHeight());
+        canvas.translate(drawingArea.width(), quoteLayout.getHeight() + (authorLayout.getHeight() / 4));
         authorLayout.draw(canvas);
         strokeText(authorLayout, quoteStrokeColor & STROKE_ALPHA, 3f, canvas);
+
+        // Re-set the x/y translation
+        canvas.setMatrix(null);
+
+        // Crop the rect to quote and author
+        drawingArea.top += centerQuoteOffset;
+        drawingArea.bottom = drawingArea.top + quoteLayout.getHeight()
+                + (int) (1.25 * authorLayout.getHeight());
+        return drawingArea;
     }
 
     void drawDimmer(Canvas canvas, int dimPreference) {
@@ -297,9 +332,37 @@ public abstract class LWQDrawScript {
         canvas.translate(-dx, 0);
     }
 
-    StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight) {
+    /**
+     * For now, disabled. Scrapping Issue #148
+     * @param canvas
+     * @param screenWidth
+     * @param screenHeight
+     * @param quoteAndAuthorRect
+     */
+    void drawWatermark(Canvas canvas, int screenWidth, int screenHeight, Rect quoteAndAuthorRect) {
+        if (!LWQPreferences.isWatermarkEnabled()) {
+            return;
+        }
+        Bitmap icon = BitmapFactory.decodeResource(LWQApplication.get().getResources(),
+                R.mipmap.ic_launcher);
+        // Let's make the icon no more than 10% of the screen size at most
+        float maxPixelHeight = ((float) Math.max(screenWidth, screenHeight)) * .1f;
+        float scale = maxPixelHeight / (float) icon.getHeight();
+        Matrix scaleMatrix = new Matrix();
+        scaleMatrix.postScale(scale, scale);
+        Paint iconPaint = new Paint();
+        iconPaint.setAntiAlias(true);
+        iconPaint.setFilterBitmap(true);
+        iconPaint.setDither(true);
+        iconPaint.setAlpha(100);
+        canvas.translate(quoteAndAuthorRect.left, screenHeight - maxPixelHeight);
+        canvas.drawBitmap(icon, scaleMatrix, iconPaint);
+    }
+
+    StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight, String longestWord) {
         final TextPaint textPaint = staticLayout.getPaint();
-        while (staticLayout.getHeight() > maxHeight) {
+        while (staticLayout.getHeight() > maxHeight
+                || staticLayout.getWidth() < StaticLayout.getDesiredWidth(longestWord, textPaint)) {
             textPaint.setTextSize(textPaint.getTextSize() * .95f);
             staticLayout = new StaticLayout(staticLayout.getText(), textPaint,
                     staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),

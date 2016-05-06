@@ -1,9 +1,9 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 
 import java.util.List;
 import java.util.Random;
@@ -41,7 +41,7 @@ import java.util.Random;
  *
  * Date: 11/29/2015
  */
-public class UnsplashPhoto extends SugarRecord<UnsplashPhoto> {
+public class UnsplashPhoto extends SugarRecord {
 
     public String unsplashId;
     public String fullURL;
@@ -60,7 +60,7 @@ public class UnsplashPhoto extends SugarRecord<UnsplashPhoto> {
     }
 
     public static UnsplashPhoto find(String unsplashId) {
-        return Select.from(UnsplashPhoto.class).where(Condition.prop(StringUtil.toSQLName("unsplashId")).eq(unsplashId)).first();
+        return Select.from(UnsplashPhoto.class).where(Condition.prop(NamingHelper.toSQLNameDefault("unsplashId")).eq(unsplashId)).first();
     }
 
     public static UnsplashPhoto random() {

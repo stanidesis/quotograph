@@ -28,6 +28,19 @@
         android:text="@string/tutorial_detail_1"
         android:textSize="30sp"
         android:gravity="end"
+        android:lines="2"
         app:layout_widthPercent="80%"/>
+
+    <ImageView
+        android:id="@+id/iv_lwq_activate_tutorial_image_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:src="@mipmap/tutorial_bg_with_home_screen"
+        android:layout_below="@id/tv_tut_details"
+        android:layout_centerHorizontal="true"
+        app:layout_widthPercent="80%"
+        app:layout_marginTopPercent="3%"/>
 
 </android.support.percent.PercentRelativeLayout>

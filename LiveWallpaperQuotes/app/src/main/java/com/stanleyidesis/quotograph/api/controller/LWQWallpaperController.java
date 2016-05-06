@@ -1,6 +1,7 @@
 package com.stanleyidesis.quotograph.api.controller;
 
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 
 import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.db.PlaylistAuthor;
@@ -70,6 +71,11 @@ public interface LWQWallpaperController {
      * @return the background image Bitmap
      */
     Bitmap getBackgroundImage();
+
+    /**
+     * @return the Typeface required for the active Quotograph, or @null
+     */
+    Typeface getTypeface();
 
     /**
      * @return true if the active wallpaper is accessible now

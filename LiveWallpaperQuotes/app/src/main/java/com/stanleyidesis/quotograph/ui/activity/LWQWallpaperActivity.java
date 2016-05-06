@@ -73,17 +73,12 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         ButterKnife.bind(this);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         EventBus.getDefault().register(this);
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
 

@@ -2,6 +2,8 @@ package com.stanleyidesis.quotograph.api.event;
 
 import android.net.Uri;
 
+import com.stanleyidesis.quotograph.api.LWQError;
+
 /**
  * Copyright (c) 2016 Stanley Idesis
  *
@@ -41,16 +43,15 @@ public class ImageSaveEvent extends FailableEvent {
         return new ImageSaveEvent(fileUri, contentUri);
     }
 
-    public static ImageSaveEvent failure(String errorMessage, Throwable throwable) {
-        return new ImageSaveEvent(errorMessage, throwable);
+    public static ImageSaveEvent failure(LWQError error) {
+        return new ImageSaveEvent(error);
     }
 
     Uri fileUri;
     Uri contentUri;
 
-    ImageSaveEvent(String errorMessage, Throwable throwable) {
-        this.errorMessage = errorMessage;
-        this.throwable = throwable;
+    ImageSaveEvent(LWQError error) {
+        super(error);
     }
 
     ImageSaveEvent(Uri fileUri, Uri contentUri) {

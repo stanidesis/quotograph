@@ -37,5 +37,5 @@ public interface Callback <Result> {
 
     void onSuccess(Result result);
 
-    void onError(String errorMessage, Throwable throwable);
+    void onError(LWQError error);
 }

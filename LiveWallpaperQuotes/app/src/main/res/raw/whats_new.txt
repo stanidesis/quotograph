@@ -1,0 +1,15 @@
+<h1>Version 1.1.0:</h1>
+<h4>Quotograph is now FREE</h4>
+<p>If you bought Quotograph, please <a href="mailto:stan.idesis@gmail.com">e-mail me</a> for a coupon code to give you access to all IAP features, forever!</p>
+
+<h4>More Fonts</h4>
+<p>We added a bunch of new fonts to Quotograph, check them out in settings!</p>
+
+<h4>Custom Background Images</h4>
+<p>Use images on your phone as backgrounds for your quotes. Go to settings to add your photos!</p>
+
+<h4>Many Bug Fixes</h4>
+<p>The magnificent tiny little critters that keep me up at night have found a new home in some other app, yay!</p>
+
+<h4>Tooltips & Tutorials</h4>
+<p>Users both old and new will benefit from these little tips!</p>

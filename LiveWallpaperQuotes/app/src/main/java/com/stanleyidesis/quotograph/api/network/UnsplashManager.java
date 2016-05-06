@@ -2,6 +2,7 @@ package com.stanleyidesis.quotograph.api.network;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
 import com.stanleyidesis.quotograph.api.db.UnsplashPhoto;
 
@@ -88,16 +89,14 @@ public class UnsplashManager {
                     .build();
             return client.newCall(request).execute().body().string();
         } catch (Exception e) {
-            e.printStackTrace();
-            return e;
+            return LWQError.create("Failed to retrieve response", e);
         }
     }
 
     public Object fetchAllCategories() {
         Object result = fetchResponse(Endpoints.UNSPLASH_API_URL.concat(Endpoints.UNSPLASH_CATEGORIES));
-        if (!(result instanceof String)) {
-            // Error
-            return ((Exception)result).getLocalizedMessage();
+        if (result instanceof LWQError) {
+            return result;
         }
         List<UnsplashCategory> unsplashCategories = new ArrayList<>();
         try {
@@ -107,15 +106,14 @@ public class UnsplashManager {
                 UnsplashCategory unsplashCategory = UnsplashCategory.find(categoryJSON.getInt(JSONCategoryKeys.KEY_ID));
                 if (unsplashCategory == null) {
                     unsplashCategory = new UnsplashCategory(categoryJSON.getInt(JSONCategoryKeys.KEY_ID),
-                            categoryJSON.getString(JSONCategoryKeys.KEY_TITLE));
+                            categoryJSON.getString(JSONCategoryKeys.KEY_TITLE), false);
                     unsplashCategory.save();
                 }
                 unsplashCategories.add(unsplashCategory);
             }
             return unsplashCategories;
         } catch (Exception e) {
-            e.printStackTrace();
-            return e.getLocalizedMessage();
+            return LWQError.create("Failed to read JSON", e);
         }
     }
 
@@ -132,14 +130,13 @@ public class UnsplashManager {
             try {
                 urlWithParams = urlWithParams.concat(String.format(Parameters.QUERY_PARAM, URLEncoder.encode(optionalQuery, "UTF-8")));
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                return LWQError.create("Failed to form URL", e);
             }
         }
         try {
             Object result = fetchResponse(urlWithParams);
-            if (!(result instanceof String)) {
-                // Error
-                return ((Exception)result).getLocalizedMessage();
+            if (result instanceof LWQError) {
+                return result;
             }
             JSONObject randomPhotoJSON = new JSONObject((String) result);
             String unsplashId = randomPhotoJSON.getString(JSONPhotoKeys.KEY_ID);
@@ -156,7 +153,7 @@ public class UnsplashManager {
             unsplashPhoto.save();
             return unsplashPhoto;
         } catch (Exception e) {
-            return e.getLocalizedMessage();
+            return LWQError.create("Failed to parse JSON", e);
         }
     }
 }

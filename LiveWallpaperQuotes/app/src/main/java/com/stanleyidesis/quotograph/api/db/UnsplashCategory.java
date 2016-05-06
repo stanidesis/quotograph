@@ -1,9 +1,12 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
+
+import java.util.List;
+import java.util.Random;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -38,23 +41,38 @@ import com.orm.query.Select;
  *
  * Date: 11/29/2015
  */
-public class UnsplashCategory extends SugarRecord<UnsplashCategory> {
+public class UnsplashCategory extends SugarRecord {
 
     public int unsplashId;
     public String title;
+    public boolean active;
 
     public UnsplashCategory() {}
 
-    public UnsplashCategory(int unsplashId, String title) {
+    public UnsplashCategory(int unsplashId, String title, boolean active) {
         this.unsplashId = unsplashId;
         this.title = title;
+        this.active = active;
     }
 
     public static UnsplashCategory find(int id) {
-        return Select.from(UnsplashCategory.class).where(Condition.prop(StringUtil.toSQLName("unsplashId")).eq(id)).first();
+        return Select.from(UnsplashCategory.class).where(Condition.prop(NamingHelper.toSQLNameDefault("unsplashId")).eq(id)).first();
     }
 
     public static UnsplashCategory find(String title) {
-        return Select.from(UnsplashCategory.class).where(Condition.prop(StringUtil.toSQLName("title")).eq(title)).first();
+        return Select.from(UnsplashCategory.class).where(Condition.prop(NamingHelper.toSQLNameDefault("title")).eq(title)).first();
+    }
+
+    public static List<UnsplashCategory> active() {
+        return Select.from(UnsplashCategory.class).where(Condition.prop(NamingHelper.toSQLNameDefault("active")).eq("1")).list();
+    }
+
+    public static UnsplashCategory random() {
+        final long count = Select.from(UnsplashCategory.class).count();
+        final int offset = new Random().nextInt((int) count);
+        return SugarRecord.findWithQuery(
+                UnsplashCategory.class,
+                "Select * from " + NamingHelper.toSQLName(UnsplashCategory.class) + " LIMIT 1 OFFSET " + offset,
+                (String []) null).get(0);
     }
 }

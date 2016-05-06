@@ -5,10 +5,12 @@
     <dimen name="lwq_settings_element_min_height">32dp</dimen>
     <dimen name="lwq_mode_selectable_item_button_radius">25dp</dimen>
     <dimen name="playlist_popup_width">160dp</dimen>
+    <dimen name="font_option_item_padding">16dp</dimen>
     <fraction name="lwq_settings_element_width_percent">80%</fraction>
     <fraction name="lwq_settings_element_margin_top_percent">5%</fraction>
-    <fraction name="lwq_settings_element_category_percent_width">35%</fraction>
-    <fraction name="lwq_settings_element_interface_percent_width">65%</fraction>
+    <dimen name="lwq_settings_element_margin_top">20dp</dimen>
+    <fraction name="lwq_settings_element_category_percent_width">45%</fraction>
+    <fraction name="lwq_settings_element_interface_percent_width">55%</fraction>
     <fraction name="lwq_settings_mode_percent_width">95%</fraction>
     <fraction name="lwq_wallpaper_action_item_width">33%</fraction>
 </resources>

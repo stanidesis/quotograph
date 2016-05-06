@@ -1,5 +1,7 @@
 package com.stanleyidesis.quotograph.api.event;
 
+import com.stanleyidesis.quotograph.api.LWQError;
+
 /**
  * Copyright (c) 2016 Stanley Idesis
  *
@@ -47,10 +49,9 @@ public class WallpaperEvent extends FailableEvent {
         return new WallpaperEvent(status);
     }
 
-    public static WallpaperEvent failedWithStatus(Status status, String errorMessage, Throwable throwable) {
+    public static WallpaperEvent failedWithStatus(Status status, LWQError error) {
         final WallpaperEvent wallpaperEvent = new WallpaperEvent(status);
-        wallpaperEvent.errorMessage = errorMessage;
-        wallpaperEvent.throwable = throwable;
+        wallpaperEvent.error = error;
         return wallpaperEvent;
     }
 

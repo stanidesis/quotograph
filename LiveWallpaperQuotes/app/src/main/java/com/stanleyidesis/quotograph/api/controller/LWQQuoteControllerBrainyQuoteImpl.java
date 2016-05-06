@@ -1,11 +1,10 @@
 package com.stanleyidesis.quotograph.api.controller;
 
-import android.util.Log;
-
-import com.orm.StringUtil;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 import com.stanleyidesis.quotograph.api.Callback;
+import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.db.Author;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Quote;
@@ -60,9 +59,15 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
 
     @Override
     public void fetchCategories(final Callback<List<Category>> callback) {
-        brainyQuoteManager.getTopics(new Callback<List<BrainyQuoteManager.BrainyTopic>>() {
+        new Thread(new Runnable() {
             @Override
-            public void onSuccess(List<BrainyQuoteManager.BrainyTopic> brainyTopics) {
+            public void run() {
+                Object topics = brainyQuoteManager.getTopics();
+                if (topics instanceof LWQError) {
+                    callback.onError((LWQError) topics);
+                    return;
+                }
+                List<BrainyQuoteManager.BrainyTopic> brainyTopics = (List<BrainyQuoteManager.BrainyTopic>) topics;
                 List<Category> newCategories = new ArrayList<>();
                 for (BrainyQuoteManager.BrainyTopic brainyTopic : brainyTopics) {
                     if (Category.hasCategory(brainyTopic.name, Category.Source.BRAINY_QUOTE)) {
@@ -74,19 +79,13 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                 }
                 callback.onSuccess(newCategories);
             }
-
-            @Override
-            public void onError(String errorMessage, Throwable throwable) {
-                callback.onError(errorMessage, throwable);
-            }
-        });
+        }).start();
     }
 
     @Override
     public void fetchNewQuotes(final Category category, final Callback<List<Quote>> callback) {
         if (category.source != Category.Source.BRAINY_QUOTE) {
-            Log.w(getClass().getSimpleName(), "Cannot fetch quotes for categories not found in BrainyQuote");
-            callback.onError("Required BrainyQuote category", null);
+            callback.onError(LWQError.create("BrainyQuote category required"));
             return;
         }
         new Thread(new Runnable() {
@@ -96,8 +95,8 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                 List<Quote> recoveredQuotes = new ArrayList<>();
                 while (page <= MAX_PAGE_QUERY && recoveredQuotes.size() == 0) {
                     final Object returnObject = brainyQuoteManager.getQuotes(category.name, page);
-                    if (returnObject instanceof String) {
-                        callback.onError((String) returnObject, null);
+                    if (returnObject instanceof LWQError) {
+                        callback.onError((LWQError) returnObject);
                         return;
                     }
                     List<BrainyQuoteManager.BrainyQuote> brainyQuotes = (List<BrainyQuoteManager.BrainyQuote>) returnObject;
@@ -127,8 +126,8 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
     @Override
     public void fetchUnusedQuotes(final Category category, final Callback<List<Quote>> callback) {
         Condition [] conditions = new Condition[2];
-        conditions[0] = Condition.prop(StringUtil.toSQLName("used")).eq("0");
-        conditions[1] = Condition.prop(StringUtil.toSQLName("category")).eq(category.getId());
+        conditions[0] = Condition.prop(NamingHelper.toSQLNameDefault("used")).eq("0");
+        conditions[1] = Condition.prop(NamingHelper.toSQLNameDefault("category")).eq(category.getId());
         final List<Quote> unusedQuotesFromCategory = Select.from(Quote.class).where(conditions).list();
         if (unusedQuotesFromCategory != null && !unusedQuotesFromCategory.isEmpty()) {
             callback.onSuccess(unusedQuotesFromCategory);
@@ -140,8 +139,8 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                 }
 
                 @Override
-                public void onError(String errorMessage, Throwable throwable) {
-                    callback.onError(errorMessage, throwable);
+                public void onError(LWQError error) {
+                    callback.onError(error);
                 }
             });
         } else {
@@ -153,8 +152,8 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
     @Override
     public void fetchUnusedQuotesBy(final Author author, final Callback<List<Quote>> callback) {
         Condition [] conditions = new Condition[2];
-        conditions[0] = Condition.prop(StringUtil.toSQLName("used")).eq("0");
-        conditions[1] = Condition.prop(StringUtil.toSQLName("author")).eq(author.getId());
+        conditions[0] = Condition.prop(NamingHelper.toSQLNameDefault("used")).eq("0");
+        conditions[1] = Condition.prop(NamingHelper.toSQLNameDefault("author")).eq(author.getId());
         final List<Quote> unusedQuotesFromAuthor = Select.from(Quote.class).where(conditions).list();
         if (unusedQuotesFromAuthor != null && !unusedQuotesFromAuthor.isEmpty()) {
             callback.onSuccess(unusedQuotesFromAuthor);
@@ -167,8 +166,8 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
                 List<Quote> recoveredQuotes = new ArrayList<>();
                 while (page <= MAX_PAGE_QUERY && recoveredQuotes.size() == 0) {
                     final Object returnObject = brainyQuoteManager.getQuotesBy(author.name, page);
-                    if (returnObject instanceof String) {
-                        callback.onError((String) returnObject, null);
+                    if (returnObject instanceof LWQError) {
+                        callback.onError((LWQError) returnObject);
                         return;
                     }
                     List<BrainyQuoteManager.BrainyQuote> brainyQuotes = (List<BrainyQuoteManager.BrainyQuote>) returnObject;
@@ -199,8 +198,8 @@ public class LWQQuoteControllerBrainyQuoteImpl implements LWQQuoteController {
             @Override
             public void run() {
                 final Object returnObject = brainyQuoteManager.searchForQuotes(searchQuery);
-                if (returnObject instanceof String) {
-                    callback.onError((String) returnObject, null);
+                if (returnObject instanceof LWQError) {
+                    callback.onError((LWQError) returnObject);
                     return;
                 }
                 List<Object> recoveredObjects = new ArrayList<>();

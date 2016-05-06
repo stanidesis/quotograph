@@ -1,9 +1,9 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -38,7 +38,7 @@ import com.orm.query.Select;
  *
  * Date: 08/01/2015
  */
-public class Wallpaper extends SugarRecord<Wallpaper> {
+public class Wallpaper extends SugarRecord {
 
     public static final short IMAGE_SOURCE_RESOURCE = 0;
     public static final short IMAGE_SOURCE_USER = 1;
@@ -49,29 +49,31 @@ public class Wallpaper extends SugarRecord<Wallpaper> {
     public long dateCreated;
     public short imageSource;
     public long imageId;
+    public long typefaceId;
 
     public Wallpaper() {}
 
-    public Wallpaper(Quote quote, boolean active, long dateCreated, short imageSource, long imageId) {
+    public Wallpaper(Quote quote, boolean active, long dateCreated, short imageSource, long imageId, int typefaceId) {
         this.quote = quote;
         this.active = active;
         this.dateCreated = dateCreated;
         this.imageSource = imageSource;
         this.imageId = imageId;
+        this.typefaceId = typefaceId;
     }
 
     public UserPhoto recoverUserPhoto() {
         if (imageSource != IMAGE_SOURCE_USER) {
             return null;
         }
-        return Select.from(UserPhoto.class).where(Condition.prop(StringUtil.toSQLName("id")).eq(imageId)).first();
+        return SugarRecord.findById(UserPhoto.class, imageId);
     }
 
     public UnsplashPhoto recoverUnsplashPhoto() {
         if (imageSource != IMAGE_SOURCE_UNSPLASH) {
             return null;
         }
-        return Select.from(UnsplashPhoto.class).where(Condition.prop(StringUtil.toSQLName("id")).eq(imageId)).first();
+        return SugarRecord.findById(UnsplashPhoto.class, imageId);
     }
 
     public static Wallpaper active() {
@@ -79,7 +81,7 @@ public class Wallpaper extends SugarRecord<Wallpaper> {
     }
 
     public static boolean exists(short source, long id) {
-        return Select.from(Wallpaper.class).where(Condition.prop(StringUtil.toSQLName("imageSource")).eq(source),
-                Condition.prop(StringUtil.toSQLName("imageId")).eq(id)).first() != null;
+        return Select.from(Wallpaper.class).where(Condition.prop(NamingHelper.toSQLNameDefault("imageSource")).eq(source),
+                Condition.prop(NamingHelper.toSQLNameDefault("imageId")).eq(id)).first() != null;
     }
 }

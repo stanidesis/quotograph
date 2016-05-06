@@ -70,29 +70,6 @@
 
     </android.support.v4.view.ViewPager>
 
-    <FrameLayout
-        android:id="@+id/fl_lwq_activate_wallpapers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/ll_lwq_activate_indicators">
-
-        <ImageView
-            android:id="@+id/iv_lwq_activate_tutorial_image_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="center"
-            android:src="@mipmap/tutorial_bg"/>
-
-        <ImageView
-            android:id="@+id/iv_lwq_activate_tutorial_image_2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="center"
-            android:src="@mipmap/tutorial_bg_with_home_screen"/>
-
-    </FrameLayout>
-
     <LinearLayout
         android:id="@+id/ll_lwq_activate_indicators"
         android:layout_width="wrap_content"

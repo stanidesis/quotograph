@@ -35,7 +35,7 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/tv_tut_details"
         android:background="@drawable/circle_button"
-        android:textSize="24sp"
+        android:textSize="34sp"
         android:textAllCaps="true"
         android:text="@string/activate"
         android:textColor="@color/palette_900"

@@ -1,9 +1,9 @@
 package com.stanleyidesis.quotograph.api.db;
 
-import com.orm.StringUtil;
 import com.orm.SugarRecord;
 import com.orm.query.Condition;
 import com.orm.query.Select;
+import com.orm.util.NamingHelper;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ import java.util.List;
  *
  * Date: 10/03/2015
  */
-public class PlaylistQuote extends SugarRecord<PlaylistQuote> implements Comparable<PlaylistQuote> {
+public class PlaylistQuote extends SugarRecord implements Comparable<PlaylistQuote> {
     public Playlist playlist;
     public Quote quote;
 
@@ -52,12 +52,12 @@ public class PlaylistQuote extends SugarRecord<PlaylistQuote> implements Compara
     }
 
     public static List<PlaylistQuote> forPlaylist(Playlist playlist) {
-        return Select.from(PlaylistQuote.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId())).list();
+        return Select.from(PlaylistQuote.class).where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(playlist.getId())).list();
     }
 
     public static PlaylistQuote find(Playlist playlist, Quote quote) {
-        return Select.from(PlaylistQuote.class).where(Condition.prop(StringUtil.toSQLName("playlist")).eq(playlist.getId()),
-                Condition.prop(StringUtil.toSQLName("quote")).eq(quote.getId())).first();
+        return Select.from(PlaylistQuote.class).where(Condition.prop(NamingHelper.toSQLNameDefault("playlist")).eq(playlist.getId()),
+                Condition.prop(NamingHelper.toSQLNameDefault("quote")).eq(quote.getId())).first();
     }
 
     @Override

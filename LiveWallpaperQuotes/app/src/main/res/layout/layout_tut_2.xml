@@ -26,6 +26,7 @@
         android:layout_alignStart="@id/tv_tut_headline"
         android:text="@string/tutorial_detail_2"
         android:textSize="30sp"
+        android:lines="2"
         app:layout_widthPercent="80%"/>
 
     <TextView
@@ -36,7 +37,7 @@
         android:layout_height="120dp"
         android:gravity="center"
         android:text="Motivational Quotes"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="@color/palette_600"
         android:textAllCaps="true"
@@ -55,7 +56,7 @@
         android:layout_height="150dp"
         android:gravity="center"
         android:text="Quotes by William Shakespeare"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/palette_600"
         android:textAllCaps="true"

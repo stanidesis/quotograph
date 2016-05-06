@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckedTextView
+        android:id="@+id/ctv_font_option_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="80dp"
+        android:paddingStart="@dimen/font_option_item_padding"
+        android:paddingLeft="@dimen/font_option_item_padding"
+        android:paddingRight="@dimen/font_option_item_padding"
+        android:paddingEnd="@dimen/font_option_item_padding"
+        android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+        android:textSize="38sp"
+        android:gravity="start|left|center_vertical"
+        android:text="Sample"/>
+
+</FrameLayout>
+
+
+
+    <!--android:textSize="@dimen/abc_text_size_display_1_material"-->

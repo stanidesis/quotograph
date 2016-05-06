@@ -2,6 +2,7 @@ package com.stanleyidesis.quotograph.api;
 
 import android.os.AsyncTask;
 
+import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
@@ -56,14 +57,16 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
     Callback<List<String>> fetchImageCategoriesCallback = new Callback<List<String>>() {
         @Override
         public void onSuccess(List<String> strings) {
-            // TODO I'm not in <3 with this…
-            LWQPreferences.setImageCategoryPreference(UnsplashCategory.listAll(UnsplashCategory.class).get(0).unsplashId);
+            // Only one category selected by default
+            UnsplashCategory category = SugarRecord.listAll(UnsplashCategory.class).get(0);
+            category.active = true;
+            category.save();
             LWQApplication.getQuoteController().fetchCategories(fetchQuoteCategoriesCallback);
         }
 
         @Override
-        public void onError(String errorMessage, Throwable throwable) {
-            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(errorMessage, throwable));
+        public void onError(LWQError error) {
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(error));
         }
     };
 
@@ -94,8 +97,8 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         }
 
         @Override
-        public void onError(String errorMessage, Throwable throwable) {
-            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(errorMessage, throwable));
+        public void onError(LWQError error) {
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(error));
         }
     };
 
@@ -123,7 +126,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
     @Override
     protected void onCancelled() {
         super.onCancelled();
-        EventBus.getDefault().post(FirstLaunchTaskEvent.failed("Cancelled by user", null));
+        EventBus.getDefault().post(FirstLaunchTaskEvent.failed(LWQError.create("Cancelled by user")));
     }
 
     @Override
@@ -142,12 +145,11 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
 
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
-            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(
-                    wallpaperEvent.getErrorMessage(),
-                    wallpaperEvent.getThrowable()));
+            EventBus.getDefault().post(FirstLaunchTaskEvent.failed(wallpaperEvent.getError()));
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             publishProgress("Setup complete!");
             LWQPreferences.setFirstLaunch(false);
+            LWQApplication.setComponentsEnabled(true);
             EventBus.getDefault().post(FirstLaunchTaskEvent.success());
         }
     }
