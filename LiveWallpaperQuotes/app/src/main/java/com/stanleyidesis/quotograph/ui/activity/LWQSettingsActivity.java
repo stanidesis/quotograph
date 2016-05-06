@@ -1063,7 +1063,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @OnClick({R.id.tv_lwq_settings_blur, R.id.tv_lwq_settings_dim,
     R.id.tv_lwq_settings_double_tap, R.id.tv_lwq_settings_fonts,
     R.id.tv_lwq_settings_images, R.id.tv_lwq_settings_refresh,
-    R.id.tv_lwq_settings_whats_new})
+    R.id.tv_lwq_settings_whats_new, R.id.tv_lwq_settings_store})
     void showSettingsTooltip(View view) {
         switch (view.getId()) {
             case R.id.tv_lwq_settings_blur:
@@ -1088,6 +1088,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 showToolTip(SettingsTooltips.WHATS_NEW, null);
                 break;
         }
+    }
+
+    @OnClick(R.id.btn_lwq_settings_store) void showStoreDialog() {
+        LWQStoreDialogModule lwqStoreDialogModule = new LWQStoreDialogModule();
+        lwqStoreDialogModule.initialize(this, null);
+        lwqStoreDialogModule.changeVisibility(null, true);
     }
 
     @OnClick(R.id.btn_lwq_settings_whats_new) void showWhatsNewDialog() {
@@ -1572,9 +1578,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
         if (!LWQApplication.ownsFontAccess()) {
             AnalyticsUtils.trackAttemptedAccess(IabConst.Product.FONTS, "fonts_dialog");
-            LWQStoreDialogModule lwqStoreDialogModule = new LWQStoreDialogModule();
-            lwqStoreDialogModule.initialize(this, null);
-            lwqStoreDialogModule.changeVisibility(null, true);
+            showStoreDialog();
             return;
         }
         FontMultiselectAdapter adapter = (FontMultiselectAdapter) dialog.getListView().getAdapter();
@@ -1603,9 +1607,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     public void addPhotoAlbum(LWQChooseImageSourceModule module) {
         if (!LWQApplication.ownsImageAccess()) {
             AnalyticsUtils.trackAttemptedAccess(IabConst.Product.IMAGES, "images_dialog");
-            LWQStoreDialogModule lwqStoreDialogModule = new LWQStoreDialogModule();
-            lwqStoreDialogModule.initialize(this, null);
-            lwqStoreDialogModule.changeVisibility(null, true);
+            showStoreDialog();
             return;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -1637,7 +1639,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         IMAGES(R.string.tt_setting_images, R.id.btn_lwq_settings_images),
         REFRESH(R.string.tt_setting_refresh, R.id.spinner_lwq_settings_refresh),
         DOUBLE_TAP(R.string.tt_setting_double_tap, R.id.check_lwq_settings_double_tap),
-        WHATS_NEW(R.string.tt_setting_whats_new, R.id.btn_lwq_settings_whats_new);
+        WHATS_NEW(R.string.tt_setting_whats_new, R.id.btn_lwq_settings_whats_new),
+        STORE(R.string.tt_setting_store, R.id.btn_lwq_settings_store);
 
         int stringId;
         int anchorId;

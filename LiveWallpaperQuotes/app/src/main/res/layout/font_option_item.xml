@@ -14,7 +14,7 @@
         android:paddingRight="@dimen/font_option_item_padding"
         android:paddingEnd="@dimen/font_option_item_padding"
         android:checkMark="?android:attr/listChoiceIndicatorMultiple"
-        android:textSize="48px"
+        android:textSize="38sp"
         android:gravity="start|left|center_vertical"
         android:text="Sample"/>
 
