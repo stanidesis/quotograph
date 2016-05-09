@@ -1,0 +1,36 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+title: "Quotograph - An Inspirational Live Wallpaper for Android"
+email: stan.idesis@gmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  Quotograph is an Android Live Wallpaper that generates beautiful backgrounds for
+  your Android device. It combines gorgeous photography with inspirational quotes
+  to keep you motivated whenever you look at your home screen.
+keywords: "quotograph,quote,photograph,inspiration,live wallpaper,android,application"
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "http://yourdomain.com" # the base hostname & protocol for your site
+# Social
+twitter_username: quotograph_app
+instagram_username: quotograph_app
+facebook_url: quotograph
+google_plua: "/communities/104668503310860720552"
+android_package: com.stanleyidesis.quotograph
+
+# Build settings
+markdown: kramdown
+
+sass:
+  style: compressed
+
+# Outputting
+timezone: America/Los_Angeles
+
+# Colletions
+collections:
+  - quotes
