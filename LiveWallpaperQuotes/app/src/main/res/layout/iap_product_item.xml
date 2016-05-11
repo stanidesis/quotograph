@@ -40,7 +40,6 @@
         android:id="@+id/iv_product_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@mipmap/img_inspired"
         android:adjustViewBounds="true"/>
 
     <!-- Acts as a dark screen -->

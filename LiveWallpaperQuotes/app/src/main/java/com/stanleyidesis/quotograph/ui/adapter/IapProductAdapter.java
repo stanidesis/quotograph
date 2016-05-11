@@ -7,9 +7,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
-import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.billing.util.SkuDetails;
 
 import butterknife.Bind;
@@ -117,7 +118,7 @@ public class IapProductAdapter extends BaseAdapter {
         void bind(IabConst.Product product) {
             this.product = product;
             this.skuDetails = LWQApplication.getProductDetails(product);
-            productImage.setImageResource(product.imgRes);
+            ImageLoader.getInstance().displayImage(product.imgSource, productImage);
             if (skuDetails == null) {
                 productTitle.setText(product.titleRes);
                 productDescription.setText(product.descriptionRes);
