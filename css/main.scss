@@ -6,11 +6,16 @@
 // Our variables
 
 // Fonts
-/* @import url(); TODO */
+@import url(https://fonts.googleapis.com/css?family=Josefin+Sans:600,400);
 
 // Brand colors
 $brand-color-base:    #B388FF;
 $brand-color-bg:      #EDE7F6;
+
+// Quotes
+$quote-font-family: "Josefin Sans", sans-serif;
+$quote-font-weight: 600;
+$author-font-weight: 400;
 
 // Our variables
 $base-font-family:    "Open Sans Condensed", sans-serif;

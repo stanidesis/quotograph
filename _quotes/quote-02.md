@@ -1,5 +1,5 @@
 ---
-quote: "Do or do not, there is no try."
-author: "Yoda"
-image: "http://www.wired.com/wp-content/uploads/2015/08/Yoda-featured1-1200x630-e1446682207788.jpg"
+quote: "The best and most beautiful things in the world cannot be seen or even touched - they must be felt with the heart."
+author: "Helen Keller"
+image: "https://i.ytimg.com/vi/aTJv0DoIgY8/maxresdefault.jpg"
 ---
