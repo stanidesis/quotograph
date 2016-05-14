@@ -53,6 +53,7 @@ import com.orm.util.NamingHelper;
 import com.sangcomz.fishbun.FishBun;
 import com.sangcomz.fishbun.define.Define;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
+import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -70,7 +71,6 @@ import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
-import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQChooseImageSourceModule;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQStoreDialogModule;
@@ -81,8 +81,10 @@ import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -472,6 +474,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Should we show tooltips?
     boolean showTutorialTips = true;
+    Set<TutorialTooltips> visibleTips;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -494,6 +497,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         });
 
         showTutorialTips = !LWQPreferences.viewedTutorial();
+        if (showTutorialTips) {
+            visibleTips = new HashSet<>();
+        }
 
         // Setup content
         setupContent();
@@ -1717,7 +1723,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     void showTutorialTip(TutorialTooltips tooltip) {
-        if (!showTutorialTips) return;
+        if (!showTutorialTips || visibleTips.contains(tooltip)) {
+            return;
+        }
+        // Assume they've seen the tutorial after we reveal the share tip
+        if (tooltip == TutorialTooltips.SHARE) {
+            LWQPreferences.setViewedTutorial(true);
+        }
         showToolTip(tooltip, this);
     }
 
@@ -1758,9 +1770,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @Override
     public void onTooltipClose(Tooltip.TooltipView tooltipView, boolean b, boolean b1) {
         TutorialTooltips[] allTips = TutorialTooltips.values();
+        // Remove from visible
+        visibleTips.remove(allTips[tooltipView.getTooltipId()]);
+
         // Reached the end of the tips?
         if (allTips.length == tooltipView.getTooltipId() + 1) {
-            LWQPreferences.setViewedTutorial(true);
             showTutorialTips = false;
             return;
         }
@@ -1776,7 +1790,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     public void onTooltipFailed(Tooltip.TooltipView tooltipView) {}
 
     @Override
-    public void onTooltipShown(Tooltip.TooltipView tooltipView) {}
+    public void onTooltipShown(Tooltip.TooltipView tooltipView) {
+        visibleTips.add(TutorialTooltips.values()[tooltipView.getTooltipId()]);
+    }
 
     @Override
     public void onTooltipHidden(Tooltip.TooltipView tooltipView) {}
