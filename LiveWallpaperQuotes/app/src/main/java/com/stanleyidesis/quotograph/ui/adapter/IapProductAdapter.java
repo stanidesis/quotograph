@@ -1,5 +1,6 @@
 package com.stanleyidesis.quotograph.ui.adapter;
 
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,9 +58,13 @@ public class IapProductAdapter extends BaseAdapter {
     }
 
     Delegate delegate;
+    int color1, color2;
 
     public IapProductAdapter(Delegate delegate) {
         this.delegate = delegate;
+        Resources resources = LWQApplication.get().getResources();
+        color1 = resources.getColor(R.color.palette_500);
+        color2 = resources.getColor(R.color.palette_700);
     }
 
     @Override
@@ -86,6 +91,7 @@ public class IapProductAdapter extends BaseAdapter {
         }
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
         viewHolder.bind(IabConst.Product.values()[position]);
+        convertView.setBackgroundColor(position % 2 == 0 ? color1 : color2);
         return convertView;
     }
 

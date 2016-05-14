@@ -2,10 +2,8 @@ package com.stanleyidesis.quotograph.api;
 
 import android.os.AsyncTask;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
-import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -16,7 +14,6 @@ import com.stanleyidesis.quotograph.api.db.UnsplashCategory;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskEvent;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskUpdate;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
-import com.stanleyidesis.quotograph.ui.adapter.ImageMultiSelectAdapter;
 
 import java.util.List;
 
@@ -150,24 +147,12 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         if (wallpaperEvent.didFail()) {
             EventBus.getDefault().post(FirstLaunchTaskEvent.failed(wallpaperEvent.getError()));
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
-            attemptImageCache();
             publishProgress("Setup complete!");
             LWQPreferences.setFirstLaunch(false);
             LWQApplication.setComponentsEnabled(true);
+            // After saving their first Quotograph, we have breathing room to cache some images
+            LWQApplication.cacheRemoteImageAssets();
             EventBus.getDefault().post(FirstLaunchTaskEvent.success());
-        }
-    }
-
-    /**
-     * Download additional images before the user needs to see them.
-     */
-    void attemptImageCache() {
-        for (IabConst.Product product : IabConst.Product.values()) {
-            ImageLoader.getInstance().loadImage(product.imgSource, null);
-        }
-        for (ImageMultiSelectAdapter.KnownUnsplashCategories category :
-                ImageMultiSelectAdapter.KnownUnsplashCategories.values()) {
-            ImageLoader.getInstance().loadImage(category.imgSource, null);
         }
     }
 }
