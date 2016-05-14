@@ -150,6 +150,8 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
             publishProgress("Setup complete!");
             LWQPreferences.setFirstLaunch(false);
             LWQApplication.setComponentsEnabled(true);
+            // After saving their first Quotograph, we have breathing room to cache some images
+            LWQApplication.cacheRemoteImageAssets();
             EventBus.getDefault().post(FirstLaunchTaskEvent.success());
         }
     }

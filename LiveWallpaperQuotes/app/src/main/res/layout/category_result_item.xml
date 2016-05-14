@@ -61,12 +61,14 @@
             android:text="@string/category_inspirational"/>
 
         <com.stanleyidesis.quotograph.ui.view.AddRemoveButton
+            android:contentDescription="Add Category to Playlist"
             android:id="@+id/add_remove_category_result_item"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
+            android:layout_marginRight="-8dp"
             android:clipToPadding="false"
             app:layout_marginLeftPercent="3%"/>
 

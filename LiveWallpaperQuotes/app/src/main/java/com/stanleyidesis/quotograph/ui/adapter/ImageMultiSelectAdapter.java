@@ -64,6 +64,32 @@ import butterknife.OnClick;
  */
 public class ImageMultiSelectAdapter extends RecyclerView.Adapter<ImageMultiSelectAdapter.ImageMultiSelectViewHolder> {
 
+    public enum KnownUnsplashCategories {
+        BUILDING(2, "https://storage.googleapis.com/quotograph-android-assets/images/photo-chooser/img_building.png"),
+        FOOD_AND_DRINK(3, "https://storage.googleapis.com/quotograph-android-assets/images/photo-chooser/img_food_and_drink.png"),
+        NATURE(4, "https://storage.googleapis.com/quotograph-android-assets/images/photo-chooser/img_nature.png"),
+        PEOPLE(6, "https://storage.googleapis.com/quotograph-android-assets/images/photo-chooser/img_people.png"),
+        TECH(7, "https://storage.googleapis.com/quotograph-android-assets/images/photo-chooser/img_technology.png"),
+        OBJECT(8, "https://storage.googleapis.com/quotograph-android-assets/images/photo-chooser/img_object.png");
+
+        KnownUnsplashCategories(int id, String imgSource) {
+            this.id = id;
+            this.imgSource = imgSource;
+        }
+
+        static KnownUnsplashCategories fromId(int id) {
+            for (KnownUnsplashCategories category : values()) {
+                if (category.id == id) {
+                    return category;
+                }
+            }
+            return NATURE;
+        }
+
+        public int id;
+        public String imgSource;
+    }
+
     List<SugarRecord> imageSources;
 
     public ImageMultiSelectAdapter() {
@@ -138,31 +164,8 @@ public class ImageMultiSelectAdapter extends RecyclerView.Adapter<ImageMultiSele
             imageSourceName.setFocusable(false);
             imageSourceName.setFocusableInTouchMode(false);
             removeSource.setVisibility(View.GONE);
-            switch (unsplashCategory.unsplashId) {
-                // Buildings
-                case 2:
-                    imageSource.setImageResource(R.mipmap.img_building);
-                    break;
-                // Food & Drink
-                case 3:
-                    imageSource.setImageResource(R.mipmap.img_food_and_drink);
-                    break;
-                // Nature
-                case 4:
-                    imageSource.setImageResource(R.mipmap.img_nature);
-                    break;
-                // People
-                case 6:
-                    imageSource.setImageResource(R.mipmap.img_people);
-                    break;
-                // Technology
-                case 7:
-                    imageSource.setImageResource(R.mipmap.img_technology);
-                    break;
-                // Objects
-                case 8:
-                    imageSource.setImageResource(R.mipmap.img_object);
-            }
+            String uri = KnownUnsplashCategories.fromId(unsplashCategory.unsplashId).imgSource;
+            ImageLoader.getInstance().displayImage(uri, imageSource);
         }
 
         void bindTo(UserAlbum userAlbum) {

@@ -40,31 +40,31 @@ public class IabConst {
         FONTS("fonts",
                 R.string.iap_fonts_title,
                 R.string.iap_fonts,
-                R.mipmap.img_fonts),
+                "https://storage.googleapis.com/quotograph-android-assets/images/store/img_fonts.png"),
         IMAGES("images",
                 R.string.iap_photos_title,
                 R.string.iap_photos,
-                R.mipmap.img_photos),
+                "https://storage.googleapis.com/quotograph-android-assets/images/store/img_photos.png"),
         FONTS_IMAGES("fonts_and_images",
                 R.string.iap_fonts_photos_title,
                 R.string.iap_fonts_photos,
-                R.mipmap.img_fonts_photos),
+                "https://storage.googleapis.com/quotograph-android-assets/images/store/img_fonts_photos.png"),
         QUOTOGRAPH_INSPIRED("quotograph_inspired",
                 R.string.iap_inspired_title,
                 R.string.iap_inspired,
-                R.mipmap.img_inspired);
+                "https://storage.googleapis.com/quotograph-android-assets/images/store/img_inspired.png");
 
-        Product(String sku, int titleRes, int descriptionRes, int imgRes) {
+        Product(String sku, int titleRes, int descriptionRes, String imgSource) {
             this.sku = sku;
             this.titleRes = titleRes;
             this.descriptionRes = descriptionRes;
-            this.imgRes = imgRes;
+            this.imgSource = imgSource;
         }
 
         public String sku;
         public int titleRes;
         public int descriptionRes;
-        public int imgRes;
+        public String imgSource;
 
     }
 
