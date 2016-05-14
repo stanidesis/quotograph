@@ -45,6 +45,8 @@
         android:layout_height="wrap_content"
         android:src="@drawable/selectable_share_button"
         android:background="@android:color/transparent"
+        android:minHeight="48dp"
+        android:contentDescription="Share Quotograph"
         app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>
 
     <ImageButton
@@ -55,6 +57,8 @@
         android:background="@android:color/transparent"
         android:layout_toRightOf="@id/btn_wallpaper_actions_share"
         android:layout_toEndOf="@id/btn_wallpaper_actions_share"
+        android:minHeight="48dp"
+        android:contentDescription="Save Quotograph"
         app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>
 
     <ImageButton
@@ -65,6 +69,8 @@
         android:background="@android:color/transparent"
         android:layout_toRightOf="@id/btn_wallpaper_actions_save"
         android:layout_toEndOf="@id/btn_wallpaper_actions_save"
+        android:minHeight="48dp"
+        android:contentDescription="Skip Quotograph"
         app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"/>
 
 </android.support.percent.PercentRelativeLayout>

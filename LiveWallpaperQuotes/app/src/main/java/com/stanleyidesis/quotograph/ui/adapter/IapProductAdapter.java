@@ -108,10 +108,8 @@ public class IapProductAdapter extends BaseAdapter {
         TextView productDescription;
         @Bind(R.id.ll_product_item_screen)
         View purchasedScreen;
-        @Bind(R.id.tv_product_item_screen_title)
-        TextView purchasedTitle;
-        @Bind(R.id.tv_product_item_screen_subtitle)
-        TextView purchasedSubtitle;
+        @Bind(R.id.btn_product_item)
+        View btnBuyProduct;
 
         IabConst.Product product;
         SkuDetails skuDetails;
@@ -135,7 +133,7 @@ public class IapProductAdapter extends BaseAdapter {
                 productPrice.setVisibility(View.VISIBLE);
                 productPrice.setText(skuDetails.getPrice());
             }
-
+            btnBuyProduct.setContentDescription("Purchase " + productTitle.getText());
             boolean ownsProduct = LWQApplication.ownsProduct(product);
             purchasedScreen.setVisibility(ownsProduct ? View.VISIBLE : View.GONE);
         }

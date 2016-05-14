@@ -69,20 +69,21 @@
             android:layout_toLeftOf="@+id/add_remove_quote_result_item"
             android:layout_toStartOf="@+id/add_remove_quote_result_item"
             android:layout_below="@+id/tv_quote_result_item_quote"
+            android:clickable="false"
             android:inputType="textNoSuggestions"
             android:text="@string/inspirational_author_0"/>
 
         <com.stanleyidesis.quotograph.ui.view.AddRemoveButton
+            android:contentDescription="Add Quote to Playlist"
             android:id="@+id/add_remove_quote_result_item"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:clipToPadding="false"
-            app:layout_marginLeftPercent="3%"
-            app:layout_widthPercent="10%"
-            app:layout_heightPercent="7%"/>
+            android:layout_marginRight="-8dp"
+            android:layout_marginTop="-8dp"
+            android:clipToPadding="false"/>
 
     </android.support.percent.PercentRelativeLayout>
 

@@ -61,6 +61,7 @@
                 android:minWidth="150dp"
                 android:gravity="start|center_vertical"
                 android:singleLine="true"
+                android:textColor="@android:color/white"
                 android:imeOptions="actionSearch"/>
 
         </android.support.design.widget.TextInputLayout>

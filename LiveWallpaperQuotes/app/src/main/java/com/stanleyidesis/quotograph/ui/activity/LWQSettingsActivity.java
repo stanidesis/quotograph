@@ -730,8 +730,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.palette_500));
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.getTabAt(0).setIcon(R.drawable.selectable_preview_button);
+        tabLayout.getTabAt(0).setContentDescription("Preview Quotograph");
         tabLayout.getTabAt(1).setIcon(R.drawable.selectable_playlist_button);
+        tabLayout.getTabAt(1).setContentDescription("Playlist");
         tabLayout.getTabAt(2).setIcon(R.drawable.selectable_settings_button);
+        tabLayout.getTabAt(2).setContentDescription("Settings");
     }
 
     void setupWallpaperActions() {
@@ -1478,6 +1481,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             if (!isModifyingSeekSetting) {
                 changeState(viewPager.getCurrentItem() == 0 ?
                         stateSaveSkipCompleted : stateSaveSkipCompletedObscured);
+            } else if (activityState == stateInitial) {
+                changeState(stateWallpaper);
             }
         } else {
             changeState(stateSkipWallpaper);

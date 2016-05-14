@@ -32,6 +32,7 @@
     Date: 10/05/2015
 -->
 <android.support.v7.widget.CardView
+    android:id="@+id/cv_playlist_item_card"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -63,8 +64,8 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/iv_playlist_item_icon"
             android:layout_toEndOf="@+id/iv_playlist_item_icon"
-            android:layout_toLeftOf="@+id/fl_playlist_item_more_wrapper"
-            android:layout_toStartOf="@+id/fl_playlist_item_more_wrapper"
+            android:layout_toLeftOf="@+id/iv_playlist_item_more"
+            android:layout_toStartOf="@+id/iv_playlist_item_more"
             android:layout_alignBaseline="@+id/iv_playlist_item_icon"
             android:text="Title"/>
 
@@ -75,8 +76,8 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/iv_playlist_item_icon"
             android:layout_toEndOf="@+id/iv_playlist_item_icon"
-            android:layout_toLeftOf="@+id/fl_playlist_item_more_wrapper"
-            android:layout_toStartOf="@+id/fl_playlist_item_more_wrapper"
+            android:layout_toLeftOf="@+id/iv_playlist_item_more"
+            android:layout_toStartOf="@+id/iv_playlist_item_more"
             android:layout_below="@id/tv_playlist_item_title"
             android:text="by Author"
             android:textColor="@color/palette_100"/>
@@ -88,32 +89,27 @@
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/iv_playlist_item_icon"
             android:layout_toEndOf="@+id/iv_playlist_item_icon"
-            android:layout_toLeftOf="@+id/fl_playlist_item_more_wrapper"
-            android:layout_toStartOf="@+id/fl_playlist_item_more_wrapper"
+            android:layout_toLeftOf="@+id/iv_playlist_item_more"
+            android:layout_toStartOf="@+id/iv_playlist_item_more"
             android:layout_below="@id/tv_playlist_item_subtitle"
             android:text="Lorem sum ipsums right here…"
             app:layout_marginTopPercent="1%"/>
 
-        <FrameLayout
-            android:id="@+id/fl_playlist_item_more_wrapper"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageButton
+            android:id="@+id/iv_playlist_item_more"
+            android:contentDescription="Options"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/selectable_more_button"
+            android:scaleType="center"
+            android:clipToPadding="false"
+            android:background="@android:color/transparent"
+            android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:clipToPadding="false"
-            app:layout_marginLeftPercent="3%"
-            app:layout_widthPercent="10%"
-            app:layout_heightPercent="7%">
-
-            <ImageView
-                android:id="@+id/iv_playlist_item_more"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/selectable_more_button"
-                android:scaleType="center"
-                android:layout_gravity="right|end|top"/>
-
-        </FrameLayout>
+            android:layout_marginRight="-8dp"
+            android:layout_marginTop="-8dp"
+            app:layout_marginLeftPercent="3%"/>
 
     </android.support.percent.PercentRelativeLayout>
 

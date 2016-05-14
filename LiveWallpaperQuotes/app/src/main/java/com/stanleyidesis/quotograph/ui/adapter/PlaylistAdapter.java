@@ -205,7 +205,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             description.setText(quote.text);
         }
 
-        @OnClick({R.id.iv_playlist_item_more, R.id.fl_playlist_item_more_wrapper}) void revealPopup(View view) {
+        @OnClick({R.id.iv_playlist_item_more, R.id.cv_playlist_item_card}) void revealPopup(View view) {
             int popupWidth = view.getResources().getDimensionPixelSize(R.dimen.playlist_popup_width);
             listPopupWindow = new ListPopupWindow(view.getContext());
             listPopupWindow.setAnchorView(view);

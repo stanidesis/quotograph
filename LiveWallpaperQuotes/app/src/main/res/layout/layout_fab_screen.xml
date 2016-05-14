@@ -53,9 +53,9 @@
         android:id="@+id/group_lwq_fab_screen_add_edit_quote"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_widthPercent="66%"
-        app:layout_marginTopPercent="10%"
-        app:layout_marginLeftPercent="10%"/>
+        app:layout_widthPercent="70%"
+        app:layout_marginTopPercent="5%"
+        app:layout_marginLeftPercent="5%"/>
 
     <!-- Search -->
 
@@ -63,9 +63,9 @@
         android:id="@+id/group_lwq_fab_screen_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_widthPercent="66%"
-        app:layout_marginTopPercent="10%"
-        app:layout_marginLeftPercent="10%"/>
+        app:layout_widthPercent="70%"
+        app:layout_marginTopPercent="5%"
+        app:layout_marginLeftPercent="5%"/>
 
     <android.support.percent.PercentFrameLayout
         android:id="@+id/fl_lwq_fab_search"
@@ -84,7 +84,8 @@
             android:layout_gravity="center"
             android:src="@mipmap/ic_search_white_small"
             android:visibility="gone"
-            app:backgroundTint="@color/palette_A400"/>
+            app:backgroundTint="@color/palette_A400"
+            android:contentDescription="Search for Quotes"/>
 
     </android.support.percent.PercentFrameLayout>
 
@@ -105,7 +106,8 @@
             android:layout_gravity="center"
             android:src="@mipmap/ic_create_white_small"
             android:visibility="gone"
-            app:backgroundTint="@color/palette_A400"/>
+            app:backgroundTint="@color/palette_A400"
+            android:contentDescription="Create a Quote"/>
 
     </android.support.percent.PercentFrameLayout>
 
@@ -127,7 +129,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:src="@mipmap/ic_add_white"
-            app:backgroundTint="@color/palette_A400"/>
+            app:backgroundTint="@color/palette_A400"
+            android:contentDescription="Add items to Playlist"/>
 
     </FrameLayout>
 
