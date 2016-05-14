@@ -135,6 +135,7 @@
                 app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
 
             <SeekBar
+                android:contentDescription="Blur SeekBar"
                 style="@style/Theme.LWQ.SeekBar"
                 android:id="@+id/sb_lwq_settings_blur"
                 android:layout_width="match_parent"
@@ -169,6 +170,7 @@
                 app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
 
             <SeekBar
+                android:contentDescription="Dim SeekBar"
                 style="@style/Theme.LWQ.SeekBar"
                 android:id="@+id/sb_lwq_settings_dim"
                 android:layout_width="match_parent"
@@ -209,7 +211,7 @@
                 android:layout_toRightOf="@id/tv_lwq_settings_fonts"
                 android:layout_toEndOf="@id/tv_lwq_settings_fonts"
                 android:gravity="left|start|center_vertical"
-                android:text="choose"
+                android:text="choose fonts"
                 android:textSize="@dimen/abc_text_size_headline_material"
                 android:textColor="@color/palette_400"
                 android:textStyle="normal"
@@ -246,7 +248,7 @@
                 android:layout_toRightOf="@id/tv_lwq_settings_images"
                 android:layout_toEndOf="@id/tv_lwq_settings_images"
                 android:gravity="left|start|center_vertical"
-                android:text="choose"
+                android:text="choose images"
                 android:textSize="@dimen/abc_text_size_headline_material"
                 android:textColor="@color/palette_400"
                 android:textStyle="normal"
@@ -308,9 +310,10 @@
                 app:layout_widthPercent="@fraction/lwq_settings_element_category_percent_width"/>
 
             <android.support.v7.widget.AppCompatCheckBox
+                android:contentDescription="Enable Double-Tap to Launch"
                 android:id="@+id/check_lwq_settings_double_tap"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@id/tv_lwq_settings_double_tap"
                 android:layout_toEndOf="@id/tv_lwq_settings_double_tap"

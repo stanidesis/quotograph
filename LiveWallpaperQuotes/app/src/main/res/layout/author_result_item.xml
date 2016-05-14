@@ -66,15 +66,18 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:textSize="20sp"
-                android:gravity="center_vertical|start"
+                android:gravity="center"
                 android:lines="2"
                 android:layout_below="@+id/iv_author_result_item_person_first"
                 android:text="@string/inspirational_author_0"/>
 
             <com.stanleyidesis.quotograph.ui.view.AddRemoveButton
+                android:contentDescription="Add Author to Playlist"
                 android:id="@+id/add_remove_author_result_item_first"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="-8dp"
+                android:layout_marginTop="-8dp"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"/>
 
@@ -115,14 +118,17 @@
                 android:layout_below="@+id/iv_author_result_item_person_second"
                 android:textSize="20sp"
                 android:lines="2"
-                android:gravity="center_vertical|start"
+                android:gravity="center"
                 android:text="@string/inspirational_author_1"
                 app:layout_marginTopPercent="0%"/>
 
             <com.stanleyidesis.quotograph.ui.view.AddRemoveButton
+                android:contentDescription="Add Author to Playlist"
                 android:id="@+id/add_remove_author_result_item_second"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="-8dp"
+                android:layout_marginTop="-8dp"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"/>
 

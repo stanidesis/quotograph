@@ -63,6 +63,7 @@
         app:layout_marginBottomPercent="5%">
 
         <android.support.design.widget.FloatingActionButton
+            android:contentDescription="Add Your Own Images"
             android:id="@+id/fab_image_source_add"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
