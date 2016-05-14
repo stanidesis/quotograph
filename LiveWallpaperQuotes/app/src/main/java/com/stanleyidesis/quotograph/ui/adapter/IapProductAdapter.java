@@ -1,5 +1,6 @@
 package com.stanleyidesis.quotograph.ui.adapter;
 
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,9 +8,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
-import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.billing.util.SkuDetails;
 
 import butterknife.Bind;
@@ -56,9 +58,13 @@ public class IapProductAdapter extends BaseAdapter {
     }
 
     Delegate delegate;
+    int color1, color2;
 
     public IapProductAdapter(Delegate delegate) {
         this.delegate = delegate;
+        Resources resources = LWQApplication.get().getResources();
+        color1 = resources.getColor(R.color.palette_500);
+        color2 = resources.getColor(R.color.palette_700);
     }
 
     @Override
@@ -85,6 +91,7 @@ public class IapProductAdapter extends BaseAdapter {
         }
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
         viewHolder.bind(IabConst.Product.values()[position]);
+        convertView.setBackgroundColor(position % 2 == 0 ? color1 : color2);
         return convertView;
     }
 
@@ -117,7 +124,7 @@ public class IapProductAdapter extends BaseAdapter {
         void bind(IabConst.Product product) {
             this.product = product;
             this.skuDetails = LWQApplication.getProductDetails(product);
-            productImage.setImageResource(product.imgRes);
+            ImageLoader.getInstance().displayImage(product.imgSource, productImage);
             if (skuDetails == null) {
                 productTitle.setText(product.titleRes);
                 productDescription.setText(product.descriptionRes);

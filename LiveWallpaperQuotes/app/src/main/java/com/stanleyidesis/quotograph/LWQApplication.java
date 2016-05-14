@@ -11,6 +11,7 @@ import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.orm.SugarApp;
 import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.controller.LWQImageController;
@@ -35,6 +36,7 @@ import com.stanleyidesis.quotograph.billing.util.Inventory;
 import com.stanleyidesis.quotograph.billing.util.Purchase;
 import com.stanleyidesis.quotograph.billing.util.SkuDetails;
 import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
+import com.stanleyidesis.quotograph.ui.adapter.ImageMultiSelectAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -126,6 +128,11 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
 
         // Enable
         setComponentsEnabled(!LWQPreferences.isFirstLaunch());
+
+        // Cache images if FTUETask completed
+        if (!LWQPreferences.isFirstLaunch()) {
+            cacheRemoteImageAssets();
+        }
     }
 
     @Override
@@ -236,6 +243,29 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
             e.printStackTrace();
         }
         return 0;
+    }
+
+    /**
+     * Download additional images before the user needs to see them.
+     * This is critical when displaying the store and the image selection dialog.
+     */
+    public static void cacheRemoteImageAssets() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (IabConst.Product product : IabConst.Product.values()) {
+                    if (ImageLoader.getInstance().getDiskCache().get(product.imgSource) == null) {
+                        ImageLoader.getInstance().loadImage(product.imgSource, null);
+                    }
+                }
+                for (ImageMultiSelectAdapter.KnownUnsplashCategories category :
+                        ImageMultiSelectAdapter.KnownUnsplashCategories.values()) {
+                    if (ImageLoader.getInstance().getDiskCache().get(category.imgSource) == null) {
+                        ImageLoader.getInstance().loadImage(category.imgSource, null);
+                    }
+                }
+            }
+        }).start();
     }
 
     ////////////////////////////////////////////////////////////
