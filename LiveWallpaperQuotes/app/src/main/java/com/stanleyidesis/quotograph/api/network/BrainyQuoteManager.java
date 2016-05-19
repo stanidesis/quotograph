@@ -123,7 +123,7 @@ public class BrainyQuoteManager {
             finalUrl = String.format(baseUrl, urlAuthorName.substring(0, 1), urlAuthorName);
         }
         final Object o = parseDocument(finalUrl);
-        if (o instanceof String) {
+        if (o instanceof LWQError) {
             return o;
         }
         return parseForQuotes((Document) o);

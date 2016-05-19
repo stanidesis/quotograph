@@ -1,3 +1,11 @@
+<h1>Version 1.1.2:</h1>
+
+<h4>- New Notification</h4>
+<p>If you like putting your phone in Airplane mode or frequently drop out of data, Quotograph will now show you a notification if it fails to update your wallpaper.</p>
+
+<h4>- Bug Fixes</h4>
+<p>Fixed a couple buggers.</p>
+
 <h1>Version 1.1.1:</h1>
 
 <h4>- We've Lost Some Weight</h4>

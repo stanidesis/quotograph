@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.net.Uri;
+import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 
 import com.stanleyidesis.quotograph.LWQApplication;
@@ -59,8 +60,11 @@ import de.greenrobot.event.EventBus;
  */
 public class LWQNotificationControllerImpl implements LWQNotificationController {
 
-    static int REQUEST_CODE_SHARE = 0xA;
-    static int REQUEST_CODE_VIEW = 0xB;
+    static final int REQUEST_CODE_SHARE = 0xA;
+    static final int REQUEST_CODE_VIEW = 0xB;
+
+    static final int PRIMARY_NOTIF_ID = 1;
+    static final int GEN_FAILURE_NOTIF_ID = 2;
 
     boolean newWallpaperIncoming = false;
 
@@ -70,6 +74,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
 
     @Override
     public void postNewWallpaperNotification() {
+        dismissWallpaperGenerationFailureNotification();
         final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
         // Compress background to reasonable Square size
         final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
@@ -78,12 +83,14 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         }
         final Bitmap notificationBitmap = chopToCenterSquare(backgroundImage);
 
+        Context context = LWQApplication.get();
+
         // Establish basic options
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(LWQApplication.get());
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
         notificationBuilder.setAutoCancel(true);
         notificationBuilder.setCategory(Notification.CATEGORY_SERVICE);
         notificationBuilder.setContentInfo(wallpaperController.getAuthor());
-        notificationBuilder.setContentTitle(LWQApplication.get().getString(R.string.new_quotograph));
+        notificationBuilder.setContentTitle(context.getString(R.string.new_quotograph));
         notificationBuilder.setContentText(String.format("\"%s\"", wallpaperController.getQuote()));
         notificationBuilder.setLargeIcon(notificationBitmap);
         notificationBuilder.setOngoing(false);
@@ -96,37 +103,37 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
         bigTextStyle.bigText(wallpaperController.getQuote());
         bigTextStyle.setBigContentTitle(wallpaperController.getAuthor());
-        bigTextStyle.setSummaryText(LWQApplication.get().getString(R.string.new_quotograph));
+        bigTextStyle.setSummaryText(context.getString(R.string.new_quotograph));
         notificationBuilder.setStyle(bigTextStyle);
 
         // Set Content Intent
-        Intent mainIntent = new Intent(LWQApplication.get(), LWQActivateActivity.class);
+        Intent mainIntent = new Intent(context, LWQActivateActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-        notificationBuilder.setContentIntent(PendingIntent.getActivity(LWQApplication.get(), 0, mainIntent, 0));
+        notificationBuilder.setContentIntent(PendingIntent.getActivity(context, 0, mainIntent, 0));
 
         // Add Share Action
-        Intent shareIntent = new Intent(LWQApplication.get().getString(R.string.action_share));
-        final PendingIntent shareBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, shareIntent, 0);
+        Intent shareIntent = new Intent(context.getString(R.string.action_share));
+        final PendingIntent shareBroadcast = PendingIntent.getBroadcast(context, 0, shareIntent, 0);
         final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.mipmap.ic_share_white,
-                LWQApplication.get().getString(R.string.share), shareBroadcast).build();
+                context.getString(R.string.share), shareBroadcast).build();
         notificationBuilder.addAction(shareAction);
 
         // Add save to disk
-        Intent saveToDiskIntent = new Intent(LWQApplication.get(), LWQSaveWallpaperActivity.class);
-        final PendingIntent saveToDiskActivity = PendingIntent.getActivity(LWQApplication.get(), 0, saveToDiskIntent, 0);
+        Intent saveToDiskIntent = new Intent(context, LWQSaveWallpaperActivity.class);
+        final PendingIntent saveToDiskActivity = PendingIntent.getActivity(context, 0, saveToDiskIntent, 0);
         final NotificationCompat.Action saveToDiskAction = new NotificationCompat.Action.Builder(R.mipmap.ic_save_white,
-                LWQApplication.get().getString(R.string.save_to_disk), saveToDiskActivity).build();
+                context.getString(R.string.save_to_disk), saveToDiskActivity).build();
         notificationBuilder.addAction(saveToDiskAction);
 
         // Add Skip Action
-        Intent skipIntent = new Intent(LWQApplication.get().getString(R.string.action_change_wallpaper));
-        final PendingIntent skipBroadcast = PendingIntent.getBroadcast(LWQApplication.get(), 0, skipIntent, 0);
+        Intent skipIntent = new Intent(context.getString(R.string.action_change_wallpaper));
+        final PendingIntent skipBroadcast = PendingIntent.getBroadcast(context, 0, skipIntent, 0);
         final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.mipmap.ic_skip_next_white,
-                LWQApplication.get().getString(R.string.skip), skipBroadcast).build();
+                context.getString(R.string.skip), skipBroadcast).build();
         notificationBuilder.addAction(skipAction);
 
-        NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notificationBuilder.build());
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(PRIMARY_NOTIF_ID, notificationBuilder.build());
 
         notificationBitmap.recycle();
     }
@@ -134,7 +141,59 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
     @Override
     public void dismissNewWallpaperNotification() {
         NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(1);
+        notificationManager.cancel(PRIMARY_NOTIF_ID);
+    }
+
+    @Override
+    public void postWallpaperGenerationFailureNotification() {
+        // Two actions: Network Settings & Try Again
+        LWQApplication context = LWQApplication.get();
+        // Establish basic options
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
+        notificationBuilder.setAutoCancel(true);
+        notificationBuilder.setCategory(Notification.CATEGORY_ERROR);
+        notificationBuilder.setContentInfo(context.getString(R.string.app_name));
+        notificationBuilder.setContentTitle(context.getString(R.string.notification_generation_failure_title));
+        notificationBuilder.setContentText(context.getString(R.string.notification_generation_failure_content));
+        notificationBuilder.setTicker(context.getString(R.string.notification_generation_failure_ticker));
+        notificationBuilder.setOngoing(false);
+        notificationBuilder.setShowWhen(true);
+        notificationBuilder.setLocalOnly(true);
+        notificationBuilder.setPriority(NotificationCompat.PRIORITY_MIN);
+        notificationBuilder.setSmallIcon(android.R.drawable.stat_notify_error);
+        notificationBuilder.setWhen(System.currentTimeMillis());
+
+        // Create BigTextStyle
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(context.getString(R.string.notification_generation_failure_title));
+        bigTextStyle.bigText(context.getString(R.string.notification_generation_failure_content));
+        notificationBuilder.setStyle(bigTextStyle);
+
+        // Add Settings Action
+        Intent settingsIntent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+        final PendingIntent settingsBroadcast = PendingIntent.getActivity(context, 0, settingsIntent, 0);
+        final NotificationCompat.Action settingsAction = new NotificationCompat.Action.Builder(R.mipmap.ic_settings_white,
+                context.getString(R.string.notification_generation_failure_action_settings), settingsBroadcast).build();
+        notificationBuilder.addAction(settingsAction);
+
+        // Add Skip Action
+        Intent skipIntent = new Intent(context.getString(R.string.action_change_wallpaper));
+        final PendingIntent skipBroadcast = PendingIntent.getBroadcast(context, 0, skipIntent, 0);
+        final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.mipmap.ic_refresh_white_36dp,
+                context.getString(R.string.notification_generation_failure_action_try_again), skipBroadcast).build();
+        notificationBuilder.addAction(skipAction);
+
+        // Set Skip as main action
+        notificationBuilder.setContentIntent(skipBroadcast);
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(GEN_FAILURE_NOTIF_ID, notificationBuilder.build());
+    }
+
+    @Override
+    public void dismissWallpaperGenerationFailureNotification() {
+        NotificationManager notificationManager = (NotificationManager) LWQApplication.get().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(GEN_FAILURE_NOTIF_ID);
     }
 
     @Override
@@ -216,10 +275,13 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         if (wallpaperEvent.getStatus() == WallpaperEvent.Status.GENERATED_NEW_WALLPAPER) {
             newWallpaperIncoming = !wallpaperEvent.didFail();
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
-            if (!wallpaperEvent.didFail() && newWallpaperIncoming && LWQApplication.isWallpaperActivated()) {
+            if (newWallpaperIncoming && LWQApplication.isWallpaperActivated()) {
                 postNewWallpaperNotification();
                 newWallpaperIncoming = false;
             }
+        } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.GENERATING_NEW_WALLPAPER
+                && wallpaperEvent.didFail()) {
+            postWallpaperGenerationFailureNotification();
         }
     }
 
