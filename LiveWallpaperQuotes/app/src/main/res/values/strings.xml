@@ -79,11 +79,17 @@
     <string name="network_connection_established_title">Network Access Established</string>
     <string name="network_connection_established_message">Thank you for your patience. Quotograph is getting back to work.</string>
     <string name="network_connection_established_positive">Heck, yeah!</string>
+    <!--Failures-->
     <string name="first_launch_task_failed">Unable to setup Quotograph</string>
     <string name="write_external_permission_denied_toast">Saving a Quotograph requires additional permissions</string>
     <string name="save_failed">Failed to save your Quotograph :(</string>
     <string name="failed_to_generate_wallpaper">Whoops! We couldn\'t make a new Quotograph, please try again.</string>
     <string name="toast_tap_set_wallpaper">Press, \'Set wallpaper,\' to use Quotograph</string>
+    <string name="notification_generation_failure_title">Quotograph failed to refresh</string>
+    <string name="notification_generation_failure_ticker">:\'-(</string>
+    <string name="notification_generation_failure_content">To see a new quote, make sure your device has access to the internet, then tap here to try again.</string>
+    <string name="notification_generation_failure_action_try_again">Retry</string>
+    <string name="notification_generation_failure_action_settings">Settings</string>
     <!-- Fonts -->
     <string name="font_abril_fatface">Abril</string>
     <string name="font_amatic_sc">Amatic SC</string>

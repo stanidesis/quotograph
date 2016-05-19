@@ -55,6 +55,7 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
             Intent updateService = new Intent(context, LWQUpdateService.class);
             startWakefulService(context, updateService);
             LWQApplication.getNotificationController().dismissNewWallpaperNotification();
+            LWQApplication.getNotificationController().dismissWallpaperGenerationFailureNotification();
         } else if (context.getString(R.string.action_share).equals(intent.getAction())) {
             final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
             final String shareText = String.format("\"%s\" - %s", wallpaperController.getQuote(), wallpaperController.getAuthor());
