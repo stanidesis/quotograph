@@ -49,6 +49,18 @@ public interface LWQNotificationController {
     void dismissNewWallpaperNotification();
 
     /**
+     * Let the user know that we failed to generate a new Quotograph,
+     * ask them to make sure to turn their data or wifi on, then tap there to
+     * try again!
+     */
+    void postWallpaperGenerationFailureNotification();
+
+    /**
+     * If present, dismiss the generation failure notification
+     */
+    void dismissWallpaperGenerationFailureNotification();
+
+    /**
      * Present a notification which shows the saved image. Clicking
      * it should let the user view the picture, it should also feature a
      * share action that presents a chooser.

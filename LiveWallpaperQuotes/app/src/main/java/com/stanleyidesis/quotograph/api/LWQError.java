@@ -71,7 +71,7 @@ public class LWQError {
     }
 
     private LWQError(String errorMessage) {
-        this(errorMessage, new RuntimeException("Auto-generated"));
+        this(errorMessage, new RuntimeException("Non-Fatal: " + errorMessage));
     }
 
     private LWQError(Throwable errorThrowable) {
