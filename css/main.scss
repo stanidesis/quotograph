@@ -1,80 +1,33 @@
 ---
-# Only the main Sass file needs front matter (the dashes are enough)
+# Only the main SASS file needs front matter
 ---
 @charset "utf-8";
-
-// Our variables
-
-// Fonts
-@import url(https://fonts.googleapis.com/css?family=Josefin+Sans:600,400);
-
-// Brand colors
-$brand-color-base:    #B388FF;
-$brand-color-bg:      #EDE7F6;
-
-// Quotes
-$quote-font-family: "Josefin Sans", sans-serif;
-$quote-font-weight: 600;
-$author-font-weight: 400;
-
-// Our variables
-$base-font-family:    "Open Sans Condensed", sans-serif;
-$base-font-size:      18px;
-$base-font-weight:    300;
-$base-line-height:    1.5;
-$heading-font-family: "Sue Ellen Francisco", cursive;
-$heading-font-weight: 400;
-$vertical-spacing:    20px;
-$default-anim-length: 200ms;
-
-// For _base.scss
-
-$content-width:       970px;
-
-$small-font-size:  $base-font-size * 0.875;
-$spacing-unit:     30px;
-
-$text-color:       #111;
-$background-color: $brand-color-bg;
-$brand-color:      $brand-color-base;
-
-$grey-color:       #828282;
-$grey-color-light: lighten($grey-color, 40%);
-$grey-color-dark:  darken($grey-color, 25%);
-
-// Bootstrap Overrides
-$max-page-width:   $content-width;
-$font-family-base: $base-font-family;
-$font-size-base:   $base-font-size;
-$link-color:       $brand-color-base;
-
-
-// Global Sass Mixins
-@mixin media-query($device) {
-    @media screen and (max-width: $device) {
-        @content;
-    }
-}
-
-@mixin media-max($device) {
-    @media screen and (max-width: $device) {
-        @content;
-    }
-}
-
-@mixin media-min($device) {
-    @media screen and (min-width: $device) {
-        @content;
-    }
-}
-
 // Import partials from `sass_dir` (defaults to `_sass`)
 @import
-        "bootstrap",
-        "base",
-        "layout",
-        "syntax-highlighting",
-        "peppermint-required",
-        "peppermint-suggested",
-        "jquery.fullPage"
+  "bootstrap",
+  "jquery.fullPage",
+  "syntax-highlighting",
+  "variables/variables",
+  "utilities/mixins",
+  "utilities/extensions",
+  "utilities/utilities",
+  "utilities/zindex",
+  "fonts/type"
 ;
+// Establish link colors transitions
+a {
+  @include m-transition(color $seconds-defaultAnimLength ease);
+  color: $color-brandBase;
+  &:hover, &:active, &:visited {
+    color: darken($color-brandBase, 25%);
+    text-decoration: none;
+  }
+}
+// Set background color
+body {
+  background-color: $color-brandBackground;
+}
+// Set html and body height to 100%
+html, body {
+  height: 100%;
+}

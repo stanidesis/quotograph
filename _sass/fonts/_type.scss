@@ -1,0 +1,91 @@
+// Fontsizes in REM, defaults set here.
+// Import fonts
+@import url(https://fonts.googleapis.com/css?family=Sue+Ellen+Francisco);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:300);
+// These are the baselines
+$lineHeight-micro: .55;
+$lineHeight-smallest: 1.1;
+$lineHeight-smaller: 1.365;
+$lineHeight-small: 1.65;
+$lineHeight-base: 2.2;
+$lineHeight-large: 2.75;
+$lineHeight-larger: 3.4;
+$lineHeight-largest: 4.4;
+$lineHeight-jumbo: 6.6;
+// Font-weight base
+$fontWeight-base: 300;
+// Font-weight headlines
+$fontWeight-headlines: 400;
+// Font-family
+$fontFamily-base: "Open Sans", sans-serif;
+// Heading font-family
+$fontFamily-headlines: "Sue Ellen Francisco", cursive;
+// All font-sizes
+$fontSize-micro: .4;
+$fontSize-smallest: .8;
+$fontSize-smaller: 1;
+$fontSize-small: 1.2;
+$fontSize-base: 1.6;
+$fontSize-large: 2.0;
+$fontSize-larger: 2.8;
+$fontSize-largest: 3.2;
+$fontSize-jumbo: 4.8;
+// Establish base font-size (defaults to 8px mobile, 10px desktop)
+html {
+  font-size: 50%;
+  @include m-mediaMin(768px) {
+    font-size: 62.5%;
+  }
+}
+// Use rem fallback to set a 16px base font-size, or 1.6rem
+body {
+  @include m-fontSize($fontSize-base);
+  @include m-lineHeight($lineHeight-base);
+  font-weight: $fontWeight-base;
+  font-family: $fontFamily-base;
+}
+.fontN3 {
+  font-family: $fontFamily-base;
+  font-weight: $fontWeight-base;
+}
+.fontN7 {
+  font-family: $fontFamily-headlines;
+  font-weight: $fontWeight-headlines;
+}
+.f-fontMicro {
+  @include m-fontSize($fontSize-micro);
+  @include m-lineHeight($lineHeight-micro);
+}
+.f-fontSmallest {
+  @include m-fontSize($fontSize-smallest);
+  @include m-lineHeight($lineHeight-smallest);
+}
+.f-fontSmaller {
+  @include m-fontSize($fontSize-smaller);
+  @include m-lineHeight($lineHeight-smaller);
+}
+.f-fontSmall {
+  @include m-fontSize($fontSize-small);
+  @include m-lineHeight($lineHeight-small);
+}
+// This is the base font class
+.f-fontBase {
+  @include m-fontSize($fontSize-base);
+  @include m-lineHeight($lineHeight-base);
+}
+.f-fontH4 {
+  @include m-fontSize($fontSize-large);
+  @include m-lineHeight($lineHeight-large);
+}
+.f-fontH3 {
+  @include m-fontSize($fontSize-larger);
+  @include m-lineHeight($lineHeight-larger);
+}
+.f-fontH2 {
+  @include m-fontSize($fontSize-largest);
+  @include m-lineHeight($lineHeight-largest);
+}
+.f-fontH1 {
+  @include m-fontSize($fontSize-jumbo);
+  @include m-lineHeight($lineHeight-jumbo);
+}

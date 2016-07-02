@@ -1,0 +1,44 @@
+// Flatten a list from left-to-right
+.u-flattenListLTR {
+  list-style-type: none;
+  list-style: none;
+  text-align: left;
+  li {
+    display: inline-block
+  }
+}
+// Flatten a list, right-to-left
+.u-flattenListRTL {
+  list-style-type: none;
+  list-style: none;
+  text-align: right;
+  li {
+    display: inline-block
+  }
+}
+.u-removeListStyle {
+  list-style-type: none;
+  list-style: none;
+}
+.u-alignChildrenCenter {
+  text-align: center;
+}
+.u-alignChildrenRight {
+  text-align: right;
+}
+.u-alignChildrenLeft {
+  text-align: left;
+}
+.u-noPadding {
+  padding: 0;
+}
+.u-noMargin {
+  margin: 0;
+}
+.u-noCushion {
+  padding: 0;
+  margin: 0;
+}
+.u-defaultHoverFloat {
+  @include m-hoverFloat(1.01, .7);
+}

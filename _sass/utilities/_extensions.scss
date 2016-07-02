@@ -1,0 +1,23 @@
+// Extend this to clearfix a div
+%e-clearFix {
+  *zoom: 1;
+  &:before, &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+// Extension to use when hiding an element visually
+// but retaining it for screen readers
+%e-visuallyHidden {
+  margin: -1px;
+  padding: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip: rect(0, 0, 0, 0);
+  position: absolute;
+}
