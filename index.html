@@ -2,25 +2,9 @@
 layout: default
 ---
 <div class="fullpage" id="fullpage">
-  <div class="section hero">
-    <div class="peppermint peppermint-inactive" id="peppermint">
-      {% for quote in site.quotes %}
-      <figure class="quote-wrapper" style="background-image: url({{quote.image}});">
-        <div class="screen"></div>
-        <div class="container">
-          <div class="row">
-            <div class="quote col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3">
-              <h1>{{quote.quote}}</h1>
-            </div>
-          </div>
-          <div class="row">
-            <div class="author col-xs-12 col-sm-6 col-sm-offset-3">
-              <h3>{{quote.author}}</h3>
-            </div>
-          </div>
-        </div>
-      </figure>
-      {% endfor %}
-    </div>
+  <div class="section">
+    {% for quote in site.quotes %}
+
+    {% endfor %}
   </div>
 </div>

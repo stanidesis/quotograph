@@ -32,7 +32,6 @@
   </script>
   <script type="text/javascript">
     var loadScriptAsync = function(url, callback) {
-      console.log("Async load: " + url);
       var script = document.createElement('script');
       script.src = url;
       script.async = true;
@@ -49,5 +48,5 @@
       loadScriptAsync("{{ '/js/bootstrap.min.js' | prepend: site.url }}", function () {});
     };
   </script>
-  {% include loadCss-inline.html %}
+  {% include load_css_inline.html %}
 </head>
