@@ -16,17 +16,38 @@
   <meta property="al:android:app_name" content="Quotograph">
   <meta property="al:android:package" content="{{site.android_package}}">
 
-  <link rel="stylesheet" href="/css/main.css">
+  <!-- CSS with loadCSS -->
+  <link rel="preload" href="css/main.css" as="style" onload="this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/css/main.css"></noscript>
+
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
-  <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ "/feed.xml" | prepend: site.url }}">
+  <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ '/feed.xml' | prepend: site.url }}">
 
   <!-- JavaScript -->
   <script async
-          on
+          onload="loadjQueryDependants()"
           src="https://code.jquery.com/jquery-2.2.3.min.js"
           integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
           crossorigin="anonymous">
   </script>
-  <script async type="text/javascript" src="/js/bootstrap.min.js"></script>
-  <script async type="text/javascript" src="/js/jquery.fullPage.min.js"></script>
+  <script type="text/javascript">
+    var loadScriptAsync = function(url, callback) {
+      console.log("Async load: " + url);
+      var script = document.createElement('script');
+      script.src = url;
+      script.async = true;
+      script.onload = callback;
+      document.head.appendChild(script);
+    }
+    var loadjQueryDependants = function() {
+      loadScriptAsync("{{ '/js/jquery.fullPage.min.js' | prepend: site.url }}",
+                      function () {
+        $(function() {
+          $('#fullpage').fullpage();
+        });
+      });
+      loadScriptAsync("{{ '/js/bootstrap.min.js' | prepend: site.url }}", function () {});
+    };
+  </script>
+  {% include loadCss-inline.html %}
 </head>
