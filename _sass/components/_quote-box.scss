@@ -1,0 +1,13 @@
+// This styles the quotes on the intrudoctory section
+.quoteBox {
+  @include m-mediaMin($screen-tablet) {
+    // Keep it small on Desktops
+    width: 30%;
+  }
+  width: 80%;
+  color: white;
+}
+.quoteBox-quote {
+}
+.quoteBox-author {
+}

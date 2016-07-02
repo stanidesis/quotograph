@@ -20,13 +20,16 @@
   list-style-type: none;
   list-style: none;
 }
-.u-alignChildrenCenter {
+.u-alignJustify {
+  text-align: justify;
+}
+.u-alignCenter {
   text-align: center;
 }
-.u-alignChildrenRight {
+.u-alignRight {
   text-align: right;
 }
-.u-alignChildrenLeft {
+.u-alignLeft {
   text-align: left;
 }
 .u-noPadding {
@@ -39,6 +42,33 @@
   padding: 0;
   margin: 0;
 }
+.u-centerInDiv {
+  margin-left: auto;
+  margin-right: auto;
+}
 .u-defaultHoverFloat {
   @include m-hoverFloat(1.01, .7);
+}
+.u-coverBackground {
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+/* This utility blurs any element */
+.u-blur {
+  filter: url(/images/blur.svg#blur);
+	-webkit-filter: blur(3px);
+	filter: blur(3px);
+	filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='3');
+}
+.u-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }

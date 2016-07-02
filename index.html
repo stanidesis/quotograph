@@ -1,10 +1,15 @@
 ---
 layout: default
 ---
-<div class="fullpage" id="fullpage">
+<div id="fullpage">
   <div class="section">
     {% for quote in site.quotes %}
-
+    <div class="slide u-coverBackground" style="background-image: url({{ quote.image }}); background-attachment: initial;">
+      <div class="quoteBox u-centerInDiv">
+        <h1 class="f-fontH1 u-alignJustify quoteBox-quote">{{ quote.quote }}</h1>
+        <h2 class="f-fontH2 u-alignRight quoteBox-author">{{ quote.author }}</h2>
+      </div>
+    </div>
     {% endfor %}
   </div>
 </div>

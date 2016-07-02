@@ -65,3 +65,12 @@
   -o-background-size:      $backgroundSize;
   background-size:         $backgroundSize;
 }
+// Text Stroke in pixels fallback
+@mixin m-textStrokePixels($color, $width) {
+   text-shadow:
+       2*$width 2*$width 0 $color,
+       -$width -$width 0 $color,
+       $width -$width 0 $color,
+       -$width $width 0 $color,
+       $width $width 0 $color;
+}

@@ -1,6 +1,6 @@
 // Fontsizes in REM, defaults set here.
 // Import fonts
-@import url(https://fonts.googleapis.com/css?family=Sue+Ellen+Francisco);
+@import url(https://fonts.googleapis.com/css?family=Josefin+Sans:700);
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:300);
 // These are the baselines
 $lineHeight-micro: .55;
@@ -15,11 +15,11 @@ $lineHeight-jumbo: 6.6;
 // Font-weight base
 $fontWeight-base: 300;
 // Font-weight headlines
-$fontWeight-headlines: 400;
+$fontWeight-headlines: 700;
 // Font-family
 $fontFamily-base: "Open Sans", sans-serif;
 // Heading font-family
-$fontFamily-headlines: "Sue Ellen Francisco", cursive;
+$fontFamily-headlines: "Josefin Sans", sans-serif;
 // All font-sizes
 $fontSize-micro: .4;
 $fontSize-smallest: .8;
@@ -48,7 +48,7 @@ body {
   font-family: $fontFamily-base;
   font-weight: $fontWeight-base;
 }
-.fontN7 {
+.fontN4 {
   font-family: $fontFamily-headlines;
   font-weight: $fontWeight-headlines;
 }
@@ -88,4 +88,7 @@ body {
 .f-fontH1 {
   @include m-fontSize($fontSize-jumbo);
   @include m-lineHeight($lineHeight-jumbo);
+}
+h1, h2, h3, h4, h5, h6 {
+  @extend .fontN4
 }
