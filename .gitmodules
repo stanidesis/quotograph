@@ -1,9 +1,6 @@
 [submodule "_modules/bootstrap-sass"]
 	path = _modules/bootstrap-sass
 	url = https://github.com/twbs/bootstrap-sass.git
-[submodule "_modules/Peppermint"]
-	path = _modules/Peppermint
-	url = https://github.com/wilddeer/Peppermint.git
 [submodule "_modules/fullPage.js"]
 	path = _modules/fullPage.js
 	url = https://github.com/alvarotrigo/fullPage.js.git
