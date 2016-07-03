@@ -14,20 +14,21 @@
   "utilities/zindex",
   "fonts/type",
   "components/down-arrow",
+  "components/header",
   "components/quote-box"
 ;
 // Establish link colors transitions
 a {
   @include m-transition(color $seconds-defaultAnimLength ease);
-  color: $color-brandBase;
+  color: $color-accent;
   &:hover, &:active, &:visited {
-    color: darken($color-brandBase, 25%);
+    color: darken($color-accent, 25%);
     text-decoration: none;
   }
 }
 // Set background color
 body {
-  background-color: $color-brandBackground;
+  background-color: $color-background;
 }
 // Set html and body height to 100%
 html, body {

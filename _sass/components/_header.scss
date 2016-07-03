@@ -1,0 +1,10 @@
+.header {
+  @include m-boxShadow(0, 0, .2rem, .2rem, rgba(black, .5));
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rem;
+  background-color: $color-background;
+  border-bottom: .1rem solid $color-accent;
+}

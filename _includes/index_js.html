@@ -2,6 +2,7 @@
   function setupFullpage() {
     $('#fullpage').fullpage({
       controlArrows: false,
+      fixedElements: ".header",
       afterRender: function() {
         $('#fullpage').fadeTo(1000, 1.0);
       }

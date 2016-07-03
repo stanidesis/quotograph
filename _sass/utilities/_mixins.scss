@@ -77,3 +77,15 @@
 @mixin m-textShadow($x: 2px, $y: 0px, $blur: 4px, $color: rgba(0,0,0,.4)) {
     text-shadow: $x $y $blur $color;
 }
+// Box Shadow
+@mixin m-boxShadow($top, $left, $blur, $size, $color, $inset: false) {
+  @if $inset {
+    -webkit-box-shadow:inset $top $left $blur $size $color;
+    -moz-box-shadow:inset $top $left $blur $size $color;
+    box-shadow:inset $top $left $blur $size $color;
+  } @else {
+    -webkit-box-shadow: $top $left $blur $size $color;
+    -moz-box-shadow: $top $left $blur $size $color;
+    box-shadow: $top $left $blur $size $color;
+  }
+}

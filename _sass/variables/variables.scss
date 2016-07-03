@@ -1,9 +1,11 @@
 // Brand colors
-$color-brandHighlight: #2ECC71;
-$color-brandBase: #27AE60;
-$color-brandBackground: rgba(255, 255, 255, 1);
-$color-brandLight: #BDC3C7;
-$color-brandText: #95A5A6;
+$color-primary: rgb(142,36,170);
+$color-secondary: rgb(186,104,200);
+$color-accent: rgb(198,255,0);
+$color-textPrimary: rgba(black, .87);
+$color-textSecondary: rgba(black, .54);
+$color-textDisabled: rgba(black, .38);
+$color-background: rgb(237,237,237);
 // Page width (rem)
 $width-pageMax: 97;
 // Default animation length
