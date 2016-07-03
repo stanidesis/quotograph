@@ -1,11 +1,29 @@
 .header {
-/*   @include m-boxShadow(0, 0, .2rem, .2rem, rgba($color-accent, .5)); */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   height: 6rem;
-  background-color: $color-primary;
-  border-bottom: .1rem solid $color-accent;
+  background-color: $color-background;
+  border-bottom: .1rem solid $color-primary;
+  color: $color-textPrimary;
+}
+.header-download {
+  @include m-boxShadow(0, 0, .1rem, .1rem, rgba(black, .2));
+  @include m-transition(-mox-box-shadow, $seconds-defaultAnimLength ease-in);
+  @include m-transition(-webkit-box-shadow, $seconds-defaultAnimLength ease-in);
+  @include m-transition(box-shadow, $seconds-defaultAnimLength ease-in);
+  &:hover, &:active, &:visited {
+    @include m-boxShadow(0, 0, .4rem, .2rem, rgba(black, .5));
+  }
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  bottom: 1rem;
+  background-color: $color-secondary;
+  border: 1px solid $color-secondary;
+  border-radius: .2rem;
+  padding: 0 2.5rem;
   color: white;
+  line-height: 3.8rem;
 }

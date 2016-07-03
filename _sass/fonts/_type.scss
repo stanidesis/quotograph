@@ -1,7 +1,7 @@
 // Fontsizes in REM, defaults set here.
 // Import fonts
 @import url(https://fonts.googleapis.com/css?family=Josefin+Sans:700);
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:300);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);
 // These are the baselines
 $lineHeight-micro: .55;
 $lineHeight-smallest: 1.1;
@@ -13,7 +13,9 @@ $lineHeight-larger: 3.4;
 $lineHeight-largest: 4.4;
 $lineHeight-jumbo: 6.6;
 // Font-weight base
-$fontWeight-base: 300;
+$fontWeight-base: 400;
+// Font-weight bold
+$fontWeight-bold: 700;
 // Font-weight headlines
 $fontWeight-headlines: 700;
 // Font-family
@@ -47,6 +49,10 @@ body {
 .fontN3 {
   font-family: $fontFamily-base;
   font-weight: $fontWeight-base;
+}
+.fontN7 {
+  font-family: $fontFamily-base;
+  font-weight: $fontWeight-bold;
 }
 .fontN4 {
   font-family: $fontFamily-headlines;
