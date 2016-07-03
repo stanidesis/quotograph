@@ -1,0 +1,44 @@
+<script type="text/javascript">
+  function setupFullpage() {
+    $('#fullpage').fullpage({
+      controlArrows: false,
+      afterRender: function() {
+        $('#fullpage').fadeTo(1000, 1.0);
+      }
+    });
+    var slideCounter = 0;
+    var autoScroll = function() {
+      if (++slideCounter > 3) {
+        return;
+      }
+      var $activeSection = $("div.section.active");
+      if ($activeSection.index() != 0) {
+        console.log("User scrolled down");
+        return;
+      }
+      $.fn.fullpage.moveSlideRight();
+      setTimeout(autoScroll, 4000);
+    }
+    setTimeout(autoScroll, 4000);
+
+    var showDownArrow = function() {
+      var $activeSection = $("div.section.active");
+      if ($activeSection.index() != 0) {
+        console.log("User scrolled down already, not showing the arrow");
+        return;
+      }
+      var counter = 0;
+      var $downArrow = $("img.downArrow");
+      animateArrow();
+      function animateArrow() {
+        if (++counter > 2) {
+          $downArrow.animate({marginBottom: 0, opacity: 1.0}, 2000);
+          return;
+        }
+        $downArrow.animate({marginBottom: 0, opacity: 1.0}, 2000);
+        $downArrow.animate({marginBottom: 30, opacity: 0}, 2000, animateArrow);
+      }
+    }
+  setTimeout(showDownArrow, 3000);
+  }
+</script>

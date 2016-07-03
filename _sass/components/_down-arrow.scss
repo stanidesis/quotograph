@@ -1,0 +1,13 @@
+// This arrow indicates that the page may be scrolled downwards
+.downArrow {
+  z-index: $zIndex-9;
+  position: absolute;
+  left: calc(50% - 2rem);
+  bottom: 4rem;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 3rem;
+  zoom: 1;
+	filter: alpha(opacity=0);
+	opacity: 0;
+}

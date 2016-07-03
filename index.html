@@ -1,7 +1,8 @@
 ---
 layout: default
 ---
-<div id="fullpage">
+{% include index_js.html %}
+<div id="fullpage" style="filter: alpha(opacity=0); opacity: 0">
   <div class="section">
     {% for quote in site.quotes %}
     <div class="slide u-coverBackground" style="background-image: url({{ quote.image }}); background-attachment: initial;">
@@ -11,5 +12,9 @@ layout: default
       </div>
     </div>
     {% endfor %}
+    <img class="downArrow" src="/images/arrow-down-sign-to-navigate.svg" alt="Down Arrow">
+  </div>
+  <div class="section">
+    I'm section 2!
   </div>
 </div>

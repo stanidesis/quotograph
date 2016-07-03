@@ -42,9 +42,7 @@
       loadScriptAsync("{{ '/js/jquery.fullPage.min.js' | prepend: site.url }}",
                       function () {
         $(function() {
-          $('#fullpage').fullpage({
-            controlArrows: false
-          });
+          setupFullpage();
         });
       });
       loadScriptAsync("{{ '/js/bootstrap.min.js' | prepend: site.url }}", function () {});
