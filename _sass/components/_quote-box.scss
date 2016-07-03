@@ -8,6 +8,9 @@
   color: white;
 }
 .quoteBox-quote {
+  text-transform: uppercase;
 }
-.quoteBox-author {
+.quoteBox-quote,
+.quoteBox-author{
+  @include m-textShadow();
 }

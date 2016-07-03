@@ -68,9 +68,12 @@
 // Text Stroke in pixels fallback
 @mixin m-textStrokePixels($color, $width) {
    text-shadow:
-       2*$width 2*$width 0 $color,
        -$width -$width 0 $color,
        $width -$width 0 $color,
        -$width $width 0 $color,
        $width $width 0 $color;
+}
+// Text Shadow
+@mixin m-textShadow($x: 2px, $y: 0px, $blur: 4px, $color: rgba(0,0,0,.4)) {
+    text-shadow: $x $y $blur $color;
 }

@@ -6,8 +6,8 @@ layout: default
     {% for quote in site.quotes %}
     <div class="slide u-coverBackground" style="background-image: url({{ quote.image }}); background-attachment: initial;">
       <div class="quoteBox u-centerInDiv">
-        <h1 class="f-fontH1 u-alignJustify quoteBox-quote">{{ quote.quote }}</h1>
-        <h2 class="f-fontH2 u-alignRight quoteBox-author">{{ quote.author }}</h2>
+        <h1 class="f-fontH1 u-alignJustify quoteBox-quote" style="color: {{quote.text_color}}">{{ quote.quote }}</h1>
+        <h2 class="f-fontH2 u-alignRight quoteBox-author" style="color: {{quote.text_color}}">{{ quote.author }}</h2>
       </div>
     </div>
     {% endfor %}

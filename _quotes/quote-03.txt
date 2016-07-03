@@ -1,0 +1,6 @@
+---
+quote: "It is during our darkest moments that we must focus to see the light."
+author: "Aristotle Onassis"
+image: "/images/unsplash/light.jpg"
+text_color: "rgb(248, 236, 192)"
+---

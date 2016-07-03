@@ -1,0 +1,6 @@
+---
+quote: "You are never too old to set another goal or to dream a new dream."
+author: "C.S. Lewis"
+image: "/images/unsplash/dream.jpg"
+text_color: "rgb(213,172,115)"
+---
