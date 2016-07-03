@@ -1,10 +1,11 @@
 .header {
-  @include m-boxShadow(0, 0, .2rem, .2rem, rgba(black, .5));
+/*   @include m-boxShadow(0, 0, .2rem, .2rem, rgba($color-accent, .5)); */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   height: 6rem;
-  background-color: $color-background;
+  background-color: $color-primary;
   border-bottom: .1rem solid $color-accent;
+  color: white;
 }
