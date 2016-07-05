@@ -6,7 +6,6 @@
 @import
   "bootstrap",
   "jquery.fullPage",
-/*   "syntax-highlighting", */
   "variables/variables",
   "utilities/mixins",
   "utilities/extensions",
@@ -15,7 +14,8 @@
   "fonts/type",
   "components/down-arrow",
   "components/header",
-  "components/quote-box"
+  "components/quote-box",
+  "components/screenshot"
 ;
 // Establish link colors transitions
 a {

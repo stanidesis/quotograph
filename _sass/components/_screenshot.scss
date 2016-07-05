@@ -1,0 +1,21 @@
+/* The screenshot portion */
+.screenshot {}
+.screenshot-image {
+  @include m-mediaMin($screen-tablet + 1px) {
+    width: 80%;
+    margin-left: inherit;
+    margin-right: inherit;
+  }
+  @include m-mediaMax($screen-tablet) {
+    float: none;
+  }
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.screenshot-blurb {
+  @include m-mediaMin($screen-tablet + 1px) {
+    margin-top: 30%;
+  }
+  margin-top: inherit;
+}
