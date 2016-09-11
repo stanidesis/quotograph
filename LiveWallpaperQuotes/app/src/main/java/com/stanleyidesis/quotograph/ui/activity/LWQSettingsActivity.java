@@ -501,6 +501,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             visibleTips = new HashSet<>();
         }
 
+        // Fetch remote config
+        LWQApplication.fetchRemoteConfig();
+
         // Setup content
         setupContent();
         // Setup ViewPager and Controls
