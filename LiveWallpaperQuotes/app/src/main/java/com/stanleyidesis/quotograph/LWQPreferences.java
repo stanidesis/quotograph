@@ -173,4 +173,11 @@ public class LWQPreferences {
     public static void clearPreferences() {
         sharedPreferences.edit().clear().apply();
     }
+
+    // WARNING: Dumping survey preferences
+    public static void clearSurveyPreferences() {
+        sharedPreferences.edit()
+                .remove(LWQApplication.get().getString(R.string.preference_key_survey_last_shown))
+                .remove(LWQApplication.get().getString(R.string.preference_key_survey_response)).apply();
+    }
 }

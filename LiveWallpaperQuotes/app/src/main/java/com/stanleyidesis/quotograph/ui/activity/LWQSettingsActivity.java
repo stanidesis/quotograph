@@ -72,6 +72,7 @@ import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
+import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQChooseImageSourceModule;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQStoreDialogModule;
@@ -137,7 +138,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         MaterialDialog.ListCallback,
         DialogInterface.OnCancelListener,
         LWQChooseImageSourceModule.Delegate,
-        Tooltip.Callback {
+        Tooltip.Callback,
+        UserSurveyController.Delegate {
 
     static class ActivityState {
         int page = -1;
@@ -525,6 +527,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         setupProgressBar();
         // Setup image source chooser
         setupChooseImageSources();
+
+        // Show survey if applicable
+        UserSurveyController.showSurvey(this);
     }
 
     @Override
@@ -1643,6 +1648,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     .startAlbum();
         }
     }
+
+    // UserSurveyController Delegate
+
+    @Override
+    public void addSurveyToPlaylist() {
+        // TODO
+    }
+
 
     // Tooltip Sequence
 

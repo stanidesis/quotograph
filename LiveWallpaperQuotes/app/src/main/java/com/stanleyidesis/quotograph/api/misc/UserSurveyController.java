@@ -1,11 +1,18 @@
 package com.stanleyidesis.quotograph.api.misc;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.RemoteConfigConst;
+import com.stanleyidesis.quotograph.ui.dialog.SurveyDialog;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -42,17 +49,24 @@ import com.stanleyidesis.quotograph.RemoteConfigConst;
  */
 public class UserSurveyController {
 
-    public static int SURVEY_VARIANT_NONE = -1;
-    public static int SURVEY_VARIANT_NOTIFICATION = 0;
-    public static int SURVEY_VARIANT_DIALOG = 1;
-    public static int SURVEY_VARIANT_POPUP = 2;
-    public static int SURVEY_VARIANT_PLAYLIST = 3;
+    public interface Delegate {
+        void addSurveyToPlaylist();
+    }
+
+    public static final int SURVEY_VARIANT_NONE = -1;
+    public static final int SURVEY_VARIANT_NOTIFICATION = 0;
+    public static final int SURVEY_VARIANT_DIALOG = 1;
+    public static final int SURVEY_VARIANT_POPUP = 2;
+    public static final int SURVEY_VARIANT_PLAYLIST = 3;
 
     public static int RESPONSE_NEVER = 0;
     public static int RESPONSE_LATER = 1;
     public static int RESPONSE_OKAY = 2;
 
-    public static boolean shouldShowSurvey() {
+    static TimerTask surveyTimerTask;
+    static Timer surveyTimer;
+
+    static boolean shouldShowSurvey() {
         long surveyLastShownOn = LWQPreferences.getSurveyLastShownOn();
         int surveyResponse = LWQPreferences.getSurveyResponse();
         if (getVariant() == SURVEY_VARIANT_NONE) {
@@ -73,18 +87,75 @@ public class UserSurveyController {
         // Check whether enough time has passed since the last
         // time we showed the survey
         long timeSinceLastSurvey = System.currentTimeMillis() - surveyLastShownOn;
-        boolean showSurvey = timeSinceLastSurvey >
+        return timeSinceLastSurvey >
                 LWQApplication.getRemoteConfig()
                         .getLong(RemoteConfigConst.SURVEY_INTERVAL_IN_MILLIS);
-        if (showSurvey) {
-            LWQPreferences.setSurveyLastShownOn(System.currentTimeMillis());
-        }
-        return showSurvey;
     }
 
-    public static long getVariant() {
+    public static <T extends Activity & Delegate> boolean showSurvey(final T activity) {
+        if (!shouldShowSurvey()) {
+            return false;
+        }
+        if (surveyTimerTask != null) {
+            return false;
+        }
+        surveyTimer = new Timer();
+        surveyTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                _showSurvey(activity);
+                surveyTimer = null;
+                surveyTimerTask = null;
+            }
+        };
+        surveyTimer.schedule(surveyTimerTask, getDelay());
+        return true;
+    }
+
+    /**
+     * Internal showSurvey that actually does the work.
+     *
+     * @param activity
+     * @param <T>
+     */
+    static <T extends Activity & Delegate> void _showSurvey(final T activity) {
+        // Bail if the user is exiting the Activity or if it's no longer visible
+        if (activity.isFinishing()
+                || !activity.getWindow().isActive()
+                || !activity.getWindow().getDecorView().isShown()) {
+            return;
+        }
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                switch ((int) getVariant()) {
+                    case SURVEY_VARIANT_NOTIFICATION:
+                        LWQApplication.getNotificationController().postSurveyNotification();
+                        break;
+                    case SURVEY_VARIANT_DIALOG:
+                        SurveyDialog.showDialog(activity);
+                        break;
+                    case SURVEY_VARIANT_PLAYLIST:
+                        activity.addSurveyToPlaylist();
+                        break;
+                    case SURVEY_VARIANT_POPUP:
+                    default:
+                        // TODO Popup
+                }
+            }
+        });
+        LWQPreferences.setSurveyLastShownOn(System.currentTimeMillis());
+    }
+
+    static long getVariant() {
         return LWQApplication.getRemoteConfig()
                 .getLong(RemoteConfigConst.SURVEY_EXPERIMENT);
+    }
+
+    static long getDelay() {
+        return LWQApplication.getRemoteConfig()
+                .getLong(RemoteConfigConst.SURVEY_DELAY_IN_MILLIS);
     }
 
     /**

@@ -1,11 +1,16 @@
 package com.stanleyidesis.quotograph.ui.debug;
 
+import android.app.Activity;
 import android.content.Context;
+import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
+import com.stanleyidesis.quotograph.RemoteConfigConst;
+import com.stanleyidesis.quotograph.ui.dialog.SurveyDialog;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -41,26 +46,56 @@ import com.stanleyidesis.quotograph.LWQPreferences;
  * Date: 09/11/2016
  */
 public class DebugDialog {
-    public static void show(Context context) {
-        CharSequence [] list = new CharSequence[] {"Clear Preferences", "Show Survey Notification"};
+    public static void show(final Context context) {
+        CharSequence [] list = new CharSequence[] {
+                "Clear all Preferences",
+                "Clear Survey Preferences",
+                "Subtract Day From 'survey_last_shown'",
+                "Show Survey Notification",
+                "Show Survey Dialog",
+                "Print Survey Data to Logs",
+                "Fetch RemoteConfig"
+        };
         MaterialDialog.ListCallback listCallback = new MaterialDialog.ListCallback() {
             @Override
             public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
                 switch (which) {
-                    case 0:
+                    case 0: // Clear all prefs
                         LWQPreferences.clearPreferences();
                         break;
-                    case 1:
+                    case 1: // Clear survey prefs
+                        LWQPreferences.clearSurveyPreferences();
+                        break;
+                    case 2: // Subtract one day from the last time the survey was shown
+                        long current = LWQPreferences.getSurveyLastShownOn();
+                        current = current == -1 ? System.currentTimeMillis() : current;
+                        LWQPreferences.setSurveyLastShownOn(current - DateUtils.DAY_IN_MILLIS);
+                        break;
+                    case 3: // Show the survey notification
                         LWQApplication.getNotificationController().postSurveyNotification();
                         break;
+                    case 4: // Show the survey dialog
+                        SurveyDialog.showDialog((Activity) context);
+                        break;
+                    case 5: // Print survey data to logs
+                        String tag = "DebugDialog-Survey";
+                        Log.v(tag, "Variant: " + LWQApplication.getRemoteConfig().getLong(RemoteConfigConst.SURVEY_EXPERIMENT));
+                        Log.v(tag, "Delay: " + LWQApplication.getRemoteConfig().getLong(RemoteConfigConst.SURVEY_DELAY_IN_MILLIS));
+                        Log.v(tag, "Interval: " + LWQApplication.getRemoteConfig().getLong(RemoteConfigConst.SURVEY_INTERVAL_IN_MILLIS));
+                        Log.v(tag, "Response: " + LWQPreferences.getSurveyResponse());
+                        Log.v(tag, "Last Shown On: " + DateUtils.formatDateTime(context, LWQPreferences.getSurveyLastShownOn(),
+                                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY));
+                        break;
+                    case 6: // Fetch Remote Config
+                        LWQApplication.fetchRemoteConfig();
                 }
             }
         };
         MaterialDialog debugDialog =
                 new MaterialDialog.Builder(context)
-                .autoDismiss(true)
                 .title("Debug Dialog")
-                .canceledOnTouchOutside(true)
+                .autoDismiss(false)
+                .canceledOnTouchOutside(false)
                 .items(list)
                 .itemsCallback(listCallback)
                 .build();

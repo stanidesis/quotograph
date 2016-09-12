@@ -40,7 +40,6 @@ public abstract class DebuggableActivity extends AppCompatActivity {
 				 * method you would use to setup whatever you want done once the
 				 * device has been shook.
 				 */
-                Log.e(DebuggableActivity.class.getSimpleName(), "Shake detected");
                 DebugDialog.show(DebuggableActivity.this);
             }
         });
