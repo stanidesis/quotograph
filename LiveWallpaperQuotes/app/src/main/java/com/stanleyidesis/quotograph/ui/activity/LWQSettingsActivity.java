@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.percent.PercentFrameLayout;
 import android.support.percent.PercentRelativeLayout;
@@ -477,7 +478,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     Set<TutorialTooltips> visibleTips;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lwq_settings);
         ButterKnife.bind(this);

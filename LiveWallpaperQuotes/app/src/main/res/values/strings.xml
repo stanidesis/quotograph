@@ -133,4 +133,8 @@
     <string name="iap_fonts_photos_title">Appearance Pack</string>
     <string name="iap_inspired">Get everything, including the features above, future features, and my personal thanks, forever.</string>
     <string name="iap_inspired_title">Quotograph Inspired</string>
+    <!-- User Survey -->
+    <string name="survey_title">Thank you for using Quotograph!</string>
+    <string name="survey_never">No… :\'(</string>
+    <string name="survey_later">Later</string>
 </resources>

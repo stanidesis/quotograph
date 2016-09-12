@@ -46,6 +46,7 @@
                 <action android:name="com.stanleyidesis.quotograph.action.CHANGE_WALLPAPER"/>
                 <action android:name="com.stanleyidesis.quotograph.action.SHARE"/>
                 <action android:name="com.stanleyidesis.quotograph.action.SAVE"/>
+                <action android:name="com.stanleyidesis.quotograph.action.SURVEY_RESPONSE"/>
             </intent-filter>
         </receiver>
 

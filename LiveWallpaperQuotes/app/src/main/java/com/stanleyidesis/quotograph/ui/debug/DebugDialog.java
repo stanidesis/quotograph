@@ -1,4 +1,11 @@
-package com.stanleyidesis.quotograph.api;
+package com.stanleyidesis.quotograph.ui.debug;
+
+import android.content.Context;
+import android.view.View;
+
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.stanleyidesis.quotograph.LWQApplication;
+import com.stanleyidesis.quotograph.LWQPreferences;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -22,7 +29,7 @@ package com.stanleyidesis.quotograph.api;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * BaseCallback.java
+ * DebugDialog.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -31,18 +38,32 @@ package com.stanleyidesis.quotograph.api;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 12/05/2015
+ * Date: 09/11/2016
  */
-public class BaseCallback <Result> implements Callback<Result> {
-    @Override
-    public void onSuccess(Result result) {
-        // Nothing by default
-    }
-
-    @Override
-    public void onError(LWQError error) {
-        if (error.getErrorThrowable() != null) {
-            error.getErrorThrowable().printStackTrace();
-        }
+public class DebugDialog {
+    public static void show(Context context) {
+        CharSequence [] list = new CharSequence[] {"Clear Preferences", "Show Survey Notification"};
+        MaterialDialog.ListCallback listCallback = new MaterialDialog.ListCallback() {
+            @Override
+            public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                switch (which) {
+                    case 0:
+                        LWQPreferences.clearPreferences();
+                        break;
+                    case 1:
+                        LWQApplication.getNotificationController().postSurveyNotification();
+                        break;
+                }
+            }
+        };
+        MaterialDialog debugDialog =
+                new MaterialDialog.Builder(context)
+                .autoDismiss(true)
+                .title("Debug Dialog")
+                .canceledOnTouchOutside(true)
+                .items(list)
+                .itemsCallback(listCallback)
+                .build();
+        debugDialog.show();
     }
 }

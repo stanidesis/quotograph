@@ -1,12 +1,13 @@
 package com.stanleyidesis.quotograph.ui.activity;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.ui.UIUtils;
+import com.stanleyidesis.quotograph.ui.debug.DebuggableActivity;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -45,7 +46,7 @@ import de.greenrobot.event.EventBus;
  *
  * Date: 09/06/2015
  */
-public abstract class LWQWallpaperActivity extends AppCompatActivity implements ActivityStateFlags {
+public abstract class LWQWallpaperActivity extends DebuggableActivity implements ActivityStateFlags {
 
     enum BackgroundWallpaperState {
         CUSTOM(0f),
@@ -64,7 +65,7 @@ public abstract class LWQWallpaperActivity extends AppCompatActivity implements 
     BackgroundWallpaperState backgroundWallpaperState;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         UIUtils.setupFullscreenIfPossible(this);
     }
