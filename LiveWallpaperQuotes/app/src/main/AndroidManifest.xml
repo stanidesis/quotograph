@@ -38,7 +38,7 @@
             android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.NoShow"/>
 
         <activity android:name="com.stanleyidesis.quotograph.ui.activity.LWQSurveyActivity" android:screenOrientation="sensorPortrait"
-            android:launchMode="singleInstance" android:theme="@style/Theme.AppCompat.NoActionBar.Translucent" android:enabled="true"/>
+            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.SurveyDialog" android:enabled="true"/>
 
         <!-- Receivers -->
 

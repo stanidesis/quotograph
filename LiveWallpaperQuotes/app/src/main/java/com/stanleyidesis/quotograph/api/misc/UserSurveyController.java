@@ -9,6 +9,7 @@ import android.os.Looper;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.RemoteConfigConst;
+import com.stanleyidesis.quotograph.ui.activity.LWQSurveyActivity;
 import com.stanleyidesis.quotograph.ui.dialog.SurveyDialog;
 
 import java.util.Timer;
@@ -141,7 +142,7 @@ public class UserSurveyController {
                         break;
                     case SURVEY_VARIANT_POPUP:
                     default:
-                        // TODO Popup
+                        activity.startActivity(new Intent(activity, LWQSurveyActivity.class));
                 }
             }
         });

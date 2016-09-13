@@ -1,9 +1,6 @@
 package com.stanleyidesis.quotograph.ui.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
@@ -50,9 +47,6 @@ import butterknife.OnClick;
  */
 public class LWQSurveyActivity extends DebuggableActivity {
 
-    @Bind(android.R.id.content)
-    View container;
-
     @Bind(R.id.rl_lwq_survey_popup)
     View popup;
 
@@ -61,12 +55,6 @@ public class LWQSurveyActivity extends DebuggableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
-    }
-
-    @Override
-    public void onPostCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onPostCreate(savedInstanceState, persistentState);
-        enter();
     }
 
     @OnClick({R.id.btn_lwq_survey_negative,
@@ -81,16 +69,15 @@ public class LWQSurveyActivity extends DebuggableActivity {
             which = 2;
         }
         UserSurveyController.handleResponse(which);
-        exit();
-    }
-
-    void exit() {
         finish();
+        overridePendingTransition(0, android.R.anim.fade_out);
     }
 
-    void enter() {
-        Animator animator = AnimatorInflater.loadAnimator(this, R.animator.enter_from_below);
-        animator.setTarget(popup);
-        animator.start();
+    @Override
+    public void onBackPressed() {
+        UserSurveyController.handleResponse(UserSurveyController.RESPONSE_LATER);
+        finish();
+        overridePendingTransition(0, android.R.anim.fade_out);
     }
+
 }
