@@ -2,6 +2,7 @@ package com.stanleyidesis.quotograph.ui.debug;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +11,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.RemoteConfigConst;
+import com.stanleyidesis.quotograph.ui.activity.LWQSurveyActivity;
 import com.stanleyidesis.quotograph.ui.dialog.SurveyDialog;
 
 /**
@@ -53,6 +55,7 @@ public class DebugDialog {
                 "Subtract Day From 'survey_last_shown'",
                 "Show Survey Notification",
                 "Show Survey Dialog",
+                "Show Survey Popup",
                 "Print Survey Data to Logs",
                 "Fetch RemoteConfig"
         };
@@ -77,7 +80,10 @@ public class DebugDialog {
                     case 4: // Show the survey dialog
                         SurveyDialog.showDialog((Activity) context);
                         break;
-                    case 5: // Print survey data to logs
+                    case 5: // Show survey popup
+                        context.startActivity(new Intent(context, LWQSurveyActivity.class));
+                        break;
+                    case 6: // Print survey data to logs
                         String tag = "DebugDialog-Survey";
                         Log.v(tag, "Variant: " + LWQApplication.getRemoteConfig().getLong(RemoteConfigConst.SURVEY_EXPERIMENT));
                         Log.v(tag, "Delay: " + LWQApplication.getRemoteConfig().getLong(RemoteConfigConst.SURVEY_DELAY_IN_MILLIS));
@@ -86,7 +92,7 @@ public class DebugDialog {
                         Log.v(tag, "Last Shown On: " + DateUtils.formatDateTime(context, LWQPreferences.getSurveyLastShownOn(),
                                 DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY));
                         break;
-                    case 6: // Fetch Remote Config
+                    case 7: // Fetch Remote Config
                         LWQApplication.fetchRemoteConfig();
                 }
             }
