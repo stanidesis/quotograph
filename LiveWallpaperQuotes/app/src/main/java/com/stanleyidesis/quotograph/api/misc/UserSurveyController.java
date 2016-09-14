@@ -126,7 +126,7 @@ public class UserSurveyController {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                switch (SURVEY_VARIANT_POPUP){//(int) getVariant()) {
+                switch ((int) getVariant()) {
                     case SURVEY_VARIANT_NOTIFICATION:
                         LWQApplication.getNotificationController().postSurveyNotification();
                         break;
