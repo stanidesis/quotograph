@@ -68,17 +68,17 @@ public class UserSurveyController {
     static Timer surveyTimer;
 
     static boolean shouldShowSurvey() {
-        long surveyLastShownOn = LWQPreferences.getSurveyLastShownOn();
-        int surveyResponse = LWQPreferences.getSurveyResponse();
         if (getVariant() == SURVEY_VARIANT_NONE) {
             return false;
         }
+        int surveyResponse = LWQPreferences.getSurveyResponse();
         if (surveyResponse == RESPONSE_NEVER
                 || surveyResponse == RESPONSE_OKAY) {
             // They've replied affirmatively or negatively,
             // so don't show the survey again
             return false;
         }
+        long surveyLastShownOn = LWQPreferences.getSurveyLastShownOn();
         if (surveyLastShownOn == -1) {
             // This is the first time we're checking, so set to system time and
             // don't show it yet, wait one cycle
@@ -93,12 +93,9 @@ public class UserSurveyController {
                         .getLong(RemoteConfigConst.SURVEY_INTERVAL_IN_MILLIS);
     }
 
-    public static <T extends Activity & Delegate> boolean showSurvey(final T activity) {
-        if (!shouldShowSurvey()) {
-            return false;
-        }
-        if (surveyTimerTask != null) {
-            return false;
+    public static <T extends Activity & Delegate> void showSurvey(final T activity) {
+        if (!shouldShowSurvey() || surveyTimerTask != null) {
+            return;
         }
         surveyTimer = new Timer();
         surveyTimerTask = new TimerTask() {
@@ -110,7 +107,6 @@ public class UserSurveyController {
             }
         };
         surveyTimer.schedule(surveyTimerTask, getDelay());
-        return true;
     }
 
     /**
@@ -130,7 +126,7 @@ public class UserSurveyController {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                switch ((int) getVariant()) {
+                switch (SURVEY_VARIANT_POPUP){//(int) getVariant()) {
                     case SURVEY_VARIANT_NOTIFICATION:
                         LWQApplication.getNotificationController().postSurveyNotification();
                         break;

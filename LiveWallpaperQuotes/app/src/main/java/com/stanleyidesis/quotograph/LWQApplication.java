@@ -7,7 +7,6 @@ import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
@@ -209,7 +208,7 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (!task.isSuccessful()) {
-                            // Ruh-roh
+                            // TODO log?
                             return;
                         }
                         LWQApplication.get().firebaseRemoteConfig.activateFetched();

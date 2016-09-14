@@ -34,8 +34,8 @@ package com.stanleyidesis.quotograph;
  * Date: 09/11/2016
  */
 public class RemoteConfigConst {
-    public static String SURVEY_EXPERIMENT                 = "survey_experiment";
-    public static String SURVEY_URL                                   = "survey_url";
-    public static String SURVEY_DELAY_IN_MILLIS        = "survey_delay_in_millis";
+    public static String SURVEY_EXPERIMENT = "survey_experiment";
+    public static String SURVEY_URL = "survey_url";
+    public static String SURVEY_DELAY_IN_MILLIS = "survey_delay_in_millis";
     public static String SURVEY_INTERVAL_IN_MILLIS = "survey_interval_in_millis";
 }

@@ -74,7 +74,8 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
         } else if (context.getString(R.string.action_survey_response).equals(action)) {
             LWQApplication.getNotificationController().dismissSurveyNotification();
             int surveyResponse = Integer.parseInt(intent.getDataString());
-            if (surveyResponse == -1) {
+            if (surveyResponse < UserSurveyController.RESPONSE_NEVER
+                    || surveyResponse > UserSurveyController.RESPONSE_OKAY) {
                 return;
             }
             UserSurveyController.handleResponse(surveyResponse);

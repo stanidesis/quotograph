@@ -8,7 +8,6 @@ import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 import com.stanleyidesis.quotograph.ui.debug.DebuggableActivity;
 
-import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -47,9 +46,6 @@ import butterknife.OnClick;
  */
 public class LWQSurveyActivity extends DebuggableActivity {
 
-    @Bind(R.id.rl_lwq_survey_popup)
-    View popup;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,11 +58,11 @@ public class LWQSurveyActivity extends DebuggableActivity {
             R.id.btn_lwq_survey_positive})
     void onClick(View button) {
         int id = button.getId();
-        int which = 0;
-        if (button.getId() == R.id.btn_lwq_survey_neutral) {
-            which = 1;
-        } else if (button.getId() == R.id.btn_lwq_survey_positive) {
-            which = 2;
+        int which = UserSurveyController.RESPONSE_NEVER;
+        if (id == R.id.btn_lwq_survey_neutral) {
+            which = UserSurveyController.RESPONSE_LATER;
+        } else if (id == R.id.btn_lwq_survey_positive) {
+            which = UserSurveyController.RESPONSE_OKAY;
         }
         UserSurveyController.handleResponse(which);
         finish();

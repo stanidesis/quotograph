@@ -6,7 +6,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.stanleyidesis.quotograph.BuildConfig;
 
@@ -52,7 +51,10 @@ public abstract class DebuggableActivity extends AppCompatActivity {
             return;
         }
         // Add the following line to register the Session Manager Listener onResume
-        mSensorManager.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(
+                mShakeDetector,
+                mAccelerometer,
+                SensorManager.SENSOR_DELAY_UI);
     }
 
     @Override

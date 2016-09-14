@@ -47,6 +47,8 @@ public class SurveyDialog {
         MaterialDialog.SingleButtonCallback buttonCallback = new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                // Which comes in reverse, 0 = okay, 1 = later, and 2 = never
+                // This quick negation and abs value flips it right-side round
                 UserSurveyController.handleResponse(Math.abs(which.ordinal() - 2));
             }
         };
