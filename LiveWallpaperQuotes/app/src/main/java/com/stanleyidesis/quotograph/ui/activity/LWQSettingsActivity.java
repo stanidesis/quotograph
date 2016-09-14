@@ -71,6 +71,7 @@ import com.stanleyidesis.quotograph.api.db.Quote;
 import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
+import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQChooseImageSourceModule;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQStoreDialogModule;
@@ -136,7 +137,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         MaterialDialog.ListCallback,
         DialogInterface.OnCancelListener,
         LWQChooseImageSourceModule.Delegate,
-        Tooltip.Callback {
+        Tooltip.Callback,
+        UserSurveyController.Delegate {
 
     static class ActivityState {
         int page = -1;
@@ -501,6 +503,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             visibleTips = new HashSet<>();
         }
 
+        // Fetch remote config
+        LWQApplication.fetchRemoteConfig();
+
         // Setup content
         setupContent();
         // Setup ViewPager and Controls
@@ -521,6 +526,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         setupProgressBar();
         // Setup image source chooser
         setupChooseImageSources();
+
+        // Show survey if applicable
+        UserSurveyController.showSurvey(this);
     }
 
     @Override
@@ -939,7 +947,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     void setupPlaylist() {
         playlistAdapter = new PlaylistAdapter(this);
         RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler_playlist);
-        recyclerView.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(false);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(playlistAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -1516,7 +1524,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onPlaylistItemRemove(PlaylistAdapter adapter, int position) {
-        if (adapter.getItemCount() == 1) {
+        if (adapter.getPlaylistItemCount() == 1) {
             Toast.makeText(this, "Your playlist may not be empty", Toast.LENGTH_LONG).show();
             return;
         }
@@ -1639,6 +1647,19 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     .startAlbum();
         }
     }
+
+    // UserSurveyController Delegate
+
+    @Override
+    public void revealSurveyInPlaylist() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                playlistAdapter.setShowSurvey(true);
+            }
+        });
+    }
+
 
     // Tooltip Sequence
 

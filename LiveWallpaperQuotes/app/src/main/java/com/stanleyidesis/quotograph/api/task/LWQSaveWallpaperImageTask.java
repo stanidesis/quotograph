@@ -1,4 +1,4 @@
-package com.stanleyidesis.quotograph.api;
+package com.stanleyidesis.quotograph.api.task;
 
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.api.BaseCallback;
+import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.drawing.LWQBitmapDrawScript;
 import com.stanleyidesis.quotograph.api.event.ImageSaveEvent;
 

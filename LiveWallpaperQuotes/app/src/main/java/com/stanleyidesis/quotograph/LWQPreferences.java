@@ -135,12 +135,49 @@ public class LWQPreferences {
     }
 
     public static int getLatestVersionCode() {
-        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_whats_new_dialog), 0);
+        return sharedPreferences.getInt(LWQApplication.get().getString(R.string.preference_key_whats_new_dialog),
+                LWQApplication.getVersionCode());
     }
 
     public static void setLatestVersionCode() {
         sharedPreferences.edit().putInt(
                 LWQApplication.get().getString(R.string.preference_key_whats_new_dialog),
                 LWQApplication.getVersionCode()).apply();
+    }
+
+    public static long getSurveyLastShownOn() {
+        return sharedPreferences.getLong(
+                LWQApplication.get().getString(R.string.preference_key_survey_last_shown), -1);
+    }
+
+    public static void setSurveyLastShownOn(long when) {
+        sharedPreferences.edit().putLong(
+                LWQApplication.get().getString(R.string.preference_key_survey_last_shown),
+                when
+        ).apply();
+    }
+
+    public static int getSurveyResponse() {
+        return sharedPreferences.getInt(
+                LWQApplication.get().getString(R.string.preference_key_survey_response), -1);
+    }
+
+    public static void setSurveyResponse(int which) {
+        sharedPreferences.edit().putInt(
+                LWQApplication.get().getString(R.string.preference_key_survey_response),
+                which
+        ).apply();
+    }
+
+    // WARNING: Dumping all preferences
+    public static void clearPreferences() {
+        sharedPreferences.edit().clear().apply();
+    }
+
+    // WARNING: Dumping survey preferences
+    public static void clearSurveyPreferences() {
+        sharedPreferences.edit()
+                .remove(LWQApplication.get().getString(R.string.preference_key_survey_last_shown))
+                .remove(LWQApplication.get().getString(R.string.preference_key_survey_response)).apply();
     }
 }

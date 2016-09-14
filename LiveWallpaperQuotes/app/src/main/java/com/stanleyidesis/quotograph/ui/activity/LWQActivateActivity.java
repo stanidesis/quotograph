@@ -24,7 +24,7 @@ import android.widget.Toast;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
-import com.stanleyidesis.quotograph.api.LWQFirstLaunchTask;
+import com.stanleyidesis.quotograph.api.task.LWQFirstLaunchTask;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskEvent;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskUpdate;
 import com.stanleyidesis.quotograph.api.event.NetworkConnectivityEvent;

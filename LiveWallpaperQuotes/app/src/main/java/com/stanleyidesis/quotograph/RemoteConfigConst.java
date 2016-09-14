@@ -1,4 +1,4 @@
-package com.stanleyidesis.quotograph.api;
+package com.stanleyidesis.quotograph;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -22,7 +22,7 @@ package com.stanleyidesis.quotograph.api;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * BaseCallback.java
+ * RemoteConfigConst.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -31,18 +31,11 @@ package com.stanleyidesis.quotograph.api;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 12/05/2015
+ * Date: 09/11/2016
  */
-public class BaseCallback <Result> implements Callback<Result> {
-    @Override
-    public void onSuccess(Result result) {
-        // Nothing by default
-    }
-
-    @Override
-    public void onError(LWQError error) {
-        if (error.getErrorThrowable() != null) {
-            error.getErrorThrowable().printStackTrace();
-        }
-    }
+public class RemoteConfigConst {
+    public static String SURVEY_EXPERIMENT = "survey_experiment";
+    public static String SURVEY_URL = "survey_url";
+    public static String SURVEY_DELAY_IN_MILLIS = "survey_delay_in_millis";
+    public static String SURVEY_INTERVAL_IN_MILLIS = "survey_interval_in_millis";
 }

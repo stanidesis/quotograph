@@ -74,4 +74,14 @@ public interface LWQNotificationController {
      * If saving the wallpaper fails, notify the user that something went wrong.
      */
     void postWallpaperSaveFailureNotification();
+
+    /**
+     * Dismiss the survey notification, if available
+     */
+    void dismissSurveyNotification();
+
+    /**
+     * Show a notification that promps the user to take a survey
+     */
+    void postSurveyNotification();
 }
