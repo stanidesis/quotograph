@@ -135,7 +135,7 @@
     <string name="iap_inspired_title">Quotograph Inspired</string>
     <!-- User Survey -->
     <string name="survey_title">Thank you for using Quotograph!</string>
-    <string name="survey_cta">Can you take <b>5 minutes</b> to help me improve the app?</string>
+    <string name="survey_cta">Do you have <b>5 minutes</b> to help me improve the app?</string>
     <string name="survey_never">No :\'(</string>
     <string name="survey_later">Later</string>
     <string name="survey_okay">Take Survey</string>

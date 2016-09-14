@@ -51,7 +51,7 @@ import java.util.TimerTask;
 public class UserSurveyController {
 
     public interface Delegate {
-        void addSurveyToPlaylist();
+        void revealSurveyInPlaylist();
     }
 
     public static final int SURVEY_VARIANT_NONE = -1;
@@ -138,7 +138,7 @@ public class UserSurveyController {
                         SurveyDialog.showDialog(activity);
                         break;
                     case SURVEY_VARIANT_PLAYLIST:
-                        activity.addSurveyToPlaylist();
+                        activity.revealSurveyInPlaylist();
                         break;
                     case SURVEY_VARIANT_POPUP:
                     default:

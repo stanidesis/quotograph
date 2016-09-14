@@ -20,6 +20,7 @@ import com.stanleyidesis.quotograph.api.db.PlaylistAuthor;
 import com.stanleyidesis.quotograph.api.db.PlaylistCategory;
 import com.stanleyidesis.quotograph.api.db.PlaylistQuote;
 import com.stanleyidesis.quotograph.api.db.Quote;
+import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,9 +63,12 @@ import butterknife.OnClick;
  *
  * Date: 10/05/2015
  */
-public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
+public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public static interface Delegate {
+    final int VIEW_TYPE_PLAYLIST = 0;
+    final int VIEW_TYPE_SURVEY = 1;
+
+    public interface Delegate {
         void onPlaylistItemRemove(PlaylistAdapter adapter, int position);
         void onQuoteEdit(PlaylistAdapter adapter, int position);
         void onMakeQuotograph(PlaylistAdapter adapter, int position);
@@ -75,6 +79,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     List<PlaylistCategory> playlistCategories;
     List<PlaylistAuthor> playlistAuthors;
     List<PlaylistQuote> playlistQuotes;
+    boolean showSurvey;
+    int surveyOffset;
 
     public PlaylistAdapter() {
         this(null);
@@ -96,7 +102,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     }
 
     public Object getItem(int position) {
-        return playlistItems.get(position);
+        if (getItemViewType(position) == VIEW_TYPE_SURVEY) {
+            return null;
+        }
+        return playlistItems.get(position - surveyOffset);
     }
 
     public void insertItem(Object object) {
@@ -120,12 +129,12 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
     public void removeItem(Object item) {
         final int position = playlistItems.indexOf(item);
         if (position > -1) {
-            removeItem(position);
+            removeItem(position + surveyOffset);
         }
     }
 
     public void removeItem(int position) {
-        final Object remove = playlistItems.remove(position);
+        final Object remove = playlistItems.remove(position - surveyOffset);
         if (remove instanceof PlaylistCategory) {
             playlistCategories.remove(remove);
         } else if (remove instanceof PlaylistAuthor) {
@@ -136,32 +145,116 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
         notifyItemRemoved(position);
     }
 
-    @Override
-    public PlaylistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new PlaylistViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.playlist_item, null));
+    public void setShowSurvey(boolean showSurvey) {
+        if (this.showSurvey == showSurvey) {
+            return;
+        }
+        this.showSurvey = showSurvey;
+        surveyOffset = showSurvey ? 1 : 0;
+        if (showSurvey) {
+            notifyItemInserted(0);
+        } else {
+            notifyItemRemoved(0);
+        }
     }
 
     @Override
-    public void onBindViewHolder(PlaylistViewHolder holder, int position) {
+    public int getItemViewType(int position) {
+        return showSurvey && position == 0 ?
+                VIEW_TYPE_SURVEY : VIEW_TYPE_PLAYLIST;
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_SURVEY) {
+            return new SurveyPlaylistViewHolder(
+                    LayoutInflater.from(parent.getContext()).inflate(R.layout.survey_playlist_item, null));
+        } else {
+            return new PlaylistViewHolder(
+                    LayoutInflater.from(parent.getContext()).inflate(R.layout.playlist_item, null));
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (getItemViewType(position) == VIEW_TYPE_SURVEY) {
+            return;
+        }
+        PlaylistViewHolder playlistViewHolder = (PlaylistViewHolder) holder;
         final Object o = getItem(position);
         if (o instanceof PlaylistCategory) {
             PlaylistCategory playlistCategory = (PlaylistCategory) o;
-            holder.updateWithCategory(playlistCategory.category);
+            playlistViewHolder.updateWithCategory(playlistCategory.category);
         } else if (o instanceof PlaylistAuthor) {
             PlaylistAuthor playlistAuthor = (PlaylistAuthor) o;
-            holder.updateWithAuthor(playlistAuthor.author);
+            playlistViewHolder.updateWithAuthor(playlistAuthor.author);
         } else if (o instanceof PlaylistQuote) {
             PlaylistQuote playlistQuote = (PlaylistQuote) o;
-            holder.updateWithQuote(playlistQuote.quote);
+            playlistViewHolder.updateWithQuote(playlistQuote.quote);
         }
     }
 
     @Override
     public int getItemCount() {
-        return playlistCategories.size() + playlistAuthors.size() + playlistQuotes.size();
+        return playlistItems.size() + surveyOffset;
     }
 
-    class PlaylistViewHolder extends RecyclerView.ViewHolder implements AdapterView.OnItemClickListener {
+    public int getPlaylistItemCount() {
+        return playlistItems.size();
+    }
+
+    class SurveyPlaylistViewHolder
+            extends RecyclerView.ViewHolder
+            implements AdapterView.OnItemClickListener {
+
+        ListPopupWindow listPopupWindow;
+
+        public SurveyPlaylistViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+
+        @OnClick({R.id.iv_survey_playlist_item_more,
+                R.id.cv_survey_playlist_item_card})
+        void revealPopup2(View view) {
+            int popupWidth = view.getResources().getDimensionPixelSize(R.dimen.playlist_popup_width);
+            listPopupWindow = new ListPopupWindow(view.getContext());
+            listPopupWindow.setAnchorView(view);
+            listPopupWindow.setWidth(popupWidth);
+            listPopupWindow.setOnItemClickListener(this);
+            listPopupWindow.setModal(true);
+            String[] options = new String[]{
+                    view.getResources().getString(R.string.survey_okay),
+                    view.getResources().getString(R.string.survey_later),
+                    view.getResources().getString(R.string.survey_never)
+            };
+            listPopupWindow.setAdapter(new ArrayAdapter<>(view.getContext(),
+                    R.layout.support_simple_spinner_dropdown_item, android.R.id.text1, options));
+            listPopupWindow.show();
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            listPopupWindow.dismiss();
+            listPopupWindow = null;
+            if (!(view instanceof TextView)) {
+                return;
+            }
+            String selectedOption = ((TextView) view).getText().toString();
+            if (selectedOption.equalsIgnoreCase(view.getResources().getString(R.string.survey_never))) {
+                UserSurveyController.handleResponse(UserSurveyController.RESPONSE_NEVER);
+            } else if (selectedOption.equalsIgnoreCase(view.getResources().getString(R.string.survey_later))) {
+                UserSurveyController.handleResponse(UserSurveyController.RESPONSE_LATER);
+            } else if (selectedOption.equalsIgnoreCase(view.getResources().getString(R.string.survey_okay))) {
+                UserSurveyController.handleResponse(UserSurveyController.RESPONSE_OKAY);
+            }
+            setShowSurvey(false);
+        }
+    }
+
+    class PlaylistViewHolder
+            extends RecyclerView.ViewHolder
+            implements AdapterView.OnItemClickListener {
 
         Object data;
         @Bind(R.id.iv_playlist_item_icon) ImageView icon;
@@ -218,7 +311,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.Playli
             } else {
                 options = view.getResources().getStringArray(R.array.popup_playlist_options);
             }
-            listPopupWindow.setAdapter(new ArrayAdapter<>(view.getContext(), R.layout.support_simple_spinner_dropdown_item, android.R.id.text1, options));
+            listPopupWindow.setAdapter(new ArrayAdapter<>(view.getContext(),
+                    R.layout.support_simple_spinner_dropdown_item, android.R.id.text1, options));
             listPopupWindow.show();
         }
 

@@ -18,7 +18,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.percent.PercentFrameLayout;
 import android.support.percent.PercentRelativeLayout;
@@ -480,7 +479,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     Set<TutorialTooltips> visibleTips;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lwq_settings);
         ButterKnife.bind(this);
@@ -948,7 +947,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     void setupPlaylist() {
         playlistAdapter = new PlaylistAdapter(this);
         RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler_playlist);
-        recyclerView.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(false);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(playlistAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -1525,7 +1524,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onPlaylistItemRemove(PlaylistAdapter adapter, int position) {
-        if (adapter.getItemCount() == 1) {
+        if (adapter.getPlaylistItemCount() == 1) {
             Toast.makeText(this, "Your playlist may not be empty", Toast.LENGTH_LONG).show();
             return;
         }
@@ -1652,8 +1651,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // UserSurveyController Delegate
 
     @Override
-    public void addSurveyToPlaylist() {
-        // TODO
+    public void revealSurveyInPlaylist() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                playlistAdapter.setShowSurvey(true);
+            }
+        });
     }
 
 
