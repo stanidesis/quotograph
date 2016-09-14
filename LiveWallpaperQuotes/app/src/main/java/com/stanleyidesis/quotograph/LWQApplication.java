@@ -6,11 +6,17 @@ import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.orm.SugarApp;
 import com.stanleyidesis.quotograph.api.LWQError;
@@ -99,6 +105,7 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
     IabBroadcastReceiver iabBroadcastReceiver;
     Set<IabConst.Product> ownedProducts = new HashSet<>();
     Map<IabConst.Product, SkuDetails> productDetails = new HashMap<>();
+    FirebaseRemoteConfig firebaseRemoteConfig;
 
     @Override
     public void onCreate() {
@@ -112,6 +119,14 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         // Analytics
         getDefaultTracker().enableAdvertisingIdCollection(true);
         getDefaultTracker().enableAutoActivityTracking(true);
+
+        // Remote Config
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+        firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        firebaseRemoteConfig.setConfigSettings(configSettings);
+        firebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
 
         // Billing
         iabHelper = new IabHelper(this, IabLic.retrieveLic());
@@ -146,6 +161,7 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
     synchronized public Tracker getDefaultTracker() {
         if (tracker == null) {
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            analytics.setDryRun(BuildConfig.DEBUG);
             tracker = analytics.newTracker(R.xml.global_tracker);
         }
         return tracker;
@@ -181,6 +197,24 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
 
     public static IabHelper getIabHelper() {
         return get().iabHelper;
+    }
+
+    public static FirebaseRemoteConfig getRemoteConfig() {
+        return get().firebaseRemoteConfig;
+    }
+
+    public static void fetchRemoteConfig() {
+        get().firebaseRemoteConfig.fetch()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (!task.isSuccessful()) {
+                            // Ruh-roh
+                            return;
+                        }
+                        LWQApplication.get().firebaseRemoteConfig.activateFetched();
+                    }
+                });
     }
 
     public static boolean ownsFontAccess() {

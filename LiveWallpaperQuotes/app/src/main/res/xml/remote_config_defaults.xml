@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- START xml_defaults -->
+<defaultsMap>
+    <entry>
+        <key>survey_experiment</key>
+        <value>-1</value>
+    </entry>
+    <entry>
+        <key>survey_url</key>
+        <value>http://goo.gl/Jg9mnY</value>
+    </entry>
+    <entry>
+        <key>survey_delay_in_millis</key>
+        <value>10000</value>
+    </entry>
+    <entry>
+        <key>survey_interval_in_millis</key>
+        <value>259200000</value>
+    </entry>
+</defaultsMap>
+<!-- END xml_defaults -->

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="semi_transparent">#DD000000</color>
+    <color name="very_transparent">#44000000</color>
     <color name="circle_button">@color/palette_50</color>
 
     <color name="palette_50">#EDE7F6</color>

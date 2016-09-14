@@ -3,4 +3,5 @@
     <string name="action_change_wallpaper">com.stanleyidesis.quotograph.action.CHANGE_WALLPAPER</string>
     <string name="action_share">com.stanleyidesis.quotograph.action.SHARE</string>
     <string name="action_save">com.stanleyidesis.quotograph.action.SAVE</string>
+    <string name="action_survey_response">com.stanleyidesis.quotograph.action.SURVEY_RESPONSE</string>
 </resources>

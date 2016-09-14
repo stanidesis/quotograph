@@ -3,15 +3,14 @@ package com.stanleyidesis.quotograph.ui.activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.stanleyidesis.quotograph.R;
-import com.stanleyidesis.quotograph.ui.UIUtils;
+import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 import com.stanleyidesis.quotograph.ui.debug.DebuggableActivity;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import de.greenrobot.event.EventBus;
+import butterknife.OnClick;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -35,7 +34,7 @@ import de.greenrobot.event.EventBus;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQWallpaperActivity.java
+ * LWQSurveyActivity.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -44,62 +43,41 @@ import de.greenrobot.event.EventBus;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 09/06/2015
+ * Date: 09/12/2016
  */
-public abstract class LWQWallpaperActivity extends DebuggableActivity implements ActivityStateFlags {
+public class LWQSurveyActivity extends DebuggableActivity {
 
-    enum BackgroundWallpaperState {
-        CUSTOM(0f),
-        OBSCURED(.7f),
-        REVEALED(0f),
-        HIDDEN(1f);
-
-        float screenAlpha;
-
-        BackgroundWallpaperState(float screenAlpha) {
-            this.screenAlpha = screenAlpha;
-        }
-    }
-
-    @Bind(R.id.view_screen_lwq_wallpaper) View silkScreen;
-    BackgroundWallpaperState backgroundWallpaperState;
+    @Bind(R.id.rl_lwq_survey_popup)
+    View popup;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UIUtils.setupFullscreenIfPossible(this);
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
+        setContentView(R.layout.activity_survey);
         ButterKnife.bind(this);
-        EventBus.getDefault().register(this);
+    }
+
+    @OnClick({R.id.btn_lwq_survey_negative,
+            R.id.btn_lwq_survey_neutral,
+            R.id.btn_lwq_survey_positive})
+    void onClick(View button) {
+        int id = button.getId();
+        int which = 0;
+        if (button.getId() == R.id.btn_lwq_survey_neutral) {
+            which = 1;
+        } else if (button.getId() == R.id.btn_lwq_survey_positive) {
+            which = 2;
+        }
+        UserSurveyController.handleResponse(which);
+        finish();
+        overridePendingTransition(0, android.R.anim.fade_out);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
-    }
-
-    // Setup
-
-    void switchToState(BackgroundWallpaperState backgroundWallpaperState) {
-        silkScreen.setAlpha(backgroundWallpaperState.screenAlpha);
-        this.backgroundWallpaperState = backgroundWallpaperState;
-    }
-
-    long animateState(BackgroundWallpaperState backgroundWallpaperState) {
-        silkScreen.animate().alpha(backgroundWallpaperState.screenAlpha).setDuration(300l)
-                .setInterpolator(new AccelerateDecelerateInterpolator()).start();
-        this.backgroundWallpaperState = backgroundWallpaperState;
-        return 300l;
-    }
-
-    void setBackgroundAlpha(float alpha) {
-        silkScreen.setAlpha(alpha);
-        backgroundWallpaperState = BackgroundWallpaperState.CUSTOM;
+    public void onBackPressed() {
+        UserSurveyController.handleResponse(UserSurveyController.RESPONSE_LATER);
+        finish();
+        overridePendingTransition(0, android.R.anim.fade_out);
     }
 
 }

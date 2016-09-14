@@ -1,4 +1,4 @@
-package com.stanleyidesis.quotograph.api;
+package com.stanleyidesis.quotograph.api.task;
 
 import android.os.AsyncTask;
 
@@ -7,6 +7,8 @@ import com.orm.query.Select;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.api.Callback;
+import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Playlist;
 import com.stanleyidesis.quotograph.api.db.PlaylistCategory;
