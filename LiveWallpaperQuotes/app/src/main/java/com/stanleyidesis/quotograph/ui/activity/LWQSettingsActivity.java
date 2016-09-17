@@ -9,7 +9,6 @@ import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
@@ -36,7 +35,6 @@ import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -1146,7 +1144,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     @OnClick(R.id.btn_fab_screen_search) void performSearch() {
-        dismissKeyboard(editableQuery);
+        UIUtils.dismissKeyboard(this);
         changeState(stateSearchInProgress);
         final int itemCount = searchResultsAdapter.getItemCount();
         searchResultsAdapter.setSearchResults(new ArrayList<Object>());
@@ -1244,9 +1242,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         if (activityState == stateAddReveal
                 || activityState == stateAddEditQuote
                 || activityState == stateSearch) {
-            dismissKeyboard(editableAuthor);
-            dismissKeyboard(editableQuote);
-            dismissKeyboard(editableQuery);
+            UIUtils.dismissKeyboard(this);
             changeState(statePlaylist);
             // Log the view
             AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_PLAYLIST);
@@ -1260,7 +1256,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @OnClick(R.id.fab_lwq_search) void revealSearch() {
         if (activityState == stateSearch) {
             changeState(stateAddReveal);
-            dismissKeyboard(editableQuery);
+            UIUtils.dismissKeyboard(this);
             // Log the view
             AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_ADD);
         } else {
@@ -1492,10 +1488,32 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
-    void dismissKeyboard(View tokenOwner) {
-        // Dismiss the keyboard
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(tokenOwner.getWindowToken(), 0);
+    void addRemovePlaylistItem(Object item, boolean add) {
+        String analyticsLabel;
+        if (item instanceof PlaylistCategory) {
+            analyticsLabel = ((PlaylistCategory) item).category.name;
+        } else if (item instanceof PlaylistAuthor) {
+            analyticsLabel = ((PlaylistAuthor) item).author.name;
+        } else if (item instanceof PlaylistQuote) {
+            String quote = ((PlaylistQuote) item).quote.text;
+            analyticsLabel = quote.substring(0, Math.min(35, quote.length())) + "...";
+        } else {
+            return;
+        }
+        if (add) {
+            playlistAdapter.insertItem(item);
+        } else {
+            if (playlistAdapter.getPlaylistItemCount() == 1) {
+                Toast.makeText(this, "Your playlist may not be empty", Toast.LENGTH_LONG).show();
+                return;
+            }
+            playlistAdapter.removeItem(item);
+            ((SugarRecord) item).delete();
+        }
+        // Log it
+        AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_PLAYLIST,
+                add ? AnalyticsUtils.ACTION_ADDED : AnalyticsUtils.ACTION_REMOVED,
+                analyticsLabel);
     }
 
     // Event Handling
@@ -1581,14 +1599,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onPlaylistItemRemove(PlaylistAdapter adapter, int position) {
-        if (adapter.getPlaylistItemCount() == 1) {
-            Toast.makeText(this, "Your playlist may not be empty", Toast.LENGTH_LONG).show();
-            return;
-        }
-        final Object item = adapter.getItem(position);
-        SugarRecord record = (SugarRecord) item;
-        record.delete();
-        adapter.removeItem(position);
+        addRemovePlaylistItem(adapter.getItem(position), false);
     }
 
     @Override
@@ -1627,49 +1638,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onRemove(SearchResultsAdapter adapter, Object playlistItem) {
-        String analyticsLabel = null;
-        if (playlistItem instanceof PlaylistCategory) {
-            analyticsLabel = ((PlaylistCategory) playlistItem).category.name;
-            ((PlaylistCategory) playlistItem).delete();
-        } else if (playlistItem instanceof PlaylistAuthor) {
-            analyticsLabel = ((PlaylistAuthor) playlistItem).author.name;
-            ((PlaylistAuthor) playlistItem).delete();
-        } else if (playlistItem instanceof PlaylistQuote) {
-            String quote = ((PlaylistQuote) playlistItem).quote.text;
-            analyticsLabel = quote.substring(0, Math.min(35, quote.length() - 1)) + "...";
-            ((PlaylistQuote) playlistItem).delete();
-        }
-        playlistAdapter.removeItem(playlistItem);
-        AnalyticsUtils.trackEvent(
-                AnalyticsUtils.CATEGORY_PLAYLIST,
-                AnalyticsUtils.ACTION_REMOVED,
-                analyticsLabel
-        );
+        addRemovePlaylistItem(playlistItem, false);
     }
 
     @Override
     public Object onAdd(SearchResultsAdapter adapter, Object model) {
         SugarRecord playlistItem = null;
-        String analyticsLabel = null;
         if (model instanceof Category) {
             playlistItem = new PlaylistCategory(Playlist.active(), (Category) model);
-            analyticsLabel = ((Category) model).name;
         } else if (model instanceof Author) {
             playlistItem = new PlaylistAuthor(Playlist.active(), (Author) model);
-            analyticsLabel = ((Author) model).name;
         } else if (model instanceof Quote) {
             playlistItem = new PlaylistQuote(Playlist.active(), (Quote) model);
-            String quote = ((Quote) model).text;
-            analyticsLabel = quote.substring(0, Math.min(35, quote.length() - 1)) + "...";
         }
         if (playlistItem != null) {
             playlistItem.save();
-            playlistAdapter.insertItem(playlistItem);
-            AnalyticsUtils.trackEvent(
-                    AnalyticsUtils.CATEGORY_PLAYLIST,
-                    AnalyticsUtils.ACTION_ADDED,
-                    analyticsLabel
-            );
+            addRemovePlaylistItem(playlistItem, true);
         }
         return playlistItem;
     }
