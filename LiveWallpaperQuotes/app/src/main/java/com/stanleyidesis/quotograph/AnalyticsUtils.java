@@ -76,6 +76,7 @@ public class AnalyticsUtils {
 
     // Categories
     public static final String CATEGORY_TOOLTIPS = "tooltips";
+    public static final String CATEGORY_TEXT_INPUT = "text_input";
     public static final String CATEGORY_FTUE_TASK = "ftue_task";
     public static final String CATEGORY_QUOTE = "quote";
     public static final String CATEGORY_WALLPAPER = "wallpaper";
@@ -94,6 +95,9 @@ public class AnalyticsUtils {
     public static final String ACTION_RESPONSE_OKAY = "response_okay";
     public static final String ACTION_COMPLETED = "completed";
     public static final String ACTION_FAILED = "failed";
+    public static final String ACTION_CUT = "cut";
+    public static final String ACTION_COPY = "copy";
+    public static final String ACTION_PASTE = "paste";
     public static final String ACTION_CREATED = "created";
     public static final String ACTION_ADDED = "added";
     public static final String ACTION_SKIPPED = "skipped";

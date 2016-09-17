@@ -52,17 +52,18 @@
             android:layout_toStartOf="@+id/btn_fab_screen_search"
             app:hintAnimationEnabled="true">
 
-            <android.support.v7.widget.AppCompatAutoCompleteTextView
+            <com.stanleyidesis.quotograph.ui.view.CaptureMenuAutoCompleteTextView
                 style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Author"
                 android:id="@+id/actv_fab_screen_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Search for categories, authors, and quotes"
+                android:hint="@string/search_hint"
                 android:minWidth="150dp"
                 android:gravity="start|center_vertical"
                 android:singleLine="true"
                 android:textColor="@android:color/white"
-                android:imeOptions="actionSearch"/>
+                android:imeOptions="actionSearch"
+                android:contentDescription="Search Query"/>
 
         </android.support.design.widget.TextInputLayout>
 
