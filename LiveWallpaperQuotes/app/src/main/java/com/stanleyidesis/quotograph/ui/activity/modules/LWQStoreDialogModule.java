@@ -135,7 +135,6 @@ public class LWQStoreDialogModule implements Module,
 
     @Override
     public void purchaseProduct(IabConst.Product product) {
-        // TODO track?
         attemptedPurchase = product;
         LWQApplication.purchaseProduct(activity, product);
     }

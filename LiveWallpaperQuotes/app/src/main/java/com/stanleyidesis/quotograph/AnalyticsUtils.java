@@ -80,9 +80,7 @@ public class AnalyticsUtils {
     public static final String CATEGORY_FTUE_TASK = "ftue_task";
     public static final String CATEGORY_QUOTE = "quote";
     public static final String CATEGORY_WALLPAPER = "wallpaper";
-    public static final String CATEGORY_PLAYLIST_CATEGORY = "playlist_category";
-    public static final String CATEGORY_PLAYLIST_AUTHOR = "playlist_author";
-    public static final String CATEGORY_PLAYLIST_QUOTE = "playlist_quote";
+    public static final String CATEGORY_PLAYLIST = "playlist";
     public static final String CATEGORY_FONTS = "fonts";
     public static final String CATEGORY_SURVEY_NOTIF = "survey_notification";
     public static final String CATEGORY_SURVEY_PLAYLIST = "survey_playlist";

@@ -1627,56 +1627,47 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onRemove(SearchResultsAdapter adapter, Object playlistItem) {
+        String analyticsLabel = null;
         if (playlistItem instanceof PlaylistCategory) {
+            analyticsLabel = ((PlaylistCategory) playlistItem).category.name;
             ((PlaylistCategory) playlistItem).delete();
-            AnalyticsUtils.trackEvent(
-                    AnalyticsUtils.CATEGORY_PLAYLIST_CATEGORY,
-                    AnalyticsUtils.ACTION_REMOVED
-            );
         } else if (playlistItem instanceof PlaylistAuthor) {
+            analyticsLabel = ((PlaylistAuthor) playlistItem).author.name;
             ((PlaylistAuthor) playlistItem).delete();
-            AnalyticsUtils.trackEvent(
-                    AnalyticsUtils.CATEGORY_PLAYLIST_AUTHOR,
-                    AnalyticsUtils.ACTION_REMOVED
-            );
         } else if (playlistItem instanceof PlaylistQuote) {
+            analyticsLabel = ((PlaylistQuote) playlistItem).quote.text.substring(0, 35) + "...";
             ((PlaylistQuote) playlistItem).delete();
-            AnalyticsUtils.trackEvent(
-                    AnalyticsUtils.CATEGORY_PLAYLIST_QUOTE,
-                    AnalyticsUtils.ACTION_REMOVED
-            );
         }
         playlistAdapter.removeItem(playlistItem);
+        AnalyticsUtils.trackEvent(
+                AnalyticsUtils.CATEGORY_PLAYLIST,
+                AnalyticsUtils.ACTION_REMOVED,
+                analyticsLabel
+        );
     }
 
     @Override
     public Object onAdd(SearchResultsAdapter adapter, Object model) {
         SugarRecord playlistItem = null;
+        String analyticsLabel = null;
         if (model instanceof Category) {
             playlistItem = new PlaylistCategory(Playlist.active(), (Category) model);
-            AnalyticsUtils.trackEvent(
-                    AnalyticsUtils.CATEGORY_PLAYLIST_CATEGORY,
-                    AnalyticsUtils.ACTION_ADDED,
-                    ((Category) model).name
-            );
+            analyticsLabel = ((Category) model).name;
         } else if (model instanceof Author) {
             playlistItem = new PlaylistAuthor(Playlist.active(), (Author) model);
-            AnalyticsUtils.trackEvent(
-                    AnalyticsUtils.CATEGORY_PLAYLIST_AUTHOR,
-                    AnalyticsUtils.ACTION_ADDED,
-                    ((Author) model).name
-            );
+            analyticsLabel = ((Author) model).name;
         } else if (model instanceof Quote) {
             playlistItem = new PlaylistQuote(Playlist.active(), (Quote) model);
-            AnalyticsUtils.trackEvent(
-                    AnalyticsUtils.CATEGORY_PLAYLIST_QUOTE,
-                    AnalyticsUtils.ACTION_ADDED,
-                    ((Quote) model).text
-            );
+            analyticsLabel = ((Quote) model).text.substring(0, 35) + "...";
         }
         if (playlistItem != null) {
             playlistItem.save();
             playlistAdapter.insertItem(playlistItem);
+            AnalyticsUtils.trackEvent(
+                    AnalyticsUtils.CATEGORY_PLAYLIST,
+                    AnalyticsUtils.ACTION_ADDED,
+                    analyticsLabel
+            );
         }
         return playlistItem;
     }
