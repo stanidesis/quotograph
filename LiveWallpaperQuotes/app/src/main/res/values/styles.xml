@@ -100,7 +100,7 @@
         <item name="android:windowContentOverlay">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowIsTranslucent">true</item>
-        <!-- Differs on v19+ -->
+        <!-- Differs on v19+ and v21+-->
     </style>
 
 </resources>

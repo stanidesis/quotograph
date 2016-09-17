@@ -112,7 +112,7 @@
     <string name="tt_skip_quotograph">Don\'t like this Quotagraph? Skip it</string>
     <string name="tt_add_quotes">Add more quotes</string>
     <string name="tt_search_for_quotes">Search for quotes, authors, and categories</string>
-    <string name="tt_write_quotes">Or type in your favorites</string>
+    <string name="tt_write_quotes">Or create your own</string>
     <string name="tt_exit_add">Tap again to exit</string>
     <string name="tt_setting_info">Touch any setting to learn more</string>
     <string name="tt_setting_blur">Blurry images make reading the quote even easier. Blurring requires extra memory</string>

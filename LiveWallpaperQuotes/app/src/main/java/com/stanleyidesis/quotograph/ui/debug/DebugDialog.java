@@ -11,6 +11,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.RemoteConfigConst;
+import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
 import com.stanleyidesis.quotograph.ui.activity.LWQSurveyActivity;
 import com.stanleyidesis.quotograph.ui.dialog.SurveyDialog;
 
@@ -57,7 +58,9 @@ public class DebugDialog {
                 "Show Survey Dialog",
                 "Show Survey Popup",
                 "Print Survey Data to Logs",
-                "Fetch RemoteConfig"
+                "Fetch RemoteConfig",
+                "Trigger Refresh Alarm",
+                "Reset Alarm"
         };
         MaterialDialog.ListCallback listCallback = new MaterialDialog.ListCallback() {
             @Override
@@ -94,6 +97,13 @@ public class DebugDialog {
                         break;
                     case 7: // Fetch Remote Config
                         LWQApplication.fetchRemoteConfig();
+                        break;
+                    case 8: // Trigger Refresh Alarm
+                        LWQAlarmController.cancelRepeatingAlarm();
+                        LWQAlarmController.setTestRepeatingAlarm();
+                        break;
+                    case 9: // Reset Alarm
+                        LWQAlarmController.resetAlarm();
                 }
             }
         };

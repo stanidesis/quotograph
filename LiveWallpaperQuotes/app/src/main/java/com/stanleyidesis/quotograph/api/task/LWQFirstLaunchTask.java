@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import com.orm.SugarRecord;
 import com.orm.query.Select;
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -56,6 +57,8 @@ import de.greenrobot.event.EventBus;
  */
 public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
 
+    long startTime;
+
     Callback<List<String>> fetchImageCategoriesCallback = new Callback<List<String>>() {
         @Override
         public void onSuccess(List<String> strings) {
@@ -68,6 +71,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
 
         @Override
         public void onError(LWQError error) {
+            logErrorToAnalytics(error.getErrorMessage());
             EventBus.getDefault().post(FirstLaunchTaskEvent.failed(error));
         }
     };
@@ -94,12 +98,17 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
             }
             new PlaylistCategory(defaultPlaylist, initialCategory).save();
 
+            // Log category count
+            LWQApplication.getLogger().logCategoryCount(1);
+
             publishProgress("Making your first Quotograph…");
             LWQApplication.getWallpaperController().generateNewWallpaper();
         }
 
         @Override
         public void onError(LWQError error) {
+            // Log the failure
+            logErrorToAnalytics(error.getErrorMessage());
             EventBus.getDefault().post(FirstLaunchTaskEvent.failed(error));
         }
     };
@@ -108,6 +117,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
     protected void onPreExecute() {
         super.onPreExecute();
         EventBus.getDefault().register(this);
+        startTime = System.currentTimeMillis();
     }
 
     @Override
@@ -137,6 +147,14 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         super.finalize();
     }
 
+    void logErrorToAnalytics(String label) {
+        AnalyticsUtils.trackEvent(
+                AnalyticsUtils.CATEGORY_FTUE_TASK,
+                AnalyticsUtils.ACTION_FAILED,
+                label
+        );
+    }
+
     void publishProgress(int stringId) {
         publishProgress(LWQApplication.get().getString(stringId));
     }
@@ -148,10 +166,18 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
             EventBus.getDefault().post(FirstLaunchTaskEvent.failed(wallpaperEvent.getError()));
+            // Log failure
+            logErrorToAnalytics(wallpaperEvent.getErrorMessage());
         } else if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
             publishProgress("Setup complete!");
             LWQPreferences.setFirstLaunch(false);
             LWQApplication.setComponentsEnabled(true);
+
+            // Log success
+            AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_FTUE_TASK,
+                    AnalyticsUtils.ACTION_COMPLETED,
+                    (int) (System.currentTimeMillis() - startTime));
+
             // After saving their first Quotograph, we have breathing room to cache some images
             LWQApplication.cacheRemoteImageAssets();
             EventBus.getDefault().post(FirstLaunchTaskEvent.success());

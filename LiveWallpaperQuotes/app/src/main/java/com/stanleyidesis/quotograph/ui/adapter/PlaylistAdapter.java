@@ -99,6 +99,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         playlistItems.addAll(playlistCategories);
         playlistItems.addAll(playlistAuthors);
         playlistItems.addAll(playlistQuotes);
+
+        // Log user data
+        logUserData();
     }
 
     public Object getItem(int position) {
@@ -124,6 +127,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         playlistItems.addAll(playlistAuthors);
         playlistItems.addAll(playlistQuotes);
         notifyItemInserted(playlistItems.indexOf(object));
+
+        // Update user data
+        logUserData();
     }
 
     public void removeItem(Object item) {
@@ -143,6 +149,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             playlistQuotes.remove(remove);
         }
         notifyItemRemoved(position);
+
+        // Update user data
+        logUserData();
     }
 
     public void setShowSurvey(boolean showSurvey) {
@@ -201,6 +210,27 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public int getPlaylistItemCount() {
         return playlistItems.size();
+    }
+
+    public int getCategoryCount() {
+        return playlistCategories.size();
+    }
+
+    public int getAuthorCount() {
+        return playlistAuthors.size();
+    }
+
+    public int getQuoteCount() {
+        return playlistQuotes.size();
+    }
+
+    public void logUserData() {
+        LWQApplication.getLogger()
+                .logCategoryCount(getCategoryCount());
+        LWQApplication.getLogger()
+                .logAuthorCount(getAuthorCount());
+        LWQApplication.getLogger()
+                .logQuoteCount(getQuoteCount());
     }
 
     class SurveyPlaylistViewHolder

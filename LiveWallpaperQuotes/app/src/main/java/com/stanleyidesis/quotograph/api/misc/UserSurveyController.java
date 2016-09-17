@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.RemoteConfigConst;
@@ -129,11 +130,14 @@ public class UserSurveyController {
                 switch ((int) getVariant()) {
                     case SURVEY_VARIANT_NOTIFICATION:
                         LWQApplication.getNotificationController().postSurveyNotification();
+                        AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_SURVEY_NOTIF);
                         break;
                     case SURVEY_VARIANT_DIALOG:
                         SurveyDialog.showDialog(activity);
+                        AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_SURVEY_DIALOG);
                         break;
                     case SURVEY_VARIANT_PLAYLIST:
+                        AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_SURVEY_PLAYLIST);
                         activity.revealSurveyInPlaylist();
                         break;
                     case SURVEY_VARIANT_POPUP:
@@ -150,6 +154,20 @@ public class UserSurveyController {
                 .getLong(RemoteConfigConst.SURVEY_EXPERIMENT);
     }
 
+    static String getVariantCategory(long variant) {
+        if (0L == variant) {
+            return AnalyticsUtils.CATEGORY_SURVEY_NOTIF;
+        } else if (1L == variant) {
+            return AnalyticsUtils.CATEGORY_SURVEY_DIALOG;
+        } else if (2L == variant) {
+            return AnalyticsUtils.CATEGORY_SURVEY_PLAYLIST;
+        } else if (3L == variant) {
+            return AnalyticsUtils.CATEGORY_SURVEY_POPUP;
+        } else {
+            return AnalyticsUtils.CATEGORY_SURVEY_NONE;
+        }
+    }
+
     static long getDelay() {
         return LWQApplication.getRemoteConfig()
                 .getLong(RemoteConfigConst.SURVEY_DELAY_IN_MILLIS);
@@ -163,8 +181,13 @@ public class UserSurveyController {
      * @param which
      */
     public static void handleResponse(int which) {
-        // TODO analytics, record response
         LWQPreferences.setSurveyResponse(which);
+        AnalyticsUtils.trackEvent(
+                getVariantCategory(getVariant()),
+                which == RESPONSE_NEVER ? AnalyticsUtils.ACTION_RESPONSE_NEVER :
+                        which == RESPONSE_LATER ? AnalyticsUtils.ACTION_RESPONSE_LATER :
+                                AnalyticsUtils.ACTION_RESPONSE_OKAY
+        );
         if (which == RESPONSE_NEVER || which == RESPONSE_LATER) {
             return;
         }

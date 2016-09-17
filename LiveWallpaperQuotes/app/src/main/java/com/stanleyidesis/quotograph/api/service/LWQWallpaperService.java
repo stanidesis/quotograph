@@ -140,6 +140,7 @@ public class LWQWallpaperService extends WallpaperService {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+            // TODO analytics and hard-code the Intent to test for speed
             if (LWQPreferences.isDoubleTapEnabled()) {
                 if (launchIntent == null) {
                     final PackageManager packageManager = getPackageManager();

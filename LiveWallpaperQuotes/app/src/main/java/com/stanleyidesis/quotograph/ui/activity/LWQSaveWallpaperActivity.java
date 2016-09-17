@@ -1,17 +1,14 @@
 package com.stanleyidesis.quotograph.ui.activity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.event.ImageSaveEvent;
 import com.stanleyidesis.quotograph.ui.UIUtils;
@@ -48,8 +45,9 @@ import de.greenrobot.event.EventBus;
  *
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
+ *
  */
-public class LWQSaveWallpaperActivity extends AppCompatActivity {
+public class LWQSaveWallpaperActivity extends LWQFirebaseActivity {
 
     public static final int RESULT_CODE_SUCCESS = 0;
     public static final int RESULT_CODE_FAILURE = 1;
@@ -59,6 +57,17 @@ public class LWQSaveWallpaperActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         UIUtils.setupFullscreenIfPossible(this);
+        // Log the view
+        AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_SAVE_QUOTOGRAPH);
+        // Log where the save came from
+        boolean savedFromNotif =
+                AnalyticsUtils.URI_SAVE_SOURCE_NOTIFICATION
+                        .equalsIgnoreCase(getIntent().getDataString());
+        AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
+                AnalyticsUtils.ACTION_SAVED,
+                savedFromNotif ? AnalyticsUtils.LABEL_FROM_NOTIF :
+                        AnalyticsUtils.LABEL_IN_APP
+        );
     }
 
     @Override
@@ -91,6 +100,7 @@ public class LWQSaveWallpaperActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.write_external_permission_denied_toast, Toast.LENGTH_LONG).show();
             setResult(RESULT_CODE_FAILURE);
             finish();
+            overridePendingTransition(0, android.R.anim.fade_out);
         }
     }
 
@@ -108,6 +118,7 @@ public class LWQSaveWallpaperActivity extends AppCompatActivity {
             setResult(RESULT_CODE_SUCCESS);
         }
         finish();
+        overridePendingTransition(0, android.R.anim.fade_out);
     }
 
 

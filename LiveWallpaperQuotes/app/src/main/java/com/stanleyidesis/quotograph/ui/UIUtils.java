@@ -140,6 +140,14 @@ public class UIUtils {
         }
     }
 
+    public static void revealKeyboard(View editText) {
+        editText.setFocusableInTouchMode(true);
+        editText.requestFocus();
+        InputMethodManager imm = (InputMethodManager) LWQApplication.get()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+    }
+
     public static void presentDialog(Activity activity, Integer titleIdRes, Integer messageIdRes,
                                      Integer positiveButtonTextRes, Integer negativeButtonTextRes,
                                      DialogInterface.OnClickListener positiveOnClickListener,

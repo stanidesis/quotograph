@@ -1,12 +1,8 @@
 package com.stanleyidesis.quotograph;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
-import com.google.android.gms.analytics.ecommerce.Product;
-import com.google.android.gms.analytics.ecommerce.ProductAction;
-import com.stanleyidesis.quotograph.billing.util.IabResult;
-import com.stanleyidesis.quotograph.billing.util.Purchase;
-import com.stanleyidesis.quotograph.billing.util.SkuDetails;
+import android.os.Bundle;
+
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -43,108 +39,128 @@ import com.stanleyidesis.quotograph.billing.util.SkuDetails;
  */
 public class AnalyticsUtils {
 
-    private static void run(Runnable runnable) {
-        new Thread(runnable).start();
+    public static final String PARAM_SCREEN_NAME = "screenName";
+
+    // Tutorial
+    public static final String SCREEN_TUTORIAL_1 = "tutorial_page_1";
+    public static final String SCREEN_TUTORIAL_2 = "tutorial_page_2";
+    public static final String SCREEN_TUTORIAL_3 = "tutorial_page_3";
+    public static final String SCREEN_TUTORIAL_4 = "tutorial_page_4";
+    public static final String SCREEN_TUTORIAL_5 = "tutorial_page_5";
+    public static final String [] SCREEN_TUTORIALS = {
+            SCREEN_TUTORIAL_1,
+            SCREEN_TUTORIAL_2,
+            SCREEN_TUTORIAL_3,
+            SCREEN_TUTORIAL_4,
+            SCREEN_TUTORIAL_5
+    };
+    // Main Views
+    public static final String SCREEN_WALLPAPER_PREVIEW = "wallpaper_preview";
+    public static final String SCREEN_PLAYLIST = "playlist";
+    public static final String SCREEN_SETTINGS = "settings";
+    // Dialogs
+    public static final String SCREEN_STORE = "store";
+    public static final String SCREEN_FONTS = "fonts";
+    public static final String SCREEN_IMAGES = "images";
+    public static final String SCREEN_WHATS_NEW = "whats_new";
+    // Add View
+    public static final String SCREEN_ADD = "add";
+    public static final String SCREEN_ADD_QUOTE = "add_qoute";
+    public static final String SCREEN_ADD_SEARCH = "add_search";
+    // Surveys
+    public static final String SCREEN_SURVEY_POPUP = "survey_popup";
+    public static final String SCREEN_SURVEY_DIALOG = "survey_dialog";
+    public static final String SCREEN_SURVEY_NOTIF = "survey_notif";
+    public static final String SCREEN_SURVEY_PLAYLIST = "survey_playlist";
+    // Misc
+    public static final String SCREEN_SAVE_QUOTOGRAPH = "save_quotograph";
+    public static final String SCREEN_CUSTOM_PHOTOS = "add_custom_photos";
+
+    // Categories
+    public static final String CATEGORY_TOOLTIPS = "tooltips";
+    public static final String CATEGORY_FTUE_TASK = "ftue_task";
+    public static final String CATEGORY_QUOTE = "quote";
+    public static final String CATEGORY_WALLPAPER = "wallpaper";
+    public static final String CATEGORY_PLAYLIST_CATEGORY = "playlist_category";
+    public static final String CATEGORY_PLAYLIST_AUTHOR = "playlist_author";
+    public static final String CATEGORY_PLAYLIST_QUOTE = "playlist_quote";
+    public static final String CATEGORY_FONTS = "fonts";
+    public static final String CATEGORY_SURVEY_NOTIF = "survey_notification";
+    public static final String CATEGORY_SURVEY_PLAYLIST = "survey_playlist";
+    public static final String CATEGORY_SURVEY_POPUP = "survey_popup";
+    public static final String CATEGORY_SURVEY_DIALOG = "survey_dialog";
+    public static final String CATEGORY_SURVEY_NONE = "survey_none";
+    // Actions
+    public static final String ACTION_RESPONSE_NEVER = "response_never";
+    public static final String ACTION_RESPONSE_LATER = "response_later";
+    public static final String ACTION_RESPONSE_OKAY = "response_okay";
+    public static final String ACTION_COMPLETED = "completed";
+    public static final String ACTION_FAILED = "failed";
+    public static final String ACTION_CREATED = "created";
+    public static final String ACTION_ADDED = "added";
+    public static final String ACTION_SKIPPED = "skipped";
+    public static final String ACTION_SAVED = "saved";
+    public static final String ACTION_SHARED = "shared";
+    public static final String ACTION_EDITED = "edited";
+    public static final String ACTION_REMOVED = "removed";
+    public static final String ACTION_STARTED = "started";
+    public static final String ACTION_MANUALLY_GEN = "manually_generated";
+    public static final String ACTION_AUTOMATICALLY_GEN = "automatically_generated";
+
+    // Labels?
+    public static final String LABEL_PLAYLIST = "playlist";
+    public static final String LABEL_ALARM = "alarm";
+    public static final String LABEL_IN_APP = "in_app";
+    public static final String LABEL_FROM_NOTIF = "from_notif";
+
+    public static final String URI_CHANGE_SOURCE_ALARM = "alarm";
+    public static final String URI_CHANGE_SOURCE_NOTIFICATION = "notif";
+    public static final String URI_SAVE_SOURCE_NOTIFICATION = "save_from_notif";
+    public static final String URI_SHARE_SOURCE_NOTIFICATION = "share_from_notif";
+
+
+    public static void trackShare(String category, String label) {
+        Bundle bundle = AnalyticsUtils.buildBundle(
+                FirebaseAnalytics.Param.CONTENT_TYPE, category);
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, label);
+        LWQApplication.getAnalytics().logEvent(FirebaseAnalytics.Event.SHARE, bundle);
+        // Double log it for GA
+        trackEvent(category, ACTION_SHARED, label);
     }
 
-    public static Product generateProduct(IabConst.Product iabProduct) {
-        SkuDetails productDetails = LWQApplication.getProductDetails(iabProduct);
-        Product product = new Product()
-                .setId(productDetails.getSku())
-                .setName(productDetails.getTitle())
-                .setCategory(productDetails.getType())
-                .setPrice(productDetails.getPriceAmountMicros() / 100)
-                .setPosition(iabProduct.ordinal());
-        return product;
+    public static void trackScreenView(String screenName) {
+        LWQApplication.getAnalytics().
+                logEvent(FirebaseAnalytics.Event.VIEW_ITEM,
+                        buildBundle(PARAM_SCREEN_NAME, screenName));
     }
 
-    public static void trackAttemptedAccess(final IabConst.Product iabProduct, final String screenName) {
-        run(new Runnable() {
-            @Override
-            public void run() {
-                Product product = generateProduct(iabProduct);
-                HitBuilders.ScreenViewBuilder builder = new HitBuilders.ScreenViewBuilder()
-                        .addImpression(product, "Attempted Access")
-                        .addProduct(product);
-                Tracker defaultTracker = LWQApplication.get().getDefaultTracker();
-                defaultTracker.set("&cu",
-                        LWQApplication.getProductDetails(iabProduct).getPriceCurrencyCode());
-                defaultTracker.setScreenName(screenName);
-                defaultTracker.send(builder.build());
-            }
-        });
+    public static void trackEvent(String category, String action) {
+        trackEvent(category, action, null, null);
+    }
+    public static void trackEvent(String category, String action, String label) {
+        trackEvent(category, action, label, null);
     }
 
-    public static void trackTappedProduct(final IabConst.Product iabProduct) {
-        run(new Runnable() {
-            @Override
-            public void run() {
-                Product product = generateProduct(iabProduct);
-                ProductAction productAction = new ProductAction(ProductAction.ACTION_DETAIL)
-                        .setCheckoutStep(1)
-                        .setProductActionList("Quotograph Store");
-                HitBuilders.ScreenViewBuilder builder = new HitBuilders.ScreenViewBuilder()
-                        .addProduct(product)
-                        .setProductAction(productAction);
-                Tracker defaultTracker = LWQApplication.get().getDefaultTracker();
-                defaultTracker.set("&cu",
-                        LWQApplication.getProductDetails(iabProduct).getPriceCurrencyCode());
-                defaultTracker.setScreenName("quotograph_store");
-                defaultTracker.send(builder.build());
-            }
-        });
+    public static void trackEvent(String category, String action, Integer value) {
+        trackEvent(category, action, null, value);
     }
 
-    public static void trackFailedPurchase(final IabConst.Product iabProduct) {
-        run(new Runnable() {
-            @Override
-            public void run() {
-                Product product = generateProduct(iabProduct);
-                SkuDetails skuDetails = LWQApplication.getProductDetails(iabProduct);
-                ProductAction productAction =
-                        new ProductAction(ProductAction.ACTION_CHECKOUT)
-                                .setCheckoutStep(2)
-                                .setTransactionAffiliation("Google Play Store")
-                                .setTransactionRevenue(skuDetails.getPriceAmountMicros() / 100)
-                                .setCheckoutOptions("checkout failed");
-                HitBuilders.ScreenViewBuilder builder = new HitBuilders.ScreenViewBuilder()
-                        .addProduct(product)
-                        .setProductAction(productAction);
-                Tracker defaultTracker = LWQApplication.get().getDefaultTracker();
-                defaultTracker.set("&cu", skuDetails.getPriceCurrencyCode());
-                defaultTracker.setScreenName("transaction");
-                defaultTracker.send(builder.build());
-            }
-        });
+    public static void trackEvent(String category, String action, String label, Integer value) {
+        Bundle bundle = buildBundle(FirebaseAnalytics.Param.CONTENT_TYPE, category);
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, action);
+        if (label != null) {
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, label);
+        }
+        if (value != null) {
+            bundle.putInt(FirebaseAnalytics.Param.VALUE, value);
+        }
+        LWQApplication.getAnalytics().logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
-    public static void trackProductPurchased(final IabResult result, final Purchase info) {
-        run(new Runnable() {
-            @Override
-            public void run() {
-                IabConst.Product purchased = null;
-                for (IabConst.Product product : IabConst.Product.values()) {
-                    if (product.sku.equalsIgnoreCase(info.getSku())) {
-                        purchased = product;
-                        break;
-                    }
-                }
-                SkuDetails skuDetails = LWQApplication.getProductDetails(purchased);
-                Product product = generateProduct(purchased);
-                ProductAction productAction =
-                        new ProductAction(ProductAction.ACTION_CHECKOUT)
-                                .setCheckoutStep(2)
-                                .setTransactionAffiliation("Google Play Store")
-                                .setTransactionRevenue(skuDetails.getPriceAmountMicros() / 100)
-                                .setTransactionId(info.getOrderId());
-                HitBuilders.ScreenViewBuilder builder = new HitBuilders.ScreenViewBuilder()
-                        .addProduct(product)
-                        .setProductAction(productAction);
-                Tracker defaultTracker = LWQApplication.get().getDefaultTracker();
-                defaultTracker.set("&cu", skuDetails.getPriceCurrencyCode());
-                defaultTracker.setScreenName("transaction");
-                defaultTracker.send(builder.build());
-            }
-        });
+    public static Bundle buildBundle(String key, String value) {
+        Bundle bundle = new Bundle();
+        bundle.putString(key, value);
+        return bundle;
     }
+
 }

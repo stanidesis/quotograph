@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 import com.stanleyidesis.quotograph.ui.debug.DebuggableActivity;
@@ -50,6 +51,8 @@ public class LWQSurveyActivity extends DebuggableActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey);
+        // Track screen
+        AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_SURVEY_POPUP);
         ButterKnife.bind(this);
     }
 
