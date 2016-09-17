@@ -17,5 +17,9 @@
         <key>survey_interval_in_millis</key>
         <value>259200000</value>
     </entry>
+    <entry>
+        <key>firebase_analytics</key>
+        <value>on</value>
+    </entry>
 </defaultsMap>
 <!-- END xml_defaults -->

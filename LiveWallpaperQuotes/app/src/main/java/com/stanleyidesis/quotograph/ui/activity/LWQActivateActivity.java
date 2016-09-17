@@ -12,7 +12,6 @@ import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -21,14 +20,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
-import com.stanleyidesis.quotograph.api.task.LWQFirstLaunchTask;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskEvent;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskUpdate;
 import com.stanleyidesis.quotograph.api.event.NetworkConnectivityEvent;
 import com.stanleyidesis.quotograph.api.service.LWQWallpaperService;
+import com.stanleyidesis.quotograph.api.task.LWQFirstLaunchTask;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ import de.greenrobot.event.EventBus;
  *
  * Date: 09/06/2015
  */
-public class LWQActivateActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
+public class LWQActivateActivity extends LWQFirebaseActivity implements ViewPager.OnPageChangeListener {
 
     // First run check
     static boolean RUN_ONCE = true;
@@ -122,9 +123,9 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
 
     Snackbar activeSnackbar;
     FirstLaunchTaskUpdate latestFirstLaunchTaskUpdate;
-    int wallpaperTop = -1;
     boolean firstLaunchTaskCompleted = false;
     LWQFirstLaunchTask firstLaunchTask;
+    boolean trackInitialPageView = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,9 +174,19 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     @Override
     protected void onResume() {
         super.onResume();
-        if (requiresActivation() && firstLaunchTaskCompleted && RUN_ONCE) {
+        if (!requiresActivation()) {
+            startActivity(new Intent(this, LWQSettingsActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            finish();
+        } else if (firstLaunchTaskCompleted && RUN_ONCE) {
             RUN_ONCE = false;
             activate();
+        } else if (trackInitialPageView) {
+            trackInitialPageView = false;
+            // Log the beginning of the tutorial
+            getFirebaseAnalytics().logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN, null);
+            // Log the first view
+            AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_TUTORIAL_1);
         }
     }
 
@@ -239,6 +250,8 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
 
     @Override
     public void onPageSelected(int position) {
+        // Log screen view
+        AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_TUTORIALS[position]);
         setIndicator(position);
         if (position == viewPages.size() - 1) {
             activePageFiveView.setEnabled(firstLaunchTaskCompleted);
@@ -281,6 +294,9 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
                         Toast.LENGTH_LONG).show();
             }
         }
+        // Log tutorial as completed
+        getFirebaseAnalytics().
+                logEvent(FirebaseAnalytics.Event.TUTORIAL_COMPLETE, null);
     }
 
     Snackbar build(String string) {
@@ -443,16 +459,10 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     }
 
     boolean requiresActivation() {
-        if (LWQApplication.isWallpaperActivated()) {
-            startActivity(new Intent(this, LWQSettingsActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            finish();
-            return false;
-        }
-        return true;
+        return !LWQApplication.isWallpaperActivated();
     }
 
-    void setIndicator(int index){
+    void setIndicator(int index) {
         if (index < Pages.values().length) {
             for(int i = 0 ; i < Pages.values().length; i++){
                 indicators.getChildAt(i).setSelected(i == index);

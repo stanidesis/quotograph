@@ -1,6 +1,10 @@
-package com.stanleyidesis.quotograph.api.controller;
+package com.stanleyidesis.quotograph.ui.activity;
 
-import com.stanleyidesis.quotograph.api.LWQError;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -24,7 +28,7 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQLogger.java
+ * LWQFirebaseActivity.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -33,26 +37,26 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 02/21/2016
+ * Date: 09/14/2016
  */
-public interface LWQLogger {
-    void logWallpaperCount(long count);
+public abstract class LWQFirebaseActivity extends AppCompatActivity {
 
-    void logWallpaperRetrievalState(LWQWallpaperController.RetrievalState retrievalState);
+    private FirebaseAnalytics firebaseAnalytics;
 
-    void logWallpaperActive(boolean active);
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+    }
 
-    void logBlurLevel(int blur);
+    protected final FirebaseAnalytics getFirebaseAnalytics() {
+        return firebaseAnalytics;
+    }
 
-    void logDimLevel(int dim);
+    protected final Bundle bundleFrom(String paramKey, String parameter) {
+        Bundle bundle = new Bundle();
+        bundle.putString(paramKey, parameter);
+        return bundle;
+    }
 
-    void logRefreshRate(String refreshRateString);
-
-    void logCategoryCount(int count);
-
-    void logAuthorCount(int count);
-
-    void logQuoteCount(int count);
-
-    void logError(LWQError error);
 }

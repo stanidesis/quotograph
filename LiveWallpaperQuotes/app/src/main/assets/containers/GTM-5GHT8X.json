@@ -1,0 +1,132 @@
+{
+
+"fingerprint":"MQ$0",
+
+"resource": {
+  "version":"1",
+  "macros":[
+    {
+      "function":"__e",
+      "instance_name":"Event Name",
+      "vendor_template_version":"1"
+    },
+    {
+      "function":"__md",
+      "instance_name":"Event Label",
+      "vendor_template_version":"1",
+      "vtp_setDefaultValue":true,
+      "vtp_viewItemParam":"item_name",
+      "vtp_defaultValue":"not set",
+      "vtp_suggestedEvent":"view_item",
+      "vtp_eventType":"SUGGESTED"
+    },
+    {
+      "function":"__c",
+      "instance_name":"Google Analytics Tracking Id",
+      "vendor_template_version":"1",
+      "vtp_value":"UA-37480432-5"
+    },
+    {
+      "function":"__md",
+      "instance_name":"Event Value",
+      "vendor_template_version":"1",
+      "vtp_setDefaultValue":false,
+      "vtp_addToCartParam":"value",
+      "vtp_suggestedEvent":"add_to_cart",
+      "vtp_eventType":"SUGGESTED"
+    },
+    {
+      "function":"__md",
+      "instance_name":"Event Category",
+      "vendor_template_version":"1",
+      "vtp_setDefaultValue":false,
+      "vtp_suggestedEvent":"select_content",
+      "vtp_eventType":"SUGGESTED",
+      "vtp_selectContentParam":"content_type"
+    },
+    {
+      "function":"__md",
+      "instance_name":"Event Action",
+      "vendor_template_version":"1",
+      "vtp_setDefaultValue":false,
+      "vtp_suggestedEvent":"select_content",
+      "vtp_eventType":"SUGGESTED",
+      "vtp_selectContentParam":"item_id"
+    },
+    {
+      "function":"__ai",
+      "instance_name":"App ID",
+      "vendor_template_version":"1"
+    },
+    {
+      "function":"__an",
+      "instance_name":"App Name",
+      "vendor_template_version":"1"
+    },
+    {
+      "function":"__av",
+      "instance_name":"App Version Code",
+      "vendor_template_version":"1"
+    }
+  ],
+  "tags":[
+    {
+      "function":"__ua",
+      "instance_name":"Screen View Tracking",
+      "once_per_event":true,
+      "vendor_template_version":"1",
+      "vtp_fieldsToSet":["list",["map","fieldName","screenName","value",["macro",1]]],
+      "vtp_trackType":"TRACK_SCREENVIEW",
+      "vtp_collectAdid":false,
+      "vtp_trackingId":["macro",2],
+      "vtp_enableUaRlsa":false,
+      "vtp_enableUseInternalVersion":false,
+      "vtp_enableFirebaseCampaignData":false,
+      "tag_id":1
+    },
+    {
+      "function":"__ua",
+      "instance_name":"Event Tracking",
+      "once_per_event":true,
+      "vendor_template_version":"1",
+      "vtp_nonInteraction":false,
+      "vtp_eventValue":["macro",3],
+      "vtp_eventCategory":["macro",4],
+      "vtp_trackType":"TRACK_EVENT",
+      "vtp_collectAdid":false,
+      "vtp_eventAction":["macro",5],
+      "vtp_eventLabel":["macro",1],
+      "vtp_trackingId":["macro",2],
+      "vtp_enableUaRlsa":false,
+      "vtp_enableUseInternalVersion":false,
+      "vtp_enableFirebaseCampaignData":false,
+      "tag_id":2
+    }
+  ],
+  "predicates":[
+    {
+      "function":"_eq",
+      "arg0":["macro",0],
+      "arg1":"view_item"
+    },
+    {
+      "function":"_eq",
+      "arg0":["macro",0],
+      "arg1":"select_content"
+    }
+  ],
+  "rules":[
+    [["if",0],["add",0]],
+    [["if",1],["add",1]]
+  ]
+},
+"runtime":
+[[50,"__ai_main",[46],[36,[2,[17,[15,"gtmUtils"],"mobile"],"applicationId",[7]]]],[50,"__ai",[46,"data"],[36,["__ai_main",[15,"data"]]]],
+[50,"__an_main",[46],[36,[2,[17,[15,"gtmUtils"],"mobile"],"applicationName",[7]]]],[50,"__an",[46,"data"],[36,["__an_main",[15,"data"]]]],
+[50,"__av_main",[46],[36,[2,[17,[15,"gtmUtils"],"mobile"],"applicationVersion",[7]]]],[50,"__av",[46,"data"],[36,["__av_main",[15,"data"]]]],
+[50,"__c_main",[46,"a"],[36,[17,[15,"a"],"value"]]],[50,"__c",[46,"data"],[36,["__c_main",[15,"data"]]]],
+[50,"__e_main",[46],[36,[2,[17,[15,"gtmUtils"],"mobile"],"event",[7]]]],[50,"__e",[46,"data"],[36,["__e_main",[15,"data"]]]],
+[50,"__ua_main",[46,"a"],[41,"b","c","d"],[3,"b",["__ua_convertFieldsToSet",[17,[15,"a"],"fieldsToSet"]]],[43,[15,"b"],"\u0026tid",[17,[15,"a"],"trackingId"]],[3,"c","screenview"],[3,"d",true],[38,[17,[15,"a"],"trackType"],[46,"TRACK_EVENT","TRACK_EXCEPTION","TRACK_SOCIAL","TRACK_TIMING","TRACK_TRANSACTION"],[46,[5,[46,[3,"c","event"],[22,[21,[17,[15,"a"],"eventCategory"],[44]],[46,[43,[15,"b"],"\u0026ec",[17,[15,"a"],"eventCategory"]]]],[22,[21,[17,[15,"a"],"eventAction"],[44]],[46,[43,[15,"b"],"\u0026ea",[17,[15,"a"],"eventAction"]]]],[22,[21,[17,[15,"a"],"eventLabel"],[44]],[46,[43,[15,"b"],"\u0026el",[17,[15,"a"],"eventLabel"]]]],[22,[21,[17,[15,"a"],"eventValue"],[44]],[46,[43,[15,"b"],"\u0026ev",[17,[15,"a"],"eventValue"]]]],[22,[21,[17,[15,"a"],"nonInteraction"],[44]],[46,[43,[15,"b"],"\u0026ni",[17,[15,"a"],"nonInteraction"]]]],[22,[17,[15,"a"],"sendFirebaseCampaignData"],[46,["__ua_convertCampaignParams",[15,"b"]]]],[4]]],[5,[46,[3,"c","exception"],[22,[21,[17,[15,"a"],"exceptionDescription"],[44]],[46,[43,[15,"b"],"\u0026exd",[17,[15,"a"],"exceptionDescription"]]]],[22,[21,[17,[15,"a"],"exceptionFatal"],[44]],[46,[43,[15,"b"],"\u0026exf",[17,[15,"a"],"exceptionFatal"]]]],[4]]],[5,[46,[3,"c","social"],[22,[21,[17,[15,"a"],"socialNetwork"],[44]],[46,[43,[15,"b"],"\u0026sn",[17,[15,"a"],"socialNetwork"]]]],[22,[21,[17,[15,"a"],"socialAction"],[44]],[46,[43,[15,"b"],"\u0026sa",[17,[15,"a"],"socialAction"]]]],[22,[21,[17,[15,"a"],"socialActionTarget"],[44]],[46,[43,[15,"b"],"\u0026st",[17,[15,"a"],"socialActionTarget"]]]],[4]]],[5,[46,[3,"c","timing"],[22,[21,[17,[15,"a"],"timingVar"],[44]],[46,[43,[15,"b"],"\u0026utv",[17,[15,"a"],"timingVar"]]]],[22,[21,[17,[15,"a"],"timingCategory"],[44]],[46,[43,[15,"b"],"\u0026utc",[17,[15,"a"],"timingCategory"]]]],[22,[21,[17,[15,"a"],"timingValue"],[44]],[46,[43,[15,"b"],"\u0026utt",[17,[15,"a"],"timingValue"]]]],[22,[21,[17,[15,"a"],"timingLabel"],[44]],[46,[43,[15,"b"],"\u0026utl",[17,[15,"a"],"timingLabel"]]]],[4]]],[5,[46,[3,"c","transaction"],[3,"d",false],[4]]]]],[43,[15,"b"],"\u0026t",[15,"c"]],[22,[17,[15,"a"],"dimension"],[46,["__ua_convertIndexedField",[15,"b"],[17,[15,"a"],"dimension"],"\u0026cd","index","dimension"]]],[22,[17,[15,"a"],"metric"],[46,["__ua_convertIndexedField",[15,"b"],[17,[15,"a"],"metric"],"\u0026cm","index","metric"]]],[22,[17,[15,"a"],"contentGroup"],[46,["__ua_convertIndexedField",[15,"b"],[17,[15,"a"],"contentGroup"],"\u0026cg","index","group"]]],[2,[17,[15,"gtmUtils"],"mobile"],"universalAnalytics",[7,[15,"b"],[15,"d"],[12,[15,"c"],"transaction"],[44],[44],[17,[15,"a"],"enableEcommerce"],[17,[15,"a"],"useEcommerceDataLayer"],[17,[15,"a"],"ecommerceMacroData"],[17,[15,"a"],"collectAdid"]]]],[50,"__ua_convertFieldsToSet",[46,"a"],[41,"b","c","d","e","f","g","h"],[22,[28,[15,"a"]],[46,[36,[8]]]],[3,"b",[8,"account","\u0026tid","anonymizeIp","\u0026aip","appName","\u0026an","appVersion","\u0026av","firebaseCampaignAdmobTicketId","\u0026gmob_t","firebaseCampaignAdNetworkClickId","\u0026aclid","firebaseCampaignAdNetworkId","\u0026anid","firebaseCampaignContent","\u0026utm_content","firebaseCampaignDfaClickId","\u0026dclid","firebaseCampaignGoogleClickId","\u0026gclid","firebaseCampaignId","\u0026utm_id","firebaseCampaignMedium","\u0026utm_medium","firebaseCampaignName","\u0026utm_campaign","firebaseCampaignSource","\u0026utm_source","firebaseCampaignTerm","\u0026utm_term","contentDescription","\u0026cd","contentGroup","\u0026cg","dimension","\u0026cd","eventAction","\u0026ea","eventCategory","\u0026ec","eventLabel","\u0026el","eventValue","\u0026ev","exceptionDescription","\u0026exd","exceptionFatal","\u0026exf","metric","\u0026cm","noninteraction","\u0026ni","page","\u0026dp","referrer","\u0026dr","sampleRate","\u0026sf","screenName","\u0026cd","sessionControl","\u0026sc","socialAction","\u0026sa","socialActionTarget","\u0026st","socialNetwork","\u0026sn","timingCategory","\u0026utc","timingLabel","\u0026utl","timingValue","\u0026utt","timingVar","\u0026utv","title","\u0026dt"]],[3,"c",[7,"\u0026tid","\u0026aip","\u0026an","\u0026av","\u0026cd","\u0026cg","\u0026cd","\u0026ea","\u0026ec","\u0026el","\u0026ev","\u0026exd","\u0026exf","\u0026cm","\u0026ni","\u0026dp","\u0026dr","\u0026sf","\u0026cd","\u0026sc","\u0026sa","\u0026st","\u0026sn","\u0026utc","\u0026utl","\u0026utt","\u0026utv","\u0026dt"]],[3,"d",[8]],[3,"e",0],[42,[23,[15,"e"],[17,[15,"a"],"length"]],[33,[15,"e"],[3,"e",[0,[15,"e"],1]]],false,[46,[3,"f",[16,[16,[15,"a"],[15,"e"]],"fieldName"]],[3,"g",[16,[16,[15,"a"],[15,"e"]],"value"]],[22,[1,[21,[15,"g"],[44]],[21,[15,"g"],[45]]],[46,[3,"h",[16,[15,"b"],[15,"f"]]],[22,[21,[15,"h"],[44]],[46,[43,[15,"d"],[15,"h"],[15,"g"]]],[46,[22,[19,[2,[15,"c"],"indexOf",[7,[15,"f"]]],0],[46,[43,[15,"d"],[15,"f"],[15,"g"]]]]]]]]]],[36,[15,"d"]]],[50,"__ua_convertIndexedField",[46,"a","b","c","d","e"],[41,"f","g"],[3,"f",0],[42,[23,[15,"f"],[17,[15,"b"],"length"]],[33,[15,"f"],[3,"f",[0,[15,"f"],1]]],false,[46,[3,"g",[16,[15,"b"],[15,"f"]]],[43,[15,"a"],[0,[15,"c"],[16,[15,"g"],[15,"d"]]],[16,[15,"g"],[15,"e"]]]]]],[50,"__ua_convertCampaignParams",[46,"a"],[41,"b","c","d"],[22,[21,[2,[17,[15,"gtmUtils"],"mobile"],"event",[7]],"_cmp"],[46,[36]]],[3,"b",[30,[2,[17,[15,"gtmUtils"],"mobile"],"eventParameters",[7]],[8]]],[3,"c",[8,"gclid","\u0026gclid","dclid","\u0026dclid","gmob_t","\u0026gmob_t","cs","\u0026utm_source","cm","\u0026utm_medium","cn","\u0026utm_campaign","ck","\u0026utm_term","cc","\u0026utm_content","ci","\u0026utm_id","aclid","\u0026aclid","anid","\u0026anid"]],[47,"d",[15,"c"],[46,[22,[1,[16,[15,"b"],[15,"d"]],[28,[2,[15,"a"],"hasOwnProperty",[7,[16,[15,"c"],[15,"d"]]]]]],[46,[43,[15,"a"],[16,[15,"c"],[15,"d"]],[16,[15,"b"],[15,"d"]]]]]]]],[50,"__ua",[46,"data"],[36,["__ua_main",[15,"data"]]]],
+[50,"__md_main",[46,"a"],[41,"b","c","d","e"],[22,[12,[17,[15,"a"],"eventType"],"CUSTOM"],[46,[3,"b",[16,[15,"a"],"key"]]],[46,[22,[12,[17,[15,"a"],"eventType"],"SUGGESTED"],[46,[47,"c",[15,"a"],[46,[3,"d",[2,[15,"c"],"lastIndexOf",[7,"Param"]]],[22,[1,[29,[15,"d"],[27,1]],[12,[15,"d"],[37,[17,[15,"c"],"length"],5]]],[46,[22,[20,[15,"b"],[44]],[46,[3,"b",[16,[15,"a"],[15,"c"]]]],[46,[2,[17,[15,"gtmUtils"],"common"],"log",[7,"e",[0,[0,[0,"Ignoring unexpected additional parameter ","key in the data (key \u003d \""],[15,"c"]],"\")."]]]]]]]]]],[46,[22,[20,[17,[15,"a"],"eventType"],[44]],[46,[2,[17,[15,"gtmUtils"],"common"],"log",[7,"w","Missing expected eventType param"]],[3,"b",[16,[15,"a"],"key"]]],[46,[2,[17,[15,"gtmUtils"],"common"],"log",[7,"e",[0,"Unexpected eventType param value: ",[17,[15,"a"],"eventType"]]]],[36]]]]]]],[22,[20,[15,"b"],[44]],[46,[2,[17,[15,"gtmUtils"],"common"],"log",[7,"e","No parameter key specified in the data."]],[36]]],[3,"e",[16,[30,[2,[17,[15,"gtmUtils"],"mobile"],"eventParameters",[7]],[8]],[15,"b"]]],[22,[21,[15,"e"],[44]],[46,[36,[15,"e"]]],[46,[22,[21,[17,[15,"a"],"defaultValue"],[44]],[46,[36,[17,[15,"a"],"defaultValue"]]],[46,[2,[17,[15,"gtmUtils"],"common"],"log",[7,"w",[0,[0,"Event does not have parameter \"",[15,"b"]],"\" and no default value was defined. Returning \"undefined\"."]]]]]]]],[50,"__md",[46,"data"],[36,["__md_main",[15,"data"]]]],
+[50,"main",[46,"a"],[43,[17,[15,"a"],"common"],"tableToMap",[15,"tableToMap"]],[43,[17,[15,"a"],"common"],"stringify",[15,"stringify"]]],[50,"tableToMap",[46,"a","b","c"],[41,"d","e","f"],[3,"d",[8]],[3,"e",false],[3,"f",0],[42,[1,[15,"a"],[23,[15,"f"],[17,[15,"a"],"length"]]],[33,[15,"f"],[3,"f",[0,[15,"f"],1]]],false,[46,[22,[1,[1,[16,[15,"a"],[15,"f"]],[2,[16,[15,"a"],[15,"f"]],"hasOwnProperty",[7,[15,"b"]]]],[2,[16,[15,"a"],[15,"f"]],"hasOwnProperty",[7,[15,"c"]]]],[46,[43,[15,"d"],[16,[16,[15,"a"],[15,"f"]],[15,"b"]],[16,[16,[15,"a"],[15,"f"]],[15,"c"]]],[3,"e",true]]]]],[36,[39,[15,"e"],[15,"d"],[45]]]],[50,"stringify",[46,"a"],[41,"b","c","d","e"],[22,[20,[15,"a"],[45]],[46,[36,"null"]]],[22,[20,[15,"a"],[44]],[46,[36,[44]]]],[22,[30,[12,[40,[15,"a"]],"number"],[12,[40,[15,"a"]],"boolean"]],[46,[36,[2,[15,"a"],"toString",[7]]]]],[22,[12,[40,[15,"a"]],"string"],[46,[36,[0,[0,"\"",[2,[2,[15,"a"],"split",[7,"\""]],"join",[7,"\\\""]]],"\""]]]],[22,[2,[17,[15,"gtmUtils"],"common"],"isArray",[7,[15,"a"]]],[46,[3,"b",[7]],[3,"c",0],[42,[23,[15,"c"],[17,[15,"a"],"length"]],[33,[15,"c"],[3,"c",[0,[15,"c"],1]]],false,[46,[3,"d",["stringify",[16,[15,"a"],[15,"c"]]]],[22,[12,[15,"d"],[44]],[46,[2,[15,"b"],"push",[7,"null"]]],[46,[2,[15,"b"],"push",[7,[15,"d"]]]]]]],[36,[0,[0,"[",[2,[15,"b"],"join",[7,","]]],"]"]]]],[22,[12,[40,[15,"a"]],"object"],[46,[3,"b",[7]],[47,"e",[15,"a"],[46,[3,"d",["stringify",[16,[15,"a"],[15,"e"]]]],[22,[29,[15,"d"],[44]],[46,[2,[15,"b"],"push",[7,[0,[0,[0,"\"",[15,"e"]],"\":"],[15,"d"]]]]]]]],[36,[0,[0,"{",[2,[15,"b"],"join",[7,","]]],"}"]]]],[2,[17,[15,"gtmUtils"],"common"],"log",[7,"e","Attempting to stringify unknown type!"]],[36,[44]]]]
+}

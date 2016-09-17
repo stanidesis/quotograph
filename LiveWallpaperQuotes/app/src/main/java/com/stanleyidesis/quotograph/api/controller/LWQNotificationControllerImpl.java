@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.event.ImageSaveEvent;
@@ -116,7 +117,9 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setContentIntent(PendingIntent.getActivity(context, uniqueRequestCode++, mainIntent, 0));
 
         // Add Share Action
-        Intent shareIntent = new Intent(context.getString(R.string.action_share));
+        Intent shareIntent = new Intent(context, LWQReceiver.class);
+        shareIntent.setAction(context.getString(R.string.action_share));
+        shareIntent.setData(Uri.parse(AnalyticsUtils.URI_SHARE_SOURCE_NOTIFICATION));
         final PendingIntent shareBroadcast = PendingIntent.getBroadcast(context, uniqueRequestCode++, shareIntent, 0);
         final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.mipmap.ic_share_white,
                 context.getString(R.string.share), shareBroadcast).build();
@@ -124,14 +127,19 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
 
         // Add save to disk
         Intent saveToDiskIntent = new Intent(context, LWQSaveWallpaperActivity.class);
+        saveToDiskIntent.setData(Uri.parse(AnalyticsUtils.URI_SAVE_SOURCE_NOTIFICATION));
         final PendingIntent saveToDiskActivity = PendingIntent.getActivity(context, uniqueRequestCode++, saveToDiskIntent, 0);
         final NotificationCompat.Action saveToDiskAction = new NotificationCompat.Action.Builder(R.mipmap.ic_save_white,
                 context.getString(R.string.save_to_disk), saveToDiskActivity).build();
         notificationBuilder.addAction(saveToDiskAction);
 
         // Add Skip Action
-        Intent skipIntent = new Intent(context.getString(R.string.action_change_wallpaper));
-        final PendingIntent skipBroadcast = PendingIntent.getBroadcast(context, uniqueRequestCode++, skipIntent, 0);
+        Intent skipIntent = new Intent(context, LWQReceiver.class);
+        skipIntent.setAction(context.getString(R.string.action_change_wallpaper));
+        // Track where the skip originated
+        skipIntent.setData(Uri.parse(AnalyticsUtils.URI_CHANGE_SOURCE_NOTIFICATION));
+        final PendingIntent skipBroadcast =
+                PendingIntent.getBroadcast(context, uniqueRequestCode++, skipIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.mipmap.ic_skip_next_white,
                 context.getString(R.string.skip), skipBroadcast).build();
         notificationBuilder.addAction(skipAction);
@@ -184,6 +192,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
 
         // Add Skip Action
         Intent skipIntent = new Intent(context.getString(R.string.action_change_wallpaper));
+        skipIntent.setData(Uri.parse(AnalyticsUtils.URI_CHANGE_SOURCE_NOTIFICATION));
         final PendingIntent skipBroadcast = PendingIntent.getBroadcast(context, uniqueRequestCode++, skipIntent, 0);
         final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.mipmap.ic_refresh_white_36dp,
                 context.getString(R.string.notification_generation_failure_action_try_again), skipBroadcast).build();
@@ -268,6 +277,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setWhen(System.currentTimeMillis());
 
         Intent saveToDiskIntent = new Intent(LWQApplication.get(), LWQSaveWallpaperActivity.class);
+        saveToDiskIntent.setData(Uri.parse(AnalyticsUtils.URI_SAVE_SOURCE_NOTIFICATION));
         final PendingIntent saveToDiskActivity = PendingIntent.getActivity(LWQApplication.get(), uniqueRequestCode++, saveToDiskIntent, 0);
         notificationBuilder.setContentIntent(saveToDiskActivity);
 

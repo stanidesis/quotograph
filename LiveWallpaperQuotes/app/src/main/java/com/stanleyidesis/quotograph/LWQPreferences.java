@@ -63,6 +63,7 @@ public class LWQPreferences {
     }
 
     public static void setBlurPreference(int blurPreference) {
+        LWQApplication.getLogger().logBlurLevel(blurPreference);
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_blur), blurPreference).apply();
         EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_blur, blurPreference));
     }
@@ -73,6 +74,7 @@ public class LWQPreferences {
     }
 
     public static void setDimPreference(int dimPreference) {
+        LWQApplication.getLogger().logDimLevel(dimPreference);
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_dim), dimPreference).apply();
         EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_dim, dimPreference));
     }

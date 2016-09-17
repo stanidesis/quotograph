@@ -7,11 +7,10 @@ import android.view.View;
 
 import com.afollestad.materialdialogs.GravityEnum;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.stanleyidesis.quotograph.AnalyticsUtils;
+import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
-import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.ui.adapter.IapProductAdapter;
 
 import de.greenrobot.event.EventBus;
@@ -117,7 +116,6 @@ public class LWQStoreDialogModule implements Module,
                 || !dialog.isShowing()
                 || activity == null) {
             if (iabPurchaseEvent.didFail() && attemptedPurchase != null) {
-                AnalyticsUtils.trackFailedPurchase(attemptedPurchase);
                 attemptedPurchase = null;
             }
             return;
@@ -138,7 +136,6 @@ public class LWQStoreDialogModule implements Module,
     @Override
     public void purchaseProduct(IabConst.Product product) {
         attemptedPurchase = product;
-        AnalyticsUtils.trackTappedProduct(product);
         LWQApplication.purchaseProduct(activity, product);
     }
 }

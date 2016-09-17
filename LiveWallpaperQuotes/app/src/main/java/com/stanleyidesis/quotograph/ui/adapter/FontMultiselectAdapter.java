@@ -8,6 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
 
 import com.afollestad.materialdialogs.util.TypefaceHelper;
+import com.stanleyidesis.quotograph.AnalyticsUtils;
+import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.ui.Fonts;
@@ -103,6 +105,11 @@ public class FontMultiselectAdapter extends BaseAdapter {
             selectedFonts.add(fontId);
         }
         LWQPreferences.setFontSet(selectedFonts);
+        // Log event
+        AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_FONTS,
+                selectedFonts.contains(fontId)
+                        ? AnalyticsUtils.ACTION_REMOVED : AnalyticsUtils.ACTION_ADDED,
+                Fonts.findById(selectedFont.getId()).getPrettyName(LWQApplication.get()));
         notifyDataSetChanged();
     }
 

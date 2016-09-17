@@ -1,13 +1,13 @@
 package com.stanleyidesis.quotograph.api.service;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.service.wallpaper.WallpaperService;
 import android.support.v4.view.GestureDetectorCompat;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -16,6 +16,7 @@ import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
 import com.stanleyidesis.quotograph.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
+import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
 
 import de.greenrobot.event.EventBus;
 
@@ -58,7 +59,6 @@ public class LWQWallpaperService extends WallpaperService {
 
         LWQSurfaceHolderDrawScript drawScript;
         GestureDetectorCompat gestureDetectorCompat;
-        Intent launchIntent;
         BaseCallback<Boolean> eventCallback = new BaseCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
@@ -141,10 +141,12 @@ public class LWQWallpaperService extends WallpaperService {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             if (LWQPreferences.isDoubleTapEnabled()) {
-                if (launchIntent == null) {
-                    final PackageManager packageManager = getPackageManager();
-                    launchIntent = packageManager.getLaunchIntentForPackage(getPackageName());
-                }
+                AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
+                        AnalyticsUtils.ACTION_DOUBLE_TAP);
+                // So turns out this is still slow? Idk
+                Intent launchIntent = new Intent(getApplicationContext(), LWQSettingsActivity.class);
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                 startActivity(launchIntent);
             }
             return true;
