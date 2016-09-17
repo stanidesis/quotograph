@@ -39,8 +39,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
  */
 public class AnalyticsUtils {
 
-    public static final String PARAM_SCREEN_NAME = "screenName";
-
     // Tutorial
     public static final String SCREEN_TUTORIAL_1 = "tutorial_page_1";
     public static final String SCREEN_TUTORIAL_2 = "tutorial_page_2";
@@ -131,7 +129,7 @@ public class AnalyticsUtils {
     public static void trackScreenView(String screenName) {
         LWQApplication.getAnalytics().
                 logEvent(FirebaseAnalytics.Event.VIEW_ITEM,
-                        buildBundle(PARAM_SCREEN_NAME, screenName));
+                        buildBundle(FirebaseAnalytics.Param.ITEM_NAME, screenName));
     }
 
     public static void trackEvent(String category, String action) {

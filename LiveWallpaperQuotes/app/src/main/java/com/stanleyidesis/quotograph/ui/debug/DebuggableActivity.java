@@ -5,9 +5,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 
 import com.stanleyidesis.quotograph.BuildConfig;
+import com.stanleyidesis.quotograph.ui.activity.LWQFirebaseActivity;
 
 
 /**
@@ -43,7 +43,7 @@ import com.stanleyidesis.quotograph.BuildConfig;
  *
  * Date: 09/11/2016
  */
-public abstract class DebuggableActivity extends AppCompatActivity {
+public abstract class DebuggableActivity extends LWQFirebaseActivity {
     // The following are used for the shake detection
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
