@@ -1635,7 +1635,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             analyticsLabel = ((PlaylistAuthor) playlistItem).author.name;
             ((PlaylistAuthor) playlistItem).delete();
         } else if (playlistItem instanceof PlaylistQuote) {
-            analyticsLabel = ((PlaylistQuote) playlistItem).quote.text.substring(0, 35) + "...";
+            String quote = ((PlaylistQuote) playlistItem).quote.text;
+            analyticsLabel = quote.substring(0, Math.min(35, quote.length() - 1)) + "...";
             ((PlaylistQuote) playlistItem).delete();
         }
         playlistAdapter.removeItem(playlistItem);
@@ -1658,7 +1659,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             analyticsLabel = ((Author) model).name;
         } else if (model instanceof Quote) {
             playlistItem = new PlaylistQuote(Playlist.active(), (Quote) model);
-            analyticsLabel = ((Quote) model).text.substring(0, 35) + "...";
+            String quote = ((Quote) model).text;
+            analyticsLabel = quote.substring(0, Math.min(35, quote.length() - 1)) + "...";
         }
         if (playlistItem != null) {
             playlistItem.save();
