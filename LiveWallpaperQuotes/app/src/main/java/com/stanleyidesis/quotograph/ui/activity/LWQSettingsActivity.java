@@ -45,7 +45,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
@@ -1175,8 +1174,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             }
         });
         // Log the search
-        getFirebaseAnalytics().logEvent(FirebaseAnalytics.Event.SEARCH,
-                bundleFrom(FirebaseAnalytics.Param.SEARCH_TERM, query));
+        AnalyticsUtils.trackSearch(query);
     }
 
     @OnClick(R.id.fab_lwq_create_quote) void revealAddEditQuote() {

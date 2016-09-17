@@ -12,6 +12,7 @@ import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -20,7 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
@@ -74,7 +74,7 @@ import de.greenrobot.event.EventBus;
  *
  * Date: 09/06/2015
  */
-public class LWQActivateActivity extends LWQFirebaseActivity implements ViewPager.OnPageChangeListener {
+public class LWQActivateActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
 
     // First run check
     static boolean RUN_ONCE = true;
@@ -184,7 +184,7 @@ public class LWQActivateActivity extends LWQFirebaseActivity implements ViewPage
         } else if (trackInitialPageView) {
             trackInitialPageView = false;
             // Log the beginning of the tutorial
-            getFirebaseAnalytics().logEvent(FirebaseAnalytics.Event.TUTORIAL_BEGIN, null);
+            AnalyticsUtils.trackTutorial(true);
             // Log the first view
             AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_TUTORIAL_1);
         }
@@ -295,8 +295,7 @@ public class LWQActivateActivity extends LWQFirebaseActivity implements ViewPage
             }
         }
         // Log tutorial as completed
-        getFirebaseAnalytics().
-                logEvent(FirebaseAnalytics.Event.TUTORIAL_COMPLETE, null);
+        AnalyticsUtils.trackTutorial(false);
     }
 
     Snackbar build(String string) {

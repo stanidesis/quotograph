@@ -87,6 +87,7 @@ public class AnalyticsUtils {
     public static final String CATEGORY_SURVEY_POPUP = "survey_popup";
     public static final String CATEGORY_SURVEY_DIALOG = "survey_dialog";
     public static final String CATEGORY_SURVEY_NONE = "survey_none";
+    public static final String CATEGORY_SEARCH = "search";
     // Actions
     public static final String ACTION_RESPONSE_NEVER = "response_never";
     public static final String ACTION_RESPONSE_LATER = "response_later";
@@ -107,6 +108,7 @@ public class AnalyticsUtils {
     public static final String ACTION_MANUALLY_GEN = "manually_generated";
     public static final String ACTION_AUTOMATICALLY_GEN = "automatically_generated";
     public static final String ACTION_DOUBLE_TAP = "double_tap_to_launch";
+    public static final String ACTION_SEARCH = "performed_search";
 
     // Labels?
     public static final String LABEL_PLAYLIST = "playlist";
@@ -119,6 +121,18 @@ public class AnalyticsUtils {
     public static final String URI_SAVE_SOURCE_NOTIFICATION = "save_from_notif";
     public static final String URI_SHARE_SOURCE_NOTIFICATION = "share_from_notif";
 
+
+    public static void trackTutorial(boolean started) {
+        LWQApplication.getAnalytics().
+                logEvent(started ?  FirebaseAnalytics.Event.TUTORIAL_BEGIN :
+                        FirebaseAnalytics.Event.TUTORIAL_COMPLETE, null);
+    }
+
+    public static void trackSearch(String query) {
+        LWQApplication.getAnalytics().logEvent(FirebaseAnalytics.Event.SEARCH,
+                buildBundle(FirebaseAnalytics.Param.SEARCH_TERM, query));
+        trackEvent(CATEGORY_SEARCH, ACTION_SEARCH, query);
+    }
 
     public static void trackShare(String category, String label) {
         Bundle bundle = AnalyticsUtils.buildBundle(

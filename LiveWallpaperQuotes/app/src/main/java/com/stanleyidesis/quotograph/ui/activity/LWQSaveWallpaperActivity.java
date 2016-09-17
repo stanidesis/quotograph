@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.stanleyidesis.quotograph.AnalyticsUtils;
@@ -47,7 +48,7 @@ import de.greenrobot.event.EventBus;
  * https://github.com/stanidesis/quotograph/issues
  *
  */
-public class LWQSaveWallpaperActivity extends LWQFirebaseActivity {
+public class LWQSaveWallpaperActivity extends AppCompatActivity {
 
     public static final int RESULT_CODE_SUCCESS = 0;
     public static final int RESULT_CODE_FAILURE = 1;
