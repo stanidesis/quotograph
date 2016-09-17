@@ -44,19 +44,19 @@
         android:layout_height="wrap_content"
         app:hintAnimationEnabled="true">
 
-        <EditText
+        <com.stanleyidesis.quotograph.ui.view.CaptureMenuEditText
             style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Quote"
             android:id="@+id/et_fab_screen_quote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="100dp"
-            android:hint="Quote"
             android:lines="3"
             android:maxLines="20"
             android:scrollbars="vertical"
             android:scrollbarStyle="insideOverlay"
             android:scrollHorizontally="false"
-            android:text="@string/inspirational_quote_0"/>
+            android:hint="@string/quote_hint"
+            android:contentDescription="Quote"/>
 
     </android.support.design.widget.TextInputLayout>
 
@@ -70,16 +70,16 @@
         app:hintAnimationEnabled="true"
         app:layout_marginBottomPercent="3%">
 
-        <android.support.v7.widget.AppCompatAutoCompleteTextView
+        <com.stanleyidesis.quotograph.ui.view.CaptureMenuAutoCompleteTextView
             style="@style/Theme.LWQ.TextAppearance.Settings.EditQuote.Author"
             android:id="@+id/actv_fab_screen_author"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:hint="Author"
             android:minWidth="150dp"
             android:gravity="start|left|center_vertical"
             android:singleLine="true"
-            android:text="@string/inspirational_author_0"/>
+            android:hint="@string/author_hint"
+            android:contentDescription="Author"/>
 
     </android.support.design.widget.TextInputLayout>
 

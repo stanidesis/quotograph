@@ -42,5 +42,17 @@ public interface LWQLogger {
 
     void logWallpaperActive(boolean active);
 
+    void logBlurLevel(int blur);
+
+    void logDimLevel(int dim);
+
+    void logRefreshRate(String refreshRateString);
+
+    void logCategoryCount(int count);
+
+    void logAuthorCount(int count);
+
+    void logQuoteCount(int count);
+
     void logError(LWQError error);
 }

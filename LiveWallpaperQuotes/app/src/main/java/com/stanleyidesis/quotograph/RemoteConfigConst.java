@@ -1,7 +1,4 @@
-package com.stanleyidesis.quotograph.api.controller;
-
-import com.crashlytics.android.Crashlytics;
-import com.stanleyidesis.quotograph.api.LWQError;
+package com.stanleyidesis.quotograph;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -25,7 +22,7 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * LWQLoggerCrashlyticsImpl.java
+ * RemoteConfigConst.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -34,32 +31,12 @@ import com.stanleyidesis.quotograph.api.LWQError;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 02/21/2016
+ * Date: 09/11/2016
  */
-public class LWQLoggerCrashlyticsImpl implements LWQLogger {
-
-    static final String KEY_WALLPAPER_COUNT = "wallpaper_count";
-    static final String KEY_WALLPAPER_RETRIEVAL_STATE = "wallpaper_retrieval_state";
-    static final String KEY_WALLPAPER_ACTIVE = "wallpaper_active";
-
-    @Override
-    public void logWallpaperCount(long count) {
-        Crashlytics.setLong(KEY_WALLPAPER_COUNT, count);
-    }
-
-    @Override
-    public void logWallpaperRetrievalState(LWQWallpaperController.RetrievalState retrievalState) {
-        Crashlytics.setString(KEY_WALLPAPER_RETRIEVAL_STATE, retrievalState.name());
-    }
-
-    @Override
-    public void logWallpaperActive(boolean active) {
-        Crashlytics.setBool(KEY_WALLPAPER_ACTIVE, active);
-    }
-
-    @Override
-    public void logError(LWQError error) {
-        Crashlytics.log(error.getErrorMessage());
-        Crashlytics.logException(error.getErrorThrowable());
-    }
+public class RemoteConfigConst {
+    public static String SURVEY_EXPERIMENT = "survey_experiment";
+    public static String SURVEY_URL = "survey_url";
+    public static String SURVEY_DELAY_IN_MILLIS = "survey_delay_in_millis";
+    public static String SURVEY_INTERVAL_IN_MILLIS = "survey_interval_in_millis";
+    public static String FIREBASE_ANALYTICS = "firebase_analytics";
 }

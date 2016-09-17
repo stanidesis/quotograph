@@ -37,6 +37,9 @@
         <activity android:name="com.stanleyidesis.quotograph.ui.activity.LWQSaveWallpaperActivity" android:screenOrientation="sensorPortrait"
             android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.NoShow"/>
 
+        <activity android:name="com.stanleyidesis.quotograph.ui.activity.LWQSurveyActivity" android:screenOrientation="sensorPortrait"
+            android:launchMode="singleInstance" android:theme="@style/Theme.LWQ.SurveyActivity"/>
+
         <!-- Receivers -->
 
         <receiver android:name="com.stanleyidesis.quotograph.api.receiver.LWQReceiver" android:enabled="false">
@@ -46,6 +49,7 @@
                 <action android:name="com.stanleyidesis.quotograph.action.CHANGE_WALLPAPER"/>
                 <action android:name="com.stanleyidesis.quotograph.action.SHARE"/>
                 <action android:name="com.stanleyidesis.quotograph.action.SAVE"/>
+                <action android:name="com.stanleyidesis.quotograph.action.SURVEY_RESPONSE"/>
             </intent-filter>
         </receiver>
 

@@ -1,0 +1,105 @@
+<!--
+    Copyright (c) 2016 Stanley Idesis
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    survey_playlist_item.xml
+    @author Stanley Idesis
+
+    From Quotograph
+    https://github.com/stanidesis/quotograph
+
+    Please report any issues
+    https://github.com/stanidesis/quotograph/issues
+
+    Date: 09/13/2016
+-->
+<android.support.v7.widget.CardView
+    android:id="@+id/cv_survey_playlist_item_card"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardUseCompatPadding="true">
+
+    <android.support.percent.PercentRelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="32dp"
+        android:padding="8dp"
+        android:background="@drawable/survey_playlist_item_bg">
+
+        <ImageView
+            android:id="@+id/iv_playlist_item_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_sentiment_very_satisfied_white"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            app:layout_marginRightPercent="3%"/>
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Title"
+            android:id="@+id/tv_playlist_item_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/iv_playlist_item_icon"
+            android:layout_toEndOf="@+id/iv_playlist_item_icon"
+            android:layout_toLeftOf="@+id/iv_survey_playlist_item_more"
+            android:layout_toStartOf="@+id/iv_survey_playlist_item_more"
+            android:layout_alignBaseline="@+id/iv_playlist_item_icon"
+            android:text="@string/survey_title"/>
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:id="@+id/tv_playlist_item_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/iv_playlist_item_icon"
+            android:layout_toEndOf="@+id/iv_playlist_item_icon"
+            android:layout_toLeftOf="@+id/iv_survey_playlist_item_more"
+            android:layout_toStartOf="@+id/iv_survey_playlist_item_more"
+            android:layout_below="@id/tv_playlist_item_title"
+            android:text="@string/survey_cta"
+            app:layout_marginTopPercent="1%"
+            app:layout_marginBottomPercent="1%"/>
+
+        <ImageButton
+            android:id="@+id/iv_survey_playlist_item_more"
+            android:contentDescription="Options"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/selectable_more_button"
+            android:scaleType="center"
+            android:clipToPadding="false"
+            android:background="@android:color/transparent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="-8dp"
+            android:layout_marginTop="-8dp"
+            app:layout_marginLeftPercent="3%"/>
+
+    </android.support.percent.PercentRelativeLayout>
+
+</android.support.v7.widget.CardView>

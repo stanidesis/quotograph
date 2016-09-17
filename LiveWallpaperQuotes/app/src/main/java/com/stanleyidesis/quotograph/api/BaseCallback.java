@@ -22,7 +22,7 @@ package com.stanleyidesis.quotograph.api;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * BaseCallbacl.java
+ * BaseCallback.java
  * @author Stanley Idesis
  *
  * From Quotograph

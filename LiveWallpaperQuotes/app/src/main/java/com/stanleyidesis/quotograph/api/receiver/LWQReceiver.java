@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
-import com.stanleyidesis.quotograph.api.LWQSaveWallpaperImageTask;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
+import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 import com.stanleyidesis.quotograph.api.service.LWQUpdateService;
+import com.stanleyidesis.quotograph.api.task.LWQSaveWallpaperImageTask;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -45,18 +47,30 @@ import com.stanleyidesis.quotograph.api.service.LWQUpdateService;
  * Date: 08/14/2015
  */
 public class LWQReceiver extends WakefulBroadcastReceiver {
+
     @Override
     public void onReceive(final Context context, Intent intent) {
-        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+        String action = intent.getAction();
+        if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             // Set the alarm
             LWQAlarmController.resetAlarm();
-        } else if (context.getString(R.string.action_change_wallpaper).equals(intent.getAction())) {
+        } else if (context.getString(R.string.action_change_wallpaper).equals(action)) {
             // Change the wallpaper
             Intent updateService = new Intent(context, LWQUpdateService.class);
             startWakefulService(context, updateService);
             LWQApplication.getNotificationController().dismissNewWallpaperNotification();
             LWQApplication.getNotificationController().dismissWallpaperGenerationFailureNotification();
-        } else if (context.getString(R.string.action_share).equals(intent.getAction())) {
+            // Log either a skip or auto-generated wallpaper
+            if (AnalyticsUtils.URI_CHANGE_SOURCE_NOTIFICATION.equalsIgnoreCase(intent.getDataString())) {
+                AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
+                        AnalyticsUtils.ACTION_SKIPPED,
+                        AnalyticsUtils.LABEL_FROM_NOTIF);
+            } else if (AnalyticsUtils.URI_CHANGE_SOURCE_ALARM.equalsIgnoreCase(intent.getDataString())) {
+                AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
+                        AnalyticsUtils.ACTION_AUTOMATICALLY_GEN,
+                        AnalyticsUtils.LABEL_ALARM);
+            }
+        } else if (context.getString(R.string.action_share).equals(action)) {
             final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
             final String shareText = String.format("\"%s\" - %s", wallpaperController.getQuote(), wallpaperController.getAuthor());
             final String shareTitle = String.format("Quote by %s", wallpaperController.getAuthor());
@@ -67,8 +81,24 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
             final Intent chooser = Intent.createChooser(sharingIntent, context.getResources().getString(R.string.share_using));
             chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(chooser);
-        } else if (context.getString(R.string.action_save).equals(intent.getAction())) {
+            // Log it
+            boolean sharedFromNotif = AnalyticsUtils.URI_SHARE_SOURCE_NOTIFICATION
+                    .equalsIgnoreCase(intent.getDataString());
+            AnalyticsUtils.trackShare(AnalyticsUtils.CATEGORY_WALLPAPER,
+                    sharedFromNotif ? AnalyticsUtils.LABEL_FROM_NOTIF : AnalyticsUtils.LABEL_IN_APP);
+        } else if (context.getString(R.string.action_save).equals(action)) {
+            AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
+                    AnalyticsUtils.ACTION_SAVED,
+                    AnalyticsUtils.LABEL_FROM_NOTIF);
             new LWQSaveWallpaperImageTask().execute();
+        } else if (context.getString(R.string.action_survey_response).equals(action)) {
+            LWQApplication.getNotificationController().dismissSurveyNotification();
+            int surveyResponse = Integer.parseInt(intent.getDataString());
+            if (surveyResponse < UserSurveyController.RESPONSE_NEVER
+                    || surveyResponse > UserSurveyController.RESPONSE_OKAY) {
+                return;
+            }
+            UserSurveyController.handleResponse(surveyResponse);
         }
     }
 }

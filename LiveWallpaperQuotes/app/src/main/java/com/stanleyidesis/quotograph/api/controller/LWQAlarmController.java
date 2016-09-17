@@ -4,8 +4,11 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.text.format.DateUtils;
 import android.widget.Toast;
 
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.BuildConfig;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
@@ -56,7 +59,7 @@ public class LWQAlarmController {
         AlarmManager alarmManager = (AlarmManager) LWQApplication.get()
                 .getSystemService(Context.ALARM_SERVICE);
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(), 1000 * 15, getPendingIntent());
+                calendar.getTimeInMillis(), 3 * DateUtils.SECOND_IN_MILLIS, getPendingIntent());
     }
 
     public static void setRepeatingAlarm() {
@@ -116,6 +119,8 @@ public class LWQAlarmController {
     static PendingIntent getPendingIntent() {
         Intent newWallpaperIntent = new Intent(LWQApplication.get(), LWQReceiver.class);
         newWallpaperIntent.setAction(LWQApplication.get().getString(R.string.action_change_wallpaper));
+        // This tracks where the refresh came from
+        newWallpaperIntent.setData(Uri.parse(AnalyticsUtils.URI_CHANGE_SOURCE_ALARM));
         return PendingIntent.getBroadcast(LWQApplication.get(), 0, newWallpaperIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }
