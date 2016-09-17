@@ -108,6 +108,7 @@ public class AnalyticsUtils {
     public static final String ACTION_STARTED = "started";
     public static final String ACTION_MANUALLY_GEN = "manually_generated";
     public static final String ACTION_AUTOMATICALLY_GEN = "automatically_generated";
+    public static final String ACTION_DOUBLE_TAP = "double_tap_to_launch";
 
     // Labels?
     public static final String LABEL_PLAYLIST = "playlist";
