@@ -146,7 +146,8 @@ public class LWQWallpaperService extends WallpaperService {
                 // So turns out this is still slow? Idk
                 Intent launchIntent = new Intent(getApplicationContext(), LWQSettingsActivity.class);
                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+                        | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
+                        | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(launchIntent);
             }
             return true;

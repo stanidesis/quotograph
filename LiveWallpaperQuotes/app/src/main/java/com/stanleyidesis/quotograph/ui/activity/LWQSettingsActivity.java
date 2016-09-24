@@ -525,9 +525,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         // Setup image source chooser
         setupChooseImageSources();
 
-        // Show survey if applicable
-        UserSurveyController.showSurvey(this);
-
         // Track initial Screen View
         AnalyticsUtils.trackScreenView(
                 AnalyticsUtils.SCREEN_WALLPAPER_PREVIEW);
@@ -595,6 +592,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             changeState(stateSearch);
             AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_ADD_SEARCH);
         }
+        // Show survey if applicable
+        UserSurveyController.showSurvey(this);
     }
 
     @Override
