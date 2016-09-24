@@ -1,3 +1,14 @@
+<H1>Quotograph Needs Your Help!</h1>
+<p>If you'd like to help me improve the app, please answer this <a href="https://goo.gl/Jg9mnY">5-minute survey</a>!<br>
+I really appreciate your help and your feedback. :D</p>
+
+<h1>Version 1.1.4:</h1>
+<p>Ugh, the bugs!</p>
+<ul>
+<li>[Fixed] Double-tapping on wallpaper</li>
+<li>[Fixed] Launches on some devices crashed</li>
+</ul>
+
 <h1>Version 1.1.2:</h1>
 
 <h4>- New Notification</h4>

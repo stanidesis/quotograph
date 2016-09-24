@@ -186,8 +186,7 @@ public class UserSurveyController {
                 getVariantCategory(getVariant()),
                 which == RESPONSE_NEVER ? AnalyticsUtils.ACTION_RESPONSE_NEVER :
                         which == RESPONSE_LATER ? AnalyticsUtils.ACTION_RESPONSE_LATER :
-                                AnalyticsUtils.ACTION_RESPONSE_OKAY
-        );
+                                AnalyticsUtils.ACTION_RESPONSE_OKAY);
         if (which == RESPONSE_NEVER || which == RESPONSE_LATER) {
             return;
         }
