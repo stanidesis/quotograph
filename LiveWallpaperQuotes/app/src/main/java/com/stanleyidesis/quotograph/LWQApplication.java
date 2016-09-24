@@ -113,6 +113,13 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
         Fabric.with(this, new Crashlytics.Builder().core(core).build());
 
+        // Application controllers
+        logger = new LWQLoggerImpl();
+        wallpaperController = new LWQWallpaperControllerUnsplashImpl();
+        imageController = new LWQImageControllerUIL();
+        quoteController = new LWQQuoteControllerBrainyQuoteImpl();
+        notificationController = new LWQNotificationControllerImpl();
+        networkConnectionListener = new NetworkConnectionListener(this);
 
         // Remote Config
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
@@ -127,7 +134,6 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
                 .setAnalyticsCollectionEnabled(
                         getRemoteConfig().getBoolean(
                                 RemoteConfigConst.FIREBASE_ANALYTICS)
-//                        && !BuildConfig.DEBUG
                 );
         FirebaseAnalytics.getInstance(this)
                 .setMinimumSessionDuration(5000);
@@ -136,14 +142,6 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         iabHelper = new IabHelper(this, IabLic.retrieveLic());
         iabHelper.enableDebugLogging(BuildConfig.DEBUG, getString(R.string.app_name) + ".BILLING");
         iabHelper.startSetup(this);
-
-        // Application controllers
-        logger = new LWQLoggerImpl();
-        wallpaperController = new LWQWallpaperControllerUnsplashImpl();
-        imageController = new LWQImageControllerUIL();
-        quoteController = new LWQQuoteControllerBrainyQuoteImpl();
-        notificationController = new LWQNotificationControllerImpl();
-        networkConnectionListener = new NetworkConnectionListener(this);
 
         // Enable
         setComponentsEnabled(!LWQPreferences.isFirstLaunch());
