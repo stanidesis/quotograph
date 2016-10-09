@@ -1,7 +1,7 @@
 ---
-headline: "Topics, Authors, and Quotes"
+headline: "All of Your Passion in One Place"
 screenshot: "/images/screenshots/device-04.png"
 ---
-Quotograph draws from a lot of inspiration, and all of it hand-picked by you.
+The app draws from a lot of inspiration, and you hand-pick it.
 
-Whether it's a topic, an author, or a quote itself, Quotograph will cycle through your playlist of choices to keep your home screen from ever repeating itself.
+Quotograph cycles through your playlist of **topics, authors, and quotes** to keep your home screen fresh.

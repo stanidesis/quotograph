@@ -1,0 +1,9 @@
+.get-it-on-google-play {
+  @include m-mediaMin($screen-tablet + 1px) {
+    margin-top: 10%;
+    width: 30%;
+  }
+  display: block;
+  margin-top: 10%;
+  width: 60%;
+}

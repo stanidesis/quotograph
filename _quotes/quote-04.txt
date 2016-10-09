@@ -1,6 +1,6 @@
 ---
 quote: "Want inspiration on the go?"
-author: "Quotograph"
+author: ""
 image: "/images/unsplash/marketing.jpg"
 text_color: "rgb(218, 125, 125"
 ---

@@ -39,13 +39,13 @@
       document.head.appendChild(script);
     }
     var loadjQueryDependants = function() {
-      loadScriptAsync("{{ '/js/jquery.fullPage.min.js' | prepend: site.url }}",
+      loadScriptAsync("/js/jquery.fullPage.min.js",
                       function () {
         $(function() {
           setupFullpage();
         });
       });
-      loadScriptAsync("{{ '/js/bootstrap.min.js' | prepend: site.url }}", function () {});
+      loadScriptAsync("/js/bootstrap.min.js", function () {});
     };
   </script>
   {% include load_css_inline.html %}

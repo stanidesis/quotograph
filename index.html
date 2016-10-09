@@ -22,7 +22,7 @@ layout: default
         {% if mod == 0 %}
         <!-- Image left -->
         <div class="col-xs-12 col-md-6">
-          <img class="img-responsive u-floatRight screenshot-image" src="{{ screenshot.screenshot | prepend: site.url }}">
+          <img class="img-responsive u-floatRight screenshot-image" src="{{ screenshot.screenshot }}">
         </div>
         <div class="col-xs-12 col-md-6 u-alignLeft screenshot-blurb">
           <h2 class="f-fontH2">{{ screenshot.headline }}</h2>
@@ -35,7 +35,7 @@ layout: default
           {{ screenshot.content | markdownify }}
         </div>
         <div class="col-xs-12 col-md-6">
-          <img class="img-responsive u-floatLeft screenshot-image" src="{{ screenshot.screenshot | prepend: site.url }}">
+          <img class="img-responsive u-floatLeft screenshot-image" src="{{ screenshot.screenshot }}">
         </div>
         {% endif %}
       </div>
@@ -43,5 +43,22 @@ layout: default
   </div>
   {% endfor %}
   <div class="section">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="u-centerInDiv" style="width: 80%">
+            <h1 class="f-fontH1 quoteBox-quote u-PrimaryText">"You Regret 100% of the Apps You Don't Download."</h1>
+            <h2 class="f-fontH2 u-alignRight quoteBox-author u-secondaryText">Wayne Appsky</h2>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+          <a href="http://bit.ly/quotograph-google-play-cta-bottom">
+            <img class="get-it-on-google-play u-centerInDiv" src="/images/google-play-badge.png" alt="Get it on Google Play">
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

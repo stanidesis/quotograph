@@ -10,6 +10,7 @@
     });
     var slideCounter = 0;
     var autoScroll = function() {
+      // TODO stop if current slide does not match expected (key scroll detected)
       if (++slideCounter > 3) {
         return;
       }
@@ -21,7 +22,7 @@
       $.fn.fullpage.moveSlideRight();
       setTimeout(autoScroll, 3000);
     }
-    setTimeout(autoScroll, 3000);
+    setTimeout(autoScroll, 4000);
 
     var showDownArrow = function() {
       var $activeSection = $("div.section.active");
@@ -41,10 +42,10 @@
         $downArrow.animate({marginBottom: 30, opacity: 0}, 2000, animateArrow);
       }
     }
-    setTimeout(showDownArrow, 3000);
+    setTimeout(showDownArrow, 4000);
     var revealHeader = function() {
       $("div.header").fadeTo(1000, 1.0);
     }
-    setTimeout(revealHeader, 3000);
+    setTimeout(revealHeader, 1000);
   }
 </script>

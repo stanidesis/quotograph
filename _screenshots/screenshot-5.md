@@ -1,8 +1,7 @@
 ---
-headline: "Get the Perfect Photo"
+headline: "Pictures Worth a Thousand Words"
 screenshot: "/images/screenshots/device-05.png"
 ---
-Pair your quotes with beautiful stock photography from Unsplash.
+We don't recommend using 1000 word quotes, though... That might flood your screen.
 
-Quotes are beautiful on their own, but they look 10x better against a gorgeous backdrop.
-Use one or more photo categories from Unsplash or choose photos from your device.
+But pair your wisdom with beautiful images from [Unsplash](https://unsplash.com/) or use pics stored on your device.

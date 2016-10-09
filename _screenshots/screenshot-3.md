@@ -1,7 +1,7 @@
 ---
-headline: "Create Your Own"
+headline: "A Little DIY"
 screenshot: "/images/screenshots/device-02.png"
 ---
-Not all quotes are in the database, so why not create your own?
+Not all quotes are in the database, especially the drunken "wisdom" your friends spill out after a long night of partying.
 
-With infinite quote storage, you can include whomever you take inspiration from; whether it's Abraham Lincoln, Mahatma Ghandi, or the most inspirational man ever: Rocky.
+Create your own quotes and Quotograph includes them in the rotation.
