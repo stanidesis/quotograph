@@ -7,8 +7,8 @@ layout: default
     {% for quote in site.quotes %}
     <div class="slide u-coverBackground" style="background-image: url({{ quote.image }}); background-attachment: initial;">
       <div class="quoteBox u-centerInDiv">
-        <h2 class="f-fontH1 u-alignJustify quoteBox-quote" style="color: {{quote.text_color}}">{{ quote.quote }}</h2>
-        <h3 class="f-fontH2 u-alignRight quoteBox-author" style="color: {{quote.text_color}}">{{ quote.author }}</h3>
+        <h2 class="f-fontH2 u-alignJustify quoteBox-quote" style="color: {{quote.text_color}}">{{ quote.quote }}</h2>
+        <h3 class="f-fontH3 u-alignLeft quoteBox-author" style="color: {{quote.text_color}}">{{ quote.author }}</h3>
       </div>
     </div>
     {% endfor %}
@@ -27,12 +27,24 @@ layout: default
         <div class="col-xs-12 col-md-6 u-alignLeft screenshot-blurb">
           <h2 class="f-fontH2">{{ screenshot.headline }}</h2>
           {{ screenshot.content | markdownify }}
+          <div class="screenshot-ctas">
+            {% if screenshot.next-section %}
+            <a href="#{{screenshot.next-section}}" class="screenshot-continue">Continue</a>
+            {% endif %}
+            <a href="#download" class="screenshot-cta">{{screenshot.cta}}</a>
+          </div>
         </div>
         {% else %}
         <!-- Text left -->
         <div class="col-xs-12 col-md-6 u-alignRight screenshot-blurb">
           <h2 class="f-fontH2">{{ screenshot.headline }}</h2>
           {{ screenshot.content | markdownify }}
+          <div class="screenshot-ctas">
+            {% if screenshot.next-section %}
+            <a href="#{{screenshot.next-section}}" class="screenshot-continue">Continue</a>
+            {% endif %}
+            <a href="#download" class="screenshot-cta">{{screenshot.cta}}</a>
+          </div>
         </div>
         <div class="col-xs-12 col-md-6">
           <img class="img-responsive u-floatLeft screenshot-image" src="{{ screenshot.screenshot }}" alt="{{screenshot.alt}}">
@@ -42,49 +54,50 @@ layout: default
     </div>
   </div>
   {% endfor %}
-  <div class="section">
+  <div class="section u-coverBackground" style="background-image: url(https://storage.googleapis.com/quotograph-site-bucket/images/wayne-gretzky-2.jpg); background-attachment: initial;">
     <div class="container">
       <div class="row">
         <div class="col-xs-12">
           <div class="u-centerInDiv" style="width: 80%">
-            <h2 class="f-fontH1 quoteBox-quote u-PrimaryText">"You Regret 100% of the Apps You Don't Download."</h2>
-            <h3 class="f-fontH2 u-alignRight quoteBox-author u-secondaryText">Wayne Appsky</h3>
+            <h2 class="f-fontH2 quoteBox-quote" style="color: white">"You Regret 100% of the Apps You Don't Download."</h2>
+            <h3 class="f-fontH3 u-alignLeft quoteBox-author" style="color: white">Wayne Gretzky</h3>
           </div>
         </div>
       </div>
       <div class="row">
         <div class="col-xs-12">
-          <a href="http://bit.ly/quotograph-google-play-cta-bottom">
+          <a href="http://bit.ly/quotograph-google-play-cta-bottom" id="google-play-badge">
             <img class="get-it-on-google-play u-centerInDiv" src="/images/google-play-badge.png" alt="Get it on Google Play">
           </a>
         </div>
       </div>
     </div>
     <div class="footer">
+      <div class="footer-background"></div>
       <div class="container">
         <div class="row">
           <div class="col-xs-6">
-            <p>Made with <span class="fa fa-heart-o" aria-hidden="true"></span> by <a href="http://bit.ly/stanley-idesis-from-quotograph">Stanley Idesis</a></p>
+            <p>Made with <span class="fa fa-heart-o" aria-hidden="true"></span> by <a href="http://bit.ly/stanley-idesis-from-quotograph" id="stanley-idesis">Stanley Idesis</a></p>
           </div>
           <div class="col-xs-6 u-alignRight u-flattenListRTL">
             <ul class="u-noPadding">
               <li class="footer-social">
-                <a href="https://www.facebook.com/quotograph/">
+                <a href="https://www.facebook.com/quotograph/" id="facebook">
                   <i id="footer-facebook" class="fa fa-facebook-official" aria-hidden="true"></i>
                 </a>
               </li>
               <li class="footer-social">
-                <a href="https://twitter.com/quotograph_app">
+                <a href="https://twitter.com/quotograph_app" id="twitter">
                   <i id="footer-twitter" class="fa fa-twitter" aria-hidden="true"></i>
                 </a>
               </li>
               <li class="footer-social">
-                <a href="https://plus.google.com/communities/104668503310860720552">
+                <a href="https://plus.google.com/communities/104668503310860720552" id="google-plus">
                   <i id="footer-google-plus" class="fa fa-google-plus" aria-hidden="true"></i>
                 </a>
               </li>
               <li class="footer-social">
-                <a href="mailto:contact@stanleyidesis.com?&subject=Quotograph App">
+                <a href="mailto:contact@stanleyidesis.com?&subject=Quotograph App" id="email">
                   <i id="footer-envelope" class="fa fa-envelope" aria-hidden="true"></i>
                 </a>
               </li>

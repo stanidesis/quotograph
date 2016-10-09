@@ -1,24 +1,34 @@
 <script type="text/javascript">
   function setupFullpage() {
+    var slideCounter = 0;
+    var slideMovements = 0;
     $('#fullpage').fullpage({
-      anchors:['quotes','screenshot-1','screenshot-2','screenshot-3','screenshot-4','screenshot-5','screenshot-6','download'],
+      anchors:['quotes','inspiration','passion','diy','search','pictures','settings','download'],
       controlArrows: false,
       fixedElements: ".header",
       afterRender: function() {
         $('#fullpage').fadeTo(1000, 1.0);
+      },
+      onSlideLeave: function(anchorLink, index, slideIndex, direction, nextSlideIndex) {
+//         console.log("Leaving!");
+        slideMovements++;
       }
     });
-    var slideCounter = 0;
     var autoScroll = function() {
-      // TODO stop if current slide does not match expected (key scroll detected)
-      if (++slideCounter > 3) {
+//       console.log("Slide movements: " + slideMovements);
+//       console.log("Slide counter: " + slideCounter);
+      if (slideMovements > slideCounter) {
+        // The user scrolled manually
+        return;
+      } else if (++slideCounter > 4) {
         return;
       }
       var $activeSection = $("div.section.active");
       if ($activeSection.index() != 0) {
-        console.log("User scrolled down");
+//         console.log("User scrolled down");
         return;
       }
+
       $.fn.fullpage.moveSlideRight();
       setTimeout(autoScroll, 3000);
     }
@@ -27,7 +37,7 @@
     var showDownArrow = function() {
       var $activeSection = $("div.section.active");
       if ($activeSection.index() != 0) {
-        console.log("User scrolled down already, not showing the arrow");
+//         console.log("User scrolled down already, not showing the arrow");
         return;
       }
       var counter = 0;

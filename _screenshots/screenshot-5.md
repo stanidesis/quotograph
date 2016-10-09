@@ -2,7 +2,7 @@
 headline: "Pictures Worth a Thousand Words"
 screenshot: "/images/screenshots/device-05.png"
 alt: "Stock Image Selector in Quotograph"
+cta: "It's Like Other Apps -- But Better"
+next-section: "settings"
 ---
-We don't recommend using 1000 word quotes, though... That might flood your screen.
-
-But pair your wisdom with beautiful images from [Unsplash](https://unsplash.com/) or use pics stored on your device.
+Thank goodness because you can't fit 1000 words on a tiny homescreen, I tried. Pair your wisdom with **beautiful images from [Unsplash](https://unsplash.com/) or your photos**.

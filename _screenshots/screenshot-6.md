@@ -2,7 +2,6 @@
 headline: "Set the Mood"
 screenshot: "/images/screenshots/device-06.png"
 alt: "Quotograph Setting Screen"
+cta: "One Click Away From Greatness"
 ---
-If you love settings, you're going to _love_ Quotograph.
-
-Blur, dim, fonts, refresh interval, and more tucked neatly away into settings.
+If you love to tinker with settings, you'll love Quotograph. **Control blur, dim, fonts, refresh times, and more**.

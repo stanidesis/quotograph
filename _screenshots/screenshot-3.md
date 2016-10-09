@@ -2,7 +2,7 @@
 headline: "A Little DIY"
 screenshot: "/images/screenshots/device-02.png"
 alt: "Editing a Quote in Quotograph"
+cta: "You Can Spare 7mb"
+next-section: "search"
 ---
-Not all quotes are in the database, especially the drunken "wisdom" your friends spill out after a long night of partying.
-
-Create your own quotes and Quotograph includes them in the rotation.
+Not all quotes are in the database, especially the unsolicited "advice" your friends give out at 2AM. **Add your own quotes** and Quotograph includes them in the rotation.

@@ -6,6 +6,23 @@
   padding: 1% 0;
 }
 
+.footer-background {
+  @include m-mediaMin($screen-tablet + 1px) {
+    top: -30%;
+  }
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: -50%;
+  // Gradients
+  background: $color-background; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(rgba(255,0,0,0),$color-background); /*Safari 5.1-6*/
+  background: -o-linear-gradient(rgba(255,0,0,0),$color-background); /*Opera 11.1-12*/
+  background: -moz-linear-gradient(rgba(255,0,0,0),$color-background); /*Fx 3.6-15*/
+  background: linear-gradient(rgba(255,0,0,0), $color-background); /*Standard*/
+}
+
 #footer-facebook,
 #footer-twitter,
 #footer-google-plus,

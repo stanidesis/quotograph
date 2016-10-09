@@ -5,6 +5,7 @@
     width: 80%;
     margin-left: inherit;
     margin-right: inherit;
+    margin-top: 0;
   }
   @include m-mediaMax($screen-tablet) {
     float: none;
@@ -12,10 +13,41 @@
   width: 50%;
   margin-left: auto;
   margin-right: auto;
+  margin-top: 5%;
 }
 .screenshot-blurb {
   @include m-mediaMin($screen-tablet + 1px) {
     margin-top: 30%;
   }
   margin-top: inherit;
+}
+.screenshot-ctas {
+  margin-top: 3%;
+}
+.screenshot-cta,
+.screenshot-continue {
+  @include m-boxShadow(0, 0, .1rem, .1rem, rgba(black, .2));
+  @include m-transition(-mox-box-shadow, $seconds-defaultAnimLength ease-in);
+  @include m-transition(-webkit-box-shadow, $seconds-defaultAnimLength ease-in);
+  @include m-transition(box-shadow, $seconds-defaultAnimLength ease-in);
+  &:hover, &:active, &:visited {
+    @include m-boxShadow(0, 0, .4rem, .2rem, rgba(black, .5));
+    text-decoration: none;
+    color: white;
+  }
+  background-color: $color-secondary;
+  border: 1px solid $color-secondary;
+  border-radius: .2rem;
+  padding: .8rem 2.5rem;
+  color: white;
+  line-height: 3.8rem;
+  text-decoration: none;
+}
+
+.screenshot-continue {&:hover, &:active, &:visited {
+    @include m-boxShadow(0, 0, .4rem, .2rem, rgba(black, .5));
+    color: $color-textPrimary;
+  }
+  background-color: $color-background;
+  color: $color-textPrimary;
 }

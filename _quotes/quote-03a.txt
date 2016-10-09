@@ -1,0 +1,6 @@
+---
+quote: "Do or Do Not, There is no try."
+author: "Dumbledore"
+image: "https://storage.googleapis.com/quotograph-site-bucket/images/gandalf.jpg"
+text_color: "rgb(200,200,200)"
+---
