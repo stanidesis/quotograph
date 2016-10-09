@@ -12,7 +12,7 @@ description: > # this means to ignore newlines until "baseurl:"
   Quotograph combines beautiful photography with inspirational quotes to keep you motivated throughout the day.
 keywords: "quotograph,quote,photograph,beautiful,inspirational,live wallpaper,android,application"
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://sites-220369.nitrousapp.com" # the base hostname & protocol for your site
+url: "http://quotograph.me" # the base hostname & protocol for your site
 # Social
 twitter_username: quotograph_app
 instagram_username: quotograph_app
