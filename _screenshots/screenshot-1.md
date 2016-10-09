@@ -1,6 +1,7 @@
 ---
 headline: "Inspiration on the Go"
 screenshot: "/images/screenshots/device-01.png"
+alt: "Home Screen with Quotograph Enabled"
 ---
 Quotograph is an ever-changing, dynamic wallpaper designed to keep you _inspired_.
 

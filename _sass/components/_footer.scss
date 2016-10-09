@@ -1,0 +1,24 @@
+.footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1% 0;
+}
+
+#footer-facebook,
+#footer-twitter,
+#footer-google-plus,
+#footer-envelope {
+  @include m-mediaMin($screen-tablet + 1px) {
+    @include m-fontSize(2.2);
+  }
+  @include m-fontSize(2.8);
+}
+
+.footer-social {
+  @include m-mediaMin($screen-tablet + 1px) {
+    margin-left: 1%;
+  }
+  margin-left: 6%;
+}

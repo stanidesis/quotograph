@@ -13,6 +13,7 @@
   "utilities/zindex",
   "fonts/type",
   "components/down-arrow",
+  "components/footer",
   "components/get-on-google-play",
   "components/header",
   "components/quote-box",
@@ -22,9 +23,9 @@
 a {
   @include m-transition(color $seconds-defaultAnimLength ease);
   color: $color-accent;
+  text-decoration: underline;
   &:hover, &:active, &:visited {
     color: darken($color-accent, 25%);
-    text-decoration: none;
   }
 }
 // Set background color

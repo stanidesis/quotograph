@@ -1,6 +1,7 @@
 ---
 headline: "Pictures Worth a Thousand Words"
 screenshot: "/images/screenshots/device-05.png"
+alt: "Stock Image Selector in Quotograph"
 ---
 We don't recommend using 1000 word quotes, though... That might flood your screen.
 

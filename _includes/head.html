@@ -4,9 +4,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Main Details -->
-  <title>{% if page.title %}{{ page.title | escape }}{% else %}{{ site.title | escape }}{% endif %}</title>
-  <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
-  <meta nam="keywords" content="{{ site.keywords }}">
+  <title>{{ site.title | escape }}</title>
+  <meta name="title" content="{{site.title | escape}}">
+  <meta name="description" content="{{ site.description }}">
+  <meta name="keywords" content="{{ site.keywords }}">
+  <meta name="author" content="Stanley Idesis">
 
   <!-- Google Indexing -->
   <meta name="googlebot" content="index,follow">
@@ -23,12 +25,31 @@
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ '/feed.xml' | prepend: site.url }}">
 
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="app">
+  <meta name="twitter:site" content="@quotograph_app">
+  <meta name="twitter:description" content="{{ site.description }}">
+  <meta name="twitter:app:name:googleplay" content="{{site.title}}">
+  <meta name="twitter:app:id:googleplay" content="{{site.android_package}}">
+
+  <!-- Facebook Card -->
+  <meta property="og:url" content="http://bit.ly/quotograph-paste-into-facebook" />
+  <meta property="og:type" content="app" />
+  <meta property="og:title" content="{{ site.title }}" />
+  <meta property="og:description" content="{{ site.description }}" />
+  <meta property="og:image" content="https://scontent-lax3-1.cdninstagram.com/l/t51.2885-19/s150x150/12825916_1673325972921524_2140949739_a.jpg" />
+
   <!-- JavaScript -->
+
+  <!-- Async jQuery Load -->
   <script async
           onload="loadjQueryDependants()"
           src="https://code.jquery.com/jquery-2.2.3.min.js"
           integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="
           crossorigin="anonymous">
+  </script>
+  <script async
+          src="https://use.fontawesome.com/a515c98bc2.js">
   </script>
   <script type="text/javascript">
     var loadScriptAsync = function(url, callback) {
@@ -39,8 +60,7 @@
       document.head.appendChild(script);
     }
     var loadjQueryDependants = function() {
-      loadScriptAsync("/js/jquery.fullPage.min.js",
-                      function () {
+      loadScriptAsync("/js/jquery.fullPage.min.js", function () {
         $(function() {
           setupFullpage();
         });

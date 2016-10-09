@@ -1,6 +1,7 @@
 ---
 headline: "Set the Mood"
 screenshot: "/images/screenshots/device-06.png"
+alt: "Quotograph Setting Screen"
 ---
 If you love settings, you're going to _love_ Quotograph.
 

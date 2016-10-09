@@ -1,6 +1,7 @@
 ---
 headline: "All of Your Passion in One Place"
 screenshot: "/images/screenshots/device-04.png"
+alt: "Quotograph's Playlist Sample: Inspirational, Albert Einstein, Dali"
 ---
 The app draws from a lot of inspiration, and you hand-pick it.
 

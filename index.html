@@ -7,8 +7,8 @@ layout: default
     {% for quote in site.quotes %}
     <div class="slide u-coverBackground" style="background-image: url({{ quote.image }}); background-attachment: initial;">
       <div class="quoteBox u-centerInDiv">
-        <h1 class="f-fontH1 u-alignJustify quoteBox-quote" style="color: {{quote.text_color}}">{{ quote.quote }}</h1>
-        <h2 class="f-fontH2 u-alignRight quoteBox-author" style="color: {{quote.text_color}}">{{ quote.author }}</h2>
+        <h2 class="f-fontH1 u-alignJustify quoteBox-quote" style="color: {{quote.text_color}}">{{ quote.quote }}</h2>
+        <h3 class="f-fontH2 u-alignRight quoteBox-author" style="color: {{quote.text_color}}">{{ quote.author }}</h3>
       </div>
     </div>
     {% endfor %}
@@ -22,7 +22,7 @@ layout: default
         {% if mod == 0 %}
         <!-- Image left -->
         <div class="col-xs-12 col-md-6">
-          <img class="img-responsive u-floatRight screenshot-image" src="{{ screenshot.screenshot }}">
+          <img class="img-responsive u-floatRight screenshot-image" src="{{ screenshot.screenshot }}" alt="{{screenshot.alt}}">
         </div>
         <div class="col-xs-12 col-md-6 u-alignLeft screenshot-blurb">
           <h2 class="f-fontH2">{{ screenshot.headline }}</h2>
@@ -35,7 +35,7 @@ layout: default
           {{ screenshot.content | markdownify }}
         </div>
         <div class="col-xs-12 col-md-6">
-          <img class="img-responsive u-floatLeft screenshot-image" src="{{ screenshot.screenshot }}">
+          <img class="img-responsive u-floatLeft screenshot-image" src="{{ screenshot.screenshot }}" alt="{{screenshot.alt}}">
         </div>
         {% endif %}
       </div>
@@ -47,8 +47,8 @@ layout: default
       <div class="row">
         <div class="col-xs-12">
           <div class="u-centerInDiv" style="width: 80%">
-            <h1 class="f-fontH1 quoteBox-quote u-PrimaryText">"You Regret 100% of the Apps You Don't Download."</h1>
-            <h2 class="f-fontH2 u-alignRight quoteBox-author u-secondaryText">Wayne Appsky</h2>
+            <h2 class="f-fontH1 quoteBox-quote u-PrimaryText">"You Regret 100% of the Apps You Don't Download."</h2>
+            <h3 class="f-fontH2 u-alignRight quoteBox-author u-secondaryText">Wayne Appsky</h3>
           </div>
         </div>
       </div>
@@ -57,6 +57,39 @@ layout: default
           <a href="http://bit.ly/quotograph-google-play-cta-bottom">
             <img class="get-it-on-google-play u-centerInDiv" src="/images/google-play-badge.png" alt="Get it on Google Play">
           </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-6">
+            <p>Made with <span class="fa fa-heart-o" aria-hidden="true"></span> by <a href="http://bit.ly/stanley-idesis-from-quotograph">Stanley Idesis</a></p>
+          </div>
+          <div class="col-xs-6 u-alignRight u-flattenListRTL">
+            <ul class="u-noPadding">
+              <li class="footer-social">
+                <a href="https://www.facebook.com/quotograph/">
+                  <i id="footer-facebook" class="fa fa-facebook-official" aria-hidden="true"></i>
+                </a>
+              </li>
+              <li class="footer-social">
+                <a href="https://twitter.com/quotograph_app">
+                  <i id="footer-twitter" class="fa fa-twitter" aria-hidden="true"></i>
+                </a>
+              </li>
+              <li class="footer-social">
+                <a href="https://plus.google.com/communities/104668503310860720552">
+                  <i id="footer-google-plus" class="fa fa-google-plus" aria-hidden="true"></i>
+                </a>
+              </li>
+              <li class="footer-social">
+                <a href="mailto:contact@stanleyidesis.com?&subject=Quotograph App">
+                  <i id="footer-envelope" class="fa fa-envelope" aria-hidden="true"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
