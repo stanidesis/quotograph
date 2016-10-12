@@ -29,9 +29,19 @@ layout: default
           {{ screenshot.content | markdownify }}
           <div class="screenshot-ctas">
             {% if screenshot.next-section %}
-            <a href="#{{screenshot.next-section}}" class="screenshot-continue">Continue</a>
+            <a href="#{{screenshot.next-section}}"
+               class="screenshot-continue"
+               ga-on="click"
+               ga-event-category="{{screenshot.section}}"
+               ga-event-action="click"
+               ga-event-label="Continue">Continue</a>
             {% endif %}
-            <a href="#download" class="screenshot-cta">{{screenshot.cta}}</a>
+            <a href="#download"
+               class="screenshot-cta"
+               ga-on="click"
+               ga-event-category="{{screenshot.section}}"
+               ga-event-action="click"
+               ga-event-label="{{screenshot.cta}}">{{screenshot.cta}}</a>
           </div>
         </div>
         {% else %}
@@ -41,9 +51,19 @@ layout: default
           {{ screenshot.content | markdownify }}
           <div class="screenshot-ctas">
             {% if screenshot.next-section %}
-            <a href="#{{screenshot.next-section}}" class="screenshot-continue">Continue</a>
+            <a href="#{{screenshot.next-section}}"
+               class="screenshot-continue"
+               ga-on="click"
+               ga-event-category="{{screenshot.section}}"
+               ga-event-action="click"
+               ga-event-label="Continue">Continue</a>
             {% endif %}
-            <a href="#download" class="screenshot-cta">{{screenshot.cta}}</a>
+            <a href="#download"
+               class="screenshot-cta"
+               ga-on="click"
+               ga-event-category="{{screenshot.section}}"
+               ga-event-action="click"
+               ga-event-label="{{screenshot.cta}}">{{screenshot.cta}}</a>
           </div>
         </div>
         <div class="col-xs-12 col-md-6">

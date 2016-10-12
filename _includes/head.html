@@ -53,8 +53,18 @@
           src="https://use.fontawesome.com/a515c98bc2.js">
   </script>
   <!-- Google Analytics -->
+  {% if jekyll.environment == "development" %}
+  <script async
+          src="/js/ga.debug.js">
+  </script>
+  {% else %}
   <script async
           src="/js/ga.js">
+  </script>
+  {% endif %}
+  <!-- AutoTrack - Thanks, Google! -->
+  <script async
+          src="/js/autotrack.js">
   </script>
   <!-- Loads jQuery, then asynchronously loads jQuery dependents -->
   <script type="text/javascript">
