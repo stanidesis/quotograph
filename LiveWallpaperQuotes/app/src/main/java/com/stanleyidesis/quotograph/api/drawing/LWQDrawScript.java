@@ -13,12 +13,12 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
+import android.renderscript.Script;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.support.v7.graphics.Palette;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.stanleyidesis.quotograph.BuildConfig;
@@ -27,7 +27,7 @@ import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
-import com.stanleyidesis.quotograph.ui.Fonts;
+import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 
 import java.util.Arrays;
@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static android.R.attr.radius;
+import static android.renderscript.RenderScript.releaseAllContexts;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -78,7 +81,7 @@ public abstract class LWQDrawScript {
     static final int TEXT_ALPHA = 0xE5FFFFFF;
     static final int STROKE_ALPHA = 0xF2FFFFFF;
     static int swatchIndex;
-    static RenderScript renderScript;
+//    static RenderScript renderScript;
 
     static {
         executorService = Executors.newSingleThreadScheduledExecutor();
@@ -141,8 +144,8 @@ public abstract class LWQDrawScript {
                         return;
                     }
                     resetDrawRequests();
-                    if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
-                        LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+                    if (!LWQWallpaperControllerHelper.get().activeWallpaperLoaded()) {
+                        LWQWallpaperControllerHelper.get().retrieveActiveWallpaper();
                         return;
                     }
                     draw();
@@ -162,7 +165,7 @@ public abstract class LWQDrawScript {
 
     void draw() {
         final LWQWallpaperController wallpaperController =
-                LWQApplication.getWallpaperController();
+                LWQWallpaperControllerHelper.get();
         final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
         if (backgroundImage == null) {
             return;
@@ -210,7 +213,7 @@ public abstract class LWQDrawScript {
      */
     Rect drawText(Canvas canvas, int screenWidth, int screenHeight) {
         Context context = LWQApplication.get();
-        final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
+        final LWQWallpaperController wallpaperController = LWQWallpaperControllerHelper.get();
 
         final Palette.Swatch swatch = getSwatch();
         int quoteColor = swatch.getRgb();
@@ -385,22 +388,38 @@ public abstract class LWQDrawScript {
     }
 
     Bitmap blurBitmap(Bitmap original, float radius) {
-        if (renderScript == null) {
+        RenderScript renderScript = null;
+        Allocation overlayAllocation = null;
+        Allocation outAllocation = null;
+        ScriptIntrinsicBlur blur = null;
+        Bitmap result = null;
+        try {
             renderScript = RenderScript.create(LWQApplication.get());
+            overlayAllocation = Allocation.createFromBitmap(renderScript, original);
+            outAllocation = Allocation.createTyped(renderScript, overlayAllocation.getType());
+            result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
+            blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
+            blur.setInput(overlayAllocation);
+            blur.setRadius(radius);
+            blur.forEach(outAllocation);
+            outAllocation.copyTo(result);
+        } finally {
+            if (renderScript != null) {
+                renderScript.destroy();
+            }
+            if (overlayAllocation != null) {
+                overlayAllocation.destroy();
+            }
+            if (outAllocation != null) {
+                outAllocation.destroy();
+            }
+            if (blur != null) {
+                blur.destroy();
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                RenderScript.releaseAllContexts();
+            }
         }
-        Allocation overlayAllocation = Allocation.createFromBitmap(renderScript, original);
-
-        ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(renderScript, overlayAllocation.getElement());
-        blur.setRadius(radius);
-        blur.setInput(overlayAllocation);
-
-        Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
-        Allocation outAllocation = Allocation.createFromBitmap(renderScript, original);
-        blur.forEach(outAllocation);
-        outAllocation.copyTo(result);
-
-        overlayAllocation.destroy();
-        outAllocation.destroy();
         return result;
     }
 

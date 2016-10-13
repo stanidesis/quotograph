@@ -25,9 +25,11 @@ import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskEvent;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskUpdate;
 import com.stanleyidesis.quotograph.api.event.NetworkConnectivityEvent;
+import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
 import com.stanleyidesis.quotograph.api.service.LWQWallpaperService;
 import com.stanleyidesis.quotograph.api.task.LWQFirstLaunchTask;
 import com.stanleyidesis.quotograph.ui.UIUtils;
@@ -158,11 +160,11 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         activePageFiveView = firstLaunchTaskCompleted ? activateButton : progressBar;
         activePageFiveView.requestLayout();
         if (firstLaunchTaskCompleted) {
-            if (!LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
-                LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+            if (!LWQWallpaperControllerHelper.get().activeWallpaperLoaded()) {
+                LWQWallpaperControllerHelper.get().retrieveActiveWallpaper();
             }
         } else {
-            if (!LWQApplication.getNetworkConnectionListener().getCurrentConnectionType().isConnected()) {
+            if (!NetworkConnectionListener.get().getCurrentConnectionType().isConnected()) {
                 presentNetworkRequiredDialog();
             } else {
                 firstLaunchTask = new LWQFirstLaunchTask();

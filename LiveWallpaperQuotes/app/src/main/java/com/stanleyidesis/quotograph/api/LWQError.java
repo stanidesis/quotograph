@@ -1,6 +1,6 @@
 package com.stanleyidesis.quotograph.api;
 
-import com.stanleyidesis.quotograph.LWQApplication;
+import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -39,24 +39,24 @@ public class LWQError {
 
     public static LWQError create(String errorMessage) {
         LWQError lwqError = new LWQError(errorMessage);
-        LWQApplication.getLogger().logError(lwqError);
+        LWQLoggerHelper.get().logError(lwqError);
         return lwqError;
     }
 
     public static LWQError create(Throwable errorThrowable) {
         LWQError lwqError = new LWQError(errorThrowable);
-        LWQApplication.getLogger().logError(lwqError);
+        LWQLoggerHelper.get().logError(lwqError);
         return lwqError;
     }
 
     public static LWQError create(String errorMessage, Throwable errorThrowable) {
         LWQError lwqError = new LWQError(errorMessage, errorThrowable);
-        LWQApplication.getLogger().logError(lwqError);
+        LWQLoggerHelper.get().logError(lwqError);
         return lwqError;
     }
 
     public static void log(String errorMessage) {
-        LWQApplication.getLogger().logError(LWQError.create(errorMessage));
+        LWQLoggerHelper.get().logError(LWQError.create(errorMessage));
     }
 
     final String errorMessage;

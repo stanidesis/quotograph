@@ -123,14 +123,15 @@ public class AnalyticsUtils {
 
 
     public static void trackTutorial(boolean started) {
-        LWQApplication.getAnalytics().
-                logEvent(started ?  FirebaseAnalytics.Event.TUTORIAL_BEGIN :
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(started ?  FirebaseAnalytics.Event.TUTORIAL_BEGIN :
                         FirebaseAnalytics.Event.TUTORIAL_COMPLETE, null);
     }
 
     public static void trackSearch(String query) {
-        LWQApplication.getAnalytics().logEvent(FirebaseAnalytics.Event.SEARCH,
-                buildBundle(FirebaseAnalytics.Param.SEARCH_TERM, query));
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(FirebaseAnalytics.Event.SEARCH,
+                        buildBundle(FirebaseAnalytics.Param.SEARCH_TERM, query));
         trackEvent(CATEGORY_SEARCH, ACTION_SEARCH, query);
     }
 
@@ -138,14 +139,15 @@ public class AnalyticsUtils {
         Bundle bundle = AnalyticsUtils.buildBundle(
                 FirebaseAnalytics.Param.CONTENT_TYPE, category);
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, label);
-        LWQApplication.getAnalytics().logEvent(FirebaseAnalytics.Event.SHARE, bundle);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(FirebaseAnalytics.Event.SHARE, bundle);
         // Double log it for GA
         trackEvent(category, ACTION_SHARED, label);
     }
 
     public static void trackScreenView(String screenName) {
-        LWQApplication.getAnalytics().
-                logEvent(FirebaseAnalytics.Event.VIEW_ITEM,
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(FirebaseAnalytics.Event.VIEW_ITEM,
                         buildBundle(FirebaseAnalytics.Param.ITEM_NAME, screenName));
     }
 
@@ -169,7 +171,8 @@ public class AnalyticsUtils {
         if (value != null) {
             bundle.putInt(FirebaseAnalytics.Param.VALUE, value);
         }
-        LWQApplication.getAnalytics().logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
     public static Bundle buildBundle(String key, String value) {
