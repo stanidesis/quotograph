@@ -13,18 +13,21 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
-import android.renderscript.Script;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.support.v7.graphics.Palette;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.util.Log;
+import android.util.SparseArray;
 import android.widget.Toast;
 
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.stanleyidesis.quotograph.BuildConfig;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.RemoteConfigConst;
 import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
@@ -37,9 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static android.R.attr.radius;
-import static android.renderscript.RenderScript.releaseAllContexts;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -77,15 +77,15 @@ import static android.renderscript.RenderScript.releaseAllContexts;
 public abstract class LWQDrawScript {
 
     static ExecutorService executorService;
-    static Map<Integer, Palette> paletteCache;
+    static SparseArray<Palette> paletteCache;
     static final int TEXT_ALPHA = 0xE5FFFFFF;
     static final int STROKE_ALPHA = 0xF2FFFFFF;
     static int swatchIndex;
-//    static RenderScript renderScript;
+    static RenderScript renderScript;
 
     static {
         executorService = Executors.newSingleThreadScheduledExecutor();
-        paletteCache = new HashMap<>();
+        paletteCache = new SparseArray<>();
     }
 
     Palette palette;
@@ -163,7 +163,7 @@ public abstract class LWQDrawScript {
         requestDraw(null);
     }
 
-    void draw() {
+    private void draw() {
         final LWQWallpaperController wallpaperController =
                 LWQWallpaperControllerHelper.get();
         final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
@@ -190,7 +190,7 @@ public abstract class LWQDrawScript {
             final int blurPreference = LWQPreferences.getBlurPreference();
             final int dimPreference = LWQPreferences.getDimPreference();
             // Blur or choose the raw background image
-            Bitmap toDraw = blurPreference > 0.5f ? generateBitmap(blurPreference, backgroundImage) : backgroundImage;
+            Bitmap toDraw = blurPreference > 0.5f ? generateBlurredBitmap(blurPreference, backgroundImage) : backgroundImage;
             drawBitmap(canvas, screenWidth, surfaceFrame, toDraw);
             drawDimmer(canvas, dimPreference);
             drawText(canvas, screenWidth, screenHeight);
@@ -211,7 +211,7 @@ public abstract class LWQDrawScript {
      * @param screenHeight
      * @return the rect surrounding both the quote and author
      */
-    Rect drawText(Canvas canvas, int screenWidth, int screenHeight) {
+    private Rect drawText(Canvas canvas, int screenWidth, int screenHeight) {
         Context context = LWQApplication.get();
         final LWQWallpaperController wallpaperController = LWQWallpaperControllerHelper.get();
 
@@ -296,21 +296,14 @@ public abstract class LWQDrawScript {
         return drawingArea;
     }
 
-    void drawDimmer(Canvas canvas, int dimPreference) {
+    private void drawDimmer(Canvas canvas, int dimPreference) {
         if (dimPreference > 0) {
             int alpha = (int) Math.floor(255f * (dimPreference / 100f));
             canvas.drawColor(Color.argb(alpha, 0, 0, 0));
         }
     }
 
-    Bitmap generateBitmap(int blurRadius, Bitmap backgroundImage) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
-            return blurBitmap(backgroundImage, blurRadius);
-        }
-        return backgroundImage;
-    }
-
-    void drawBitmap(Canvas canvas, int screenWidth, Rect surfaceFrame, Bitmap bitmapToDraw) {
+    private void drawBitmap(Canvas canvas, int screenWidth, Rect surfaceFrame, Bitmap bitmapToDraw) {
         Paint bitmapPaint = new Paint();
         bitmapPaint.setAntiAlias(true);
         bitmapPaint.setFilterBitmap(true);
@@ -362,7 +355,7 @@ public abstract class LWQDrawScript {
         canvas.drawBitmap(icon, scaleMatrix, iconPaint);
     }
 
-    StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight, String longestWord) {
+    private StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight, String longestWord) {
         final TextPaint textPaint = staticLayout.getPaint();
         while (staticLayout.getHeight() > maxHeight
                 || staticLayout.getWidth() < StaticLayout.getDesiredWidth(longestWord, textPaint)) {
@@ -374,7 +367,7 @@ public abstract class LWQDrawScript {
         return staticLayout;
     }
 
-    void strokeText(StaticLayout staticLayout, int color, float width, Canvas canvas) {
+    private void strokeText(StaticLayout staticLayout, int color, float width, Canvas canvas) {
         TextPaint strokePaint = new TextPaint(staticLayout.getPaint());
         strokePaint.setColor(color);
         strokePaint.setStyle(Paint.Style.STROKE);
@@ -387,14 +380,34 @@ public abstract class LWQDrawScript {
         strokeLayout.draw(canvas);
     }
 
-    Bitmap blurBitmap(Bitmap original, float radius) {
-        RenderScript renderScript = null;
+    /**
+     * This approach uses StackBlurring by Mario Klingemann as long as the device is running
+     * an old OS or the Firebase config says so.
+     *
+     * Leaving the Firebase config in there in case a flurry of OOM errors results.
+     *
+     * @param blurRadius
+     * @param backgroundImage
+     * @return
+     */
+    private Bitmap generateBlurredBitmap(int blurRadius, Bitmap backgroundImage) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN
+                || FirebaseRemoteConfig.getInstance().getBoolean(RemoteConfigConst.STACK_BLURRING)) {
+            return stackBlur(backgroundImage, 1.0f, blurRadius);
+        } else {
+            return blurBitmap(backgroundImage, blurRadius);
+        }
+    }
+
+    private Bitmap blurBitmap(Bitmap original, float radius) {
         Allocation overlayAllocation = null;
         Allocation outAllocation = null;
         ScriptIntrinsicBlur blur = null;
         Bitmap result = null;
         try {
-            renderScript = RenderScript.create(LWQApplication.get());
+            if (renderScript == null) {
+                renderScript = RenderScript.create(LWQApplication.get());
+            }
             overlayAllocation = Allocation.createFromBitmap(renderScript, original);
             outAllocation = Allocation.createTyped(renderScript, overlayAllocation.getType());
             result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
@@ -423,19 +436,230 @@ public abstract class LWQDrawScript {
         return result;
     }
 
-    Palette.Swatch getSwatch() {
+    /**
+     * Stack Blur Algorithm by Mario Klingemann <mario@quasimondo.com>
+     */
+    public Bitmap stackBlur(Bitmap sentBitmap, float scale, int radius) {
+
+        int width = Math.round(sentBitmap.getWidth() * scale);
+        int height = Math.round(sentBitmap.getHeight() * scale);
+        sentBitmap = Bitmap.createScaledBitmap(sentBitmap, width, height, false);
+
+        Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
+
+        if (radius < 1) {
+            return (null);
+        }
+
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+
+        int[] pix = new int[w * h];
+        Log.e("pix", w + " " + h + " " + pix.length);
+        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+
+        int wm = w - 1;
+        int hm = h - 1;
+        int wh = w * h;
+        int div = radius + radius + 1;
+
+        int r[] = new int[wh];
+        int g[] = new int[wh];
+        int b[] = new int[wh];
+        int rsum, gsum, bsum, x, y, i, p, yp, yi, yw;
+        int vmin[] = new int[Math.max(w, h)];
+
+        int divsum = (div + 1) >> 1;
+        divsum *= divsum;
+        int dv[] = new int[256 * divsum];
+        for (i = 0; i < 256 * divsum; i++) {
+            dv[i] = (i / divsum);
+        }
+
+        yw = yi = 0;
+
+        int[][] stack = new int[div][3];
+        int stackpointer;
+        int stackstart;
+        int[] sir;
+        int rbs;
+        int r1 = radius + 1;
+        int routsum, goutsum, boutsum;
+        int rinsum, ginsum, binsum;
+
+        for (y = 0; y < h; y++) {
+            rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
+            for (i = -radius; i <= radius; i++) {
+                p = pix[yi + Math.min(wm, Math.max(i, 0))];
+                sir = stack[i + radius];
+                sir[0] = (p & 0xff0000) >> 16;
+                sir[1] = (p & 0x00ff00) >> 8;
+                sir[2] = (p & 0x0000ff);
+                rbs = r1 - Math.abs(i);
+                rsum += sir[0] * rbs;
+                gsum += sir[1] * rbs;
+                bsum += sir[2] * rbs;
+                if (i > 0) {
+                    rinsum += sir[0];
+                    ginsum += sir[1];
+                    binsum += sir[2];
+                } else {
+                    routsum += sir[0];
+                    goutsum += sir[1];
+                    boutsum += sir[2];
+                }
+            }
+            stackpointer = radius;
+
+            for (x = 0; x < w; x++) {
+
+                r[yi] = dv[rsum];
+                g[yi] = dv[gsum];
+                b[yi] = dv[bsum];
+
+                rsum -= routsum;
+                gsum -= goutsum;
+                bsum -= boutsum;
+
+                stackstart = stackpointer - radius + div;
+                sir = stack[stackstart % div];
+
+                routsum -= sir[0];
+                goutsum -= sir[1];
+                boutsum -= sir[2];
+
+                if (y == 0) {
+                    vmin[x] = Math.min(x + radius + 1, wm);
+                }
+                p = pix[yw + vmin[x]];
+
+                sir[0] = (p & 0xff0000) >> 16;
+                sir[1] = (p & 0x00ff00) >> 8;
+                sir[2] = (p & 0x0000ff);
+
+                rinsum += sir[0];
+                ginsum += sir[1];
+                binsum += sir[2];
+
+                rsum += rinsum;
+                gsum += ginsum;
+                bsum += binsum;
+
+                stackpointer = (stackpointer + 1) % div;
+                sir = stack[(stackpointer) % div];
+
+                routsum += sir[0];
+                goutsum += sir[1];
+                boutsum += sir[2];
+
+                rinsum -= sir[0];
+                ginsum -= sir[1];
+                binsum -= sir[2];
+
+                yi++;
+            }
+            yw += w;
+        }
+        for (x = 0; x < w; x++) {
+            rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
+            yp = -radius * w;
+            for (i = -radius; i <= radius; i++) {
+                yi = Math.max(0, yp) + x;
+
+                sir = stack[i + radius];
+
+                sir[0] = r[yi];
+                sir[1] = g[yi];
+                sir[2] = b[yi];
+
+                rbs = r1 - Math.abs(i);
+
+                rsum += r[yi] * rbs;
+                gsum += g[yi] * rbs;
+                bsum += b[yi] * rbs;
+
+                if (i > 0) {
+                    rinsum += sir[0];
+                    ginsum += sir[1];
+                    binsum += sir[2];
+                } else {
+                    routsum += sir[0];
+                    goutsum += sir[1];
+                    boutsum += sir[2];
+                }
+
+                if (i < hm) {
+                    yp += w;
+                }
+            }
+            yi = x;
+            stackpointer = radius;
+            for (y = 0; y < h; y++) {
+                // Preserve alpha channel: ( 0xff000000 & pix[yi] )
+                pix[yi] = ( 0xff000000 & pix[yi] ) | ( dv[rsum] << 16 ) | ( dv[gsum] << 8 ) | dv[bsum];
+
+                rsum -= routsum;
+                gsum -= goutsum;
+                bsum -= boutsum;
+
+                stackstart = stackpointer - radius + div;
+                sir = stack[stackstart % div];
+
+                routsum -= sir[0];
+                goutsum -= sir[1];
+                boutsum -= sir[2];
+
+                if (x == 0) {
+                    vmin[y] = Math.min(y + r1, hm) * w;
+                }
+                p = x + vmin[y];
+
+                sir[0] = r[p];
+                sir[1] = g[p];
+                sir[2] = b[p];
+
+                rinsum += sir[0];
+                ginsum += sir[1];
+                binsum += sir[2];
+
+                rsum += rinsum;
+                gsum += ginsum;
+                bsum += binsum;
+
+                stackpointer = (stackpointer + 1) % div;
+                sir = stack[stackpointer];
+
+                routsum += sir[0];
+                goutsum += sir[1];
+                boutsum += sir[2];
+
+                rinsum -= sir[0];
+                ginsum -= sir[1];
+                binsum -= sir[2];
+
+                yi += w;
+            }
+        }
+
+        Log.e("pix", w + " " + h + " " + pix.length);
+        bitmap.setPixels(pix, 0, w, 0, 0, w, h);
+
+        return (bitmap);
+    }
+
+    private Palette.Swatch getSwatch() {
         return palette.getSwatches().get(swatchIndex);
     }
 
-    synchronized void increaseDrawRequests() {
+    private synchronized void increaseDrawRequests() {
         drawRequests++;
     }
 
-    synchronized void resetDrawRequests() {
+    private synchronized void resetDrawRequests() {
         drawRequests = 0;
     }
 
-    synchronized int getDrawRequests() {
+    private synchronized int getDrawRequests() {
         return drawRequests;
     }
 }
