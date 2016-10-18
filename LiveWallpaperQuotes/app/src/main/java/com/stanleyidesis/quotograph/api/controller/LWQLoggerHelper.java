@@ -14,7 +14,7 @@ public class LWQLoggerHelper {
         if (logger != null) {
             return logger;
         }
-        logger = BuildConfig.DEBUG ? new LWQLoggerImpl() : new LWQDebugLogger();
+        logger = BuildConfig.DEBUG ? new LWQDebugLogger() : new LWQLoggerImpl();
         return get();
     }
 }
