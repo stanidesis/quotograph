@@ -6,6 +6,7 @@ import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.StrictMode;
 import android.support.annotation.NonNull;
 
 import com.crashlytics.android.Crashlytics;
@@ -18,18 +19,9 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.orm.SugarApp;
 import com.stanleyidesis.quotograph.api.LWQError;
-import com.stanleyidesis.quotograph.api.controller.LWQImageController;
-import com.stanleyidesis.quotograph.api.controller.LWQImageControllerUIL;
-import com.stanleyidesis.quotograph.api.controller.LWQLogger;
-import com.stanleyidesis.quotograph.api.controller.LWQLoggerImpl;
-import com.stanleyidesis.quotograph.api.controller.LWQNotificationController;
-import com.stanleyidesis.quotograph.api.controller.LWQNotificationControllerImpl;
-import com.stanleyidesis.quotograph.api.controller.LWQQuoteController;
-import com.stanleyidesis.quotograph.api.controller.LWQQuoteControllerBrainyQuoteImpl;
-import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
-import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerUnsplashImpl;
+import com.stanleyidesis.quotograph.api.controller.LWQImageControllerHelper;
+import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
 import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
-import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
 import com.stanleyidesis.quotograph.api.receiver.LWQReceiver;
 import com.stanleyidesis.quotograph.api.service.LWQWallpaperService;
 import com.stanleyidesis.quotograph.billing.util.IabBroadcastReceiver;
@@ -51,6 +43,7 @@ import java.util.Set;
 
 import de.greenrobot.event.EventBus;
 import io.fabric.sdk.android.Fabric;
+import io.fabric.sdk.android.services.concurrency.AsyncTask;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -90,67 +83,80 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         IabHelper.QueryInventoryFinishedListener,
         IabHelper.OnIabPurchaseFinishedListener {
 
+    /**
+     * Performs asynchronous work to prepare any
+     * application components that require disk writes
+     * and network access during initialization.
+     */
+    private class LoadApplicationTask extends AsyncTask<Void,Void,Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            // Bug tracking
+            CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
+            Fabric.with(LWQApplication.get(), new Crashlytics.Builder().core(core).build());
+
+            // ImageLoader Requires Disk Access to Initialize
+            LWQImageControllerHelper.get();
+
+            // Remote Config
+            FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                    .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                    .build();
+            FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+            firebaseRemoteConfig.setConfigSettings(configSettings);
+            firebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
+
+            // Firebase Analytics
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(LWQApplication.get());
+            firebaseAnalytics.setAnalyticsCollectionEnabled(
+                            firebaseRemoteConfig.getBoolean(
+                                    RemoteConfigConst.FIREBASE_ANALYTICS)
+                                    && !BuildConfig.DEBUG);
+            firebaseAnalytics.setMinimumSessionDuration(5000);
+
+            // Enable
+            setComponentsEnabled(!LWQPreferences.isFirstLaunch());
+
+            // Cache images if FTUETask completed
+            if (!LWQPreferences.isFirstLaunch()) {
+                cacheRemoteImageAssets();
+            }
+            return null;
+        }
+    }
+
     static LWQApplication sApplication;
 
-    LWQWallpaperController wallpaperController;
-    LWQImageController imageController;
-    LWQQuoteController quoteController;
-    LWQNotificationController notificationController;
-    LWQLogger logger;
-    NetworkConnectionListener networkConnectionListener;
     IabHelper iabHelper;
     IabBroadcastReceiver iabBroadcastReceiver;
     Set<IabConst.Product> ownedProducts = new HashSet<>();
     Map<IabConst.Product, SkuDetails> productDetails = new HashMap<>();
-    FirebaseRemoteConfig firebaseRemoteConfig;
 
     @Override
     public void onCreate() {
+        if (BuildConfig.DEBUG) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+        }
         super.onCreate();
         sApplication = this;
-
-        // Bug tracking
-        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
-        Fabric.with(this, new Crashlytics.Builder().core(core).build());
-
-        // Application controllers
-        logger = new LWQLoggerImpl();
-        wallpaperController = new LWQWallpaperControllerUnsplashImpl();
-        imageController = new LWQImageControllerUIL();
-        quoteController = new LWQQuoteControllerBrainyQuoteImpl();
-        notificationController = new LWQNotificationControllerImpl();
-        networkConnectionListener = new NetworkConnectionListener(this);
-
-        // Remote Config
-        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-                .setDeveloperModeEnabled(BuildConfig.DEBUG)
-                .build();
-        firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        firebaseRemoteConfig.setConfigSettings(configSettings);
-        firebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
-
-        // Firebase Analytics
-        FirebaseAnalytics.getInstance(this)
-                .setAnalyticsCollectionEnabled(
-                        getRemoteConfig().getBoolean(
-                                RemoteConfigConst.FIREBASE_ANALYTICS)
-                                && !BuildConfig.DEBUG);
-        FirebaseAnalytics.getInstance(this)
-                .setMinimumSessionDuration(5000);
 
         // Billing
         iabHelper = new IabHelper(this, IabLic.retrieveLic());
         iabHelper.enableDebugLogging(BuildConfig.DEBUG, getString(R.string.app_name) + ".BILLING");
         iabHelper.startSetup(this);
 
-
-        // Enable
-        setComponentsEnabled(!LWQPreferences.isFirstLaunch());
-
-        // Cache images if FTUETask completed
-        if (!LWQPreferences.isFirstLaunch()) {
-            cacheRemoteImageAssets();
-        }
+        // Asynch Application Dependencies
+        new LoadApplicationTask().execute();
     }
 
     @Override
@@ -165,52 +171,19 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         return sApplication;
     }
 
-    public static LWQWallpaperController getWallpaperController() {
-        return sApplication.wallpaperController;
-    }
-
-    public static LWQImageController getImageController() {
-        return sApplication.imageController;
-    }
-
-    public static LWQQuoteController getQuoteController() {
-        return sApplication.quoteController;
-    }
-
-    public static LWQNotificationController getNotificationController() {
-        return sApplication.notificationController;
-    }
-
-    public static NetworkConnectionListener getNetworkConnectionListener() {
-        return sApplication.networkConnectionListener;
-    }
-
-    public static LWQLogger getLogger() {
-        return sApplication.logger;
-    }
-
     public static IabHelper getIabHelper() {
         return get().iabHelper;
     }
 
-    public static FirebaseRemoteConfig getRemoteConfig() {
-        return get().firebaseRemoteConfig;
-    }
-
-    public static FirebaseAnalytics getAnalytics() {
-        return FirebaseAnalytics.getInstance(get());
-    }
-
     public static void fetchRemoteConfig() {
-        get().firebaseRemoteConfig.fetch()
+        FirebaseRemoteConfig.getInstance().fetch()
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (!task.isSuccessful()) {
-                            // TODO log?
                             return;
                         }
-                        LWQApplication.get().firebaseRemoteConfig.activateFetched();
+                        FirebaseRemoteConfig.getInstance().activateFetched();
                     }
                 });
     }
@@ -244,7 +217,7 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         final WallpaperManager wallpaperManager = WallpaperManager.getInstance(sApplication);
         final WallpaperInfo wallpaperInfo = wallpaperManager.getWallpaperInfo();
         boolean active = wallpaperInfo != null && sApplication.getPackageName().equalsIgnoreCase(wallpaperInfo.getPackageName());
-        getLogger().logWallpaperActive(active);
+        LWQLoggerHelper.get().logWallpaperActive(active);
         return active;
     }
 

@@ -21,5 +21,9 @@
         <key>firebase_analytics</key>
         <value>on</value>
     </entry>
+    <entry>
+        <key>stack_blurring</key>
+        <value>on</value>
+    </entry>
 </defaultsMap>
 <!-- END xml_defaults -->

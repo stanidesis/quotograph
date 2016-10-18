@@ -3,7 +3,7 @@ package com.stanleyidesis.quotograph.api.service;
 import android.app.IntentService;
 import android.content.Intent;
 
-import com.stanleyidesis.quotograph.LWQApplication;
+import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.api.receiver.LWQReceiver;
 
@@ -85,6 +85,6 @@ public class LWQUpdateService extends IntentService {
             LWQReceiver.completeWakefulIntent(intent);
             return;
         }
-        LWQApplication.getWallpaperController().generateNewWallpaper();
+        LWQWallpaperControllerHelper.get().generateNewWallpaper();
     }
 }
