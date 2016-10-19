@@ -30,6 +30,7 @@ import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
 import com.stanleyidesis.quotograph.ui.Fonts;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -235,23 +236,30 @@ public abstract class LWQDrawScript {
         authorTextPaint.setTextAlign(Paint.Align.RIGHT);
         authorTextPaint.setColor(authorColor & TEXT_ALPHA);
         authorTextPaint.setTypeface(quoteTypeFace);
-        String author = context.getString(R.string.unknown);
+        String author = "";
         if (wallpaperController.getAuthor() != null && !wallpaperController.getAuthor().isEmpty()) {
             author = wallpaperController.getAuthor();
         }
-        String quote = context.getString(R.string.unknown);
+        String quote = "";
         if (wallpaperController.getQuote() != null && !wallpaperController.getQuote().isEmpty()) {
             quote = wallpaperController.getQuote();
         }
 
-        // Find the longest word
-        String[] words = quote.split(" ");
-        Arrays.sort(words, new Comparator<String>() {
-            @Override
-            public int compare(String lhs, String rhs) {
-                return rhs.length() - lhs.length();
+        // Find the ending index of each word
+        // We use this data to determine whether a line-break occurs in our StaticLayout
+        List<Integer> endIndeces = new ArrayList<>();
+        String[] words = quote.split("\\s+");
+        if (words.length > 0) {
+            int runningIndex = 0;
+            for (int i = 0; i < words.length; i++) {
+                int nextEndCap = quote.indexOf(words[i], runningIndex) + words[i].length() - 1;
+                runningIndex = nextEndCap;
+                endIndeces.add(nextEndCap);
             }
-        });
+        } else {
+            endIndeces.add(quote.length() - 1);
+        }
+
         final int horizontalPadding = (int) (screenWidth * .07);
         final int verticalPadding = (int) (screenHeight * .2);
         final Rect drawingArea = new Rect(horizontalPadding, verticalPadding,
@@ -263,8 +271,8 @@ public abstract class LWQDrawScript {
                 drawingArea.width(), Layout.Alignment.ALIGN_NORMAL, 1, 0, true);
 
         // Correct the quote and author height, if necessary
-        quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight(), words[0]);
-        authorLayout = correctFontSize(authorLayout, Integer.MAX_VALUE, author);
+        quoteLayout = correctFontSize(quoteLayout, drawingArea.height() - authorLayout.getHeight(), endIndeces);
+        authorLayout = correctFontSize(authorLayout, Integer.MAX_VALUE, null);
         if (authorLayout.getPaint().getTextSize() > quoteLayout.getPaint().getTextSize()) {
             TextPaint paint = authorLayout.getPaint();
             paint.setTextSize(quoteLayout.getPaint().getTextSize());
@@ -293,21 +301,21 @@ public abstract class LWQDrawScript {
         return drawingArea;
     }
 
-    void drawDimmer(Canvas canvas, int dimPreference) {
+    private void drawDimmer(Canvas canvas, int dimPreference) {
         if (dimPreference > 0) {
             int alpha = (int) Math.floor(255f * (dimPreference / 100f));
             canvas.drawColor(Color.argb(alpha, 0, 0, 0));
         }
     }
 
-    Bitmap generateBitmap(int blurRadius, Bitmap backgroundImage) {
+    private Bitmap generateBitmap(int blurRadius, Bitmap backgroundImage) {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
             return blurBitmap(backgroundImage, blurRadius);
         }
         return backgroundImage;
     }
 
-    void drawBitmap(Canvas canvas, int screenWidth, Rect surfaceFrame, Bitmap bitmapToDraw) {
+    private void drawBitmap(Canvas canvas, int screenWidth, Rect surfaceFrame, Bitmap bitmapToDraw) {
         Paint bitmapPaint = new Paint();
         bitmapPaint.setAntiAlias(true);
         bitmapPaint.setFilterBitmap(true);
@@ -359,19 +367,32 @@ public abstract class LWQDrawScript {
         canvas.drawBitmap(icon, scaleMatrix, iconPaint);
     }
 
-    StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight, String longestWord) {
+    private StaticLayout correctFontSize(StaticLayout staticLayout, int maxHeight, List<Integer> endOfWordIndices) {
         final TextPaint textPaint = staticLayout.getPaint();
-        while (staticLayout.getHeight() > maxHeight
-                || staticLayout.getWidth() < StaticLayout.getDesiredWidth(longestWord, textPaint)) {
-            textPaint.setTextSize(textPaint.getTextSize() * .95f);
+        boolean heightFixed = false;
+        while (!heightFixed) {
+            textPaint.setTextSize(textPaint.getTextSize() * .99f);
             staticLayout = new StaticLayout(staticLayout.getText(), textPaint,
                     staticLayout.getWidth(), staticLayout.getAlignment(), staticLayout.getSpacingMultiplier(),
                     staticLayout.getSpacingAdd(), true);
+
+            // Check end of word indices for cut-off
+            // This essentially acts as a 'break on white space' function
+            boolean noCutOffs = true;
+            if (endOfWordIndices != null) {
+                for (int i = 0; i < staticLayout.getLineCount() && noCutOffs; i++) {
+                    // -1 because it goes one past the last visible character
+                    int lineVisibleEnd = staticLayout.getLineVisibleEnd(i) - 1;
+                    // Check if the end to each line is the end of a word or quote
+                    noCutOffs = noCutOffs && endOfWordIndices.contains(lineVisibleEnd);
+                }
+            }
+            heightFixed = staticLayout.getHeight() <= maxHeight && noCutOffs;
         }
         return staticLayout;
     }
 
-    void strokeText(StaticLayout staticLayout, int color, float width, Canvas canvas) {
+    private void strokeText(StaticLayout staticLayout, int color, float width, Canvas canvas) {
         TextPaint strokePaint = new TextPaint(staticLayout.getPaint());
         strokePaint.setColor(color);
         strokePaint.setStyle(Paint.Style.STROKE);
