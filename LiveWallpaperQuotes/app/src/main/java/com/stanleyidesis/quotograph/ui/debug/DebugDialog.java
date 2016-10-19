@@ -8,10 +8,12 @@ import android.util.Log;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.RemoteConfigConst;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
+import com.stanleyidesis.quotograph.api.controller.LWQNotificationControllerHelper;
 import com.stanleyidesis.quotograph.ui.activity.LWQSurveyActivity;
 import com.stanleyidesis.quotograph.ui.dialog.SurveyDialog;
 
@@ -78,7 +80,7 @@ public class DebugDialog {
                         LWQPreferences.setSurveyLastShownOn(current - DateUtils.DAY_IN_MILLIS);
                         break;
                     case 3: // Show the survey notification
-                        LWQApplication.getNotificationController().postSurveyNotification();
+                        LWQNotificationControllerHelper.get().postSurveyNotification();
                         break;
                     case 4: // Show the survey dialog
                         SurveyDialog.showDialog((Activity) context);
@@ -88,9 +90,9 @@ public class DebugDialog {
                         break;
                     case 6: // Print survey data to logs
                         String tag = "DebugDialog-Survey";
-                        Log.v(tag, "Variant: " + LWQApplication.getRemoteConfig().getLong(RemoteConfigConst.SURVEY_EXPERIMENT));
-                        Log.v(tag, "Delay: " + LWQApplication.getRemoteConfig().getLong(RemoteConfigConst.SURVEY_DELAY_IN_MILLIS));
-                        Log.v(tag, "Interval: " + LWQApplication.getRemoteConfig().getLong(RemoteConfigConst.SURVEY_INTERVAL_IN_MILLIS));
+                        Log.v(tag, "Variant: " + FirebaseRemoteConfig.getInstance().getLong(RemoteConfigConst.SURVEY_EXPERIMENT));
+                        Log.v(tag, "Delay: " + FirebaseRemoteConfig.getInstance().getLong(RemoteConfigConst.SURVEY_DELAY_IN_MILLIS));
+                        Log.v(tag, "Interval: " + FirebaseRemoteConfig.getInstance().getLong(RemoteConfigConst.SURVEY_INTERVAL_IN_MILLIS));
                         Log.v(tag, "Response: " + LWQPreferences.getSurveyResponse());
                         Log.v(tag, "Last Shown On: " + DateUtils.formatDateTime(context, LWQPreferences.getSurveyLastShownOn(),
                                 DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY));

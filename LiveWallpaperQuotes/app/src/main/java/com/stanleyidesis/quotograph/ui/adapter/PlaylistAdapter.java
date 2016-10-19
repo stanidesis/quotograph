@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
 import com.stanleyidesis.quotograph.api.db.Author;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Playlist;
@@ -225,11 +226,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public void logUserData() {
-        LWQApplication.getLogger()
+        LWQLoggerHelper.get()
                 .logCategoryCount(getCategoryCount());
-        LWQApplication.getLogger()
+        LWQLoggerHelper.get()
                 .logAuthorCount(getAuthorCount());
-        LWQApplication.getLogger()
+        LWQLoggerHelper.get()
                 .logQuoteCount(getQuoteCount());
     }
 

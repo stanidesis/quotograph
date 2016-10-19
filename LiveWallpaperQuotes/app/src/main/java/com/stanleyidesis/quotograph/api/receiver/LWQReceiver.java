@@ -5,10 +5,11 @@ import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.stanleyidesis.quotograph.AnalyticsUtils;
-import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
+import com.stanleyidesis.quotograph.api.controller.LWQNotificationControllerHelper;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
+import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
 import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 import com.stanleyidesis.quotograph.api.service.LWQUpdateService;
 import com.stanleyidesis.quotograph.api.task.LWQSaveWallpaperImageTask;
@@ -58,8 +59,8 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
             // Change the wallpaper
             Intent updateService = new Intent(context, LWQUpdateService.class);
             startWakefulService(context, updateService);
-            LWQApplication.getNotificationController().dismissNewWallpaperNotification();
-            LWQApplication.getNotificationController().dismissWallpaperGenerationFailureNotification();
+            LWQNotificationControllerHelper.get().dismissNewWallpaperNotification();
+            LWQNotificationControllerHelper.get().dismissWallpaperGenerationFailureNotification();
             // Log either a skip or auto-generated wallpaper
             if (AnalyticsUtils.URI_CHANGE_SOURCE_NOTIFICATION.equalsIgnoreCase(intent.getDataString())) {
                 AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
@@ -71,7 +72,7 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
                         AnalyticsUtils.LABEL_ALARM);
             }
         } else if (context.getString(R.string.action_share).equals(action)) {
-            final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
+            final LWQWallpaperController wallpaperController = LWQWallpaperControllerHelper.get();
             final String shareText = String.format("\"%s\" - %s", wallpaperController.getQuote(), wallpaperController.getAuthor());
             final String shareTitle = String.format("Quote by %s", wallpaperController.getAuthor());
             Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
@@ -92,7 +93,7 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
                     AnalyticsUtils.LABEL_FROM_NOTIF);
             new LWQSaveWallpaperImageTask().execute();
         } else if (context.getString(R.string.action_survey_response).equals(action)) {
-            LWQApplication.getNotificationController().dismissSurveyNotification();
+            LWQNotificationControllerHelper.get().dismissSurveyNotification();
             int surveyResponse = Integer.parseInt(intent.getDataString());
             if (surveyResponse < UserSurveyController.RESPONSE_NEVER
                     || surveyResponse > UserSurveyController.RESPONSE_OKAY) {

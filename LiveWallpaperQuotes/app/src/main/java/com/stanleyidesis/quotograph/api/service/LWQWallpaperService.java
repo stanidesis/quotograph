@@ -8,11 +8,11 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 import com.stanleyidesis.quotograph.AnalyticsUtils;
-import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.BaseCallback;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
+import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
 import com.stanleyidesis.quotograph.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
@@ -73,7 +73,7 @@ public class LWQWallpaperService extends WallpaperService {
             gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
             gestureDetectorCompat.setOnDoubleTapListener(this);
             EventBus.getDefault().register(this);
-            LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
+            LWQWallpaperController wallpaperController = LWQWallpaperControllerHelper.get();
             if (!wallpaperController.activeWallpaperLoaded()) {
                 wallpaperController.retrieveActiveWallpaper();
             }
@@ -197,6 +197,6 @@ public class LWQWallpaperService extends WallpaperService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        LWQApplication.getWallpaperController().discardActiveWallpaper();
+        LWQWallpaperControllerHelper.get().discardActiveWallpaper();
     }
 }

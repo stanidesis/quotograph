@@ -58,7 +58,10 @@ import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
+import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
+import com.stanleyidesis.quotograph.api.controller.LWQQuoteControllerHelper;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
+import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
 import com.stanleyidesis.quotograph.api.db.Author;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Playlist;
@@ -533,7 +536,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (LWQApplication.getWallpaperController().activeWallpaperLoaded()) {
+        if (LWQWallpaperControllerHelper.get().activeWallpaperLoaded()) {
             changeState(stateWallpaper);
         } else {
             changeState(stateInitial);
@@ -585,7 +588,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @Override
     protected void onResume() {
         super.onResume();
-        if (LWQApplication.getWallpaperController().getRetrievalState()
+        if (LWQWallpaperControllerHelper.get().getRetrievalState()
                 != LWQWallpaperController.RetrievalState.NONE) {
             changeState(stateSkipWallpaper);
         } else if (activityState == stateSearchInProgress) {
@@ -975,7 +978,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int index, long l) {
                 // Log refresh rate choice
-                LWQApplication.getLogger().logRefreshRate((String) adapterView.getAdapter().getItem(index));
+                LWQLoggerHelper.get().logRefreshRate((String) adapterView.getAdapter().getItem(index));
                 final int[] refreshValues = getResources().getIntArray(R.array.refresh_preference_values);
                 LWQPreferences.setRefreshPreference(refreshValues[index]);
                 LWQAlarmController.resetAlarm();
@@ -1148,7 +1151,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         searchResultsAdapter.setSearchResults(new ArrayList<Object>());
         searchResultsAdapter.notifyItemRangeRemoved(0, itemCount);
         String query = editableQuery.getText().toString().trim();
-        LWQApplication.getQuoteController().fetchQuotes(query, new Callback<List<Object>>() {
+        LWQQuoteControllerHelper.get().fetchQuotes(query, new Callback<List<Object>>() {
             @Override
             public void onSuccess(final List<Object> objects) {
                 runOnUiThread(new Runnable() {
@@ -1269,7 +1272,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
                 AnalyticsUtils.ACTION_SKIPPED,
                 AnalyticsUtils.LABEL_IN_APP);
-        LWQApplication.getWallpaperController().generateNewWallpaper();
+        LWQWallpaperControllerHelper.get().generateNewWallpaper();
     }
 
     @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperClick() {
@@ -1621,11 +1624,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     public void onMakeQuotograph(PlaylistAdapter adapter, int position) {
         final Object item = adapter.getItem(position);
         if (item instanceof PlaylistCategory) {
-            LWQApplication.getWallpaperController().generateNewWallpaper((PlaylistCategory) item);
+            LWQWallpaperControllerHelper.get().generateNewWallpaper((PlaylistCategory) item);
         } else if (item instanceof PlaylistAuthor) {
-            LWQApplication.getWallpaperController().generateNewWallpaper((PlaylistAuthor) item);
+            LWQWallpaperControllerHelper.get().generateNewWallpaper((PlaylistAuthor) item);
         } else if (item instanceof PlaylistQuote) {
-            LWQApplication.getWallpaperController().generateNewWallpaper((PlaylistQuote) item);
+            LWQWallpaperControllerHelper.get().generateNewWallpaper((PlaylistQuote) item);
         }
         // Track manual creation
         AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,

@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
+import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.ui.Fonts;
 
@@ -63,7 +64,7 @@ public class LWQPreferences {
     }
 
     public static void setBlurPreference(int blurPreference) {
-        LWQApplication.getLogger().logBlurLevel(blurPreference);
+        LWQLoggerHelper.get().logBlurLevel(blurPreference);
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_blur), blurPreference).apply();
         EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_blur, blurPreference));
     }
@@ -74,7 +75,7 @@ public class LWQPreferences {
     }
 
     public static void setDimPreference(int dimPreference) {
-        LWQApplication.getLogger().logDimLevel(dimPreference);
+        LWQLoggerHelper.get().logDimLevel(dimPreference);
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_dim), dimPreference).apply();
         EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_dim, dimPreference));
     }

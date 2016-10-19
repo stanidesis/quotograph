@@ -78,7 +78,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
     @Override
     public void postNewWallpaperNotification() {
         dismissWallpaperGenerationFailureNotification();
-        final LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
+        final LWQWallpaperController wallpaperController = LWQWallpaperControllerHelper.get();
         // Compress background to reasonable Square size
         final Bitmap backgroundImage = wallpaperController.getBackgroundImage();
         if (backgroundImage == null) {

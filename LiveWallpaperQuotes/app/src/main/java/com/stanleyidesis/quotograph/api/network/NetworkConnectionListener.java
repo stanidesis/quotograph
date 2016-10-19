@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.api.event.NetworkConnectivityEvent;
 
 import de.greenrobot.event.EventBus;
@@ -48,6 +49,15 @@ import de.greenrobot.event.EventBus;
 public class NetworkConnectionListener {
 
     static String TAG = NetworkConnectionListener.class.getSimpleName();
+    static NetworkConnectionListener sNetworkConnectionListener;
+
+    public static NetworkConnectionListener get() {
+        if (sNetworkConnectionListener != null) {
+            return sNetworkConnectionListener;
+        }
+        sNetworkConnectionListener = new NetworkConnectionListener();
+        return get();
+    }
 
     public enum ConnectionType {
         CONNECTION_NO_NETWORK,
@@ -61,7 +71,6 @@ public class NetworkConnectionListener {
     }
 
     ConnectionType currentConnectionType;
-    Context context;
 
     BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
         @Override
@@ -79,15 +88,11 @@ public class NetworkConnectionListener {
         }
     };
 
-    public NetworkConnectionListener(Context context) {
-        initialize(context);
+    public NetworkConnectionListener() {
+        initialize(LWQApplication.get());
     }
 
     public void initialize(Context context) {
-        if (context == null || this.context != null) {
-            return;
-        }
-        this.context = context;
         this.currentConnectionType = getConnectionType();
         context.registerReceiver(connectionReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -99,7 +104,7 @@ public class NetworkConnectionListener {
 
     ConnectionType getConnectionType() {
         ConnectivityManager connectivityManager =
-                (ConnectivityManager) context.getApplicationContext().getSystemService(
+                (ConnectivityManager) LWQApplication.get().getSystemService(
                         Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
 
@@ -131,7 +136,7 @@ public class NetworkConnectionListener {
     @Override
     protected void finalize() throws Throwable {
         try {
-            context.unregisterReceiver(connectionReceiver);
+            LWQApplication.get().unregisterReceiver(connectionReceiver);
         } catch (Exception e) {
             e.printStackTrace();
         }

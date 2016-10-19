@@ -39,4 +39,5 @@ public class RemoteConfigConst {
     public static String SURVEY_DELAY_IN_MILLIS = "survey_delay_in_millis";
     public static String SURVEY_INTERVAL_IN_MILLIS = "survey_interval_in_millis";
     public static String FIREBASE_ANALYTICS = "firebase_analytics";
+    public static String STACK_BLURRING = "stack_blurring";
 }
