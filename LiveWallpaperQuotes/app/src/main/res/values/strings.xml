@@ -125,17 +125,6 @@
     <string name="tt_setting_refresh">Choose how often you want Quotograph to make a new wallpaper</string>
     <string name="tt_setting_double_tap">This option lets you double-tap your home screen to launch Quotograph</string>
     <string name="tt_setting_whats_new">Tap here to read about the newest features</string>
-    <string name="tt_setting_store">Want to support Quotograph? Tap here to shop</string>
-    <!-- Product Stuff -->
-    <string name="iap_dialog_title">Quotograph Store</string>
-    <string name="iap_fonts">Make your quotes stand out! Get access to all fonts.</string>
-    <string name="iap_fonts_title">Fonts</string>
-    <string name="iap_photos">Have beautiful photos of your own? Use them in Quotograph.</string>
-    <string name="iap_photos_title">Images</string>
-    <string name="iap_fonts_photos">Double whammy: get access to fonts and custom images.</string>
-    <string name="iap_fonts_photos_title">Appearance Pack</string>
-    <string name="iap_inspired">Get everything, including the features above, future features, and my personal thanks, forever.</string>
-    <string name="iap_inspired_title">Quotograph Inspired</string>
     <!-- User Survey -->
     <string name="survey_title">Thank you for using Quotograph!</string>
     <string name="survey_cta">Do you have <b>5 minutes</b> to help me improve the app?</string>

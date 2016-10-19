@@ -188,18 +188,6 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
                 });
     }
 
-    public static boolean ownsFontAccess() {
-        return ownsProduct(IabConst.Product.FONTS)
-                || ownsProduct(IabConst.Product.FONTS_IMAGES)
-                || ownsProduct(IabConst.Product.QUOTOGRAPH_INSPIRED);
-    }
-
-    public static boolean ownsImageAccess() {
-        return ownsProduct(IabConst.Product.IMAGES)
-                || ownsProduct(IabConst.Product.FONTS_IMAGES)
-                || ownsProduct(IabConst.Product.QUOTOGRAPH_INSPIRED);
-    }
-
     public static boolean ownsProduct(IabConst.Product product) {
         return get().ownedProducts.contains(product);
     }
@@ -258,11 +246,6 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
         new Thread(new Runnable() {
             @Override
             public void run() {
-                for (IabConst.Product product : IabConst.Product.values()) {
-                    if (ImageLoader.getInstance().getDiskCache().get(product.imgSource) == null) {
-                        ImageLoader.getInstance().loadImage(product.imgSource, null);
-                    }
-                }
                 for (ImageMultiSelectAdapter.KnownUnsplashCategories category :
                         ImageMultiSelectAdapter.KnownUnsplashCategories.values()) {
                     if (ImageLoader.getInstance().getDiskCache().get(category.imgSource) == null) {

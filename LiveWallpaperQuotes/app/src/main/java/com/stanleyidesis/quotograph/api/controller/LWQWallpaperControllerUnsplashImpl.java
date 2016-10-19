@@ -130,8 +130,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             }
             List<UnsplashCategory> activeCategories = UnsplashCategory.active();
             List<UserAlbum> activeAlbums = UserAlbum.active();
-            boolean useAlbums = activeAlbums.size() > 0
-                    && LWQApplication.ownsImageAccess();
+            boolean useAlbums = activeAlbums.size() > 0;
             if (activeCategories.size() > 0
                     && useAlbums) {
                 // Randomness will determine whether we still use an album
@@ -349,8 +348,10 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             setRetrievalState(RetrievalState.NONE);
         } else if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_USER) {
             UserPhoto userPhoto = activeWallpaper.recoverUserPhoto();
-            activeBackgroundImage = LWQImageControllerHelper.get()
-                    .retrieveBitmapSync(userPhoto.uri);
+            if (userPhoto != null) {
+                activeBackgroundImage = LWQImageControllerHelper.get()
+                        .retrieveBitmapSync(userPhoto.uri);
+            }
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
             setRetrievalState(RetrievalState.NONE);
         }
