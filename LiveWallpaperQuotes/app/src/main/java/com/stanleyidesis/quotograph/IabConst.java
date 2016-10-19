@@ -37,22 +37,7 @@ public class IabConst {
 
     public enum Product {
 
-        FONTS("fonts",
-                R.string.iap_fonts_title,
-                R.string.iap_fonts,
-                "https://storage.googleapis.com/quotograph-android-assets/images/store/img_fonts.png"),
-        IMAGES("images",
-                R.string.iap_photos_title,
-                R.string.iap_photos,
-                "https://storage.googleapis.com/quotograph-android-assets/images/store/img_photos.png"),
-        FONTS_IMAGES("fonts_and_images",
-                R.string.iap_fonts_photos_title,
-                R.string.iap_fonts_photos,
-                "https://storage.googleapis.com/quotograph-android-assets/images/store/img_fonts_photos.png"),
-        QUOTOGRAPH_INSPIRED("quotograph_inspired",
-                R.string.iap_inspired_title,
-                R.string.iap_inspired,
-                "https://storage.googleapis.com/quotograph-android-assets/images/store/img_inspired.png");
+        NONE("", 0, 0, "");
 
         Product(String sku, int titleRes, int descriptionRes, String imgSource) {
             this.sku = sku;

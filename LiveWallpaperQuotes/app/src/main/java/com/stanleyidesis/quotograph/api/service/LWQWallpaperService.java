@@ -118,6 +118,7 @@ public class LWQWallpaperService extends WallpaperService {
                 return;
             }
             if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+                drawScript.clearCache();
                 drawScript.requestDraw(eventCallback);
             }
         }

@@ -75,7 +75,6 @@ import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.activity.modules.LWQChooseImageSourceModule;
-import com.stanleyidesis.quotograph.ui.activity.modules.LWQStoreDialogModule;
 import com.stanleyidesis.quotograph.ui.activity.modules.WhatsNewDialog;
 import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
@@ -1099,7 +1098,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     @OnClick({R.id.tv_lwq_settings_blur, R.id.tv_lwq_settings_dim,
     R.id.tv_lwq_settings_double_tap, R.id.tv_lwq_settings_fonts,
     R.id.tv_lwq_settings_images, R.id.tv_lwq_settings_refresh,
-    R.id.tv_lwq_settings_whats_new, R.id.tv_lwq_settings_store})
+    R.id.tv_lwq_settings_whats_new})
     void showSettingsTooltip(View view) {
         switch (view.getId()) {
             case R.id.tv_lwq_settings_blur:
@@ -1124,15 +1123,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 showToolTip(SettingsTooltips.WHATS_NEW, null);
                 break;
         }
-    }
-
-    @OnClick(R.id.btn_lwq_settings_store) void showStoreDialog() {
-        // Log view
-        AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_STORE);
-        // Show the store
-        LWQStoreDialogModule lwqStoreDialogModule = new LWQStoreDialogModule();
-        lwqStoreDialogModule.initialize(this, null);
-        lwqStoreDialogModule.changeVisibility(null, true);
     }
 
     @OnClick(R.id.btn_lwq_settings_whats_new) void showWhatsNewDialog() {
@@ -1662,10 +1652,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
-        if (!LWQApplication.ownsFontAccess()) {
-            showStoreDialog();
-            return;
-        }
         FontMultiselectAdapter adapter = (FontMultiselectAdapter) dialog.getListView().getAdapter();
         adapter.addOrRemoveFont(which);
     }
@@ -1690,17 +1676,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void addPhotoAlbum(LWQChooseImageSourceModule module) {
-        if (!LWQApplication.ownsImageAccess()) {
-            showStoreDialog();
-            return;
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             // Use DocumentsProvider
             Intent documentPicker = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             documentPicker.setType("image/*");
             documentPicker.addCategory(Intent.CATEGORY_OPENABLE);
             documentPicker.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            startActivityForResult(documentPicker, Define.ALBUM_REQUEST_CODE);
+            startActivityForResult(Intent.createChooser(documentPicker, "Choose one or more photos"), Define.ALBUM_REQUEST_CODE);
         } else {
             // Use FishBun
             FishBun.with(this)
@@ -1739,8 +1721,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         IMAGES(R.string.tt_setting_images, R.id.btn_lwq_settings_images),
         REFRESH(R.string.tt_setting_refresh, R.id.spinner_lwq_settings_refresh),
         DOUBLE_TAP(R.string.tt_setting_double_tap, R.id.check_lwq_settings_double_tap),
-        WHATS_NEW(R.string.tt_setting_whats_new, R.id.btn_lwq_settings_whats_new),
-        STORE(R.string.tt_setting_store, R.id.btn_lwq_settings_store);
+        WHATS_NEW(R.string.tt_setting_whats_new, R.id.btn_lwq_settings_whats_new);
 
         int stringId;
         int anchorId;
