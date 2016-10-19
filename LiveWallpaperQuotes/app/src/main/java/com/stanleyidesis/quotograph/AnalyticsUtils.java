@@ -57,7 +57,6 @@ public class AnalyticsUtils {
     public static final String SCREEN_PLAYLIST = "playlist";
     public static final String SCREEN_SETTINGS = "settings";
     // Dialogs
-    public static final String SCREEN_STORE = "store";
     public static final String SCREEN_FONTS = "fonts";
     public static final String SCREEN_IMAGES = "images";
     public static final String SCREEN_WHATS_NEW = "whats_new";
