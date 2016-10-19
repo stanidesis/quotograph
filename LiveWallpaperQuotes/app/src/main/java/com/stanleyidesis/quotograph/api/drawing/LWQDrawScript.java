@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.google.android.gms.analytics.internal.zzy.i;
+
 /**
  * Copyright (c) 2016 Stanley Idesis
  *
@@ -83,6 +85,8 @@ public abstract class LWQDrawScript {
     static final int STROKE_ALPHA = 0xF2FFFFFF;
     static int swatchIndex;
     static RenderScript renderScript;
+    static Bitmap cachedBlur;
+    static int cachedBlurLevel;
 
     static {
         executorService = Executors.newSingleThreadScheduledExecutor();
@@ -133,6 +137,17 @@ public abstract class LWQDrawScript {
         } else {
             Toast.makeText(LWQApplication.get(), "Unknown Swatch", Toast.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     * Notifies the Draw script that a brand new image is coming in
+     */
+    public void clearCache() {
+        paletteCache.clear();
+        if (cachedBlur != null) cachedBlur.recycle();
+        cachedBlur = null;
+        cachedBlurLevel = 0;
+        renderScript = null;
     }
 
     public void requestDraw(final Callback<Boolean> callback) {
@@ -191,7 +206,14 @@ public abstract class LWQDrawScript {
             final int blurPreference = LWQPreferences.getBlurPreference();
             final int dimPreference = LWQPreferences.getDimPreference();
             // Blur or choose the raw background image
-            Bitmap toDraw = blurPreference > 0.5f ? generateBlurredBitmap(blurPreference, backgroundImage) : backgroundImage;
+            Bitmap toDraw = null;
+            if (cachedBlurLevel == blurPreference && cachedBlur != null) {
+                toDraw = cachedBlur;
+            } else {
+                toDraw = blurPreference > 0.5f ? generateBlurredBitmap(blurPreference, backgroundImage) : backgroundImage;
+                cachedBlur = blurPreference > 0.5f ? toDraw : null;
+                cachedBlurLevel = blurPreference;
+            }
             drawBitmap(canvas, screenWidth, surfaceFrame, toDraw);
             drawDimmer(canvas, dimPreference);
             drawText(canvas, screenWidth, screenHeight);
@@ -201,7 +223,6 @@ public abstract class LWQDrawScript {
             canvas.restore();
             releaseCanvas(canvas);
         }
-
     }
 
     /**
