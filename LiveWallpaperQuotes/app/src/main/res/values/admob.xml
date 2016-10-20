@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="admob_app_id">ca-app-pub-6347399532612145~8580773850</string>
+    <string name="admob_playlist_native_small">ca-app-pub-6347399532612145/1057507053</string>
+    <string name="admob_prime_interstitial">ca-app-pub-6347399532612145/4010973451</string>
+    <string name="admob_search_native_small">ca-app-pub-6347399532612145/2534240253</string>
+</resources>

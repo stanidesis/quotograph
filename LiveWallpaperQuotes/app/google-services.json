@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "882000933178-gjqu8uoutpafpkm9m52li4mckpo5rcnf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.stanleyidesis.quotograph",
+            "certificate_hash": "C742B8EFC623E3D5369CDE4D8CBBFBE058C2DE35"
+          }
+        },
+        {
           "client_id": "882000933178-4tbf6fuicdk0g5ukqmt993pffcve79pl.apps.googleusercontent.com",
           "client_type": 3
         },
