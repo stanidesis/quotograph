@@ -11,7 +11,7 @@ import android.util.Log;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.api.event.NetworkConnectivityEvent;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis

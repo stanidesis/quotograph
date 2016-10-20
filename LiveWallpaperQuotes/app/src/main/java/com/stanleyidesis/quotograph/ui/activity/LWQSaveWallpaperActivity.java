@@ -9,12 +9,13 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.Subscribe;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.event.ImageSaveEvent;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -105,6 +106,7 @@ public class LWQSaveWallpaperActivity extends AppCompatActivity {
         }
     }
 
+    @Subscribe
     public void onEvent(ImageSaveEvent imageSaveEvent) {
         if (imageSaveEvent.didFail()) {
             setResult(RESULT_CODE_FAILURE);

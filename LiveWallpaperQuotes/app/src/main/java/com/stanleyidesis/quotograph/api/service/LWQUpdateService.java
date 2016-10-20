@@ -3,11 +3,12 @@ package com.stanleyidesis.quotograph.api.service;
 import android.app.IntentService;
 import android.content.Intent;
 
+import org.greenrobot.eventbus.Subscribe;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.api.receiver.LWQReceiver;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -71,6 +72,7 @@ public class LWQUpdateService extends IntentService {
         super.onDestroy();
     }
 
+    @Subscribe
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
             attempt();

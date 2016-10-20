@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.StrictMode;
@@ -11,6 +12,7 @@ import android.support.annotation.NonNull;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -34,6 +36,8 @@ import com.stanleyidesis.quotograph.billing.util.SkuDetails;
 import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
 import com.stanleyidesis.quotograph.ui.adapter.ImageMultiSelectAdapter;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.greenrobot.event.EventBus;
 import io.fabric.sdk.android.Fabric;
 import io.fabric.sdk.android.services.concurrency.AsyncTask;
 
@@ -115,6 +118,9 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
                                     && !BuildConfig.DEBUG);
             firebaseAnalytics.setMinimumSessionDuration(5000);
 
+            // AdMob
+            MobileAds.initialize(getApplicationContext(), getString(R.string.admob_app_id));
+
             // Enable
             setComponentsEnabled(!LWQPreferences.isFirstLaunch());
 
@@ -157,6 +163,12 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
 
         // Asynch Application Dependencies
         new LoadApplicationTask().execute();
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+//        MultiDex.install(this);
+        super.attachBaseContext(base);
     }
 
     @Override

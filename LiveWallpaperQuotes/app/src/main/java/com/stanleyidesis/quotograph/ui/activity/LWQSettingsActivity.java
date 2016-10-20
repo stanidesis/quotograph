@@ -45,11 +45,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import org.greenrobot.eventbus.Subscribe;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
-import com.sangcomz.fishbun.FishBun;
-import com.sangcomz.fishbun.define.Define;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
@@ -385,6 +384,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             .build();
 
     private static final int REQUEST_CODE_SAVE = 0;
+    private static final int REQUEST_CODE_ALBUM = 1;
 
     // Current ActivityState
     ActivityState activityState = null;
@@ -554,30 +554,24 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             return;
         } else if (requestCode == IabConst.PURCHASE_REQUEST_CODE) {
             LWQApplication.getIabHelper().handleActivityResult(requestCode, resultCode, data);
-        } else if (requestCode == Define.ALBUM_REQUEST_CODE) {
+        } else if (requestCode == REQUEST_CODE_ALBUM) {
             if (resultCode != RESULT_OK) {
                 return;
             }
             List<String> resultUris = new ArrayList<>();
-            if (data.hasExtra(Define.INTENT_PATH)) {
-                for (String localPath : data.getStringArrayListExtra(Define.INTENT_PATH)) {
-                    resultUris.add("file://" + localPath);
-                }
-            } else {
-                final int takeFlags = data.getFlags()
-                        & Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                if (data.getClipData() != null) {
-                    ClipData clipData = data.getClipData();
-                    for (int i = 0; i < clipData.getItemCount(); i++) {
-                        Uri imageUri = clipData.getItemAt(i).getUri();
-                        getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
-                        resultUris.add(imageUri.toString());
-                    }
-                } else if (data.getData() != null) {
-                    Uri imageUri = data.getData();
-                    getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
+//            final int takeFlags = data.getFlags()
+//                    & Intent.FLAG_GRANT_READ_URI_PERMISSION;
+            if (data.getClipData() != null) {
+                ClipData clipData = data.getClipData();
+                for (int i = 0; i < clipData.getItemCount(); i++) {
+                    Uri imageUri = clipData.getItemAt(i).getUri();
+//                    getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
                     resultUris.add(imageUri.toString());
                 }
+            } else if (data.getData() != null) {
+                Uri imageUri = data.getData();
+//                getContentResolver().takePersistableUriPermission(imageUri, takeFlags);
+                resultUris.add(imageUri.toString());
             }
             chooseImageSourceModule.onImagesRecovered(resultUris);
         }
@@ -1508,6 +1502,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Event Handling
 
+    @Subscribe
     public void onEvent(final IabPurchaseEvent purchaseEvent) {
         if (purchaseEvent.didFail()) {
             return;
@@ -1524,6 +1519,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         });
     }
 
+    @Subscribe
     public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
         if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_refresh) {
             runOnUiThread(new Runnable() {
@@ -1535,6 +1531,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
+    @Subscribe
     public void onEvent(final WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
             changeState(viewPager.getCurrentItem() == 0 ?
@@ -1676,23 +1673,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void addPhotoAlbum(LWQChooseImageSourceModule module) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            // Use DocumentsProvider
-            Intent documentPicker = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            documentPicker.setType("image/*");
-            documentPicker.addCategory(Intent.CATEGORY_OPENABLE);
+        Intent documentPicker = new Intent(Intent.ACTION_GET_CONTENT);
+        documentPicker.setType("image/*");
+        documentPicker.addCategory(Intent.CATEGORY_OPENABLE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             documentPicker.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            startActivityForResult(Intent.createChooser(documentPicker, "Choose one or more photos"), Define.ALBUM_REQUEST_CODE);
-        } else {
-            // Use FishBun
-            FishBun.with(this)
-                    .setCamera(false)
-                    .setPickerCount(120)
-                    .setButtonInAlbumActiviy(true)
-                    .setActionBarColor(getResources().getColor(R.color.palette_400),
-                            getResources().getColor(R.color.palette_700))
-                    .startAlbum();
         }
+        startActivityForResult(Intent.createChooser(documentPicker, "Choose photo(s)"), REQUEST_CODE_ALBUM);
         // Track viewing
         AnalyticsUtils.trackScreenView(
                 AnalyticsUtils.SCREEN_CUSTOM_PHOTOS);

@@ -7,6 +7,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
+import org.greenrobot.eventbus.Subscribe;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
@@ -18,7 +19,8 @@ import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
+
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -113,6 +115,7 @@ public class LWQWallpaperService extends WallpaperService {
             }
         }
 
+        @Subscribe
         public void onEvent(WallpaperEvent wallpaperEvent) {
             if (wallpaperEvent.didFail()) {
                 return;
@@ -123,6 +126,7 @@ public class LWQWallpaperService extends WallpaperService {
             }
         }
 
+        @Subscribe
         public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
             if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_blur ||
                     preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_dim) {
