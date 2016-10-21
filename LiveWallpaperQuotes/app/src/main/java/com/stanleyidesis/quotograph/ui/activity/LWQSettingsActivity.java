@@ -45,11 +45,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import org.greenrobot.eventbus.Subscribe;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
+import com.stanleyidesis.quotograph.BuildConfig;
 import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
@@ -78,6 +81,8 @@ import com.stanleyidesis.quotograph.ui.activity.modules.WhatsNewDialog;
 import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
+
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -405,6 +410,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // Seekbar Status
     boolean isModifyingSeekSetting;
 
+    // Should we show tooltips?
+    boolean showTutorialTips = true;
+    Set<TutorialTooltips> visibleTips;
+
+    // Ads
+    InterstitialAd interstitialAd;
+    boolean interstitialVisible;
+
     // Content
     @Bind(R.id.group_lwq_settings_content)
     View content;
@@ -474,10 +487,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     AppCompatAutoCompleteTextView editableQuery;
     SearchResultsAdapter searchResultsAdapter;
 
-    // Should we show tooltips?
-    boolean showTutorialTips = true;
-    Set<TutorialTooltips> visibleTips;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -530,6 +539,47 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         // Track initial Screen View
         AnalyticsUtils.trackScreenView(
                 AnalyticsUtils.SCREEN_WALLPAPER_PREVIEW);
+
+        // Ads
+        setupInterstitialAd();
+    }
+
+    private void setupInterstitialAd() {
+        interstitialAd = new InterstitialAd(this);
+        interstitialAd.setAdUnitId(getString(R.string.admob_prime_interstitial));
+        interstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+//                LWQApplication.setStrictMode(BuildConfig.DEBUG);
+            }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+//                LWQApplication.setStrictMode(BuildConfig.DEBUG);
+            }
+
+            @Override
+            public void onAdClosed() {
+                requestNewInterstitial();
+            }
+        });
+        requestNewInterstitial();
+    }
+
+    private void requestNewInterstitial() {
+        if (BuildConfig.DEBUG) {
+            return;
+        }
+        final AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(getString(R.string.admob_nexus_5x_device_id))
+                .build();
+        // Ew, Admob, ew...
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                interstitialAd.loadAd(adRequest);
+            }
+        }, 1);
     }
 
     @Override
@@ -723,7 +773,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 // Action Buttons
                 View [] buttons = new View[] {shareButton, saveButton, skipButton};
                 for (View button : buttons) {
-                    button.setTranslationY(position == 0 ? 0f : button.getHeight() * 2);
+                    button.setTranslationY(position == 0 ? 0f : button.getHeight() * 2f);
                     button.setAlpha(position == 0 ? 1f : 0f);
                     button.setEnabled(position == 0);
                 }
@@ -1257,6 +1307,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 AnalyticsUtils.ACTION_SKIPPED,
                 AnalyticsUtils.LABEL_IN_APP);
         LWQWallpaperControllerHelper.get().generateNewWallpaper();
+        // Show an interstitial, if applicable
+        if (interstitialAd.isLoaded()) {
+            interstitialAd.show();
+        }
     }
 
     @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperClick() {
@@ -1504,19 +1558,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Subscribe
     public void onEvent(final IabPurchaseEvent purchaseEvent) {
-        if (purchaseEvent.didFail()) {
-            return;
-        }
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                // Let them continue choosing images
-                if (chooseImageSourceModule != null
-                        && chooseImageSourceModule.isVisible()) {
-                    addPhotoAlbum(chooseImageSourceModule);
-                }
-            }
-        });
+        // TODO remove ads
     }
 
     @Subscribe
@@ -1621,6 +1663,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
                 AnalyticsUtils.ACTION_MANUALLY_GEN,
                 AnalyticsUtils.LABEL_PLAYLIST);
+        if (interstitialAd.isLoaded()) {
+            interstitialAd.show();
+        }
     }
 
     @Override

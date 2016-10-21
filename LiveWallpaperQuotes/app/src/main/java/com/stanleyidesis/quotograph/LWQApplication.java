@@ -120,6 +120,7 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
 
             // AdMob
             MobileAds.initialize(getApplicationContext(), getString(R.string.admob_app_id));
+            MobileAds.setAppMuted(true);
 
             // Enable
             setComponentsEnabled(!LWQPreferences.isFirstLaunch());
@@ -141,18 +142,8 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
 
     @Override
     public void onCreate() {
-        if (BuildConfig.DEBUG) {
-            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                    .detectAll()
-                    .penaltyLog()
-                    .penaltyDeath()
-                    .build());
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectAll()
-                    .penaltyLog()
-                    .penaltyDeath()
-                    .build());
-        }
+        setStrictMode(BuildConfig.DEBUG);
+
         super.onCreate();
         sApplication = this;
 
@@ -211,6 +202,24 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
     public static void purchaseProduct(Activity activity, IabConst.Product product) {
         getIabHelper().launchPurchaseFlow(activity, product.sku,
                 IabConst.PURCHASE_REQUEST_CODE, get());
+    }
+
+    public static void setStrictMode(boolean enabled) {
+        if (enabled) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+        } else {
+            StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX);
+            StrictMode.setVmPolicy(StrictMode.VmPolicy.LAX);
+        }
     }
 
     public static boolean isWallpaperActivated() {
