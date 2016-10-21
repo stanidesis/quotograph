@@ -26,12 +26,20 @@ android {
         versionName "1.1.4"
     }
     buildTypes {
+        debugAds {
+            buildConfigField("boolean", "TEST_ADS", "true")
+            minifyEnabled true
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules-debug.pro'
+        }
         debug {
+            buildConfigField("boolean", "TEST_ADS", "false")
             minifyEnabled true
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules-debug.pro'
         }
         release {
+            buildConfigField("boolean", "TEST_ADS", "false")
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

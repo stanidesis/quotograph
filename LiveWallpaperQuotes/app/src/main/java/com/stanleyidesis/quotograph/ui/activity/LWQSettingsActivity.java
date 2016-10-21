@@ -549,16 +549,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         interstitialAd.setAdUnitId(getString(R.string.admob_prime_interstitial));
         interstitialAd.setAdListener(new AdListener() {
             @Override
-            public void onAdLoaded() {
-//                LWQApplication.setStrictMode(BuildConfig.DEBUG);
-            }
-
-            @Override
-            public void onAdFailedToLoad(int i) {
-//                LWQApplication.setStrictMode(BuildConfig.DEBUG);
-            }
-
-            @Override
             public void onAdClosed() {
                 requestNewInterstitial();
             }
@@ -567,7 +557,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     private void requestNewInterstitial() {
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG && !BuildConfig.TEST_ADS) {
             return;
         }
         final AdRequest adRequest = new AdRequest.Builder()
