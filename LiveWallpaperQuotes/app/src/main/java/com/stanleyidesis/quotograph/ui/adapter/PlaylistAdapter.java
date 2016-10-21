@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.orm.SugarRecord;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
@@ -66,8 +67,8 @@ import butterknife.OnClick;
  */
 public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    final int VIEW_TYPE_PLAYLIST = 0;
-    final int VIEW_TYPE_SURVEY = 1;
+    private final int VIEW_TYPE_SURVEY = 1;
+    private final int VIEW_TYPE_AD = 2;
 
     public interface Delegate {
         void onPlaylistItemRemove(PlaylistAdapter adapter, int position);
@@ -75,13 +76,12 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         void onMakeQuotograph(PlaylistAdapter adapter, int position);
     }
 
-    Delegate delegate;
-    List<Object> playlistItems;
-    List<PlaylistCategory> playlistCategories;
-    List<PlaylistAuthor> playlistAuthors;
-    List<PlaylistQuote> playlistQuotes;
-    boolean showSurvey;
-    int surveyOffset;
+    private Delegate delegate;
+    private List<Object> playlistItems;
+    private List<PlaylistCategory> playlistCategories;
+    private List<PlaylistAuthor> playlistAuthors;
+    private List<PlaylistQuote> playlistQuotes;
+    private boolean showSurvey;
 
     public PlaylistAdapter() {
         this(null);
@@ -106,10 +106,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public Object getItem(int position) {
-        if (getItemViewType(position) == VIEW_TYPE_SURVEY) {
-            return null;
-        }
-        return playlistItems.get(position - surveyOffset);
+        return playlistItems.get(position);
     }
 
     public void insertItem(Object object) {
@@ -124,6 +121,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             Collections.sort(playlistQuotes);
         }
         playlistItems.clear();
+        if (showSurvey) playlistItems.add(new SurveyPlaceholder());
         playlistItems.addAll(playlistCategories);
         playlistItems.addAll(playlistAuthors);
         playlistItems.addAll(playlistQuotes);
@@ -134,14 +132,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public void removeItem(Object item) {
-        final int position = playlistItems.indexOf(item);
-        if (position > -1) {
-            removeItem(position + surveyOffset);
-        }
+        removeItem(playlistItems.indexOf(item));
     }
 
-    public void removeItem(int position) {
-        final Object remove = playlistItems.remove(position - surveyOffset);
+    private void removeItem(int position) {
+        final Object remove = playlistItems.remove(position);
         if (remove instanceof PlaylistCategory) {
             playlistCategories.remove(remove);
         } else if (remove instanceof PlaylistAuthor) {
@@ -160,18 +155,25 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return;
         }
         this.showSurvey = showSurvey;
-        surveyOffset = showSurvey ? 1 : 0;
         if (showSurvey) {
+            playlistItems.add(0, new SurveyPlaceholder());
             notifyItemInserted(0);
         } else {
+            playlistItems.remove(0);
             notifyItemRemoved(0);
         }
     }
 
     @Override
     public int getItemViewType(int position) {
-        return showSurvey && position == 0 ?
-                VIEW_TYPE_SURVEY : VIEW_TYPE_PLAYLIST;
+        Object item = getItem(position);
+        if (item instanceof SugarRecord) {
+            return 0;
+        } else if (item instanceof SurveyPlaceholder) {
+            return VIEW_TYPE_SURVEY;
+        } else {
+            return VIEW_TYPE_AD;
+        }
     }
 
     @Override
@@ -187,7 +189,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (getItemViewType(position) == VIEW_TYPE_SURVEY) {
+        int itemViewType = getItemViewType(position);
+        if (itemViewType == VIEW_TYPE_SURVEY) {
+            return;
+        } else if (itemViewType == VIEW_TYPE_AD) {
+            // TODO request ad?
             return;
         }
         PlaylistViewHolder playlistViewHolder = (PlaylistViewHolder) holder;
@@ -206,26 +212,26 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public int getItemCount() {
-        return playlistItems.size() + surveyOffset;
+        return playlistItems.size();
     }
 
     public int getPlaylistItemCount() {
         return playlistItems.size();
     }
 
-    public int getCategoryCount() {
+    private int getCategoryCount() {
         return playlistCategories.size();
     }
 
-    public int getAuthorCount() {
+    private int getAuthorCount() {
         return playlistAuthors.size();
     }
 
-    public int getQuoteCount() {
+    private int getQuoteCount() {
         return playlistQuotes.size();
     }
 
-    public void logUserData() {
+    private void logUserData() {
         LWQLoggerHelper.get()
                 .logCategoryCount(getCategoryCount());
         LWQLoggerHelper.get()
@@ -234,13 +240,21 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 .logQuoteCount(getQuoteCount());
     }
 
+    /**
+     * Dummy classes to identify where, in the full list,
+     * do we insert Ads and Survey, among other things.
+     */
+    private abstract class PlaylistPlaceholder {}
+    private class SurveyPlaceholder extends PlaylistPlaceholder {}
+    private class AdPlaceholder extends PlaylistPlaceholder {}
+
     class SurveyPlaylistViewHolder
             extends RecyclerView.ViewHolder
             implements AdapterView.OnItemClickListener {
 
         ListPopupWindow listPopupWindow;
 
-        public SurveyPlaylistViewHolder(View itemView) {
+        private SurveyPlaylistViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
@@ -294,7 +308,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         @Bind(R.id.tv_playlist_item_description) TextView description;
         ListPopupWindow listPopupWindow;
 
-        public PlaylistViewHolder(View itemView) {
+        private PlaylistViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

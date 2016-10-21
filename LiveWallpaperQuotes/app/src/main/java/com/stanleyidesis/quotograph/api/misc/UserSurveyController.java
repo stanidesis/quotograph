@@ -67,10 +67,10 @@ public class UserSurveyController {
     public static int RESPONSE_LATER = 1;
     public static int RESPONSE_OKAY = 2;
 
-    static TimerTask surveyTimerTask;
-    static Timer surveyTimer;
+    private static TimerTask surveyTimerTask;
+    private static Timer surveyTimer;
 
-    static boolean shouldShowSurvey() {
+    private static boolean shouldShowSurvey() {
         if (getVariant() == SURVEY_VARIANT_NONE) {
             return false;
         }
@@ -82,7 +82,7 @@ public class UserSurveyController {
             return false;
         }
         long surveyLastShownOn = LWQPreferences.getSurveyLastShownOn();
-        if (surveyLastShownOn == -1) {
+        if (surveyLastShownOn == -1L) {
             // This is the first time we're checking, so set to system time and
             // don't show it yet, wait one cycle
             LWQPreferences.setSurveyLastShownOn(System.currentTimeMillis());
