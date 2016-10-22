@@ -53,7 +53,7 @@ import butterknife.ButterKnife;
  * Date: 10/22/2016
  */
 
-public class AdViewHolder extends RecyclerView.ViewHolder {
+class AdViewHolder extends RecyclerView.ViewHolder {
 
     @Bind(R.id.prl_ad_container)
     PercentRelativeLayout nativeAdHolder;
@@ -137,6 +137,7 @@ public class AdViewHolder extends RecyclerView.ViewHolder {
 
     private void requestAd() {
         // Start the request
+        maxAttempts = 10;
         nativeExpressAdView.loadAd(AdMobUtils.buildRequest(itemView.getContext()));
     }
 

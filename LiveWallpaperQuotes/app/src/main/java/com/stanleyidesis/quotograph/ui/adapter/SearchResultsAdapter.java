@@ -113,6 +113,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
                 searchResults.add(authorCouplet);
             }
         }
+        // This area is pretty small, so there's a high likelihood that
+        // ads will not render on small devices.
         searchResults.add(0, new AdPlaceholder());
     }
 
