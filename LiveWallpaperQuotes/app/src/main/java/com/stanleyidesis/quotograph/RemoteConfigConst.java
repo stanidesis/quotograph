@@ -41,4 +41,5 @@ public class RemoteConfigConst {
     public static String FIREBASE_ANALYTICS = "firebase_analytics";
     public static String STACK_BLURRING = "stack_blurring";
     public static String ADMOB_PLAYLIST_NATIVE_SMALL_BG_COLOR = "admob_playlist_native_small_bg_color";
+    public static String ADMOB_SEARCH_NATIVE_SMALL_BG_COLOR = "admob_search_native_small_bg_color";
 }

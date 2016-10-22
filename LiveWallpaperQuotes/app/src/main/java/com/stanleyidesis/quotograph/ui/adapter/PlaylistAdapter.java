@@ -1,12 +1,10 @@
 package com.stanleyidesis.quotograph.ui.adapter;
 
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +15,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.NativeExpressAdView;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -272,8 +269,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return new SurveyPlaylistViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.survey_playlist_item, null));
         } else if (viewType == VIEW_TYPE_AD) {
-            return new AdViewHolder(
-                    LayoutInflater.from(parent.getContext()).inflate(R.layout.ad_playlist_item, null));
+            return new AdViewHolder(parent.getContext(),
+                    RemoteConfigConst.ADMOB_PLAYLIST_NATIVE_SMALL_BG_COLOR,
+                    R.string.admob_playlist_native_small);
         } else {
             return new PlaylistViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.playlist_item, null));
@@ -478,99 +476,5 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    class AdViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(R.id.prl_playlist_item_ad)
-        PercentRelativeLayout nativeAdHolder;
-        NativeExpressAdView nativeExpressAdView;
-
-        int finalHeight;
-        boolean runOnce = true;
-
-        AdListener adListener = new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                if (itemView.getLayoutParams().height > 0) {
-                    return;
-                }
-                ValueAnimator valueAnimator = ValueAnimator.ofInt(0, finalHeight).setDuration(200);
-                valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-                valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        itemView.getLayoutParams().height = (int) valueAnimator.getAnimatedValue();
-                        itemView.requestLayout();
-                    }
-                });
-                valueAnimator.start();
-            }
-
-            @Override
-            public void onAdOpened() {}
-
-            @Override
-            public void onAdLeftApplication() {}
-
-            @Override
-            public void onAdFailedToLoad(int i) {
-                requestAd();
-            }
-
-            @Override
-            public void onAdClosed() {}
-        };
-
-        AdViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-            nativeExpressAdView = new NativeExpressAdView(itemView.getContext());
-            nativeExpressAdView.setAdListener(adListener);
-            nativeAdHolder.addView(nativeExpressAdView, PercentRelativeLayout.LayoutParams.WRAP_CONTENT,
-                    PercentRelativeLayout.LayoutParams.WRAP_CONTENT);
-            adSetup();
-        }
-
-        void adSetup() {
-            nativeAdHolder.post(new Runnable() {
-                @Override
-                public void run() {
-                    // Set the ad target size
-                    int maxWidthInt = nativeAdHolder.getWidth();
-                    int maxHeightInt = nativeAdHolder.getHeight();
-                    maxWidthInt = (int) (maxWidthInt * 1f / itemView.getResources().getDisplayMetrics().density);
-                    maxHeightInt = (int) (maxHeightInt * 1f / itemView.getResources().getDisplayMetrics().density);
-                    nativeExpressAdView.setAdSize(new AdSize(maxWidthInt, maxHeightInt));
-                    nativeExpressAdView.setAdUnitId(itemView.getContext().getString(R.string.admob_playlist_native_small));
-
-                    // Setup animation
-                    finalHeight = itemView.getHeight();
-                    itemView.getLayoutParams().height = 0;
-                    itemView.requestLayout();
-                }
-            });
-        }
-
-        void requestAd() {
-            // Start the request
-            nativeExpressAdView.loadAd(AdMobUtils.buildRequest(itemView.getContext()));
-        }
-
-        void update() {
-            itemView.setBackgroundColor(
-                    Integer.parseInt(
-                            FirebaseRemoteConfig.getInstance().getString(
-                                    RemoteConfigConst.ADMOB_PLAYLIST_NATIVE_SMALL_BG_COLOR),
-                            16)
-            );
-            if (runOnce) {
-                nativeAdHolder.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        requestAd();
-                    }
-                });
-                runOnce = false;
-            }
-        }
-    }
 }
