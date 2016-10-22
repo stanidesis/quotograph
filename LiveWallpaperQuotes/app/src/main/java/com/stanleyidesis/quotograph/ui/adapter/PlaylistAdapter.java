@@ -1,8 +1,10 @@
 package com.stanleyidesis.quotograph.ui.adapter;
 
+import android.support.percent.PercentRelativeLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +13,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.NativeExpressAdView;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.orm.SugarRecord;
+import com.stanleyidesis.quotograph.BuildConfig;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.RemoteConfigConst;
 import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
 import com.stanleyidesis.quotograph.api.db.Author;
 import com.stanleyidesis.quotograph.api.db.Category;
@@ -81,6 +90,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private List<PlaylistCategory> playlistCategories;
     private List<PlaylistAuthor> playlistAuthors;
     private List<PlaylistQuote> playlistQuotes;
+    private List<AdPlaceholder> adPlaceholders;
     private boolean showSurvey;
 
     public PlaylistAdapter() {
@@ -90,6 +100,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public PlaylistAdapter(Delegate delegate) {
         this.delegate = delegate;
         final Playlist activePlaylist = Playlist.active();
+        adPlaceholders = new ArrayList<>();
         playlistCategories = PlaylistCategory.forPlaylist(activePlaylist);
         playlistAuthors = PlaylistAuthor.forPlaylist(activePlaylist);
         playlistQuotes = PlaylistQuote.forPlaylist(activePlaylist);
@@ -97,10 +108,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         Collections.sort(playlistAuthors);
         Collections.sort(playlistQuotes);
         playlistItems = new ArrayList<>();
-        playlistItems.addAll(playlistCategories);
-        playlistItems.addAll(playlistAuthors);
-        playlistItems.addAll(playlistQuotes);
-
+        insertAll();
         // Log user data
         logUserData();
     }
@@ -110,25 +118,65 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public void insertItem(Object object) {
+        int insertPosition;
+        List<?> playlistEntryList = null;
         if (object instanceof PlaylistCategory) {
+            playlistEntryList = playlistCategories;
+            insertPosition = findFirstPosition(playlistCategories);
             playlistCategories.add((PlaylistCategory) object);
             Collections.sort(playlistCategories);
+            if (insertPosition != -1) {
+                insertPosition += playlistCategories.indexOf(object);
+            } else {
+                insertPosition = findFirstPosition(playlistAuthors);
+                if (insertPosition == -1) insertPosition = findFirstPosition(playlistQuotes);
+            }
         } else if (object instanceof PlaylistAuthor) {
+            playlistEntryList = playlistAuthors;
+            insertPosition = findFirstPosition(playlistAuthors);
             playlistAuthors.add((PlaylistAuthor) object);
             Collections.sort(playlistAuthors);
+            if (insertPosition != -1) {
+                insertPosition += playlistAuthors.indexOf(object);
+            } else {
+                insertPosition = findLastPosition(playlistCategories) + 1;
+                if (insertPosition == 0) insertPosition = findFirstPosition(playlistQuotes);
+            }
         } else {
+            playlistEntryList = playlistQuotes;
+            insertPosition = findFirstPosition(playlistQuotes);
             playlistQuotes.add((PlaylistQuote) object);
             Collections.sort(playlistQuotes);
+            if (insertPosition != -1) {
+                insertPosition += playlistQuotes.indexOf(object);
+            } else {
+                insertPosition = findLastPosition(playlistAuthors) + 1;
+                if (insertPosition == 0) insertPosition = findLastPosition(playlistCategories) + 1;
+            }
         }
-        playlistItems.clear();
-        if (showSurvey) playlistItems.add(new SurveyPlaceholder());
-        playlistItems.addAll(playlistCategories);
-        playlistItems.addAll(playlistAuthors);
-        playlistItems.addAll(playlistQuotes);
-        notifyItemInserted(playlistItems.indexOf(object));
+        playlistItems.add(insertPosition, object);
+        notifyItemInserted(insertPosition);
+        if (playlistEntryList.size() == 5) {
+            // Insert an add
+            insertAdAt(findFirstPosition(playlistEntryList), true);
+        }
 
         // Update user data
         logUserData();
+    }
+
+    private int findFirstPosition(List<?> playlistEntities) {
+        if (playlistEntities.size() == 0) {
+            return -1;
+        }
+        return playlistItems.indexOf(playlistEntities.get(0));
+    }
+
+    private int findLastPosition(List<?> playlistEntities) {
+        if (playlistEntities.size() == 0) {
+            return -1;
+        }
+        return playlistItems.indexOf(playlistEntities.get(playlistEntities.size() - 1));
     }
 
     public void removeItem(Object item) {
@@ -150,6 +198,29 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         logUserData();
     }
 
+    private void insertAll() {
+        playlistItems.clear();
+        playlistItems.addAll(playlistCategories);
+        if (playlistCategories.size() > 4) {
+            insertAdAt(findFirstPosition(playlistCategories), false);
+        }
+        playlistItems.addAll(playlistAuthors);
+        if (playlistAuthors.size() > 4) {
+            insertAdAt(findFirstPosition(playlistAuthors), false);
+        }
+        playlistItems.addAll(playlistQuotes);
+        if (playlistQuotes.size() > 4) {
+            insertAdAt(findFirstPosition(playlistQuotes), false);
+        }
+        if (showSurvey) {
+            playlistItems.add(0, new SurveyPlaceholder());
+        }
+        if (adPlaceholders.size() == 0) {
+            // Append to top
+            insertAdAt(showSurvey ? 1 : 0, false);
+        }
+    }
+
     public void setShowSurvey(boolean showSurvey) {
         if (this.showSurvey == showSurvey) {
             return;
@@ -162,6 +233,21 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             playlistItems.remove(0);
             notifyItemRemoved(0);
         }
+    }
+
+    public void insertAdAt(int position, boolean notify) {
+        if (BuildConfig.DEBUG && !BuildConfig.TEST_ADS) {
+            return;
+        }
+        AdPlaceholder adPlaceholder = new AdPlaceholder();
+        adPlaceholders.add(adPlaceholder);
+        playlistItems.add(position, adPlaceholder);
+        if (notify) notifyItemInserted(position);
+    }
+
+    public void removeAllAds() {
+        playlistItems.removeAll(adPlaceholders);
+        adPlaceholders.clear();
     }
 
     @Override
@@ -181,6 +267,9 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (viewType == VIEW_TYPE_SURVEY) {
             return new SurveyPlaylistViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.survey_playlist_item, null));
+        } else if (viewType == VIEW_TYPE_AD) {
+            return new AdViewHolder(
+                    LayoutInflater.from(parent.getContext()).inflate(R.layout.ad_playlist_item, null));
         } else {
             return new PlaylistViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.playlist_item, null));
@@ -193,7 +282,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (itemViewType == VIEW_TYPE_SURVEY) {
             return;
         } else if (itemViewType == VIEW_TYPE_AD) {
-            // TODO request ad?
+            ((AdViewHolder) holder).update();
             return;
         }
         PlaylistViewHolder playlistViewHolder = (PlaylistViewHolder) holder;
@@ -381,6 +470,85 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 if (delegate != null) {
                     delegate.onMakeQuotograph(PlaylistAdapter.this, getAdapterPosition());
                 }
+            }
+        }
+    }
+
+    class AdViewHolder extends RecyclerView.ViewHolder {
+
+        @Bind(R.id.prl_playlist_item_ad)
+        PercentRelativeLayout nativeAdHolder;
+
+        NativeExpressAdView nativeExpressAdView;
+
+        AdListener adListener = new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                Log.v("NEAV", "onAdLoaded");
+            }
+
+            @Override
+            public void onAdOpened() {
+                Log.v("NEAV", "onAdOpened");
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                Log.v("NEAV", "onAdLeftApplication");
+            }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+                Log.v("NEAV", "onAdFailedToLoad: " + i);
+            }
+
+            @Override
+            public void onAdClosed() {
+                Log.v("NEAV", "onAdClosed");
+            }
+        };
+
+        AdViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+            nativeExpressAdView = new NativeExpressAdView(itemView.getContext());
+            nativeExpressAdView.setAdListener(adListener);
+            nativeAdHolder.addView(nativeExpressAdView, PercentRelativeLayout.LayoutParams.WRAP_CONTENT,
+                    PercentRelativeLayout.LayoutParams.WRAP_CONTENT);
+            nativeAdHolder.post(new Runnable() {
+                @Override
+                public void run() {
+                    requestAd();
+                }
+            });
+        }
+
+        void requestAd() {
+            AdRequest request = new AdRequest.Builder()
+                    .addTestDevice(itemView.getContext().getString(R.string.admob_nexus_5x_device_id))
+                    .addTestDevice(itemView.getContext().getString(R.string.admob_moto_g_device_id))
+                    .build();
+            int maxWidthInt = nativeAdHolder.getWidth();
+            int maxHeightInt = nativeAdHolder.getHeight();
+            maxWidthInt = (int) (maxWidthInt * 1f / itemView.getResources().getDisplayMetrics().density);
+            maxHeightInt = (int) (maxHeightInt * 1f / itemView.getResources().getDisplayMetrics().density);
+            nativeExpressAdView.setAdSize(new AdSize(maxWidthInt, maxHeightInt));
+            nativeExpressAdView.setAdUnitId(itemView.getContext().getString(R.string.admob_playlist_native_small));
+            nativeExpressAdView.loadAd(request);
+        }
+
+        boolean runOnce = false;
+
+        void update() {
+            itemView.setBackgroundColor(
+                    Integer.parseInt(
+                            FirebaseRemoteConfig.getInstance().getString(
+                                    RemoteConfigConst.ADMOB_PLAYLIST_NATIVE_SMALL_BG_COLOR),
+                            16)
+            );
+            if (runOnce) {
+                runOnce = false;
+                requestAd();
             }
         }
     }

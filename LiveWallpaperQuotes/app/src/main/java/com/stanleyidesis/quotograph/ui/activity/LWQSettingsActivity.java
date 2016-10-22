@@ -48,6 +48,10 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
@@ -101,19 +105,21 @@ import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import it.sephiroth.android.library.tooltip.Tooltip;
 
+import static butterknife.ButterKnife.findById;
+
 /**
  * Copyright (c) 2016 Stanley Idesis
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
-
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -122,17 +128,18 @@ import it.sephiroth.android.library.tooltip.Tooltip;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
+ * <p>
  * LWQSettingsActivity.java
+ *
  * @author Stanley Idesis
- *
- * From Quotograph
- * https://github.com/stanidesis/quotograph
- *
- * Please report any issues
- * https://github.com/stanidesis/quotograph/issues
- *
- * Date: 07/11/2015
+ *         <p>
+ *         From Quotograph
+ *         https://github.com/stanidesis/quotograph
+ *         <p>
+ *         Please report any issues
+ *         https://github.com/stanidesis/quotograph/issues
+ *         <p>
+ *         Date: 07/11/2015
  */
 public class LWQSettingsActivity extends LWQWallpaperActivity implements ActivityStateFlags,
         SeekBar.OnSeekBarChangeListener,
@@ -228,7 +235,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
             // The MAIN loop…
             for (int resourceId : nextActivityState.newStateValues.keySet()) {
-                final View view = ButterKnife.findById(LWQSettingsActivity.this, resourceId);
+                final View view = findById(LWQSettingsActivity.this, resourceId);
                 if (view == null) {
                     continue;
                 }
@@ -273,9 +280,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                        ((Runnable) view.getTag(rotate ?
-                                R.id.view_tag_animator_rotate
-                                : R.id.view_tag_animator_unrotate)).run();
+                            ((Runnable) view.getTag(rotate ?
+                                    R.id.view_tag_animator_rotate
+                                    : R.id.view_tag_animator_unrotate)).run();
                         }
                     });
                     currentFlags &= ~(FLAG_ROTATE | FLAG_NO_ROTATE);
@@ -429,10 +436,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     ViewPager viewPager;
 
     // Preview Container and Wallpaper Actions
-    @Bind(R.id.group_lwq_settings_wallpaper_preview_wrapper) View wallpaperPreviewWrapper;
-    @Bind(R.id.btn_wallpaper_actions_share) View shareButton;
-    @Bind(R.id.btn_wallpaper_actions_save) View saveButton;
-    @Bind(R.id.btn_wallpaper_actions_skip) View skipButton;
+    @Bind(R.id.group_lwq_settings_wallpaper_preview_wrapper)
+    View wallpaperPreviewWrapper;
+    @Bind(R.id.btn_wallpaper_actions_share)
+    View shareButton;
+    @Bind(R.id.btn_wallpaper_actions_save)
+    View saveButton;
+    @Bind(R.id.btn_wallpaper_actions_skip)
+    View skipButton;
 
     // Settings Container
     @Bind(R.id.group_lwq_settings_settings_wrapper)
@@ -497,7 +508,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void onGlobalLayout() {
                 content.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                View [] buttons = new View[] {shareButton, saveButton, skipButton};
+                View[] buttons = new View[]{shareButton, saveButton, skipButton};
                 for (View button : buttons) {
                     button.setAlpha(0f);
                     button.setTranslationY(button.getHeight() * 2);
@@ -542,34 +553,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
         // Ads
         setupInterstitialAd();
-    }
-
-    private void setupInterstitialAd() {
-        interstitialAd = new InterstitialAd(this);
-        interstitialAd.setAdUnitId(getString(R.string.admob_prime_interstitial));
-        interstitialAd.setAdListener(new AdListener() {
-            @Override
-            public void onAdClosed() {
-                requestNewInterstitial();
-            }
-        });
-        requestNewInterstitial();
-    }
-
-    private void requestNewInterstitial() {
-        if (BuildConfig.DEBUG && !BuildConfig.TEST_ADS) {
-            return;
-        }
-        final AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice(getString(R.string.admob_nexus_5x_device_id))
-                .build();
-        // Ew, Admob, ew...
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                interstitialAd.loadAd(adRequest);
-            }
-        }, 1);
     }
 
     @Override
@@ -651,6 +634,35 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Setup
 
+    private void setupInterstitialAd() {
+        interstitialAd = new InterstitialAd(this);
+        interstitialAd.setAdUnitId(getString(R.string.admob_prime_interstitial));
+        interstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                requestNewInterstitial();
+            }
+        });
+        requestNewInterstitial();
+    }
+
+    private void requestNewInterstitial() {
+        if (BuildConfig.DEBUG && !BuildConfig.TEST_ADS) {
+            return;
+        }
+        final AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(getString(R.string.admob_nexus_5x_device_id))
+                .addTestDevice(getString(R.string.admob_moto_g_device_id))
+                .build();
+        // Ew, Admob, ew...
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                interstitialAd.loadAd(adRequest);
+            }
+        }, 1);
+    }
+
     void setupContent() {
         content.setAlpha(0f);
         content.setTag(R.id.view_tag_flags, FLAG_HIDE);
@@ -714,9 +726,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                         // Content
                         content.setAlpha(positionOffset);
                         // At .3, share is gone, at .6, save is gone, and at 1, skip is gone
-                        shareButton.setAlpha(1f - (Math.min(positionOffset, 1/3f) / (1/3f)));
+                        shareButton.setAlpha(1f - (Math.min(positionOffset, 1 / 3f) / (1 / 3f)));
                         shareButton.setTranslationY((1f - shareButton.getAlpha()) * shareButton.getHeight() * 2);
-                        saveButton.setAlpha(1f - (Math.min(positionOffset, 2/3f) / (2/3f)));
+                        saveButton.setAlpha(1f - (Math.min(positionOffset, 2 / 3f) / (2 / 3f)));
                         saveButton.setTranslationY((1f - saveButton.getAlpha()) * saveButton.getHeight() * 2);
                         skipButton.setAlpha(1f - positionOffset);
                         skipButton.setTranslationY((1f - skipButton.getAlpha()) * skipButton.getHeight() * 2);
@@ -761,7 +773,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 }
 
                 // Action Buttons
-                View [] buttons = new View[] {shareButton, saveButton, skipButton};
+                View[] buttons = new View[]{shareButton, saveButton, skipButton};
                 for (View button : buttons) {
                     button.setTranslationY(position == 0 ? 0f : button.getHeight() * 2f);
                     button.setAlpha(position == 0 ? 1f : 0f);
@@ -779,7 +791,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {}
+            public void onPageScrollStateChanged(int state) {
+            }
         });
         tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.palette_500));
         tabLayout.setupWithViewPager(viewPager);
@@ -794,7 +807,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     void setupWallpaperActions() {
         int navBarHeight = UIUtils.getNavBarHeight(this);
         if (navBarHeight > 0) {
-            View wallpaperActionsContainer = ButterKnife.findById(this, R.id.group_lwq_settings_wallpaper_actions);
+            View wallpaperActionsContainer = findById(this, R.id.group_lwq_settings_wallpaper_actions);
             float navBarHeightPercentage = (float) navBarHeight / (float) UIUtils.getRealScreenSize().y;
             final PercentFrameLayout.LayoutParams layoutParams =
                     (PercentFrameLayout.LayoutParams) wallpaperActionsContainer.getLayoutParams();
@@ -848,7 +861,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         int navBarHeight = UIUtils.getNavBarHeight(this);
         if (navBarHeight > 0) {
             float navBarHeightPercentage = (float) navBarHeight / (float) UIUtils.getRealScreenSize().y;
-            View fabAddWrapper = ButterKnife.findById(this, R.id.fl_lwq_fab_reveal);
+            View fabAddWrapper = findById(this, R.id.fl_lwq_fab_reveal);
             PercentRelativeLayout.LayoutParams layoutParams =
                     (PercentRelativeLayout.LayoutParams) fabAddWrapper.getLayoutParams();
             layoutParams.getPercentLayoutInfo().bottomMarginPercent += navBarHeightPercentage;
@@ -915,7 +928,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             public void run() {
                 Activity context = LWQSettingsActivity.this;
                 final List<Author> list = Select.from(Author.class).orderBy(NamingHelper.toSQLNameDefault("name")).list();
-                String [] allAuthors = new String[list.size()];
+                String[] allAuthors = new String[list.size()];
                 for (int i = 0; i < list.size(); i++) {
                     allAuthors[i] = list.get(i).name;
                 }
@@ -961,7 +974,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         // RecyclerView
         searchResultsAdapter = new SearchResultsAdapter();
         searchResultsAdapter.setDelegate(this);
-        final RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler_fab_screen_search_results);
+        final RecyclerView recyclerView = findById(this, R.id.recycler_fab_screen_search_results);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(searchResultsAdapter);
@@ -992,7 +1005,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     void setupPlaylist() {
         playlistAdapter = new PlaylistAdapter(this);
-        RecyclerView recyclerView = ButterKnife.findById(this, R.id.recycler_playlist);
+        RecyclerView recyclerView = findById(this, R.id.recycler_playlist);
         recyclerView.setHasFixedSize(false);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(playlistAdapter);
@@ -1000,12 +1013,12 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     void setupSettings() {
-        final String [] refreshPreferenceOptions = getResources().getStringArray(R.array.refresh_preference_options);
+        final String[] refreshPreferenceOptions = getResources().getStringArray(R.array.refresh_preference_options);
         ArrayAdapter<String> refreshOptionsAdapter = new ArrayAdapter<>(this,
                 R.layout.spinner_item,
                 refreshPreferenceOptions);
         refreshOptionsAdapter.setDropDownViewResource(R.layout.spinner_drop_down_item);
-        Spinner refreshSpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_refresh);
+        Spinner refreshSpinner = findById(settingsContainer, R.id.spinner_lwq_settings_refresh);
         refreshSpinner.setAdapter(refreshOptionsAdapter);
         refreshSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -1018,29 +1031,30 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
         });
         updateRefreshSpinner();
 
         // Blur
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            ButterKnife.findById(settingsContainer, R.id.sb_lwq_settings_blur).setVisibility(View.GONE);
+            findById(settingsContainer, R.id.sb_lwq_settings_blur).setVisibility(View.GONE);
         } else {
-            SeekBar blurBar = ButterKnife.findById(settingsContainer, R.id.sb_lwq_settings_blur);
+            SeekBar blurBar = findById(settingsContainer, R.id.sb_lwq_settings_blur);
             blurBar.setProgress(LWQPreferences.getBlurPreference());
             blurBar.setOnSeekBarChangeListener(this);
         }
 
         // Dim
-        SeekBar dimBar = ButterKnife.findById(settingsContainer, R.id.sb_lwq_settings_dim);
+        SeekBar dimBar = findById(settingsContainer, R.id.sb_lwq_settings_dim);
         dimBar.setProgress(LWQPreferences.getDimPreference());
         dimBar.setOnSeekBarChangeListener(this);
 
-        AppCompatCheckBox doubleTapCheckbox = ButterKnife.findById(this, R.id.check_lwq_settings_double_tap);
+        AppCompatCheckBox doubleTapCheckbox = findById(this, R.id.check_lwq_settings_double_tap);
         doubleTapCheckbox.setChecked(LWQPreferences.isDoubleTapEnabled());
 
         // Fonts
-        ButterKnife.findById(settingsContainer, R.id.btn_lwq_settings_fonts).setOnClickListener(new View.OnClickListener() {
+        findById(settingsContainer, R.id.btn_lwq_settings_fonts).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 chooseFontsDialog = new MaterialDialog.Builder(LWQSettingsActivity.this)
@@ -1059,19 +1073,19 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         });
 
         // Images
-        ButterKnife.findById(settingsContainer, R.id.btn_lwq_settings_images)
+        findById(settingsContainer, R.id.btn_lwq_settings_images)
                 .setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeState(stateChooseImageSources);
-                // Log view
-                AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_IMAGES);
-            }
-        });
+                    @Override
+                    public void onClick(View v) {
+                        changeState(stateChooseImageSources);
+                        // Log view
+                        AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_IMAGES);
+                    }
+                });
     }
 
     void updateRefreshSpinner() {
-        Spinner refreshSpinner = ButterKnife.findById(settingsContainer, R.id.spinner_lwq_settings_refresh);
+        Spinner refreshSpinner = findById(settingsContainer, R.id.spinner_lwq_settings_refresh);
         final AdapterView.OnItemSelectedListener onItemSelectedListener = refreshSpinner.getOnItemSelectedListener();
         refreshSpinner.setOnItemSelectedListener(null);
         final long refreshPreference = LWQPreferences.getRefreshPreference();
@@ -1110,7 +1124,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void run() {
                 chooseImageSourceModule.changeVisibility(
-                        ButterKnife.findById(LWQSettingsActivity.this,
+                        findById(LWQSettingsActivity.this,
                                 R.id.btn_lwq_settings_images),
                         false);
             }
@@ -1119,7 +1133,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void run() {
                 chooseImageSourceModule.changeVisibility(
-                        ButterKnife.findById(LWQSettingsActivity.this,
+                        findById(LWQSettingsActivity.this,
                                 R.id.btn_lwq_settings_images),
                         true);
             }
@@ -1130,9 +1144,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Hanlde the click for every settings option
     @OnClick({R.id.tv_lwq_settings_blur, R.id.tv_lwq_settings_dim,
-    R.id.tv_lwq_settings_double_tap, R.id.tv_lwq_settings_fonts,
-    R.id.tv_lwq_settings_images, R.id.tv_lwq_settings_refresh,
-    R.id.tv_lwq_settings_whats_new})
+            R.id.tv_lwq_settings_double_tap, R.id.tv_lwq_settings_fonts,
+            R.id.tv_lwq_settings_images, R.id.tv_lwq_settings_refresh,
+            R.id.tv_lwq_settings_whats_new})
     void showSettingsTooltip(View view) {
         switch (view.getId()) {
             case R.id.tv_lwq_settings_blur:
@@ -1159,7 +1173,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
-    @OnClick(R.id.btn_lwq_settings_whats_new) void showWhatsNewDialog() {
+    @OnClick(R.id.btn_lwq_settings_whats_new)
+    void showWhatsNewDialog() {
         // Log view
         AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_WHATS_NEW);
         // Show dialog
@@ -1168,7 +1183,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         dialog.changeVisibility(null, true);
     }
 
-    @OnClick(R.id.btn_fab_screen_search) void performSearch() {
+    @OnClick(R.id.btn_fab_screen_search)
+    void performSearch() {
         UIUtils.dismissKeyboard(this);
         changeState(stateSearchInProgress);
         final int itemCount = searchResultsAdapter.getItemCount();
@@ -1203,7 +1219,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         AnalyticsUtils.trackSearch(query);
     }
 
-    @OnClick(R.id.fab_lwq_create_quote) void revealAddEditQuote() {
+    @OnClick(R.id.fab_lwq_create_quote)
+    void revealAddEditQuote() {
         if (activityState == stateAddEditQuote) {
             changeState(stateAddReveal);
             // Log the view
@@ -1217,7 +1234,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
-    @OnClick(R.id.btn_fab_screen_save) void saveQuote() {
+    @OnClick(R.id.btn_fab_screen_save)
+    void saveQuote() {
         Author author = Author.findAuthor(editableAuthor.getText().toString().trim());
         if (author == null) {
             // Create a new Author
@@ -1253,7 +1271,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         );
     }
 
-    @OnClick(R.id.btn_fab_screen_cancel) void dismissAddEditQuote() {
+    @OnClick(R.id.btn_fab_screen_cancel)
+    void dismissAddEditQuote() {
         editingQuote = null;
         editingQuotePosition = -1;
         changeState(stateAddReveal);
@@ -1262,7 +1281,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_ADD);
     }
 
-    @OnClick(R.id.fab_lwq_plus) void toggleAddScreen() {
+    @OnClick(R.id.fab_lwq_plus)
+    void toggleAddScreen() {
         if (activityState == stateAddReveal
                 || activityState == stateAddEditQuote
                 || activityState == stateSearch) {
@@ -1277,7 +1297,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
-    @OnClick(R.id.fab_lwq_search) void revealSearch() {
+    @OnClick(R.id.fab_lwq_search)
+    void revealSearch() {
         if (activityState == stateSearch) {
             changeState(stateAddReveal);
             UIUtils.dismissKeyboard(this);
@@ -1292,7 +1313,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
-    @OnClick(R.id.btn_wallpaper_actions_skip) void skipWallpaperClick() {
+    @OnClick(R.id.btn_wallpaper_actions_skip)
+    void skipWallpaperClick() {
         AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
                 AnalyticsUtils.ACTION_SKIPPED,
                 AnalyticsUtils.LABEL_IN_APP);
@@ -1303,12 +1325,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         }
     }
 
-    @OnClick(R.id.btn_wallpaper_actions_save) void saveWallpaperClick() {
+    @OnClick(R.id.btn_wallpaper_actions_save)
+    void saveWallpaperClick() {
         startActivityForResult(new Intent(this, LWQSaveWallpaperActivity.class), REQUEST_CODE_SAVE);
         changeState(stateSaveWallpaper);
     }
 
-    @OnClick(R.id.btn_wallpaper_actions_share) void shareWallpaperClick() {
+    @OnClick(R.id.btn_wallpaper_actions_share)
+    void shareWallpaperClick() {
         sendBroadcast(new Intent(getString(R.string.action_share)));
     }
 
@@ -1324,7 +1348,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             @Override
             public void run() {
                 if (button.getTag(R.id.view_tag_animator) != null) {
-                    ((Animator)button.getTag(R.id.view_tag_animator)).end();
+                    ((Animator) button.getTag(R.id.view_tag_animator)).end();
                     button.setTag(R.id.view_tag_animator, null);
                 }
             }
@@ -1355,8 +1379,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     Animator generateAnimator(View target, boolean dismiss, long startDelay) {
-        float [] fadeIn = new float[] {0f, 1f};
-        float [] fadeOut = new float[] {1f, 0f};
+        float[] fadeIn = new float[]{0f, 1f};
+        float[] fadeOut = new float[]{1f, 0f};
         final ObjectAnimator propAnimator = ObjectAnimator.ofPropertyValuesHolder(target,
                 PropertyValuesHolder.ofFloat(View.ALPHA, dismiss ? fadeOut : fadeIn),
                 PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, dismiss ? (target.getHeight() * 2f) : 0f));
@@ -1432,7 +1456,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     Animator animateFAB(final View fabToAnimate, final boolean dismiss) {
         fabToAnimate.setVisibility(View.VISIBLE);
-        float [] toFrom = dismiss ? new float[] {1f, .2f} : new float[] {.2f, 1f};
+        float[] toFrom = dismiss ? new float[]{1f, .2f} : new float[]{.2f, 1f};
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -1863,7 +1887,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 .text(getResources(), stringId)
                 .withCallback(callback);
         if (anchorId > 0) {
-            builder.anchor(ButterKnife.findById(this, anchorId), gravity);
+            builder.anchor(findById(this, anchorId), gravity);
         }
         Tooltip.make(this, builder.build()).show();
     }
@@ -1892,7 +1916,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     @Override
-    public void onTooltipFailed(Tooltip.TooltipView tooltipView) {}
+    public void onTooltipFailed(Tooltip.TooltipView tooltipView) {
+    }
 
     @Override
     public void onTooltipShown(Tooltip.TooltipView tooltipView) {
@@ -1900,5 +1925,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     @Override
-    public void onTooltipHidden(Tooltip.TooltipView tooltipView) {}
+    public void onTooltipHidden(Tooltip.TooltipView tooltipView) {
+    }
 }

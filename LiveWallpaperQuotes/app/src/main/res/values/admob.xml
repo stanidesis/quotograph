@@ -5,4 +5,5 @@
     <string name="admob_prime_interstitial">ca-app-pub-6347399532612145/4010973451</string>
     <string name="admob_search_native_small">ca-app-pub-6347399532612145/2534240253</string>
     <string name="admob_nexus_5x_device_id">E54E1AE78DC66E76D0E1A2EAAD5A1BAA</string>
+    <string name="admob_moto_g_device_id">E54E1AE78DC66E76D0E1A2EAAD5A1BAA</string>
 </resources>
