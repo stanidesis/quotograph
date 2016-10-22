@@ -1,5 +1,7 @@
 package com.stanleyidesis.quotograph.ui.adapter;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.ListPopupWindow;
@@ -8,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -19,6 +22,7 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.NativeExpressAdView;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.orm.SugarRecord;
+import com.stanleyidesis.quotograph.AdMobUtils;
 import com.stanleyidesis.quotograph.BuildConfig;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
@@ -478,34 +482,42 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         @Bind(R.id.prl_playlist_item_ad)
         PercentRelativeLayout nativeAdHolder;
-
         NativeExpressAdView nativeExpressAdView;
+
+        int finalHeight;
+        boolean runOnce = true;
 
         AdListener adListener = new AdListener() {
             @Override
             public void onAdLoaded() {
-                Log.v("NEAV", "onAdLoaded");
+                if (itemView.getLayoutParams().height > 0) {
+                    return;
+                }
+                ValueAnimator valueAnimator = ValueAnimator.ofInt(0, finalHeight).setDuration(200);
+                valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+                valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                        itemView.getLayoutParams().height = (int) valueAnimator.getAnimatedValue();
+                        itemView.requestLayout();
+                    }
+                });
+                valueAnimator.start();
             }
 
             @Override
-            public void onAdOpened() {
-                Log.v("NEAV", "onAdOpened");
-            }
+            public void onAdOpened() {}
 
             @Override
-            public void onAdLeftApplication() {
-                Log.v("NEAV", "onAdLeftApplication");
-            }
+            public void onAdLeftApplication() {}
 
             @Override
             public void onAdFailedToLoad(int i) {
-                Log.v("NEAV", "onAdFailedToLoad: " + i);
+                requestAd();
             }
 
             @Override
-            public void onAdClosed() {
-                Log.v("NEAV", "onAdClosed");
-            }
+            public void onAdClosed() {}
         };
 
         AdViewHolder(View itemView) {
@@ -515,29 +527,33 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             nativeExpressAdView.setAdListener(adListener);
             nativeAdHolder.addView(nativeExpressAdView, PercentRelativeLayout.LayoutParams.WRAP_CONTENT,
                     PercentRelativeLayout.LayoutParams.WRAP_CONTENT);
+            adSetup();
+        }
+
+        void adSetup() {
             nativeAdHolder.post(new Runnable() {
                 @Override
                 public void run() {
-                    requestAd();
+                    // Set the ad target size
+                    int maxWidthInt = nativeAdHolder.getWidth();
+                    int maxHeightInt = nativeAdHolder.getHeight();
+                    maxWidthInt = (int) (maxWidthInt * 1f / itemView.getResources().getDisplayMetrics().density);
+                    maxHeightInt = (int) (maxHeightInt * 1f / itemView.getResources().getDisplayMetrics().density);
+                    nativeExpressAdView.setAdSize(new AdSize(maxWidthInt, maxHeightInt));
+                    nativeExpressAdView.setAdUnitId(itemView.getContext().getString(R.string.admob_playlist_native_small));
+
+                    // Setup animation
+                    finalHeight = itemView.getHeight();
+                    itemView.getLayoutParams().height = 0;
+                    itemView.requestLayout();
                 }
             });
         }
 
         void requestAd() {
-            AdRequest request = new AdRequest.Builder()
-                    .addTestDevice(itemView.getContext().getString(R.string.admob_nexus_5x_device_id))
-                    .addTestDevice(itemView.getContext().getString(R.string.admob_moto_g_device_id))
-                    .build();
-            int maxWidthInt = nativeAdHolder.getWidth();
-            int maxHeightInt = nativeAdHolder.getHeight();
-            maxWidthInt = (int) (maxWidthInt * 1f / itemView.getResources().getDisplayMetrics().density);
-            maxHeightInt = (int) (maxHeightInt * 1f / itemView.getResources().getDisplayMetrics().density);
-            nativeExpressAdView.setAdSize(new AdSize(maxWidthInt, maxHeightInt));
-            nativeExpressAdView.setAdUnitId(itemView.getContext().getString(R.string.admob_playlist_native_small));
-            nativeExpressAdView.loadAd(request);
+            // Start the request
+            nativeExpressAdView.loadAd(AdMobUtils.buildRequest(itemView.getContext()));
         }
-
-        boolean runOnce = false;
 
         void update() {
             itemView.setBackgroundColor(
@@ -547,8 +563,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                             16)
             );
             if (runOnce) {
+                nativeAdHolder.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        requestAd();
+                    }
+                });
                 runOnce = false;
-                requestAd();
             }
         }
     }

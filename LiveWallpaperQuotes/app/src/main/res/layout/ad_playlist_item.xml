@@ -29,7 +29,7 @@
     Please report any issues
     https://github.com/stanidesis/quotograph/issues
 
-    Date: 09/21/2015
+    Date: 10/21/2016
 -->
 <android.support.v7.widget.CardView
     android:id="@+id/cv_playlist_item_card"

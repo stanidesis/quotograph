@@ -51,6 +51,7 @@ import com.google.android.gms.ads.InterstitialAd;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
+import com.stanleyidesis.quotograph.AdMobUtils;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.BuildConfig;
 import com.stanleyidesis.quotograph.IabConst;
@@ -646,15 +647,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         if (BuildConfig.DEBUG && !BuildConfig.TEST_ADS) {
             return;
         }
-        final AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice(getString(R.string.admob_nexus_5x_device_id))
-                .addTestDevice(getString(R.string.admob_moto_g_device_id))
-                .build();
         // Ew, Admob, ew...
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                interstitialAd.loadAd(adRequest);
+                interstitialAd.loadAd(AdMobUtils.buildRequest(LWQSettingsActivity.this));
             }
         }, 1);
     }
