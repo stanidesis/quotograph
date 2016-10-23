@@ -99,9 +99,15 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public void setSearchResults(List<Object> originalSearchResults) {
         this.searchResults.clear();
+        boolean justOnce = true;
         for (int i = 0; i < originalSearchResults.size(); i++) {
             final Object o = originalSearchResults.get(i);
             if (o instanceof Category || o instanceof Quote) {
+                // Separate the authors and quotes with an ad
+                if (justOnce && i > 0) {
+                    searchResults.add(new AdPlaceholder());
+                    justOnce = false;
+                }
                 searchResults.add(o);
             } else {
                 AuthorCouplet authorCouplet = new AuthorCouplet();
@@ -115,7 +121,9 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
         // This area is pretty small, so there's a high likelihood that
         // ads will not render on small devices.
-        searchResults.add(0, new AdPlaceholder());
+        if (searchResults.size() > 0) {
+            searchResults.add(0, new AdPlaceholder());
+        }
     }
 
     @Override

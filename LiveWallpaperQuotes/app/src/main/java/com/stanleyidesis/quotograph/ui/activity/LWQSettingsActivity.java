@@ -1182,7 +1182,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         changeState(stateSearchInProgress);
         final int itemCount = searchResultsAdapter.getItemCount();
         searchResultsAdapter.setSearchResults(new ArrayList<Object>());
-        searchResultsAdapter.notifyItemRangeRemoved(0, itemCount);
+        searchResultsAdapter.notifyDataSetChanged();
         String query = editableQuery.getText().toString().trim();
         LWQQuoteControllerHelper.get().fetchQuotes(query, new Callback<List<Object>>() {
             @Override
@@ -1192,7 +1192,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     public void run() {
                         changeState(stateSearch);
                         searchResultsAdapter.setSearchResults(objects);
-                        searchResultsAdapter.notifyItemRangeInserted(0, searchResultsAdapter.getItemCount());
+                        searchResultsAdapter.notifyDataSetChanged();
                     }
                 });
             }

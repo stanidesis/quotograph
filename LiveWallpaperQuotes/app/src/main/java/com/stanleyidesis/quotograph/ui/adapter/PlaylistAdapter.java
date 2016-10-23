@@ -1,25 +1,17 @@
 package com.stanleyidesis.quotograph.ui.adapter;
 
-import android.animation.ValueAnimator;
-import android.support.percent.PercentRelativeLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.ListPopupWindow;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.NativeExpressAdView;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.orm.SugarRecord;
-import com.stanleyidesis.quotograph.AdMobUtils;
 import com.stanleyidesis.quotograph.BuildConfig;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
@@ -475,6 +467,4 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
         }
     }
-
-
 }

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.StrictMode;
@@ -156,12 +155,6 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
 
         // Asynch Application Dependencies
         new LoadApplicationTask().execute();
-    }
-
-    @Override
-    protected void attachBaseContext(Context base) {
-//        MultiDex.install(this);
-        super.attachBaseContext(base);
     }
 
     @Override
