@@ -2,6 +2,7 @@ package com.stanleyidesis.quotograph.api.task;
 
 import android.os.AsyncTask;
 
+import org.greenrobot.eventbus.Subscribe;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
@@ -21,9 +22,9 @@ import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskEvent;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskUpdate;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 
-import java.util.List;
+import org.greenrobot.eventbus.EventBus;
 
-import de.greenrobot.event.EventBus;
+import java.util.List;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -166,6 +167,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         EventBus.getDefault().post(FirstLaunchTaskUpdate.newUpdate(progress));
     }
 
+    @Subscribe
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
             EventBus.getDefault().post(FirstLaunchTaskEvent.failed(wallpaperEvent.getError()));

@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -34,6 +35,8 @@ import com.stanleyidesis.quotograph.billing.util.SkuDetails;
 import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
 import com.stanleyidesis.quotograph.ui.adapter.ImageMultiSelectAdapter;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.greenrobot.event.EventBus;
 import io.fabric.sdk.android.Fabric;
 import io.fabric.sdk.android.services.concurrency.AsyncTask;
 
@@ -109,11 +111,12 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
 
             // Firebase Analytics
             FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(LWQApplication.get());
-            firebaseAnalytics.setAnalyticsCollectionEnabled(
-                            firebaseRemoteConfig.getBoolean(
-                                    RemoteConfigConst.FIREBASE_ANALYTICS)
-                                    && !BuildConfig.DEBUG);
-            firebaseAnalytics.setMinimumSessionDuration(5000);
+            firebaseAnalytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG);
+            firebaseAnalytics.setMinimumSessionDuration(1000);
+
+            // AdMob
+            MobileAds.initialize(getApplicationContext(), getString(R.string.admob_app_id));
+            MobileAds.setAppMuted(true);
 
             // Enable
             setComponentsEnabled(!LWQPreferences.isFirstLaunch());
@@ -135,18 +138,10 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
 
     @Override
     public void onCreate() {
-        if (BuildConfig.DEBUG) {
-            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                    .detectAll()
-                    .penaltyLog()
-                    .penaltyDeath()
-                    .build());
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectAll()
-                    .penaltyLog()
-                    .penaltyDeath()
-                    .build());
+        if (BuildConfig.DEBUG && !AdMobUtils.adsEnabled()) {
+                setStrictMode(true);
         }
+
         super.onCreate();
         sApplication = this;
 
@@ -199,6 +194,24 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
     public static void purchaseProduct(Activity activity, IabConst.Product product) {
         getIabHelper().launchPurchaseFlow(activity, product.sku,
                 IabConst.PURCHASE_REQUEST_CODE, get());
+    }
+
+    public static void setStrictMode(boolean enabled) {
+        if (enabled) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+        } else {
+            StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX);
+            StrictMode.setVmPolicy(StrictMode.VmPolicy.LAX);
+        }
     }
 
     public static boolean isWallpaperActivated() {

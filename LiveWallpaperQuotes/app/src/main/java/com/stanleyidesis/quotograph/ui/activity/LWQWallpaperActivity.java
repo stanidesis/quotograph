@@ -9,9 +9,10 @@ import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.debug.DebuggableActivity;
 
+import org.greenrobot.eventbus.EventBus;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import de.greenrobot.event.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis

@@ -25,5 +25,17 @@
         <key>stack_blurring</key>
         <value>on</value>
     </entry>
+    <entry>
+        <key>admob_playlist_native_small_bg_color</key>
+        <value>4527A0</value>
+    </entry>
+    <entry>
+        <key>admob_search_native_small_bg_color</key>
+        <value>EDE7F6</value>
+    </entry>
+    <entry>
+        <key>admob</key>
+        <value>on</value>
+    </entry>
 </defaultsMap>
 <!-- END xml_defaults -->

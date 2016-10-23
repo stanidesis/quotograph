@@ -16,6 +16,9 @@
 #   public *;
 #}
 
+# Debug only
+-dontobfuscate
+
 # Butterknife
 -keep class butterknife.** { *; }
 -dontwarn butterknife.internal.**
