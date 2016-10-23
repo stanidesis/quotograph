@@ -1586,7 +1586,21 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Subscribe
     public void onEvent(final IabPurchaseEvent purchaseEvent) {
-        // TODO remove ads
+        if (purchaseEvent.didFail()) {
+            return;
+        }
+        if (purchaseEvent.purchased == IabConst.Product.REMOVE_ADS) {
+            // Remove ads
+            interstitialAd = null;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    playlistAdapter.removeAllAds();
+                    searchResultsAdapter.setAdsEnabled(false);
+                    // // TODO: 10/23/16 dialog
+                }
+            });
+        }
     }
 
     @Subscribe

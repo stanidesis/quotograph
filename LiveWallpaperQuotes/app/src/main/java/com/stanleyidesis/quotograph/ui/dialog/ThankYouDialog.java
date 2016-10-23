@@ -1,4 +1,13 @@
-package com.stanleyidesis.quotograph;
+package com.stanleyidesis.quotograph.ui.dialog;
+
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.support.annotation.NonNull;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.api.misc.UserSurveyController;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -22,7 +31,7 @@ package com.stanleyidesis.quotograph;
  * SOFTWARE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * IabConst.java
+ * ThankYouDialog.java
  * @author Stanley Idesis
  *
  * From Quotograph
@@ -31,26 +40,26 @@ package com.stanleyidesis.quotograph;
  * Please report any issues
  * https://github.com/stanidesis/quotograph/issues
  *
- * Date: 03/26/2016
+ * Date: 10/23/2016
  */
-public class IabConst {
+public class ThankYouDialog {
+    public static void showDialog(Activity activity) {
+        MaterialDialog.SingleButtonCallback buttonCallback = new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
 
-    public enum Product {
-
-        REMOVE_ADS("remove_ads", R.string.remove_ads_title, R.string.remove_ads_description);
-
-        Product(String sku, int titleRes, int descriptionRes) {
-            this.sku = sku;
-            this.titleRes = titleRes;
-            this.descriptionRes = descriptionRes;
-        }
-
-        public String sku;
-        public int titleRes;
-        public int descriptionRes;
-
+            }
+        };
+        new MaterialDialog.Builder(activity)
+                .title(R.string.survey_title)
+                .content(R.string.survey_cta)
+//                .customView()
+                .autoDismiss(true)
+                .negativeText(R.string.survey_never)
+                .positiveText(R.string.survey_okay)
+                .onAny(buttonCallback)
+                .canceledOnTouchOutside(false)
+                .cancelable(false)
+                .show();
     }
-
-    public static final int PURCHASE_REQUEST_CODE = 1001;
-
 }

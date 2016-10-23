@@ -12,8 +12,9 @@ public final class AdMobUtils {
         if (BuildConfig.DEBUG) {
             return BuildConfig.TEST_ADS;
         }
-        return FirebaseRemoteConfig.getInstance()
-                .getBoolean(RemoteConfigConst.ADMOB);
+        // Check if we've disabled ads remotely or if the user purchased 'remove_ads'
+        return FirebaseRemoteConfig.getInstance().getBoolean(RemoteConfigConst.ADMOB)
+                && !LWQApplication.ownsProduct(IabConst.Product.REMOVE_ADS);
     }
 
     public static AdRequest buildRequest(Context context) {
