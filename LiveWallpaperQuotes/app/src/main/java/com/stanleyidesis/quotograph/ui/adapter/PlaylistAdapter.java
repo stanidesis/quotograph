@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.orm.SugarRecord;
-import com.stanleyidesis.quotograph.BuildConfig;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.RemoteConfigConst;
@@ -176,6 +175,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             playlistAuthors.remove(remove);
         } else if (remove instanceof PlaylistQuote){
             playlistQuotes.remove(remove);
+        } else if (remove instanceof AdPlaceholder) {
+            adPlaceholders.remove(remove);
         }
         notifyItemRemoved(position);
 
@@ -207,10 +208,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    private  void insertAdAt(int position, boolean notify) {
-        if (BuildConfig.DEBUG && !BuildConfig.TEST_ADS) {
-            return;
-        }
+    private void insertAdAt(int position, boolean notify) {
         AdPlaceholder adPlaceholder = new AdPlaceholder();
         adPlaceholders.add(adPlaceholder);
         playlistItems.add(position, adPlaceholder);
@@ -246,6 +244,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public int getItemViewType(int position) {
         Object item = getItem(position);
         if (item instanceof SugarRecord) {
+            // VIEW_TYPE_PLAYLIST
             return 0;
         } else if (item instanceof SurveyPlaceholder) {
             return VIEW_TYPE_SURVEY;
@@ -326,9 +325,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
      * Dummy classes to identify where, in the full list,
      * do we insert Ads and Survey, among other things.
      */
-    private abstract class PlaylistPlaceholder {}
-    private class SurveyPlaceholder extends PlaylistPlaceholder {}
-    private class AdPlaceholder extends PlaylistPlaceholder {}
+    private class SurveyPlaceholder {}
+    private class AdPlaceholder {}
 
     class SurveyPlaylistViewHolder
             extends RecyclerView.ViewHolder

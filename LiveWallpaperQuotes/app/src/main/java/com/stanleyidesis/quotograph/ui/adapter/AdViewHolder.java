@@ -141,8 +141,8 @@ class AdViewHolder extends RecyclerView.ViewHolder {
     public void update() {
         itemView.setBackgroundColor(
                 Integer.parseInt(
-                        FirebaseRemoteConfig.getInstance().getString(configColorKey),
-                        16)
+                        FirebaseRemoteConfig.getInstance()
+                                .getString(configColorKey), 16)
         );
         if (runOnce) {
             nativeAdHolder.post(new Runnable() {

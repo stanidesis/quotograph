@@ -1334,7 +1334,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 AnalyticsUtils.LABEL_IN_APP);
         LWQWallpaperControllerHelper.get().generateNewWallpaper();
         // Show an interstitial, if applicable
-        if (interstitialAd.isLoaded()) {
+        if (interstitialAd != null && interstitialAd.isLoaded()) {
             interstitialAd.show();
         }
     }
@@ -1691,7 +1691,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
                 AnalyticsUtils.ACTION_MANUALLY_GEN,
                 AnalyticsUtils.LABEL_PLAYLIST);
-        if (interstitialAd.isLoaded()) {
+        if (interstitialAd != null && interstitialAd.isLoaded()) {
             interstitialAd.show();
         }
     }
@@ -1746,13 +1746,13 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void addPhotoAlbum(LWQChooseImageSourceModule module) {
-        Intent documentPicker = new Intent(Intent.ACTION_GET_CONTENT);
-        documentPicker.setType("image/*");
-        documentPicker.addCategory(Intent.CATEGORY_OPENABLE);
+        Intent imagePicker = new Intent(Intent.ACTION_GET_CONTENT);
+        imagePicker.setType("image/*");
+        imagePicker.addCategory(Intent.CATEGORY_OPENABLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            documentPicker.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            imagePicker.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         }
-        startActivityForResult(Intent.createChooser(documentPicker, "Choose photo(s)"), REQUEST_CODE_ALBUM);
+        startActivityForResult(Intent.createChooser(imagePicker, "Choose photo(s)"), REQUEST_CODE_ALBUM);
         // Track viewing
         AnalyticsUtils.trackScreenView(
                 AnalyticsUtils.SCREEN_CUSTOM_PHOTOS);
