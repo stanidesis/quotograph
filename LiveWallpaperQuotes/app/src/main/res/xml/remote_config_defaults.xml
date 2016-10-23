@@ -33,5 +33,9 @@
         <key>admob_search_native_small_bg_color</key>
         <value>EDE7F6</value>
     </entry>
+    <entry>
+        <key>admob</key>
+        <value>on</value>
+    </entry>
 </defaultsMap>
 <!-- END xml_defaults -->

@@ -52,7 +52,6 @@ import com.orm.query.Select;
 import com.orm.util.NamingHelper;
 import com.stanleyidesis.quotograph.AdMobUtils;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
-import com.stanleyidesis.quotograph.BuildConfig;
 import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
@@ -634,6 +633,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // Setup
 
     private void setupInterstitialAd() {
+        if (!AdMobUtils.adsEnabled()) {
+            return;
+        }
         maxAdLoadAttempts = 10;
         interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId(getString(R.string.admob_prime_interstitial));
@@ -659,13 +661,17 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         content.postDelayed(new Runnable() {
             @Override
             public void run() {
+                if ((Build.VERSION.SDK_INT >= 17 && LWQSettingsActivity.this.isDestroyed())
+                        || LWQSettingsActivity.this.isFinishing()) {
+                    return;
+                }
                 requestNewInterstitial();
             }
         }, 1000);
     }
 
     private void requestNewInterstitial() {
-        if (BuildConfig.DEBUG && !BuildConfig.TEST_ADS) {
+        if (!AdMobUtils.adsEnabled()) {
             return;
         }
         interstitialAd.loadAd(AdMobUtils.buildRequest(LWQSettingsActivity.this));
