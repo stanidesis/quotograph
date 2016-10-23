@@ -138,8 +138,8 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
 
     @Override
     public void onCreate() {
-        if (!BuildConfig.TEST_ADS && BuildConfig.DEBUG) {
-//                setStrictMode(true);
+        if (BuildConfig.DEBUG && !AdMobUtils.adsEnabled()) {
+                setStrictMode(true);
         }
 
         super.onCreate();
