@@ -42,4 +42,6 @@ public class RemoteConfigConst {
     public static String ADMOB_PLAYLIST_NATIVE_SMALL_BG_COLOR = "admob_playlist_native_small_bg_color";
     public static String ADMOB_SEARCH_NATIVE_SMALL_BG_COLOR = "admob_search_native_small_bg_color";
     public static String ADMOB = "admob";
+    public static String THANK_YOU_IMAGE = "thank_you_image";
+    public static String THANK_YOU_MESSAGE = "thank_you_message";
 }

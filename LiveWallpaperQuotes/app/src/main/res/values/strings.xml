@@ -131,6 +131,11 @@
     <string name="survey_never">No :\'(</string>
     <string name="survey_later">Later</string>
     <string name="survey_okay">Take Survey</string>
+    <!-- Thank You Dialog -->
+    <string name="thank_you_title">Thank You For Supporting Quotograph!</string>
+    <string name="thank_you_message">We\'ve disabled your ads, and replaced them with puppies!</string>
+    <string name="thank_you_negative">Done</string>
+    <string name="thank_you_positive">Review Quotograph</string>
     <!-- IAP -->
     <string name="remove_ads_title">Remove Ads</string>
     <string name="remove_ads_description">Love Quotograph but hate the ads? Support the app by removing them once and for all.</string>

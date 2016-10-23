@@ -6,12 +6,19 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Movie;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 import com.stanleyidesis.quotograph.R;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -21,6 +28,11 @@ import java.io.InputStream;
  * Modified by Stanley Idesis on 10.23.2016
  */
 public class GifView extends View {
+
+    public interface Callback {
+        void onGifLoaded();
+        void onGifFailure(String message);
+    }
 
     private static final int DEFAULT_MOVIE_VIEW_DURATION = 1000;
 
@@ -48,8 +60,11 @@ public class GifView extends View {
     private int mMeasuredMovieWidth;
     private int mMeasuredMovieHeight;
 
+    private volatile boolean mScaleToFillWidth;
     private volatile boolean mPaused;
     private boolean mVisible = true;
+
+    private final OkHttpClient client = new OkHttpClient();
 
     public GifView(Context context) {
         this(context, null);
@@ -61,7 +76,6 @@ public class GifView extends View {
 
     public GifView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
         setViewAttributes(context, attrs, defStyle);
     }
 
@@ -82,6 +96,7 @@ public class GifView extends View {
         //-1 is default value
         mMovieResourceId = array.getResourceId(R.styleable.GifView_gif, -1);
         mPaused = array.getBoolean(R.styleable.GifView_paused, false);
+        mScaleToFillWidth = array.getBoolean(R.styleable.GifView_scaleToFillWidth, false);
 
         array.recycle();
 
@@ -100,13 +115,47 @@ public class GifView extends View {
         return this.mMovieResourceId;
     }
 
-    public void setGifURL(String gifURL) {
+    public void setGifURL(final String gifURL, final Callback callback) {
+        // Barebones implementation
+        Request gifRequest = new Request.Builder().url(gifURL).build();
+        client.newCall(gifRequest).enqueue(new com.squareup.okhttp.Callback() {
+            @Override
+            public void onFailure(Request request, final IOException e) {
+                // womp!
+                e.printStackTrace();
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onGifFailure(e.getMessage());
+                    }
+                });
+            }
 
+            @Override
+            public void onResponse(Response response) throws IOException {
+                final InputStream inputStream = new ByteArrayInputStream(response.body().bytes());
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onGifLoaded();
+                        setGifInputStream(inputStream);
+                    }
+                });
+            }
+        });
     }
 
     public void setGifInputStream(InputStream gifInputStream) {
         movie = Movie.decodeStream(gifInputStream);
         requestLayout();
+    }
+
+    public void setScaleToFillWidth(boolean scaleToFillWidth) {
+        if (this.mScaleToFillWidth == scaleToFillWidth) {
+            return;
+        }
+        this.mScaleToFillWidth = scaleToFillWidth;
+        invalidateView();
     }
 
     public void play() {
@@ -157,6 +206,8 @@ public class GifView extends View {
                 int maximumWidth = MeasureSpec.getSize(widthMeasureSpec);
                 if (movieWidth > maximumWidth) {
                     scaleH = (float) movieWidth / (float) maximumWidth;
+                } else if (mScaleToFillWidth) {
+                    scaleH = (float) maximumWidth / (float) movieWidth;
                 }
             }
 
@@ -176,7 +227,7 @@ public class GifView extends View {
 			/*
              * calculate overall scale
 			 */
-            mScale = 1f / Math.max(scaleH, scaleW);
+            mScale = Math.max(scaleH, scaleW);
 
             mMeasuredMovieWidth = (int) (movieWidth * mScale);
             mMeasuredMovieHeight = (int) (movieHeight * mScale);

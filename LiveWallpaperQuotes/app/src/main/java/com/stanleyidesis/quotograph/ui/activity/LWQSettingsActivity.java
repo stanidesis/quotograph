@@ -80,6 +80,7 @@ import com.stanleyidesis.quotograph.ui.activity.modules.WhatsNewDialog;
 import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
+import com.stanleyidesis.quotograph.ui.dialog.ThankYouDialog;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -1597,7 +1598,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 public void run() {
                     playlistAdapter.removeAllAds();
                     searchResultsAdapter.setAdsEnabled(false);
-                    // // TODO: 10/23/16 dialog
+                    ThankYouDialog.showDialog(LWQSettingsActivity.this);
                 }
             });
         }
