@@ -5,7 +5,6 @@ import android.content.Context;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.google.android.gms.ads.AdListener;
@@ -14,7 +13,6 @@ import com.google.android.gms.ads.NativeExpressAdView;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.stanleyidesis.quotograph.AdMobUtils;
 import com.stanleyidesis.quotograph.R;
-import com.stanleyidesis.quotograph.RemoteConfigConst;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -137,7 +135,6 @@ class AdViewHolder extends RecyclerView.ViewHolder {
 
     private void requestAd() {
         // Start the request
-        maxAttempts = 10;
         nativeExpressAdView.loadAd(AdMobUtils.buildRequest(itemView.getContext()));
     }
 

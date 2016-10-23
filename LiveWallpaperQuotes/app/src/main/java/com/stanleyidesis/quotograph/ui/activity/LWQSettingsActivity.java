@@ -46,7 +46,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
@@ -91,6 +90,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -420,7 +421,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Ads
     InterstitialAd interstitialAd;
-    boolean interstitialVisible;
+    boolean firstAdLoaded;
+    int maxAdLoadAttempts;
 
     // Content
     @Bind(R.id.group_lwq_settings_content)
@@ -632,28 +634,41 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // Setup
 
     private void setupInterstitialAd() {
+        maxAdLoadAttempts = 10;
         interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId(getString(R.string.admob_prime_interstitial));
         interstitialAd.setAdListener(new AdListener() {
             @Override
-            public void onAdClosed() {
+            public void onAdFailedToLoad(int i) {
+                if (--maxAdLoadAttempts < 0) {
+                    return;
+                }
                 requestNewInterstitial();
             }
+
+            @Override
+            public void onAdLoaded() {
+                if (!firstAdLoaded) {
+                    firstAdLoaded = true;
+                    playlistAdapter.populateWithAds();
+                    searchResultsAdapter.setAdsEnabled(true);
+                }
+            }
         });
-        requestNewInterstitial();
+        // Ew, AdMob, ew...
+        content.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                requestNewInterstitial();
+            }
+        }, 1000);
     }
 
     private void requestNewInterstitial() {
         if (BuildConfig.DEBUG && !BuildConfig.TEST_ADS) {
             return;
         }
-        // Ew, Admob, ew...
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                interstitialAd.loadAd(AdMobUtils.buildRequest(LWQSettingsActivity.this));
-            }
-        }, 1);
+        interstitialAd.loadAd(AdMobUtils.buildRequest(LWQSettingsActivity.this));
     }
 
     void setupContent() {

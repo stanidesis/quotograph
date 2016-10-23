@@ -92,6 +92,11 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
     private List<Object> searchResults = new ArrayList<>();
     private Delegate delegate;
     private Playlist activePlaylist = Playlist.active();
+    private boolean adsEnabled = false;
+
+    public void setAdsEnabled(boolean adsEnabled) {
+        this.adsEnabled = adsEnabled;
+    }
 
     public void setDelegate(Delegate delegate) {
         this.delegate = delegate;
@@ -104,7 +109,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
             final Object o = originalSearchResults.get(i);
             if (o instanceof Category || o instanceof Quote) {
                 // Separate the authors and quotes with an ad
-                if (justOnce && i > 0) {
+                if (adsEnabled && justOnce && i > 0
+                        && (originalSearchResults.get(i - 1) instanceof Author)) {
                     searchResults.add(new AdPlaceholder());
                     justOnce = false;
                 }
@@ -121,7 +127,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
         // This area is pretty small, so there's a high likelihood that
         // ads will not render on small devices.
-        if (searchResults.size() > 0) {
+        if (searchResults.size() > 0 && adsEnabled) {
             searchResults.add(0, new AdPlaceholder());
         }
     }

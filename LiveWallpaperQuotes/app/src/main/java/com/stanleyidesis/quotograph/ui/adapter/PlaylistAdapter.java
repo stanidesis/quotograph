@@ -112,9 +112,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public void insertItem(Object object) {
         int insertPosition;
-        List<?> playlistEntryList = null;
         if (object instanceof PlaylistCategory) {
-            playlistEntryList = playlistCategories;
             insertPosition = findFirstPosition(playlistCategories);
             playlistCategories.add((PlaylistCategory) object);
             Collections.sort(playlistCategories);
@@ -125,7 +123,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 if (insertPosition == -1) insertPosition = findFirstPosition(playlistQuotes);
             }
         } else if (object instanceof PlaylistAuthor) {
-            playlistEntryList = playlistAuthors;
             insertPosition = findFirstPosition(playlistAuthors);
             playlistAuthors.add((PlaylistAuthor) object);
             Collections.sort(playlistAuthors);
@@ -136,7 +133,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 if (insertPosition == 0) insertPosition = findFirstPosition(playlistQuotes);
             }
         } else {
-            playlistEntryList = playlistQuotes;
             insertPosition = findFirstPosition(playlistQuotes);
             playlistQuotes.add((PlaylistQuote) object);
             Collections.sort(playlistQuotes);
@@ -149,10 +145,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
         playlistItems.add(insertPosition, object);
         notifyItemInserted(insertPosition);
-        if (playlistEntryList.size() == 5) {
-            // Insert an add
-            insertAdAt(findFirstPosition(playlistEntryList), true);
-        }
 
         // Update user data
         logUserData();
@@ -194,23 +186,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private void insertAll() {
         playlistItems.clear();
         playlistItems.addAll(playlistCategories);
-        if (playlistCategories.size() > 4) {
-            insertAdAt(findFirstPosition(playlistCategories), false);
-        }
         playlistItems.addAll(playlistAuthors);
-        if (playlistAuthors.size() > 4) {
-            insertAdAt(findFirstPosition(playlistAuthors), false);
-        }
         playlistItems.addAll(playlistQuotes);
-        if (playlistQuotes.size() > 4) {
-            insertAdAt(findFirstPosition(playlistQuotes), false);
-        }
         if (showSurvey) {
             playlistItems.add(0, new SurveyPlaceholder());
-        }
-        if (adPlaceholders.size() == 0) {
-            // Append to top
-            insertAdAt(showSurvey ? 1 : 0, false);
         }
     }
 
@@ -228,7 +207,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    public void insertAdAt(int position, boolean notify) {
+    private  void insertAdAt(int position, boolean notify) {
         if (BuildConfig.DEBUG && !BuildConfig.TEST_ADS) {
             return;
         }
@@ -238,8 +217,28 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (notify) notifyItemInserted(position);
     }
 
+    public void populateWithAds() {
+        if (playlistCategories.size() > 4) {
+            insertAdAt(findFirstPosition(playlistCategories), true);
+        }
+        if (playlistAuthors.size() > 4) {
+            insertAdAt(findFirstPosition(playlistAuthors), true);
+        }
+        if (playlistQuotes.size() > 4) {
+            insertAdAt(findFirstPosition(playlistQuotes), true);
+        }
+        if (adPlaceholders.size() == 0) {
+            // Append to top if we have no ads
+            insertAdAt(showSurvey ? 1 : 0, true);
+        }
+    }
+
     public void removeAllAds() {
-        playlistItems.removeAll(adPlaceholders);
+        for (AdPlaceholder adPlaceholder : adPlaceholders) {
+            int index = playlistItems.indexOf(adPlaceholder);
+            playlistItems.remove(index);
+            notifyItemRemoved(index);
+        }
         adPlaceholders.clear();
     }
 
@@ -467,4 +466,5 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
         }
     }
+
 }
