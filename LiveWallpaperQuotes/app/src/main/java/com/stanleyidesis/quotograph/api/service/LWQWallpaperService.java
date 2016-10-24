@@ -18,7 +18,9 @@ import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -113,15 +115,18 @@ public class LWQWallpaperService extends WallpaperService {
             }
         }
 
+        @Subscribe
         public void onEvent(WallpaperEvent wallpaperEvent) {
             if (wallpaperEvent.didFail()) {
                 return;
             }
             if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+                drawScript.clearCache();
                 drawScript.requestDraw(eventCallback);
             }
         }
 
+        @Subscribe
         public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
             if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_blur ||
                     preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_dim) {

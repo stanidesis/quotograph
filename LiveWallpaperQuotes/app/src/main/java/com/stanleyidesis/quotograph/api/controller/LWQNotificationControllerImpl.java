@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 
+import org.greenrobot.eventbus.Subscribe;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
@@ -24,9 +25,9 @@ import com.stanleyidesis.quotograph.ui.UIUtils;
 import com.stanleyidesis.quotograph.ui.activity.LWQActivateActivity;
 import com.stanleyidesis.quotograph.ui.activity.LWQSaveWallpaperActivity;
 
-import java.io.File;
+import org.greenrobot.eventbus.EventBus;
 
-import de.greenrobot.event.EventBus;
+import java.io.File;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -343,6 +344,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         super.finalize();
     }
 
+    @Subscribe
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.getStatus() == WallpaperEvent.Status.GENERATED_NEW_WALLPAPER) {
             newWallpaperIncoming = !wallpaperEvent.didFail();
@@ -357,6 +359,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         }
     }
 
+    @Subscribe
     public void onEvent(ImageSaveEvent imageSaveEvent) {
         if (imageSaveEvent.didFail()) {
             postWallpaperSaveFailureNotification();

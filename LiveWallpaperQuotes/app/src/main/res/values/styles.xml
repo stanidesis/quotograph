@@ -103,4 +103,7 @@
         <!-- Differs on v19+ and v21+-->
     </style>
 
+    <!-- For GifView Declaration -->
+    <style name="Widget.GifView" parent="@android:style/Widget"/>
+
 </resources>

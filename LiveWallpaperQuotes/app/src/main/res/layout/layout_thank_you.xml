@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
+
+    <TextView
+        style="@style/TextAppearance.AppCompat.Display3"
+        android:id="@+id/tv_thank_you_frown"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:gravity="center"
+        android:text=":'("
+        android:alpha="0"
+        android:visibility="gone"/>
+
+    <com.stanleyidesis.quotograph.ui.view.GifView
+        android:id="@+id/gview_thank_you"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="80dp"
+        app:scaleToFillWidth="true"/>
+
+    <ProgressBar
+        android:id="@+id/pb_thank_you"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:foregroundGravity="center"
+        android:indeterminate="true"
+        android:indeterminateBehavior="cycle"/>
+
+    <TextView
+        style="@style/TextAppearance.AppCompat.Body2"
+        android:id="@+id/tv_thank_you_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_below="@+id/gview_thank_you"
+        android:text="@string/thank_you_message"/>
+
+</RelativeLayout>

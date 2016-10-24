@@ -8,14 +8,20 @@ import android.util.Log;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.crashlytics.android.answers.PurchaseEvent;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.RemoteConfigConst;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
 import com.stanleyidesis.quotograph.api.controller.LWQNotificationControllerHelper;
+import com.stanleyidesis.quotograph.api.event.IabPurchaseEvent;
 import com.stanleyidesis.quotograph.ui.activity.LWQSurveyActivity;
 import com.stanleyidesis.quotograph.ui.dialog.SurveyDialog;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -62,7 +68,9 @@ public class DebugDialog {
                 "Print Survey Data to Logs",
                 "Fetch RemoteConfig",
                 "Trigger Refresh Alarm",
-                "Reset Alarm"
+                "Reset Alarm",
+                "Debug Ads Menu",
+                "Test Remove Ads"
         };
         MaterialDialog.ListCallback listCallback = new MaterialDialog.ListCallback() {
             @Override
@@ -106,6 +114,10 @@ public class DebugDialog {
                         break;
                     case 9: // Reset Alarm
                         LWQAlarmController.resetAlarm();
+                    case 10: // Debug ad menu
+                        MobileAds.openDebugMenu(context, "String McStringy");
+                    case 11: // Test Remove Ads Purchase
+                        EventBus.getDefault().post(IabPurchaseEvent.success(IabConst.Product.REMOVE_ADS));
                 }
             }
         };

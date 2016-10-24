@@ -34,6 +34,9 @@ import com.stanleyidesis.quotograph.api.service.LWQWallpaperService;
 import com.stanleyidesis.quotograph.api.task.LWQFirstLaunchTask;
 import com.stanleyidesis.quotograph.ui.UIUtils;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +44,6 @@ import butterknife.Bind;
 import butterknife.BindColor;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -310,6 +312,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
 
     // Events
 
+    @Subscribe
     public void onEvent(final FirstLaunchTaskUpdate firstLaunchTaskUpdate) {
         latestFirstLaunchTaskUpdate = firstLaunchTaskUpdate;
         runOnUiThread(new Runnable() {
@@ -326,6 +329,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         });
     }
 
+    @Subscribe
     public void onEvent(final FirstLaunchTaskEvent firstLaunchTaskEvent) {
         runOnUiThread(new Runnable() {
             @Override
@@ -374,6 +378,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         });
     }
 
+    @Subscribe
     public void onEvent(NetworkConnectivityEvent networkConnectivityEvent) {
         if (networkConnectivityEvent.getNewConnectionType().isConnected() && firstLaunchTask == null) {
             firstLaunchTask = new LWQFirstLaunchTask();

@@ -8,10 +8,10 @@ import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.ui.Fonts;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -112,9 +112,6 @@ public class LWQPreferences {
     public static Set<String> getFontSet() {
         Set<String> defaultSet = new HashSet<>();
         defaultSet.add(String.valueOf(Fonts.JOSEFIN_BOLD.getId()));
-        if (!LWQApplication.ownsFontAccess()) {
-            return defaultSet;
-        }
         Set<String> stringSet = sharedPreferences.getStringSet(LWQApplication.get().getString(R.string.preference_key_fonts), defaultSet);
         Set<String> mutableSet = new HashSet<>();
         mutableSet.addAll(stringSet);
