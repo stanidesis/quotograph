@@ -54,7 +54,7 @@ public class LWQPreferences {
         sInstance = new LWQPreferences();
     }
 
-    LWQPreferences() {
+    private LWQPreferences() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(LWQApplication.get());
     }
 
@@ -132,6 +132,14 @@ public class LWQPreferences {
 
     public static boolean viewedTutorial() {
         return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial), false);
+    }
+
+    public static void setViewedTutorialDialog(boolean viewedTutorialDialog) {
+        sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial_dialog), viewedTutorialDialog).apply();
+    }
+
+    public static boolean viewedTutorialDialog() {
+        return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial_dialog), false);
     }
 
     public static int getLatestVersionCode() {

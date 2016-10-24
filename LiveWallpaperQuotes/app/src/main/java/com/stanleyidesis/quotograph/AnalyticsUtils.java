@@ -118,6 +118,7 @@ public class AnalyticsUtils {
     public static final String LABEL_IN_APP = "in_app";
     public static final String LABEL_FROM_NOTIF = "from_notif";
     public static final String LABEL_REMOVE_ADS_BANNER = "remove_ads_banner";
+    public static final String LABEL_SKIP_TUTORIAL = "skip_tutorial";
 
     public static final String URI_CHANGE_SOURCE_ALARM = "alarm";
     public static final String URI_CHANGE_SOURCE_NOTIFICATION = "notif";

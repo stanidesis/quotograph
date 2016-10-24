@@ -131,6 +131,11 @@
     <string name="survey_never">No :\'(</string>
     <string name="survey_later">Later</string>
     <string name="survey_okay">Take Survey</string>
+    <!-- Tutorial Dialog -->
+    <string name="tutorial_dialog_title">Welcome to Quotograph!</string>
+    <string name="tutorial_dialog_message">Would you like a quick tour?</string>
+    <string name="tutorial_dialog_positive">Yes, Please!</string>
+    <string name="tutorial_dialog_negative">Not Now</string>
     <!-- Thank You Dialog -->
     <string name="thank_you_title">Thank You For Supporting Quotograph!</string>
     <string name="thank_you_message">We\'ve disabled your ads, and replaced them with puppies!</string>
@@ -140,4 +145,6 @@
     <string name="remove_ads_title">Remove Ads</string>
     <string name="remove_ads_description">Love Quotograph but hate the ads? Support the app by removing them once and for all.</string>
     <string name="remove_ads_banner">Ads Suck: Tap Here to Kill Them</string>
+    <!-- What's New Dialog -->
+    <string name="whats_new_dialog_title">What\'s New!</string>
 </resources>

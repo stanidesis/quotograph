@@ -83,6 +83,7 @@ import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
 import com.stanleyidesis.quotograph.ui.dialog.ThankYouDialog;
+import com.stanleyidesis.quotograph.ui.dialog.TutorialDialog;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -147,7 +148,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         DialogInterface.OnCancelListener,
         LWQChooseImageSourceModule.Delegate,
         Tooltip.Callback,
-        UserSurveyController.Delegate {
+        UserSurveyController.Delegate, TutorialDialog.Delegate {
 
     static class ActivityState {
         int page = -1;
@@ -415,8 +416,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     // Seekbar Status
     boolean isModifyingSeekSetting;
 
-    // Should we show tooltips?
-    boolean showTutorialTips = true;
+    // Tooltip Stuff
+    boolean showTutorialTips;
     Set<TutorialTooltips> visibleTips;
 
     // Ads
@@ -517,11 +518,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             }
         });
 
-        showTutorialTips = !LWQPreferences.viewedTutorial();
-        if (showTutorialTips) {
-            visibleTips = new HashSet<>();
-        }
-
         // Fetch remote config
         LWQApplication.fetchRemoteConfig();
 
@@ -560,7 +556,10 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         } else {
             changeState(stateInitial);
         }
-        if (WhatsNewDialog.shouldShowDialog()) {
+        if (!LWQPreferences.viewedTutorialDialog()) {
+            TutorialDialog.showDialog(this, this);
+            LWQPreferences.setViewedTutorialDialog(true);
+        } else if (WhatsNewDialog.shouldShowDialog()) {
             showWhatsNewDialog();
         }
     }
@@ -1393,20 +1392,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     void animateWallpaperActions(final boolean dismiss) {
         AnimatorSet animatorSet = new AnimatorSet();
         Animator shareButtonAnimator = generateAnimator(shareButton, dismiss, 0);
-        if (!dismiss) {
-            // Delay the tooltip a bit to make sure it lines up right
-            shareButtonAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            showTutorialTip(TutorialTooltips.SHARE);
-                        }
-                    }, 500);
-                }
-            });
-        }
         animatorSet.playTogether(shareButtonAnimator,
                 generateAnimator(saveButton, dismiss, 20),
                 generateAnimator(skipButton, dismiss, 35));
@@ -1553,6 +1538,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         AnimatorSet allAnimations = new AnimatorSet();
         allAnimations.playTogether(backgroundAnimator, createAnimator, searchAnimator);
         return allAnimations;
+    }
+
+    // Tutorial Dialog
+
+    @Override
+    public void onShowTutorial(TutorialDialog dialog) {
+        showTutorialTips = true;
+        visibleTips = new HashSet<>();
+        showTutorialTip(TutorialTooltips.SHARE);
+    }
+
+    @Override
+    public void onDismiss(TutorialDialog dialog) {
+        AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_TOOLTIPS,
+                AnalyticsUtils.ACTION_TAP,
+                AnalyticsUtils.LABEL_SKIP_TUTORIAL);
     }
 
     // Misc
@@ -1894,7 +1895,9 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
     }
 
     void showTutorialTip(TutorialTooltips tooltip) {
-        if (!showTutorialTips || visibleTips.contains(tooltip)) {
+        if (!showTutorialTips) {
+            return;
+        } else if (visibleTips.contains(tooltip)) {
             return;
         }
         // Assume they've seen the tutorial after we reveal the share tip
