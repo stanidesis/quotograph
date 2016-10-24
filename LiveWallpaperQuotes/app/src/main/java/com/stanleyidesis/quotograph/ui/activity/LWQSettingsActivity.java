@@ -90,8 +90,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -545,13 +543,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         setupProgressBar();
         // Setup image source chooser
         setupChooseImageSources();
-
+        // Ads
+        setupAds();
         // Track initial Screen View
         AnalyticsUtils.trackScreenView(
                 AnalyticsUtils.SCREEN_WALLPAPER_PREVIEW);
-
-        // Ads
-        setupInterstitialAd();
     }
 
     @Override
@@ -633,10 +629,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Setup
 
-    private void setupInterstitialAd() {
+    private void setupAds() {
         if (!AdMobUtils.adsEnabled()) {
             return;
         }
+        findViewById(R.id.rl_lwq_settings_remove_ads_banner).setVisibility(View.VISIBLE);
         maxAdLoadAttempts = 10;
         interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId(getString(R.string.admob_prime_interstitial));
@@ -656,6 +653,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     playlistAdapter.populateWithAds();
                     searchResultsAdapter.setAdsEnabled(true);
                 }
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                AnalyticsUtils.trackEvent(
+                        AnalyticsUtils.CATEGORY_ADS,
+                        AnalyticsUtils.ACTION_CLICKTHROUGH,
+                        interstitialAd.getAdUnitId());
             }
         });
         // Ew, AdMob, ew...
@@ -1351,6 +1356,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         sendBroadcast(new Intent(getString(R.string.action_share)));
     }
 
+    @OnClick(R.id.rl_lwq_settings_remove_ads_banner)
+    void purchaseAdRemoval() {
+        AnalyticsUtils.trackEvent(
+                AnalyticsUtils.CATEGORY_ADS,
+                AnalyticsUtils.ACTION_TAP,
+                AnalyticsUtils.LABEL_REMOVE_ADS_BANNER);
+        LWQApplication.purchaseProduct(this, IabConst.Product.REMOVE_ADS);
+    }
+
     @OnCheckedChanged(R.id.check_lwq_settings_double_tap)
     void onDoubleTapCheckChange(boolean checked) {
         LWQPreferences.setDoubleTapEnabled(checked);
@@ -1598,6 +1612,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 public void run() {
                     playlistAdapter.removeAllAds();
                     searchResultsAdapter.setAdsEnabled(false);
+                    findViewById(R.id.rl_lwq_settings_remove_ads_banner).setVisibility(View.GONE);
                     ThankYouDialog.showDialog(LWQSettingsActivity.this);
                 }
             });

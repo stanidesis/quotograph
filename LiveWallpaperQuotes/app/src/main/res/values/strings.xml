@@ -139,4 +139,5 @@
     <!-- IAP -->
     <string name="remove_ads_title">Remove Ads</string>
     <string name="remove_ads_description">Love Quotograph but hate the ads? Support the app by removing them once and for all.</string>
+    <string name="remove_ads_banner">Ads Suck: Tap Here to Kill Them</string>
 </resources>
