@@ -613,11 +613,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Override
     public void onBackPressed() {
-        if (activityState == stateAddReveal) {
+        if (activityState == stateSearch
+                || activityState == stateAddEditQuote
+                || activityState == stateAddReveal) {
             changeState(statePlaylist);
-        } else if (activityState == stateSearch || activityState == stateAddEditQuote) {
-            changeState(stateAddReveal);
-            AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_ADD);
+            AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_PLAYLIST);
         } else if (activityState == stateChooseImageSources) {
             changeState(stateSettings);
         } else {
