@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.google.android.gms.ads.AdListener;
@@ -73,16 +74,18 @@ class AdViewHolder extends RecyclerView.ViewHolder {
         AdListener adListener = new AdListener() {
             @Override
             public void onAdLoaded() {
-                if (AdViewHolder.this.itemView.getLayoutParams().height > 0) {
+                if (AdViewHolder.this.nativeAdHolder.getLayoutParams().height > 0) {
                     return;
                 }
+                itemView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                itemView.requestLayout();
                 ValueAnimator valueAnimator = ValueAnimator.ofInt(0, finalHeight).setDuration(200);
                 valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
                 valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        AdViewHolder.this.itemView.getLayoutParams().height = (int) valueAnimator.getAnimatedValue();
-                        AdViewHolder.this.itemView.requestLayout();
+                        AdViewHolder.this.nativeAdHolder.getLayoutParams().height = (int) valueAnimator.getAnimatedValue();
+                        AdViewHolder.this.nativeAdHolder.requestLayout();
                     }
                 });
                 valueAnimator.start();
@@ -122,18 +125,16 @@ class AdViewHolder extends RecyclerView.ViewHolder {
         nativeAdHolder.post(new Runnable() {
             @Override
             public void run() {
+                int maxHeightPixels = nativeAdHolder.getResources().getDimensionPixelSize(R.dimen.admob_ad_height);
                 // Set the ad target size
                 int maxWidthInt = nativeAdHolder.getWidth();
-                int maxHeightInt = nativeAdHolder.getHeight();
                 maxWidthInt = (int) (maxWidthInt * 1f / itemView.getResources().getDisplayMetrics().density);
-                maxHeightInt = (int) (maxHeightInt * 1f / itemView.getResources().getDisplayMetrics().density);
+                int maxHeightInt = (int) (maxHeightPixels * 1f / itemView.getResources().getDisplayMetrics().density);
                 nativeExpressAdView.setAdSize(new AdSize(maxWidthInt, maxHeightInt));
                 nativeExpressAdView.setAdUnitId(itemView.getContext().getString(adMobIdResource));
 
                 // Setup animation
-                finalHeight = itemView.getHeight();
-                itemView.getLayoutParams().height = 0;
-                itemView.requestLayout();
+                finalHeight = maxHeightPixels;
             }
         });
     }

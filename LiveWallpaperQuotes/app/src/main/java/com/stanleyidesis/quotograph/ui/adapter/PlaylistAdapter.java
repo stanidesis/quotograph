@@ -208,26 +208,26 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    private void insertAdAt(int position, boolean notify) {
+    private void insertAdAt(int position) {
         AdPlaceholder adPlaceholder = new AdPlaceholder();
         adPlaceholders.add(adPlaceholder);
         playlistItems.add(position, adPlaceholder);
-        if (notify) notifyItemInserted(position);
+        notifyItemInserted(position);
     }
 
     public void populateWithAds() {
         if (playlistCategories.size() > 4) {
-            insertAdAt(findFirstPosition(playlistCategories), true);
+            insertAdAt(findFirstPosition(playlistCategories));
         }
         if (playlistAuthors.size() > 4) {
-            insertAdAt(findFirstPosition(playlistAuthors), true);
+            insertAdAt(findFirstPosition(playlistAuthors));
         }
         if (playlistQuotes.size() > 4) {
-            insertAdAt(findFirstPosition(playlistQuotes), true);
+            insertAdAt(findFirstPosition(playlistQuotes));
         }
         if (adPlaceholders.size() == 0) {
             // Append to top if we have no ads
-            insertAdAt(showSurvey ? 1 : 0, true);
+            insertAdAt(showSurvey ? 1 : 0);
         }
     }
 
