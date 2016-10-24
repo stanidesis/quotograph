@@ -65,7 +65,7 @@ public class LWQChooseImageSourceModule implements Module {
         void addPhotoAlbum(LWQChooseImageSourceModule module);
     }
 
-    Delegate delegate;
+    private Delegate delegate;
 
     View root;
     @Bind(R.id.recycler_image_sources)
