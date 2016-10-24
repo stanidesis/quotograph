@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -108,12 +109,13 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
     @Bind(R.id.ll_lwq_activate_indicators)
     LinearLayout indicators;
     @Bind(R.id.pb_lwq_activate)
-    View progressBar;
+    ProgressBar progressBar;
     @Bind(R.id.button_lwq_activate)
     View activateButton;
     View activePageFiveView;
     @Bind({R.id.tv_tut_category, R.id.tv_tut_author, R.id.tv_tut_own_quote})
     List<TextView> sourceBubbles;
+    List<Float> percentageShifts = new ArrayList<>();
     @Bind({R.id.lwq_activate_tut_0,R.id.lwq_activate_tut_1,
             R.id.lwq_activate_tut_2,R.id.lwq_activate_tut_3,R.id.lwq_activate_tut_4,})
     List<View> viewPages;
@@ -147,8 +149,13 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         setupSourceBubbles();
         setupViewPager();
         setIndicator(0);
-        setupClock();
+        setupProgressBar();
         activePageFiveView = progressBar;
+    }
+
+    private void setupProgressBar() {
+        progressBar.getIndeterminateDrawable().setColorFilter(
+                Color.WHITE, android.graphics.PorterDuff.Mode.SRC_IN);
     }
 
     @Override
@@ -219,25 +226,11 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         int blueBlend = Color.blue(firstColor) + (int) (positionOffset * (Color.blue(secondColor) - Color.blue(firstColor)));
         viewPager.setBackgroundColor(Color.rgb(redBlend, greenBlend, blueBlend));
 
-        // Title Alpha
-
-        final View view = viewPages.get(position);
-        ButterKnife.findById(view, R.id.tv_tut_headline).setAlpha(1f - positionOffset);
-        ButterKnife.findById(view, R.id.tv_tut_details).setAlpha(1f - positionOffset);
-        if (viewPages.size() > position + 1) {
-            final View nextView = viewPages.get(position + 1);
-            ButterKnife.findById(nextView, R.id.tv_tut_headline).setAlpha(positionOffset);
-            ButterKnife.findById(nextView, R.id.tv_tut_details).setAlpha(positionOffset);
-        }
-
         if (position == 1) {
-            fadeBubbles(positionOffset, true);
+            scaleBubbles(positionOffset, true);
         } else if (position == 2) {
-            fadeBubbles(positionOffset, false);
+            scaleBubbles(positionOffset, false);
             calculatePivots();
-            clock.setAlpha(positionOffset);
-            hourHand.setAlpha(positionOffset);
-            minuteHand.setAlpha(positionOffset);
             minuteHand.setRotation(360f * positionOffset);
             hourHand.setRotation(360f/5f*positionOffset);
         } else if (position == 3) {
@@ -246,7 +239,6 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
             activePageFiveView.setScaleX(positionOffset);
             activePageFiveView.setScaleY(positionOffset);
 
-            clock.setAlpha(1f - positionOffset);
             minuteHand.setRotation(360f * positionOffset);
             hourHand.setRotation(360f/5f + 360f/5*positionOffset);
         }
@@ -259,6 +251,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         setIndicator(position);
         if (position == viewPages.size() - 1) {
             activePageFiveView.setEnabled(firstLaunchTaskCompleted);
+            activePageFiveView.setVisibility(firstLaunchTaskCompleted ? View.VISIBLE : View.GONE);
             if (activeSnackbar != null && !firstLaunchTaskCompleted) {
                 activeSnackbar = build(latestFirstLaunchTaskUpdate.getUpdate());
                 activeSnackbar.show();
@@ -412,12 +405,6 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
 
     // Setup
 
-    void setupClock() {
-        clock.setAlpha(0f);
-        hourHand.setAlpha(0f);
-        minuteHand.setAlpha(0f);
-    }
-
     void calculatePivots() {
         if (pivotsCalculated) {
             return;
@@ -432,26 +419,21 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
         sourceBubbles.get(1).setRotation(5f);
         sourceBubbles.get(2).setRotation(-10f);
         for (View bubble : sourceBubbles) {
-            bubble.setVisibility(View.GONE);
             bubble.setScaleX(0f);
             bubble.setScaleY(0f);
-            bubble.setAlpha(0f);
         }
     }
 
-    void fadeBubbles(float percentage, boolean reveal) {
-        List<Float> percentageShifts =new ArrayList<>();
+    void scaleBubbles(float percentage, boolean enter) {
         percentageShifts.add(1/3f);
         percentageShifts.add(2/3f);
         percentageShifts.add(1f);
         for (View bubble : sourceBubbles) {
-            bubble.setVisibility(View.VISIBLE);
-            float actualPercentage = reveal ? percentage : 1f - percentage;
+            float actualPercentage = enter ? percentage : 1f - percentage;
             float shiftedPosition = actualPercentage / percentageShifts.remove(0);
             if (shiftedPosition > 1f) {
                 shiftedPosition = 1f;
             }
-            bubble.setAlpha(shiftedPosition);
             bubble.setScaleX(shiftedPosition);
             bubble.setScaleY(shiftedPosition);
         }
@@ -488,7 +470,9 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
                         dialog.dismiss();
                         try {
                             startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
-                        } catch (Exception e) {}
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
     }
