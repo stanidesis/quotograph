@@ -47,6 +47,7 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
@@ -56,6 +57,7 @@ import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.RemoteConfigConst;
 import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
@@ -633,7 +635,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         if (!AdMobUtils.adsEnabled()) {
             return;
         }
-        findViewById(R.id.rl_lwq_settings_remove_ads_banner).setVisibility(View.VISIBLE);
+        View adsBanner = findViewById(R.id.rl_lwq_settings_remove_ads_banner);
+        adsBanner.setVisibility(View.VISIBLE);
+        ((TextView) adsBanner.findViewById(R.id.tv_lwq_settings_remove_ads_message))
+                .setText(FirebaseRemoteConfig.getInstance().getString(
+                                RemoteConfigConst.REMOVE_ADS_BANNER_MESSAGE));
         maxAdLoadAttempts = 10;
         interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId(getString(R.string.admob_prime_interstitial));

@@ -34,6 +34,7 @@ package com.stanleyidesis.quotograph;
  * Date: 09/11/2016
  */
 public class RemoteConfigConst {
+    static String ADMOB = "admob";
     public static String SURVEY_EXPERIMENT = "survey_experiment";
     public static String SURVEY_URL = "survey_url";
     public static String SURVEY_DELAY_IN_MILLIS = "survey_delay_in_millis";
@@ -41,7 +42,7 @@ public class RemoteConfigConst {
     public static String STACK_BLURRING = "stack_blurring";
     public static String ADMOB_PLAYLIST_NATIVE_SMALL_BG_COLOR = "admob_playlist_native_small_bg_color";
     public static String ADMOB_SEARCH_NATIVE_SMALL_BG_COLOR = "admob_search_native_small_bg_color";
-    public static String ADMOB = "admob";
     public static String THANK_YOU_IMAGE = "thank_you_image";
     public static String THANK_YOU_MESSAGE = "thank_you_message";
+    public static String REMOVE_ADS_BANNER_MESSAGE = "remove_ads_banner_message";
 }

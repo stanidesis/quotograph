@@ -45,5 +45,9 @@
         <key>thank_you_message</key>
         <value>We've disabled your ads and replaced them with a puppy!</value>
     </entry>
+    <entry>
+        <key>remove_ads_banner_message</key>
+        <value>Ads Suck: Tap Here to Destroy Them</value>
+    </entry>
 </defaultsMap>
 <!-- END xml_defaults -->

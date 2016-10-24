@@ -145,6 +145,7 @@
 
                         <TextView
                             style="@style/TextAppearance.AppCompat.Subhead"
+                            android:id="@+id/tv_lwq_settings_remove_ads_message"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
