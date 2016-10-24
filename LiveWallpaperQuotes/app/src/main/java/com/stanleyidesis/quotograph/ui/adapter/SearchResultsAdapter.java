@@ -96,6 +96,14 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public void setAdsEnabled(boolean adsEnabled) {
         this.adsEnabled = adsEnabled;
+        if (!adsEnabled) {
+            for (int i = 0; i < searchResults.size(); i++) {
+                if (searchResults.get(i) instanceof AdPlaceholder) {
+                    searchResults.remove(i);
+                    notifyItemRemoved(i);
+                }
+            }
+        }
     }
 
     public void setDelegate(Delegate delegate) {

@@ -102,13 +102,61 @@
                     android:layout_height="match_parent"
                     android:layout_width="match_parent">
 
-                    <include layout="@layout/layout_settings"
-                        android:id="@+id/group_lwq_settings_settings"
+                    <FrameLayout
+                        android:id="@+id/fl_lwq_settings_settings_wrapper"
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
-                        android:layout_centerHorizontal="true"
+                        android:layout_below="@+id/rl_lwq_settings_remove_ads_banner"
                         app:layout_widthPercent="@fraction/lwq_settings_mode_percent_width"
-                        app:layout_marginTopPercent="3%"/>
+                        app:layout_marginTopPercent="3%">
+
+                        <include layout="@layout/layout_settings"
+                            android:id="@+id/group_lwq_settings_settings"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"/>
+
+                    </FrameLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rl_lwq_settings_remove_ads_banner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:padding="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:visibility="gone"
+                        android:background="@drawable/remove_ads_banner_background">
+
+                        <ImageView
+                            android:id="@+id/iv_lwq_settings_remove_ads_icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="true"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:src="@drawable/ic_info_white_18dp"
+                            android:scaleType="center"
+                            android:contentDescription="Info Icon"/>
+
+                        <TextView
+                            style="@style/TextAppearance.AppCompat.Subhead"
+                            android:id="@+id/tv_lwq_settings_remove_ads_message"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:textAlignment="center"
+                            android:gravity="center"
+                            android:text="@string/remove_ads_banner"/>
+
+                    </RelativeLayout>
 
                 </android.support.percent.PercentRelativeLayout>
             </android.support.v4.view.ViewPager>

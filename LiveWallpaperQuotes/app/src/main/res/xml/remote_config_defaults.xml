@@ -37,5 +37,17 @@
         <key>admob</key>
         <value>on</value>
     </entry>
+    <entry>
+        <key>thank_you_image</key>
+        <value>http://67.media.tumblr.com/3ad59dc948ba6287782b72b6dc03abde/tumblr_nhtwe0X8cJ1qhub34o1_500.gif</value>
+    </entry>
+    <entry>
+        <key>thank_you_message</key>
+        <value>We've disabled your ads and replaced them with a puppy!</value>
+    </entry>
+    <entry>
+        <key>remove_ads_banner_message</key>
+        <value>Ads Suck: Tap Here to Destroy Them</value>
+    </entry>
 </defaultsMap>
 <!-- END xml_defaults -->

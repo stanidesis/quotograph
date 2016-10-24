@@ -37,19 +37,17 @@ public class IabConst {
 
     public enum Product {
 
-        NONE("", 0, 0, "");
+        REMOVE_ADS("remove_ads", R.string.remove_ads_title, R.string.remove_ads_description);
 
-        Product(String sku, int titleRes, int descriptionRes, String imgSource) {
+        Product(String sku, int titleRes, int descriptionRes) {
             this.sku = sku;
             this.titleRes = titleRes;
             this.descriptionRes = descriptionRes;
-            this.imgSource = imgSource;
         }
 
         public String sku;
         public int titleRes;
         public int descriptionRes;
-        public String imgSource;
 
     }
 

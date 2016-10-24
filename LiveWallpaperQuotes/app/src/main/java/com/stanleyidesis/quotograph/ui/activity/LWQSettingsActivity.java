@@ -47,6 +47,7 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.orm.util.NamingHelper;
@@ -56,6 +57,7 @@ import com.stanleyidesis.quotograph.IabConst;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.RemoteConfigConst;
 import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
@@ -80,6 +82,7 @@ import com.stanleyidesis.quotograph.ui.activity.modules.WhatsNewDialog;
 import com.stanleyidesis.quotograph.ui.adapter.FontMultiselectAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.PlaylistAdapter;
 import com.stanleyidesis.quotograph.ui.adapter.SearchResultsAdapter;
+import com.stanleyidesis.quotograph.ui.dialog.ThankYouDialog;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -89,8 +92,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -544,13 +545,11 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         setupProgressBar();
         // Setup image source chooser
         setupChooseImageSources();
-
+        // Ads
+        setupAds();
         // Track initial Screen View
         AnalyticsUtils.trackScreenView(
                 AnalyticsUtils.SCREEN_WALLPAPER_PREVIEW);
-
-        // Ads
-        setupInterstitialAd();
     }
 
     @Override
@@ -632,10 +631,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     // Setup
 
-    private void setupInterstitialAd() {
+    private void setupAds() {
         if (!AdMobUtils.adsEnabled()) {
             return;
         }
+        View adsBanner = findViewById(R.id.rl_lwq_settings_remove_ads_banner);
+        adsBanner.setVisibility(View.VISIBLE);
+        ((TextView) adsBanner.findViewById(R.id.tv_lwq_settings_remove_ads_message))
+                .setText(FirebaseRemoteConfig.getInstance().getString(
+                                RemoteConfigConst.REMOVE_ADS_BANNER_MESSAGE));
         maxAdLoadAttempts = 10;
         interstitialAd = new InterstitialAd(this);
         interstitialAd.setAdUnitId(getString(R.string.admob_prime_interstitial));
@@ -655,6 +659,14 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                     playlistAdapter.populateWithAds();
                     searchResultsAdapter.setAdsEnabled(true);
                 }
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                AnalyticsUtils.trackEvent(
+                        AnalyticsUtils.CATEGORY_ADS,
+                        AnalyticsUtils.ACTION_CLICKTHROUGH,
+                        interstitialAd.getAdUnitId());
             }
         });
         // Ew, AdMob, ew...
@@ -1350,6 +1362,15 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         sendBroadcast(new Intent(getString(R.string.action_share)));
     }
 
+    @OnClick(R.id.rl_lwq_settings_remove_ads_banner)
+    void purchaseAdRemoval() {
+        AnalyticsUtils.trackEvent(
+                AnalyticsUtils.CATEGORY_ADS,
+                AnalyticsUtils.ACTION_TAP,
+                AnalyticsUtils.LABEL_REMOVE_ADS_BANNER);
+        LWQApplication.purchaseProduct(this, IabConst.Product.REMOVE_ADS);
+    }
+
     @OnCheckedChanged(R.id.check_lwq_settings_double_tap)
     void onDoubleTapCheckChange(boolean checked) {
         LWQPreferences.setDoubleTapEnabled(checked);
@@ -1586,7 +1607,22 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
 
     @Subscribe
     public void onEvent(final IabPurchaseEvent purchaseEvent) {
-        // TODO remove ads
+        if (purchaseEvent.didFail()) {
+            return;
+        }
+        if (purchaseEvent.purchased == IabConst.Product.REMOVE_ADS) {
+            // Remove ads
+            interstitialAd = null;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    playlistAdapter.removeAllAds();
+                    searchResultsAdapter.setAdsEnabled(false);
+                    findViewById(R.id.rl_lwq_settings_remove_ads_banner).setVisibility(View.GONE);
+                    ThankYouDialog.showDialog(LWQSettingsActivity.this);
+                }
+            });
+        }
     }
 
     @Subscribe

@@ -12,6 +12,7 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.NativeExpressAdView;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.stanleyidesis.quotograph.AdMobUtils;
+import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.R;
 
 import butterknife.Bind;
@@ -93,6 +94,10 @@ class AdViewHolder extends RecyclerView.ViewHolder {
 
             @Override
             public void onAdLeftApplication() {
+                AnalyticsUtils.trackEvent(
+                        AnalyticsUtils.CATEGORY_ADS,
+                        AnalyticsUtils.ACTION_CLICKTHROUGH,
+                        nativeExpressAdView.getAdUnitId());
             }
 
             @Override
