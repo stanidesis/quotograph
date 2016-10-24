@@ -745,21 +745,16 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                             setBackgroundAlpha(BackgroundWallpaperState.OBSCURED.screenAlpha * positionOffset);
                         }
                         // Fab Add
-                        fabAdd.setAlpha(positionOffset);
                         fabAdd.setScaleX(positionOffset);
                         fabAdd.setScaleY(positionOffset);
                         // Content
                         content.setAlpha(positionOffset);
                         // At .3, share is gone, at .6, save is gone, and at 1, skip is gone
-                        shareButton.setAlpha(1f - (Math.min(positionOffset, 1 / 3f) / (1 / 3f)));
-                        shareButton.setTranslationY((1f - shareButton.getAlpha()) * shareButton.getHeight() * 2);
-                        saveButton.setAlpha(1f - (Math.min(positionOffset, 2 / 3f) / (2 / 3f)));
-                        saveButton.setTranslationY((1f - saveButton.getAlpha()) * saveButton.getHeight() * 2);
-                        skipButton.setAlpha(1f - positionOffset);
-                        skipButton.setTranslationY((1f - skipButton.getAlpha()) * skipButton.getHeight() * 2);
+                        shareButton.setTranslationY((1f - (1f - (Math.min(positionOffset, 1 / 3f) / (1 / 3f)))) * shareButton.getHeight() * 3);
+                        saveButton.setTranslationY((1f - (1f - (Math.min(positionOffset, 2 / 3f) / (2 / 3f)))) * saveButton.getHeight() * 3);
+                        skipButton.setTranslationY((1f - (1f - positionOffset)) * skipButton.getHeight() * 3);
                         break;
                     case 1:
-                        fabAdd.setAlpha(1f - positionOffset);
                         fabAdd.setScaleX(1f - positionOffset);
                         fabAdd.setScaleY(1f - positionOffset);
                 }
@@ -773,7 +768,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 // Add Fab
                 fabAdd.setScaleX(position == 1 ? 1f : 0f);
                 fabAdd.setScaleY(position == 1 ? 1f : 0f);
-                fabAdd.setAlpha(position == 1 ? 1f : 0f);
                 fabAdd.setEnabled(position == 1);
 
 
@@ -800,8 +794,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
                 // Action Buttons
                 View[] buttons = new View[]{shareButton, saveButton, skipButton};
                 for (View button : buttons) {
-                    button.setTranslationY(position == 0 ? 0f : button.getHeight() * 2f);
-                    button.setAlpha(position == 0 ? 1f : 0f);
+                    button.setTranslationY(position == 0 ? 0f : button.getHeight() * 3f);
                     button.setEnabled(position == 0);
                 }
 
@@ -893,7 +886,6 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
             fabAddWrapper.requestLayout();
         }
 
-        fabAdd.setAlpha(0f);
         fabAdd.setVisibility(View.GONE);
         fabAdd.setTag(R.id.view_tag_flags, FLAG_HIDE | FLAG_DISABLE | FLAG_NO_ROTATE);
         fabAdd.setTag(R.id.view_tag_animator_reveal, new Runnable() {
