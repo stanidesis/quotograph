@@ -1,6 +1,20 @@
-<H1>Quotograph Needs Your Help!</h1>
-<p>If you'd like to help me improve the app, please answer this <a href="https://goo.gl/Jg9mnY">5-minute survey</a>!<br>
-I really appreciate your help and your feedback. :D</p>
+<h4>Quotograph Needs Your Help!</h4>
+<blockquote>If you'd like to help me improve the app, please answer this <a href="https://goo.gl/Jg9mnY">5-minute survey</a>!<br>
+I really appreciate your help and your feedback. :D</blockquote>
+
+<h1>Version 1.2.0: Hypocrite Edition</h1>
+<h3>Great news:</h3>
+<ul>
+<li>ALL FEATURES UNLOCKED FOREVER!<li>
+<li>That means custom photos, fonts, and more! Try them now from the settings screen!</li>
+<li>Performance and bug fixes for everyone!</li>
+</ul>
+
+<h3>Bad news:</h3>
+<p>Quotograph is now ad-supported :/</p>
+
+<h3>Mixed news:</h3>
+<p>Support the app and we'll take away those pesky ads!</p>
 
 <h1>Version 1.1.4:</h1>
 <p>Ugh, the bugs!</p>
