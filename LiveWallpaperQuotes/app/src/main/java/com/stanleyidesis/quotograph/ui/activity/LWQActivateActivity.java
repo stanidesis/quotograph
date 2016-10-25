@@ -173,7 +173,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
                 LWQWallpaperControllerHelper.get().retrieveActiveWallpaper();
             }
         } else {
-            if (!NetworkConnectionListener.get().getCurrentConnectionType().isConnected()) {
+            if (!NetworkConnectionListener.get().getConnectionType().isConnected()) {
                 presentNetworkRequiredDialog();
             } else {
                 firstLaunchTask = new LWQFirstLaunchTask();
