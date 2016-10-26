@@ -8,9 +8,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.api.event.NetworkConnectivityEvent;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -47,10 +48,20 @@ import de.greenrobot.event.EventBus;
  */
 public class NetworkConnectionListener {
 
-    static String TAG = NetworkConnectionListener.class.getSimpleName();
+    private static String TAG = NetworkConnectionListener.class.getSimpleName();
+    private static NetworkConnectionListener sNetworkConnectionListener;
+
+    public static NetworkConnectionListener get() {
+        if (sNetworkConnectionListener != null) {
+            return sNetworkConnectionListener;
+        }
+        sNetworkConnectionListener = new NetworkConnectionListener();
+        return get();
+    }
 
     public enum ConnectionType {
         CONNECTION_NO_NETWORK,
+        CONNECTION_UNKNOWN,
         CONNECTION_WIFI,
         CONNECTION_MOBILE_DATA;
 
@@ -60,46 +71,28 @@ public class NetworkConnectionListener {
 
     }
 
-    ConnectionType currentConnectionType;
-    Context context;
-
-    BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "Network connectivity change");
+//            Log.d(TAG, "Network connectivity change");
             if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                ConnectionType newType = getConnectionType();
-                if (newType != currentConnectionType) {
-                    Log.d(TAG, "Network connectivity change: " + currentConnectionType.toString()
-                            + " to " + newType.toString());
-                    currentConnectionType = newType;
-                    notifyConnectionUpdate();
-                }
+                notifyConnectionUpdate();
             }
         }
     };
 
-    public NetworkConnectionListener(Context context) {
-        initialize(context);
+    private NetworkConnectionListener() {
+        initialize(LWQApplication.get());
     }
 
-    public void initialize(Context context) {
-        if (context == null || this.context != null) {
-            return;
-        }
-        this.context = context;
-        this.currentConnectionType = getConnectionType();
+    private void initialize(Context context) {
         context.registerReceiver(connectionReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
-    public ConnectionType getCurrentConnectionType() {
-        return currentConnectionType;
-    }
-
-    ConnectionType getConnectionType() {
+    public ConnectionType getConnectionType() {
         ConnectivityManager connectivityManager =
-                (ConnectivityManager) context.getApplicationContext().getSystemService(
+                (ConnectivityManager) LWQApplication.get().getSystemService(
                         Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
 
@@ -108,30 +101,25 @@ public class NetworkConnectionListener {
         }
         if (netInfo == null || !netInfo.isAvailable() || !netInfo.isConnected()) {
             return ConnectionType.CONNECTION_NO_NETWORK;
-        } else {
-            if ((netInfo.getType() == ConnectivityManager.TYPE_WIFI)
+        } else if ((netInfo.getType() == ConnectivityManager.TYPE_WIFI)
                     || (netInfo.getType() == ConnectivityManager.TYPE_WIMAX)) {
                 return ConnectionType.CONNECTION_WIFI;
-            }
-            if ((netInfo.getType() == ConnectivityManager.TYPE_MOBILE)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_DUN)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_HIPRI)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_SUPL)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_MMS)) {
+        } else if ((netInfo.getType() == ConnectivityManager.TYPE_MOBILE)
+                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_DUN)) {
                 return ConnectionType.CONNECTION_MOBILE_DATA;
-            }
+        } else {
+            return ConnectionType.CONNECTION_UNKNOWN;
         }
-        return ConnectionType.CONNECTION_NO_NETWORK;
     }
 
-    void notifyConnectionUpdate() {
-        EventBus.getDefault().post(new NetworkConnectivityEvent(currentConnectionType));
+    private void notifyConnectionUpdate() {
+        EventBus.getDefault().post(new NetworkConnectivityEvent(getConnectionType()));
     }
 
     @Override
     protected void finalize() throws Throwable {
         try {
-            context.unregisterReceiver(connectionReceiver);
+            LWQApplication.get().unregisterReceiver(connectionReceiver);
         } catch (Exception e) {
             e.printStackTrace();
         }

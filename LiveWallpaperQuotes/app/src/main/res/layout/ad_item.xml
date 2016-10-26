@@ -20,7 +20,7 @@
     SOFTWARE.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    layout_choose_image_sources.xml
+    ad_item.xml
     @author Stanley Idesis
 
     From Quotograph
@@ -29,47 +29,31 @@
     Please report any issues
     https://github.com/stanidesis/quotograph/issues
 
-    Date: 04/17/2015
+    Date: 10/21/2016
 -->
-<android.support.percent.PercentRelativeLayout
+<android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:fitsSystemWindows="true">
+    android:layout_height="0dp"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/palette_800"
+    app:cardUseCompatPadding="true">
 
-    <View
-        android:id="@+id/view_image_sources_background"
+    <android.support.percent.PercentRelativeLayout
+        android:id="@+id/prl_ad_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/palette_A100"
-        android:clickable="true"/>
+        android:layout_height="0dp">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_image_sources"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        <View
+            android:id="@+id/v_ad_hidden"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            android:background="@android:color/transparent"/>
 
-    <FrameLayout
-        android:id="@+id/fl_image_source_fab_add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        app:layout_widthPercent="@fraction/lwq_wallpaper_action_item_width"
-        app:layout_marginBottomPercent="5%">
+    </android.support.percent.PercentRelativeLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:contentDescription="Add Your Own Images"
-            android:id="@+id/fab_image_source_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@mipmap/ic_add_white"
-            app:backgroundTint="@color/palette_A400"/>
-
-    </FrameLayout>
-
-</android.support.percent.PercentRelativeLayout>
+</android.support.v7.widget.CardView>

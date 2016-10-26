@@ -54,8 +54,8 @@ public class WhatsNewDialog implements Module {
         return LWQApplication.getVersionCode() > LWQPreferences.getLatestVersionCode();
     }
 
-    Activity activity;
-    MaterialDialog dialog;
+    private Activity activity;
+    private MaterialDialog dialog;
 
     @Override
     public void initialize(Context context, View root) {
@@ -67,7 +67,7 @@ public class WhatsNewDialog implements Module {
         if (visible) {
             dialog = new MaterialDialog.Builder(activity)
                     .content(convertToString())
-                    .title("What's New!")
+                    .title(R.string.whats_new_dialog_title)
                     .positiveText(android.R.string.ok)
                     .build();
             dialog.show();

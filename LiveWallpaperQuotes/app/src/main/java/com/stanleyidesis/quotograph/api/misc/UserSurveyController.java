@@ -6,10 +6,12 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.RemoteConfigConst;
+import com.stanleyidesis.quotograph.api.controller.LWQNotificationControllerHelper;
 import com.stanleyidesis.quotograph.ui.activity.LWQSurveyActivity;
 import com.stanleyidesis.quotograph.ui.dialog.SurveyDialog;
 
@@ -65,10 +67,10 @@ public class UserSurveyController {
     public static int RESPONSE_LATER = 1;
     public static int RESPONSE_OKAY = 2;
 
-    static TimerTask surveyTimerTask;
-    static Timer surveyTimer;
+    private static TimerTask surveyTimerTask;
+    private static Timer surveyTimer;
 
-    static boolean shouldShowSurvey() {
+    private static boolean shouldShowSurvey() {
         if (getVariant() == SURVEY_VARIANT_NONE) {
             return false;
         }
@@ -80,7 +82,7 @@ public class UserSurveyController {
             return false;
         }
         long surveyLastShownOn = LWQPreferences.getSurveyLastShownOn();
-        if (surveyLastShownOn == -1) {
+        if (surveyLastShownOn == -1L) {
             // This is the first time we're checking, so set to system time and
             // don't show it yet, wait one cycle
             LWQPreferences.setSurveyLastShownOn(System.currentTimeMillis());
@@ -90,7 +92,7 @@ public class UserSurveyController {
         // time we showed the survey
         long timeSinceLastSurvey = System.currentTimeMillis() - surveyLastShownOn;
         return timeSinceLastSurvey >
-                LWQApplication.getRemoteConfig()
+                FirebaseRemoteConfig.getInstance()
                         .getLong(RemoteConfigConst.SURVEY_INTERVAL_IN_MILLIS);
     }
 
@@ -129,7 +131,7 @@ public class UserSurveyController {
             public void run() {
                 switch ((int) getVariant()) {
                     case SURVEY_VARIANT_NOTIFICATION:
-                        LWQApplication.getNotificationController().postSurveyNotification();
+                        LWQNotificationControllerHelper.get().postSurveyNotification();
                         AnalyticsUtils.trackScreenView(AnalyticsUtils.SCREEN_SURVEY_NOTIF);
                         break;
                     case SURVEY_VARIANT_DIALOG:
@@ -150,7 +152,7 @@ public class UserSurveyController {
     }
 
     static long getVariant() {
-        return LWQApplication.getRemoteConfig()
+        return FirebaseRemoteConfig.getInstance()
                 .getLong(RemoteConfigConst.SURVEY_EXPERIMENT);
     }
 
@@ -169,7 +171,7 @@ public class UserSurveyController {
     }
 
     static long getDelay() {
-        return LWQApplication.getRemoteConfig()
+        return FirebaseRemoteConfig.getInstance()
                 .getLong(RemoteConfigConst.SURVEY_DELAY_IN_MILLIS);
     }
 
@@ -195,7 +197,7 @@ public class UserSurveyController {
         takeSurvey.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         takeSurvey.setData(
                 Uri.parse(
-                        LWQApplication.getRemoteConfig()
+                        FirebaseRemoteConfig.getInstance()
                                 .getString(RemoteConfigConst.SURVEY_URL)));
         LWQApplication.get().startActivity(takeSurvey);
     }

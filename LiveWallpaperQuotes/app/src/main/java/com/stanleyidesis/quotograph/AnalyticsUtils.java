@@ -57,7 +57,6 @@ public class AnalyticsUtils {
     public static final String SCREEN_PLAYLIST = "playlist";
     public static final String SCREEN_SETTINGS = "settings";
     // Dialogs
-    public static final String SCREEN_STORE = "store";
     public static final String SCREEN_FONTS = "fonts";
     public static final String SCREEN_IMAGES = "images";
     public static final String SCREEN_WHATS_NEW = "whats_new";
@@ -75,6 +74,7 @@ public class AnalyticsUtils {
     public static final String SCREEN_CUSTOM_PHOTOS = "add_custom_photos";
 
     // Categories
+    public static final String CATEGORY_ADS = "ads";
     public static final String CATEGORY_TOOLTIPS = "tooltips";
     public static final String CATEGORY_TEXT_INPUT = "text_input";
     public static final String CATEGORY_FTUE_TASK = "ftue_task";
@@ -89,6 +89,8 @@ public class AnalyticsUtils {
     public static final String CATEGORY_SURVEY_NONE = "survey_none";
     public static final String CATEGORY_SEARCH = "search";
     // Actions
+    public static final String ACTION_TAP = "tapped";
+    public static final String ACTION_CLICKTHROUGH = "clicked_through";
     public static final String ACTION_RESPONSE_NEVER = "response_never";
     public static final String ACTION_RESPONSE_LATER = "response_later";
     public static final String ACTION_RESPONSE_OKAY = "response_okay";
@@ -115,6 +117,8 @@ public class AnalyticsUtils {
     public static final String LABEL_ALARM = "alarm";
     public static final String LABEL_IN_APP = "in_app";
     public static final String LABEL_FROM_NOTIF = "from_notif";
+    public static final String LABEL_REMOVE_ADS_BANNER = "remove_ads_banner";
+    public static final String LABEL_SKIP_TUTORIAL = "skip_tutorial";
 
     public static final String URI_CHANGE_SOURCE_ALARM = "alarm";
     public static final String URI_CHANGE_SOURCE_NOTIFICATION = "notif";
@@ -123,14 +127,15 @@ public class AnalyticsUtils {
 
 
     public static void trackTutorial(boolean started) {
-        LWQApplication.getAnalytics().
-                logEvent(started ?  FirebaseAnalytics.Event.TUTORIAL_BEGIN :
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(started ?  FirebaseAnalytics.Event.TUTORIAL_BEGIN :
                         FirebaseAnalytics.Event.TUTORIAL_COMPLETE, null);
     }
 
     public static void trackSearch(String query) {
-        LWQApplication.getAnalytics().logEvent(FirebaseAnalytics.Event.SEARCH,
-                buildBundle(FirebaseAnalytics.Param.SEARCH_TERM, query));
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(FirebaseAnalytics.Event.SEARCH,
+                        buildBundle(FirebaseAnalytics.Param.SEARCH_TERM, query));
         trackEvent(CATEGORY_SEARCH, ACTION_SEARCH, query);
     }
 
@@ -138,14 +143,15 @@ public class AnalyticsUtils {
         Bundle bundle = AnalyticsUtils.buildBundle(
                 FirebaseAnalytics.Param.CONTENT_TYPE, category);
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, label);
-        LWQApplication.getAnalytics().logEvent(FirebaseAnalytics.Event.SHARE, bundle);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(FirebaseAnalytics.Event.SHARE, bundle);
         // Double log it for GA
         trackEvent(category, ACTION_SHARED, label);
     }
 
     public static void trackScreenView(String screenName) {
-        LWQApplication.getAnalytics().
-                logEvent(FirebaseAnalytics.Event.VIEW_ITEM,
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(FirebaseAnalytics.Event.VIEW_ITEM,
                         buildBundle(FirebaseAnalytics.Param.ITEM_NAME, screenName));
     }
 
@@ -169,7 +175,8 @@ public class AnalyticsUtils {
         if (value != null) {
             bundle.putInt(FirebaseAnalytics.Param.VALUE, value);
         }
-        LWQApplication.getAnalytics().logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
+                .logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
     }
 
     public static Bundle buildBundle(String key, String value) {

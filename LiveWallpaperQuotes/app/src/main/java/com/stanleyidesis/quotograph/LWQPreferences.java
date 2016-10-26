@@ -4,13 +4,14 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
+import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.ui.Fonts;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -53,7 +54,7 @@ public class LWQPreferences {
         sInstance = new LWQPreferences();
     }
 
-    LWQPreferences() {
+    private LWQPreferences() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(LWQApplication.get());
     }
 
@@ -63,7 +64,7 @@ public class LWQPreferences {
     }
 
     public static void setBlurPreference(int blurPreference) {
-        LWQApplication.getLogger().logBlurLevel(blurPreference);
+        LWQLoggerHelper.get().logBlurLevel(blurPreference);
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_blur), blurPreference).apply();
         EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_blur, blurPreference));
     }
@@ -74,7 +75,7 @@ public class LWQPreferences {
     }
 
     public static void setDimPreference(int dimPreference) {
-        LWQApplication.getLogger().logDimLevel(dimPreference);
+        LWQLoggerHelper.get().logDimLevel(dimPreference);
         sharedPreferences.edit().putInt(LWQApplication.get().getString(R.string.preference_key_dim), dimPreference).apply();
         EventBus.getDefault().post(PreferenceUpdateEvent.preferenceUpdated(R.string.preference_key_dim, dimPreference));
     }
@@ -111,9 +112,6 @@ public class LWQPreferences {
     public static Set<String> getFontSet() {
         Set<String> defaultSet = new HashSet<>();
         defaultSet.add(String.valueOf(Fonts.JOSEFIN_BOLD.getId()));
-        if (!LWQApplication.ownsFontAccess()) {
-            return defaultSet;
-        }
         Set<String> stringSet = sharedPreferences.getStringSet(LWQApplication.get().getString(R.string.preference_key_fonts), defaultSet);
         Set<String> mutableSet = new HashSet<>();
         mutableSet.addAll(stringSet);
@@ -134,6 +132,14 @@ public class LWQPreferences {
 
     public static boolean viewedTutorial() {
         return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial), false);
+    }
+
+    public static void setViewedTutorialDialog(boolean viewedTutorialDialog) {
+        sharedPreferences.edit().putBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial_dialog), viewedTutorialDialog).apply();
+    }
+
+    public static boolean viewedTutorialDialog() {
+        return sharedPreferences.getBoolean(LWQApplication.get().getString(R.string.preference_key_tutorial_dialog), false);
     }
 
     public static int getLatestVersionCode() {

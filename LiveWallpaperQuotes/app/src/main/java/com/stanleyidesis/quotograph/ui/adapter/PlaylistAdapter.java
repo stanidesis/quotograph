@@ -11,8 +11,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.orm.SugarRecord;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.RemoteConfigConst;
+import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
 import com.stanleyidesis.quotograph.api.db.Author;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Playlist;
@@ -65,8 +68,8 @@ import butterknife.OnClick;
  */
 public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    final int VIEW_TYPE_PLAYLIST = 0;
-    final int VIEW_TYPE_SURVEY = 1;
+    private final int VIEW_TYPE_SURVEY = 1;
+    private final int VIEW_TYPE_AD = 2;
 
     public interface Delegate {
         void onPlaylistItemRemove(PlaylistAdapter adapter, int position);
@@ -74,13 +77,13 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         void onMakeQuotograph(PlaylistAdapter adapter, int position);
     }
 
-    Delegate delegate;
-    List<Object> playlistItems;
-    List<PlaylistCategory> playlistCategories;
-    List<PlaylistAuthor> playlistAuthors;
-    List<PlaylistQuote> playlistQuotes;
-    boolean showSurvey;
-    int surveyOffset;
+    private Delegate delegate;
+    private List<Object> playlistItems;
+    private List<PlaylistCategory> playlistCategories;
+    private List<PlaylistAuthor> playlistAuthors;
+    private List<PlaylistQuote> playlistQuotes;
+    private List<AdPlaceholder> adPlaceholders;
+    private boolean showSurvey;
 
     public PlaylistAdapter() {
         this(null);
@@ -89,6 +92,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public PlaylistAdapter(Delegate delegate) {
         this.delegate = delegate;
         final Playlist activePlaylist = Playlist.active();
+        adPlaceholders = new ArrayList<>();
         playlistCategories = PlaylistCategory.forPlaylist(activePlaylist);
         playlistAuthors = PlaylistAuthor.forPlaylist(activePlaylist);
         playlistQuotes = PlaylistQuote.forPlaylist(activePlaylist);
@@ -96,57 +100,83 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         Collections.sort(playlistAuthors);
         Collections.sort(playlistQuotes);
         playlistItems = new ArrayList<>();
-        playlistItems.addAll(playlistCategories);
-        playlistItems.addAll(playlistAuthors);
-        playlistItems.addAll(playlistQuotes);
-
+        insertAll();
         // Log user data
         logUserData();
     }
 
     public Object getItem(int position) {
-        if (getItemViewType(position) == VIEW_TYPE_SURVEY) {
-            return null;
-        }
-        return playlistItems.get(position - surveyOffset);
+        return playlistItems.get(position);
     }
 
     public void insertItem(Object object) {
+        int insertPosition;
         if (object instanceof PlaylistCategory) {
+            insertPosition = findFirstPosition(playlistCategories);
             playlistCategories.add((PlaylistCategory) object);
             Collections.sort(playlistCategories);
+            if (insertPosition != -1) {
+                insertPosition += playlistCategories.indexOf(object);
+            } else {
+                insertPosition = findFirstPosition(playlistAuthors);
+                if (insertPosition == -1) insertPosition = findFirstPosition(playlistQuotes);
+            }
         } else if (object instanceof PlaylistAuthor) {
+            insertPosition = findFirstPosition(playlistAuthors);
             playlistAuthors.add((PlaylistAuthor) object);
             Collections.sort(playlistAuthors);
+            if (insertPosition != -1) {
+                insertPosition += playlistAuthors.indexOf(object);
+            } else {
+                insertPosition = findLastPosition(playlistCategories) + 1;
+                if (insertPosition == 0) insertPosition = findFirstPosition(playlistQuotes);
+            }
         } else {
+            insertPosition = findFirstPosition(playlistQuotes);
             playlistQuotes.add((PlaylistQuote) object);
             Collections.sort(playlistQuotes);
+            if (insertPosition != -1) {
+                insertPosition += playlistQuotes.indexOf(object);
+            } else {
+                insertPosition = findLastPosition(playlistAuthors) + 1;
+                if (insertPosition == 0) insertPosition = findLastPosition(playlistCategories) + 1;
+            }
         }
-        playlistItems.clear();
-        playlistItems.addAll(playlistCategories);
-        playlistItems.addAll(playlistAuthors);
-        playlistItems.addAll(playlistQuotes);
-        notifyItemInserted(playlistItems.indexOf(object));
+        playlistItems.add(insertPosition, object);
+        notifyItemInserted(insertPosition);
 
         // Update user data
         logUserData();
     }
 
-    public void removeItem(Object item) {
-        final int position = playlistItems.indexOf(item);
-        if (position > -1) {
-            removeItem(position + surveyOffset);
+    private int findFirstPosition(List<?> playlistEntities) {
+        if (playlistEntities.size() == 0) {
+            return -1;
         }
+        return playlistItems.indexOf(playlistEntities.get(0));
     }
 
-    public void removeItem(int position) {
-        final Object remove = playlistItems.remove(position - surveyOffset);
+    private int findLastPosition(List<?> playlistEntities) {
+        if (playlistEntities.size() == 0) {
+            return -1;
+        }
+        return playlistItems.indexOf(playlistEntities.get(playlistEntities.size() - 1));
+    }
+
+    public void removeItem(Object item) {
+        removeItem(playlistItems.indexOf(item));
+    }
+
+    private void removeItem(int position) {
+        final Object remove = playlistItems.remove(position);
         if (remove instanceof PlaylistCategory) {
             playlistCategories.remove(remove);
         } else if (remove instanceof PlaylistAuthor) {
             playlistAuthors.remove(remove);
         } else if (remove instanceof PlaylistQuote){
             playlistQuotes.remove(remove);
+        } else if (remove instanceof AdPlaceholder) {
+            adPlaceholders.remove(remove);
         }
         notifyItemRemoved(position);
 
@@ -154,23 +184,73 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         logUserData();
     }
 
+    private void insertAll() {
+        playlistItems.clear();
+        playlistItems.addAll(playlistCategories);
+        playlistItems.addAll(playlistAuthors);
+        playlistItems.addAll(playlistQuotes);
+        if (showSurvey) {
+            playlistItems.add(0, new SurveyPlaceholder());
+        }
+    }
+
     public void setShowSurvey(boolean showSurvey) {
         if (this.showSurvey == showSurvey) {
             return;
         }
         this.showSurvey = showSurvey;
-        surveyOffset = showSurvey ? 1 : 0;
         if (showSurvey) {
+            playlistItems.add(0, new SurveyPlaceholder());
             notifyItemInserted(0);
         } else {
+            playlistItems.remove(0);
             notifyItemRemoved(0);
         }
     }
 
+    private void insertAdAt(int position) {
+        AdPlaceholder adPlaceholder = new AdPlaceholder();
+        adPlaceholders.add(adPlaceholder);
+        playlistItems.add(position, adPlaceholder);
+        notifyItemInserted(position);
+    }
+
+    public void populateWithAds() {
+        if (playlistCategories.size() > 4) {
+            insertAdAt(findFirstPosition(playlistCategories));
+        }
+        if (playlistAuthors.size() > 4) {
+            insertAdAt(findFirstPosition(playlistAuthors));
+        }
+        if (playlistQuotes.size() > 4) {
+            insertAdAt(findFirstPosition(playlistQuotes));
+        }
+        if (adPlaceholders.size() == 0) {
+            // Append to top if we have no ads
+            insertAdAt(showSurvey ? 1 : 0);
+        }
+    }
+
+    public void removeAllAds() {
+        for (AdPlaceholder adPlaceholder : adPlaceholders) {
+            int index = playlistItems.indexOf(adPlaceholder);
+            playlistItems.remove(index);
+            notifyItemRemoved(index);
+        }
+        adPlaceholders.clear();
+    }
+
     @Override
     public int getItemViewType(int position) {
-        return showSurvey && position == 0 ?
-                VIEW_TYPE_SURVEY : VIEW_TYPE_PLAYLIST;
+        Object item = getItem(position);
+        if (item instanceof SugarRecord) {
+            // VIEW_TYPE_PLAYLIST
+            return 0;
+        } else if (item instanceof SurveyPlaceholder) {
+            return VIEW_TYPE_SURVEY;
+        } else {
+            return VIEW_TYPE_AD;
+        }
     }
 
     @Override
@@ -178,6 +258,10 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (viewType == VIEW_TYPE_SURVEY) {
             return new SurveyPlaylistViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.survey_playlist_item, null));
+        } else if (viewType == VIEW_TYPE_AD) {
+            return new AdViewHolder(parent.getContext(),
+                    RemoteConfigConst.ADMOB_PLAYLIST_NATIVE_SMALL_BG_COLOR,
+                    R.string.admob_playlist_native_small);
         } else {
             return new PlaylistViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.playlist_item, null));
@@ -186,7 +270,11 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (getItemViewType(position) == VIEW_TYPE_SURVEY) {
+        int itemViewType = getItemViewType(position);
+        if (itemViewType == VIEW_TYPE_SURVEY) {
+            return;
+        } else if (itemViewType == VIEW_TYPE_AD) {
+            ((AdViewHolder) holder).update();
             return;
         }
         PlaylistViewHolder playlistViewHolder = (PlaylistViewHolder) holder;
@@ -205,33 +293,40 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public int getItemCount() {
-        return playlistItems.size() + surveyOffset;
+        return playlistItems.size();
     }
 
     public int getPlaylistItemCount() {
         return playlistItems.size();
     }
 
-    public int getCategoryCount() {
+    private int getCategoryCount() {
         return playlistCategories.size();
     }
 
-    public int getAuthorCount() {
+    private int getAuthorCount() {
         return playlistAuthors.size();
     }
 
-    public int getQuoteCount() {
+    private int getQuoteCount() {
         return playlistQuotes.size();
     }
 
-    public void logUserData() {
-        LWQApplication.getLogger()
+    private void logUserData() {
+        LWQLoggerHelper.get()
                 .logCategoryCount(getCategoryCount());
-        LWQApplication.getLogger()
+        LWQLoggerHelper.get()
                 .logAuthorCount(getAuthorCount());
-        LWQApplication.getLogger()
+        LWQLoggerHelper.get()
                 .logQuoteCount(getQuoteCount());
     }
+
+    /**
+     * Dummy classes to identify where, in the full list,
+     * do we insert Ads and Survey, among other things.
+     */
+    private class SurveyPlaceholder {}
+    private class AdPlaceholder {}
 
     class SurveyPlaylistViewHolder
             extends RecyclerView.ViewHolder
@@ -239,7 +334,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         ListPopupWindow listPopupWindow;
 
-        public SurveyPlaylistViewHolder(View itemView) {
+        private SurveyPlaylistViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
@@ -293,7 +388,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         @Bind(R.id.tv_playlist_item_description) TextView description;
         ListPopupWindow listPopupWindow;
 
-        public PlaylistViewHolder(View itemView) {
+        private PlaylistViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
@@ -369,4 +464,5 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
         }
     }
+
 }

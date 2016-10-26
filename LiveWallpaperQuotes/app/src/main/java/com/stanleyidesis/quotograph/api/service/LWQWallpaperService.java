@@ -8,17 +8,19 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 import com.stanleyidesis.quotograph.AnalyticsUtils;
-import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.BaseCallback;
 import com.stanleyidesis.quotograph.api.controller.LWQWallpaperController;
+import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
 import com.stanleyidesis.quotograph.api.drawing.LWQSurfaceHolderDrawScript;
 import com.stanleyidesis.quotograph.api.event.PreferenceUpdateEvent;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 import com.stanleyidesis.quotograph.ui.activity.LWQSettingsActivity;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -73,7 +75,7 @@ public class LWQWallpaperService extends WallpaperService {
             gestureDetectorCompat = new GestureDetectorCompat(LWQWallpaperService.this, this);
             gestureDetectorCompat.setOnDoubleTapListener(this);
             EventBus.getDefault().register(this);
-            LWQWallpaperController wallpaperController = LWQApplication.getWallpaperController();
+            LWQWallpaperController wallpaperController = LWQWallpaperControllerHelper.get();
             if (!wallpaperController.activeWallpaperLoaded()) {
                 wallpaperController.retrieveActiveWallpaper();
             }
@@ -113,15 +115,18 @@ public class LWQWallpaperService extends WallpaperService {
             }
         }
 
+        @Subscribe
         public void onEvent(WallpaperEvent wallpaperEvent) {
             if (wallpaperEvent.didFail()) {
                 return;
             }
             if (wallpaperEvent.getStatus() == WallpaperEvent.Status.RETRIEVED_WALLPAPER) {
+                drawScript.clearCache();
                 drawScript.requestDraw(eventCallback);
             }
         }
 
+        @Subscribe
         public void onEvent(PreferenceUpdateEvent preferenceUpdateEvent) {
             if (preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_blur ||
                     preferenceUpdateEvent.getPreferenceKeyId() == R.string.preference_key_dim) {
@@ -197,6 +202,6 @@ public class LWQWallpaperService extends WallpaperService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        LWQApplication.getWallpaperController().discardActiveWallpaper();
+        LWQWallpaperControllerHelper.get().discardActiveWallpaper();
     }
 }

@@ -14,12 +14,12 @@ import com.stanleyidesis.quotograph.api.LWQError;
 import com.stanleyidesis.quotograph.api.drawing.LWQBitmapDrawScript;
 import com.stanleyidesis.quotograph.api.event.ImageSaveEvent;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis

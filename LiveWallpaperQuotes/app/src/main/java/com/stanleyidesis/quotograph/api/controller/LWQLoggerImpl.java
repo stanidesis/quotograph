@@ -1,8 +1,11 @@
 package com.stanleyidesis.quotograph.api.controller;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.api.LWQError;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -51,70 +54,70 @@ public class LWQLoggerImpl implements LWQLogger {
 
     @Override
     public void logWallpaperCount(long count) {
-        Crashlytics.setLong(KEY_WALLPAPER_COUNT, count);
-        LWQApplication.getAnalytics()
+        if (Fabric.isInitialized()) Crashlytics.setLong(KEY_WALLPAPER_COUNT, count);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
                 .setUserProperty(KEY_WALLPAPER_COUNT, String.valueOf(count));
     }
 
     @Override
     public void logWallpaperRetrievalState(LWQWallpaperController.RetrievalState retrievalState) {
-        Crashlytics.setString(KEY_WALLPAPER_RETRIEVAL_STATE, retrievalState.name());
-        LWQApplication.getAnalytics()
+        if (Fabric.isInitialized()) Crashlytics.setString(KEY_WALLPAPER_RETRIEVAL_STATE, retrievalState.name());
+        FirebaseAnalytics.getInstance(LWQApplication.get())
                 .setUserProperty(KEY_WALLPAPER_RETRIEVAL_STATE, retrievalState.name());
     }
 
     @Override
     public void logWallpaperActive(boolean active) {
-        Crashlytics.setBool(KEY_WALLPAPER_ACTIVE, active);
-        LWQApplication.getAnalytics()
+        if (Fabric.isInitialized()) Crashlytics.setBool(KEY_WALLPAPER_ACTIVE, active);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
                 .setUserProperty(KEY_WALLPAPER_ACTIVE, String.valueOf(active));
     }
 
     @Override
     public void logBlurLevel(int blur) {
-        Crashlytics.setInt(KEY_BLUR_LEVEL, blur);
-        LWQApplication.getAnalytics()
+        if (Fabric.isInitialized()) Crashlytics.setInt(KEY_BLUR_LEVEL, blur);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
                 .setUserProperty(KEY_BLUR_LEVEL, String.valueOf(blur));
     }
 
     @Override
     public void logDimLevel(int dim) {
-        Crashlytics.setInt(KEY_DIM_LEVEL, dim);
-        LWQApplication.getAnalytics()
+        if (Fabric.isInitialized()) Crashlytics.setInt(KEY_DIM_LEVEL, dim);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
                 .setUserProperty(KEY_DIM_LEVEL, String.valueOf(dim));
     }
 
     @Override
     public void logRefreshRate(String refreshRateString) {
-        Crashlytics.setString(KEY_REFRESH_RATE, refreshRateString);
-        LWQApplication.getAnalytics()
+        if (Fabric.isInitialized()) Crashlytics.setString(KEY_REFRESH_RATE, refreshRateString);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
                 .setUserProperty(KEY_REFRESH_RATE, refreshRateString);
     }
 
     @Override
     public void logCategoryCount(int count) {
-        Crashlytics.setInt(KEY_CATEGORY_COUNT, count);
-        LWQApplication.getAnalytics()
+        if (Fabric.isInitialized()) Crashlytics.setInt(KEY_CATEGORY_COUNT, count);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
                 .setUserProperty(KEY_CATEGORY_COUNT, String.valueOf(count));
     }
 
     @Override
     public void logAuthorCount(int count) {
-        Crashlytics.setInt(KEY_AUTHOR_COUNT, count);
-        LWQApplication.getAnalytics()
+        if (Fabric.isInitialized()) Crashlytics.setInt(KEY_AUTHOR_COUNT, count);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
                 .setUserProperty(KEY_AUTHOR_COUNT, String.valueOf(count));
     }
 
     @Override
     public void logQuoteCount(int count) {
-        Crashlytics.setInt(KEY_QUOTE_COUNT, count);
-        LWQApplication.getAnalytics()
+        if (Fabric.isInitialized()) Crashlytics.setInt(KEY_QUOTE_COUNT, count);
+        FirebaseAnalytics.getInstance(LWQApplication.get())
                 .setUserProperty(KEY_QUOTE_COUNT, String.valueOf(count));
     }
 
     @Override
     public void logError(LWQError error) {
-        Crashlytics.log(error.getErrorMessage());
-        Crashlytics.logException(error.getErrorThrowable());
+        if (Fabric.isInitialized()) Crashlytics.log(error.getErrorMessage());
+        if (Fabric.isInitialized()) Crashlytics.logException(error.getErrorThrowable());
     }
 }

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.stanleyidesis.quotograph.R;
+import com.stanleyidesis.quotograph.RemoteConfigConst;
 import com.stanleyidesis.quotograph.api.db.Author;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Playlist;
@@ -57,7 +58,7 @@ import butterknife.OnClick;
  *
  * Date: 11/03/2015
  */
-public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdapter.BaseResultHolder> {
+public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public interface Delegate {
         /**
@@ -76,36 +77,51 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         Object onAdd(SearchResultsAdapter adapter, Object model);
     }
 
-    static final int TYPE_CATEGORY = 0;
-    static final int TYPE_AUTHOR = 1;
-    static final int TYPE_QUOTE = 2;
+    static final private int TYPE_CATEGORY = 0;
+    static final private int TYPE_AUTHOR = 1;
+    static final private int TYPE_QUOTE = 2;
+    static final private int TYPE_AD = 3;
 
     private class AuthorCouplet {
         Author firstAuthor;
         Author secondAuthor;
     }
 
-    List<Object> searchResults = new ArrayList<>();
-    Delegate delegate;
-    Playlist activePlaylist = Playlist.active();
+    private class AdPlaceholder {}
 
-    public Delegate getDelegate() {
-        return delegate;
+    private List<Object> searchResults = new ArrayList<>();
+    private Delegate delegate;
+    private Playlist activePlaylist = Playlist.active();
+    private boolean adsEnabled = false;
+
+    public void setAdsEnabled(boolean adsEnabled) {
+        this.adsEnabled = adsEnabled;
+        if (!adsEnabled) {
+            for (int i = 0; i < searchResults.size(); i++) {
+                if (searchResults.get(i) instanceof AdPlaceholder) {
+                    searchResults.remove(i);
+                    notifyItemRemoved(i);
+                }
+            }
+        }
     }
 
     public void setDelegate(Delegate delegate) {
         this.delegate = delegate;
     }
 
-    public List<Object> getSearchResults() {
-        return searchResults;
-    }
-
     public void setSearchResults(List<Object> originalSearchResults) {
         this.searchResults.clear();
+        boolean justOnce = true;
         for (int i = 0; i < originalSearchResults.size(); i++) {
             final Object o = originalSearchResults.get(i);
             if (o instanceof Category || o instanceof Quote) {
+                // Separate the authors and quotes with an ad
+                if (adsEnabled && justOnce && i > 0
+                        && (originalSearchResults.get(i - 1) instanceof Author)) {
+                    searchResults.add(new AdPlaceholder());
+                    justOnce = false;
+                }
                 searchResults.add(o);
             } else {
                 AuthorCouplet authorCouplet = new AuthorCouplet();
@@ -117,21 +133,33 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
                 searchResults.add(authorCouplet);
             }
         }
+        // This area is pretty small, so there's a high likelihood that
+        // ads will not render on small devices.
+        if (searchResults.size() > 0 && adsEnabled) {
+            searchResults.add(0, new AdPlaceholder());
+        }
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (searchResults.get(position) instanceof Quote) {
+        Object item = searchResults.get(position);
+        if (item instanceof AdPlaceholder) {
+            return TYPE_AD;
+        } else if (item instanceof Quote) {
             return TYPE_QUOTE;
-        } else if (searchResults.get(position) instanceof AuthorCouplet) {
+        } else if (item instanceof AuthorCouplet) {
             return TYPE_AUTHOR;
         }
         return TYPE_CATEGORY;
     }
 
     @Override
-    public BaseResultHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
+            case TYPE_AD:
+                return new AdViewHolder(parent.getContext(),
+                        RemoteConfigConst.ADMOB_SEARCH_NATIVE_SMALL_BG_COLOR,
+                        R.string.admob_search_native_small);
             case TYPE_CATEGORY:
                 return new CategoryResultHolder(
                         LayoutInflater.from(parent.getContext())
@@ -149,9 +177,11 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     }
 
     @Override
-    public void onBindViewHolder(BaseResultHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         UIUtils.setViewAndChildrenEnabled(holder.itemView, true);
-        if (holder instanceof CategoryResultHolder) {
+        if (holder instanceof AdViewHolder) {
+            ((AdViewHolder) holder).update();
+        } else if (holder instanceof CategoryResultHolder) {
             ((CategoryResultHolder) holder).updateWithCategory((Category) searchResults.get(position));
         } else if (holder instanceof AuthorResultHolder) {
             AuthorCouplet authorCouplet = (AuthorCouplet) searchResults.get(position);
@@ -183,7 +213,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         @Bind(R.id.add_remove_category_result_item)
         AddRemoveButton categoryAddRemove;
 
-        public CategoryResultHolder(View itemView) {
+        CategoryResultHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
@@ -227,7 +257,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         @Bind(R.id.add_remove_author_result_item_second)
         AddRemoveButton secondAuthorAddRemove;
 
-        public AuthorResultHolder(View itemView) {
+        AuthorResultHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
@@ -286,7 +316,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         @Bind(R.id.add_remove_quote_result_item)
         AddRemoveButton addOrRemoveQuote;
 
-        public QuoteResultHolder(View itemView) {
+        QuoteResultHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
@@ -311,4 +341,5 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
             }
         }
     }
+
 }

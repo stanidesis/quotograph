@@ -2,6 +2,7 @@ package com.stanleyidesis.quotograph.api.task;
 
 import android.os.AsyncTask;
 
+import org.greenrobot.eventbus.Subscribe;
 import com.orm.SugarRecord;
 import com.orm.query.Select;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
@@ -10,6 +11,9 @@ import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.Callback;
 import com.stanleyidesis.quotograph.api.LWQError;
+import com.stanleyidesis.quotograph.api.controller.LWQLoggerHelper;
+import com.stanleyidesis.quotograph.api.controller.LWQQuoteControllerHelper;
+import com.stanleyidesis.quotograph.api.controller.LWQWallpaperControllerHelper;
 import com.stanleyidesis.quotograph.api.db.Category;
 import com.stanleyidesis.quotograph.api.db.Playlist;
 import com.stanleyidesis.quotograph.api.db.PlaylistCategory;
@@ -18,9 +22,9 @@ import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskEvent;
 import com.stanleyidesis.quotograph.api.event.FirstLaunchTaskUpdate;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
 
-import java.util.List;
+import org.greenrobot.eventbus.EventBus;
 
-import de.greenrobot.event.EventBus;
+import java.util.List;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -66,7 +70,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
             UnsplashCategory category = SugarRecord.listAll(UnsplashCategory.class).get(0);
             category.active = true;
             category.save();
-            LWQApplication.getQuoteController().fetchCategories(fetchQuoteCategoriesCallback);
+            LWQQuoteControllerHelper.get().fetchCategories(fetchQuoteCategoriesCallback);
         }
 
         @Override
@@ -99,10 +103,10 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
             new PlaylistCategory(defaultPlaylist, initialCategory).save();
 
             // Log category count
-            LWQApplication.getLogger().logCategoryCount(1);
+            LWQLoggerHelper.get().logCategoryCount(1);
 
             publishProgress("Making your first Quotograph…");
-            LWQApplication.getWallpaperController().generateNewWallpaper();
+            LWQWallpaperControllerHelper.get().generateNewWallpaper();
         }
 
         @Override
@@ -124,13 +128,13 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
     protected Void doInBackground(Void... params) {
         if (!LWQPreferences.isFirstLaunch()) {
             return null;
-        } else if (!LWQApplication.getWallpaperController().activeWallpaperExists()) {
+        } else if (!LWQWallpaperControllerHelper.get().activeWallpaperExists()) {
             publishProgress("Fetching quote categories…");
             // Go through everything again
-            LWQApplication.getWallpaperController().fetchBackgroundCategories(fetchImageCategoriesCallback);
+            LWQWallpaperControllerHelper.get().fetchBackgroundCategories(fetchImageCategoriesCallback);
         } else {
             publishProgress("Retrieving artwork…");
-            LWQApplication.getWallpaperController().retrieveActiveWallpaper();
+            LWQWallpaperControllerHelper.get().retrieveActiveWallpaper();
         }
         return null;
     }
@@ -163,6 +167,7 @@ public class LWQFirstLaunchTask extends AsyncTask<Void, String, Void> {
         EventBus.getDefault().post(FirstLaunchTaskUpdate.newUpdate(progress));
     }
 
+    @Subscribe
     public void onEvent(WallpaperEvent wallpaperEvent) {
         if (wallpaperEvent.didFail()) {
             EventBus.getDefault().post(FirstLaunchTaskEvent.failed(wallpaperEvent.getError()));

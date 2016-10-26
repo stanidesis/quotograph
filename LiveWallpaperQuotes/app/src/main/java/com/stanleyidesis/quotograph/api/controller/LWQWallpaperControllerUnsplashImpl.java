@@ -24,8 +24,11 @@ import com.stanleyidesis.quotograph.api.db.UserAlbum;
 import com.stanleyidesis.quotograph.api.db.UserPhoto;
 import com.stanleyidesis.quotograph.api.db.Wallpaper;
 import com.stanleyidesis.quotograph.api.event.WallpaperEvent;
+import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
 import com.stanleyidesis.quotograph.api.network.UnsplashManager;
 import com.stanleyidesis.quotograph.ui.Fonts;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,8 +37,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import de.greenrobot.event.EventBus;
 
 /**
  * Copyright (c) 2016 Stanley Idesis
@@ -113,7 +114,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                     photoRecord instanceof UnsplashPhoto ? Wallpaper.IMAGE_SOURCE_UNSPLASH : Wallpaper.IMAGE_SOURCE_USER,
                     ((SugarRecord) photoRecord).getId(), newFontId);
             activeWallpaper.save();
-            LWQApplication.getLogger().logWallpaperCount(activeWallpaper.getId());
+            LWQLoggerHelper.get().logWallpaperCount(activeWallpaper.getId());
             newQuote.used = true;
             newQuote.save();
             setRetrievalState(RetrievalState.NONE);
@@ -129,8 +130,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             }
             List<UnsplashCategory> activeCategories = UnsplashCategory.active();
             List<UserAlbum> activeAlbums = UserAlbum.active();
-            boolean useAlbums = activeAlbums.size() > 0
-                    && LWQApplication.ownsImageAccess();
+            boolean useAlbums = activeAlbums.size() > 0;
             if (activeCategories.size() > 0
                     && useAlbums) {
                 // Randomness will determine whether we still use an album
@@ -252,15 +252,17 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         if (getRetrievalState() == RetrievalState.NEW_WALLPAPER) {
             return;
         }
-        if (!LWQApplication.getNetworkConnectionListener().getCurrentConnectionType().isConnected()) {
-            notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER, LWQError.create(LWQApplication.get().getString(R.string.network_connection_required_title)));
+        if (!NetworkConnectionListener.get().getConnectionType().isConnected()) {
+            notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER,
+                    LWQError.create(LWQApplication.get().getString(R.string.network_connection_required_title)));
             return;
         }
         setRetrievalState(RetrievalState.NEW_WALLPAPER);
         notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER);
 
         if (playlistObject instanceof PlaylistCategory) {
-            LWQApplication.getQuoteController().fetchUnusedQuotes(((PlaylistCategory) playlistObject).category, new Callback<List<Quote>>() {
+            LWQQuoteControllerHelper.get()
+                    .fetchUnusedQuotes(((PlaylistCategory) playlistObject).category, new Callback<List<Quote>>() {
                 @Override
                 public void onSuccess(List<Quote> quotes) {
                     if (quotes.size() > 0) {
@@ -278,7 +280,8 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 }
             });
         } else if (playlistObject instanceof PlaylistAuthor) {
-            LWQApplication.getQuoteController().fetchUnusedQuotesBy(((PlaylistAuthor) playlistObject).author, new Callback<List<Quote>>() {
+            LWQQuoteControllerHelper.get()
+                    .fetchUnusedQuotesBy(((PlaylistAuthor) playlistObject).author, new Callback<List<Quote>>() {
                 @Override
                 public void onSuccess(List<Quote> quotes) {
                     if (quotes.size() > 0) {
@@ -324,7 +327,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         setRetrievalState(RetrievalState.ACTIVE_WALLPAPER);
         notifyWallpaper(WallpaperEvent.Status.RETRIEVING_WALLPAPER);
         if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_UNSPLASH) {
-            LWQApplication.getImageController().retrieveBitmap(getFullUri(), new Callback<Bitmap>() {
+            LWQImageControllerHelper.get().retrieveBitmap(getFullUri(), new Callback<Bitmap>() {
                 @Override
                 public void onSuccess(Bitmap bitmap) {
                     activeBackgroundImage = bitmap;
@@ -346,8 +349,10 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
             setRetrievalState(RetrievalState.NONE);
         } else if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_USER) {
             UserPhoto userPhoto = activeWallpaper.recoverUserPhoto();
-            activeBackgroundImage = LWQApplication.getImageController()
-                    .retrieveBitmapSync(userPhoto.uri);
+            if (userPhoto != null) {
+                activeBackgroundImage = LWQImageControllerHelper.get()
+                        .retrieveBitmapSync(userPhoto.uri);
+            }
             notifyWallpaper(WallpaperEvent.Status.RETRIEVED_WALLPAPER);
             setRetrievalState(RetrievalState.NONE);
         }
@@ -393,7 +398,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
 
     synchronized void setRetrievalState(RetrievalState retrievalState) {
         this.retrievalState = retrievalState;
-        LWQApplication.getLogger().logWallpaperRetrievalState(retrievalState);
+        LWQLoggerHelper.get().logWallpaperRetrievalState(retrievalState);
     }
 
     String getFullUri() {
@@ -406,7 +411,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     void discardActiveBitmap() {
         if (activeWallpaperLoaded()) {
             if (activeWallpaper.imageSource == Wallpaper.IMAGE_SOURCE_UNSPLASH) {
-                LWQApplication.getImageController().clearBitmap(getFullUri());
+                LWQImageControllerHelper.get().clearBitmap(getFullUri());
             }
         }
         activeBackgroundImage = null;
