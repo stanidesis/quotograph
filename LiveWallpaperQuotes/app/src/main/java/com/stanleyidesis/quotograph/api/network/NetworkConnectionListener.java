@@ -48,8 +48,8 @@ import org.greenrobot.eventbus.EventBus;
  */
 public class NetworkConnectionListener {
 
-    static String TAG = NetworkConnectionListener.class.getSimpleName();
-    static NetworkConnectionListener sNetworkConnectionListener;
+    private static String TAG = NetworkConnectionListener.class.getSimpleName();
+    private static NetworkConnectionListener sNetworkConnectionListener;
 
     public static NetworkConnectionListener get() {
         if (sNetworkConnectionListener != null) {
@@ -61,6 +61,7 @@ public class NetworkConnectionListener {
 
     public enum ConnectionType {
         CONNECTION_NO_NETWORK,
+        CONNECTION_UNKNOWN,
         CONNECTION_WIFI,
         CONNECTION_MOBILE_DATA;
 
@@ -70,39 +71,26 @@ public class NetworkConnectionListener {
 
     }
 
-    ConnectionType currentConnectionType;
-
-    BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "Network connectivity change");
+//            Log.d(TAG, "Network connectivity change");
             if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                ConnectionType newType = getConnectionType();
-                if (newType != currentConnectionType) {
-                    Log.d(TAG, "Network connectivity change: " + currentConnectionType.toString()
-                            + " to " + newType.toString());
-                    currentConnectionType = newType;
-                    notifyConnectionUpdate();
-                }
+                notifyConnectionUpdate();
             }
         }
     };
 
-    public NetworkConnectionListener() {
+    private NetworkConnectionListener() {
         initialize(LWQApplication.get());
     }
 
-    public void initialize(Context context) {
-        this.currentConnectionType = getConnectionType();
+    private void initialize(Context context) {
         context.registerReceiver(connectionReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
-    public ConnectionType getCurrentConnectionType() {
-        return currentConnectionType;
-    }
-
-    ConnectionType getConnectionType() {
+    public ConnectionType getConnectionType() {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) LWQApplication.get().getSystemService(
                         Context.CONNECTIVITY_SERVICE);
@@ -113,24 +101,19 @@ public class NetworkConnectionListener {
         }
         if (netInfo == null || !netInfo.isAvailable() || !netInfo.isConnected()) {
             return ConnectionType.CONNECTION_NO_NETWORK;
-        } else {
-            if ((netInfo.getType() == ConnectivityManager.TYPE_WIFI)
+        } else if ((netInfo.getType() == ConnectivityManager.TYPE_WIFI)
                     || (netInfo.getType() == ConnectivityManager.TYPE_WIMAX)) {
                 return ConnectionType.CONNECTION_WIFI;
-            }
-            if ((netInfo.getType() == ConnectivityManager.TYPE_MOBILE)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_DUN)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_HIPRI)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_SUPL)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_MMS)) {
+        } else if ((netInfo.getType() == ConnectivityManager.TYPE_MOBILE)
+                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_DUN)) {
                 return ConnectionType.CONNECTION_MOBILE_DATA;
-            }
+        } else {
+            return ConnectionType.CONNECTION_UNKNOWN;
         }
-        return ConnectionType.CONNECTION_NO_NETWORK;
     }
 
-    void notifyConnectionUpdate() {
-        EventBus.getDefault().post(new NetworkConnectivityEvent(currentConnectionType));
+    private void notifyConnectionUpdate() {
+        EventBus.getDefault().post(new NetworkConnectivityEvent(getConnectionType()));
     }
 
     @Override

@@ -10,10 +10,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 
-import org.greenrobot.eventbus.Subscribe;
 import com.stanleyidesis.quotograph.AnalyticsUtils;
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.R;
@@ -26,6 +26,7 @@ import com.stanleyidesis.quotograph.ui.activity.LWQActivateActivity;
 import com.stanleyidesis.quotograph.ui.activity.LWQSaveWallpaperActivity;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.File;
 
@@ -164,7 +165,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         // Establish basic options
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
         notificationBuilder.setAutoCancel(true);
-        notificationBuilder.setCategory(Notification.CATEGORY_ERROR);
+        notificationBuilder.setCategory(Build.VERSION.SDK_INT > 21 ? Notification.CATEGORY_ERROR : Notification.CATEGORY_SERVICE);
         notificationBuilder.setColor(LWQApplication.get().getResources().getColor(R.color.palette_A100));
         notificationBuilder.setContentInfo(context.getString(R.string.app_name));
         notificationBuilder.setContentTitle(context.getString(R.string.notification_generation_failure_title));
@@ -192,7 +193,8 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.addAction(settingsAction);
 
         // Add Skip Action
-        Intent skipIntent = new Intent(context.getString(R.string.action_change_wallpaper));
+        Intent skipIntent = new Intent(context, LWQReceiver.class);
+        skipIntent.setAction(context.getString(R.string.action_change_wallpaper));
         skipIntent.setData(Uri.parse(AnalyticsUtils.URI_CHANGE_SOURCE_NOTIFICATION));
         final PendingIntent skipBroadcast = PendingIntent.getBroadcast(context, uniqueRequestCode++, skipIntent, 0);
         final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.mipmap.ic_refresh_white_36dp,
