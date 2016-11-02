@@ -71,16 +71,16 @@ import java.util.concurrent.Executors;
  *
  * Date: 08/01/2015
  */
-public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperController {
+class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperController {
 
-    static final int MAX_RETRIES = 5;
+    private static final int MAX_RETRIES = 5;
 
-    UnsplashManager unsplashManager;
-    Wallpaper activeWallpaper;
-    Bitmap activeBackgroundImage;
-    RetrievalState retrievalState;
+    private UnsplashManager unsplashManager;
+    private Wallpaper activeWallpaper;
+    private Bitmap activeBackgroundImage;
+    private RetrievalState retrievalState;
 
-    Callback<List<Quote>> generateNewWallpaperCallback = new Callback<List<Quote>>() {
+    private Callback<List<Quote>> generateNewWallpaperCallback = new Callback<List<Quote>>() {
 
         void finishUp(List<Quote> newQuotes, Object photoRecord) {
             // Get the font set first
@@ -93,6 +93,10 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
                 // This prevents reusing the same font twice
                 if (fontPreferenceSet.size() > 1) {
                     fontPreferenceSet.remove(String.valueOf(activeWallpaper.typefaceId));
+                }
+                // Avoid repeating a quote if possible
+                if (newQuotes.size() > 1) {
+                    newQuotes.remove(activeWallpaper.quote);
                 }
                 discardActiveWallpaper();
             }
@@ -241,10 +245,47 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
     @Override
     public synchronized void generateNewWallpaper() {
         final Playlist activePlaylist = Playlist.active();
+        final List<PlaylistCategory> activeCategories = activePlaylist.categories();
+        final List<PlaylistAuthor> activeAuthors = activePlaylist.authors();
+        final List<PlaylistQuote> activeQuotes = activePlaylist.quotes();
+
+        if (activeWallpaperExists()
+                && (activeCategories.size() + activeAuthors.size() + activeQuotes.size() > 1)) {
+            // Avoid repetition if possible
+            boolean removed = false;
+
+            Long activeQuoteId = activeWallpaper.quote.getId();
+            for (PlaylistQuote playlistQuote : activeQuotes) {
+                if (playlistQuote.quote.getId().equals(activeQuoteId)) {
+                    removed = true;
+                    activeQuotes.remove(playlistQuote);
+                    break;
+                }
+            }
+            if (!removed && activeWallpaper.quote.author != null) {
+                Long activeAuthorId = activeWallpaper.quote.author.getId();
+                for (PlaylistAuthor playlistAuthor : activeAuthors) {
+                    if (playlistAuthor.author.getId().equals(activeAuthorId)) {
+                        removed = true;
+                        activeAuthors.remove(playlistAuthor);
+                        break;
+                    }
+                }
+            }
+            if (!removed && activeWallpaper.quote.category != null) {
+                Long activeCategoryId = activeWallpaper.quote.category.getId();
+                for (PlaylistCategory playlistCategory : activeCategories) {
+                    if (playlistCategory.category.getId().equals(activeCategoryId)) {
+                        activeCategories.remove(playlistCategory);
+                        break;
+                    }
+                }
+            }
+        }
         final List<Object> options = new ArrayList<>();
-        options.addAll(activePlaylist.categories());
-        options.addAll(activePlaylist.authors());
-        options.addAll(activePlaylist.quotes());
+        options.addAll(activeCategories);
+        options.addAll(activeAuthors);
+        options.addAll(activeQuotes);
         _generateNewWallpaper(options.get(new Random().nextInt(options.size())));
     }
 
