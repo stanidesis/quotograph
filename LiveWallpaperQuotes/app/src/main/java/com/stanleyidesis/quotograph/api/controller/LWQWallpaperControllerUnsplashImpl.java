@@ -252,7 +252,7 @@ public class LWQWallpaperControllerUnsplashImpl implements LWQWallpaperControlle
         if (getRetrievalState() == RetrievalState.NEW_WALLPAPER) {
             return;
         }
-        if (!NetworkConnectionListener.get().getConnectionType().isConnected()) {
+        if (!NetworkConnectionListener.get().isConnected()) {
             notifyWallpaper(WallpaperEvent.Status.GENERATING_NEW_WALLPAPER,
                     LWQError.create(LWQApplication.get().getString(R.string.network_connection_required_title)));
             return;

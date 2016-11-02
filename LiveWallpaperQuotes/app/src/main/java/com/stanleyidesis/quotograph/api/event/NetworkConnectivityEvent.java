@@ -1,7 +1,5 @@
 package com.stanleyidesis.quotograph.api.event;
 
-import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
-
 /**
  * Copyright (c) 2016 Stanley Idesis
  *
@@ -36,13 +34,13 @@ import com.stanleyidesis.quotograph.api.network.NetworkConnectionListener;
  * Date: 12/07/2015
  */
 public class NetworkConnectivityEvent {
-    final NetworkConnectionListener.ConnectionType newConnectionType;
+    final boolean isConnected;
 
-    public NetworkConnectivityEvent(NetworkConnectionListener.ConnectionType connectionType) {
-        newConnectionType = connectionType;
+    public NetworkConnectivityEvent(boolean isConnected) {
+        this.isConnected = isConnected;
     }
 
-    public NetworkConnectionListener.ConnectionType getNewConnectionType() {
-        return newConnectionType;
+    public boolean isConnected() {
+        return isConnected;
     }
 }
