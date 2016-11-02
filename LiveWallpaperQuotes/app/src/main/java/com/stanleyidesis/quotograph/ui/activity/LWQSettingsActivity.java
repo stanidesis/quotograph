@@ -1335,6 +1335,7 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
                 AnalyticsUtils.ACTION_SKIPPED,
                 AnalyticsUtils.LABEL_IN_APP);
+        LWQPreferences.setWallpaperSkipped(true);
         LWQWallpaperControllerHelper.get().generateNewWallpaper();
         // Show an interstitial, if applicable
         if (interstitialAd != null && interstitialAd.isLoaded()) {
@@ -1716,6 +1717,8 @@ public class LWQSettingsActivity extends LWQWallpaperActivity implements Activit
         } else if (item instanceof PlaylistQuote) {
             LWQWallpaperControllerHelper.get().generateNewWallpaper((PlaylistQuote) item);
         }
+        // Mark wallpaper as 'skipped'
+        LWQPreferences.setWallpaperSkipped(true);
         // Track manual creation
         AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
                 AnalyticsUtils.ACTION_MANUALLY_GEN,

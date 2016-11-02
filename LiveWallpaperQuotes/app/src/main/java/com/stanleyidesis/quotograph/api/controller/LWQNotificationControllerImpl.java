@@ -206,7 +206,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIF_ID_GEN_FAILURE, notificationBuilder.build());
-    }
+    }build
 
     @Override
     public void dismissWallpaperGenerationFailureNotification() {

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.stanleyidesis.quotograph.AnalyticsUtils;
+import com.stanleyidesis.quotograph.LWQPreferences;
 import com.stanleyidesis.quotograph.R;
 import com.stanleyidesis.quotograph.api.controller.LWQAlarmController;
 import com.stanleyidesis.quotograph.api.controller.LWQNotificationControllerHelper;
@@ -56,21 +57,29 @@ public class LWQReceiver extends WakefulBroadcastReceiver {
             // Set the alarm
             LWQAlarmController.resetAlarm();
         } else if (context.getString(R.string.action_change_wallpaper).equals(action)) {
+            // Log either a skip or auto-generated wallpaper
+            if (AnalyticsUtils.URI_CHANGE_SOURCE_NOTIFICATION.equalsIgnoreCase(intent.getDataString())) {
+                // Mark wallpaper as skipped
+                LWQPreferences.setWallpaperSkipped(true);
+                AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
+                        AnalyticsUtils.ACTION_SKIPPED,
+                        AnalyticsUtils.LABEL_FROM_NOTIF);
+            } else if (AnalyticsUtils.URI_CHANGE_SOURCE_ALARM.equalsIgnoreCase(intent.getDataString())) {
+                // Skipping the wallpaper guarantees the
+                // wallpaper stays for at least one alarm cycle
+                if (LWQPreferences.didSkipWallpaper()) {
+                    LWQPreferences.setWallpaperSkipped(false);
+                    return;
+                }
+                AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
+                        AnalyticsUtils.ACTION_AUTOMATICALLY_GEN,
+                        AnalyticsUtils.LABEL_ALARM);
+            }
             // Change the wallpaper
             Intent updateService = new Intent(context, LWQUpdateService.class);
             startWakefulService(context, updateService);
             LWQNotificationControllerHelper.get().dismissNewWallpaperNotification();
             LWQNotificationControllerHelper.get().dismissWallpaperGenerationFailureNotification();
-            // Log either a skip or auto-generated wallpaper
-            if (AnalyticsUtils.URI_CHANGE_SOURCE_NOTIFICATION.equalsIgnoreCase(intent.getDataString())) {
-                AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
-                        AnalyticsUtils.ACTION_SKIPPED,
-                        AnalyticsUtils.LABEL_FROM_NOTIF);
-            } else if (AnalyticsUtils.URI_CHANGE_SOURCE_ALARM.equalsIgnoreCase(intent.getDataString())) {
-                AnalyticsUtils.trackEvent(AnalyticsUtils.CATEGORY_WALLPAPER,
-                        AnalyticsUtils.ACTION_AUTOMATICALLY_GEN,
-                        AnalyticsUtils.LABEL_ALARM);
-            }
         } else if (context.getString(R.string.action_share).equals(action)) {
             final LWQWallpaperController wallpaperController = LWQWallpaperControllerHelper.get();
             final String shareText = String.format("\"%s\" - %s", wallpaperController.getQuote(), wallpaperController.getAuthor());

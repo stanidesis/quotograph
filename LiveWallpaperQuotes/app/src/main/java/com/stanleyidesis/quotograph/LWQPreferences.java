@@ -177,6 +177,20 @@ public class LWQPreferences {
         ).apply();
     }
 
+    public static boolean didSkipWallpaper() {
+        return sharedPreferences.getBoolean(
+                LWQApplication.get().getString(R.string.preference_key_skipped_wallpaper),
+                false
+        );
+    }
+
+    public static void setWallpaperSkipped(boolean skipped) {
+        sharedPreferences.edit().putBoolean(
+                LWQApplication.get().getString(R.string.preference_key_skipped_wallpaper),
+                skipped
+        ).apply();
+    }
+
     // WARNING: Dumping all preferences
     public static void clearPreferences() {
         sharedPreferences.edit().clear().apply();
