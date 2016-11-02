@@ -13,4 +13,5 @@
     <string name="preference_key_whats_new_dialog">com.stanleyidesis.quotograph.preference.WHATS_NEW_DIALOG</string>
     <string name="preference_key_survey_last_shown">com.stanleyidesis.quotograph.preference.SURVEY_LAST_SHOWN</string>
     <string name="preference_key_survey_response">com.stanleyidesis.quotograph.preference.SURVEY_RESPONSE</string>
+    <string name="preference_key_skipped_wallpaper">com.stanleyidesis.quotograph.preference.SKIPPED_WALLPAPER</string>
 </resources>
