@@ -52,7 +52,7 @@
             android:id="@+id/iv_playlist_item_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_person_white"
+            android:src="@drawable/ic_person_white"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             app:layout_marginRightPercent="3%"/>

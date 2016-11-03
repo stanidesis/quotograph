@@ -36,7 +36,7 @@
     android:enterFadeDuration="100"
     android:exitFadeDuration="100">
     <item android:state_pressed="true">
-        <bitmap android:src="@mipmap/ic_save_white" android:alpha=".7"/>
+        <bitmap android:src="@drawable/ic_save_white" android:alpha=".7"/>
     </item>
-    <item android:drawable="@mipmap/ic_save_white" />
+    <item android:drawable="@drawable/ic_save_white" />
 </selector>

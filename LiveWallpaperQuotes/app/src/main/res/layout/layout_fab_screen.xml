@@ -82,7 +82,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@mipmap/ic_search_white_small"
+            android:src="@drawable/ic_search_white_small"
             android:visibility="gone"
             app:backgroundTint="@color/palette_A400"
             android:contentDescription="Search for Quotes"/>
@@ -104,7 +104,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@mipmap/ic_create_white_small"
+            android:src="@drawable/ic_create_white_small"
             android:visibility="gone"
             app:backgroundTint="@color/palette_A400"
             android:contentDescription="Create a Quote"/>
@@ -128,7 +128,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@mipmap/ic_add_white"
+            android:src="@drawable/ic_add_white"
             app:backgroundTint="@color/palette_A400"
             android:contentDescription="Add items to Playlist"/>
 
