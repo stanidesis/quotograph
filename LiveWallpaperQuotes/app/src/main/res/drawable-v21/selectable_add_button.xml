@@ -41,6 +41,6 @@
         </shape>
     </item>
 
-    <item android:drawable="@mipmap/ic_add_white" />
+    <item android:drawable="@drawable/ic_add_white" />
 
 </ripple>

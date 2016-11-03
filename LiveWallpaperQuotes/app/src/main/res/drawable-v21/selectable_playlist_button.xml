@@ -35,10 +35,10 @@
     android:enterFadeDuration="100"
     android:exitFadeDuration="100">
     <item android:state_selected="true">
-        <bitmap android:src="@mipmap/ic_format_quote_white_large" android:tint="@color/palette_500"/>
+        <bitmap android:src="@drawable/ic_format_quote_white_large" android:tint="@color/palette_500"/>
     </item>
     <item android:state_pressed="true">
-        <bitmap android:src="@mipmap/ic_format_quote_white_large" android:tint="@color/palette_800"/>
+        <bitmap android:src="@drawable/ic_format_quote_white_large" android:tint="@color/palette_800"/>
     </item>
-    <item android:drawable="@mipmap/ic_format_quote_white_large" />
+    <item android:drawable="@drawable/ic_format_quote_white_large" />
 </selector>

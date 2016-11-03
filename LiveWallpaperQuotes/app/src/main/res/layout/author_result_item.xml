@@ -56,7 +56,7 @@
                 android:id="@+id/iv_author_result_item_person_first"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@mipmap/ic_person_white_large"
+                android:src="@drawable/ic_person_white_large"
                 android:layout_centerHorizontal="true"/>
 
             <TextView
@@ -106,7 +106,7 @@
                 android:id="@+id/iv_author_result_item_person_second"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@mipmap/ic_person_white_large"
+                android:src="@drawable/ic_person_white_large"
                 android:layout_centerHorizontal="true"/>
 
             <TextView
