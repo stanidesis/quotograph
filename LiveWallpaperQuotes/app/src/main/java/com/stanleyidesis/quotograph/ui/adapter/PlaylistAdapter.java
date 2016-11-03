@@ -397,7 +397,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             CardView cardView = (CardView) itemView;
             cardView.setCardBackgroundColor(itemView.getResources().getColor(R.color.palette_400));
             data = category;
-            icon.setImageResource(R.mipmap.ic_style_white);
+            icon.setImageResource(R.drawable.ic_style_white);
             title.setText(category.name);
             subtitle.setText(R.string.category);
             description.setText(LWQApplication.get().getString(R.string.blank_quotes, category.name));
@@ -407,7 +407,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             CardView cardView = (CardView) itemView;
             cardView.setCardBackgroundColor(itemView.getResources().getColor(R.color.palette_600));
             data = author;
-            icon.setImageResource(R.mipmap.ic_person_white);
+            icon.setImageResource(R.drawable.ic_person_white);
             title.setText(author.name);
             subtitle.setText(R.string.author);
             description.setText(LWQApplication.get().getString(R.string.quotes_by, author.name));
@@ -417,7 +417,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             CardView cardView = (CardView) itemView;
             cardView.setCardBackgroundColor(itemView.getResources().getColor(R.color.palette_800));
             data = quote;
-            icon.setImageResource(R.mipmap.ic_format_quote_white);
+            icon.setImageResource(R.drawable.ic_format_quote_white);
             title.setText(quote.author.name);
             subtitle.setText(R.string.quote);
             description.setText(quote.text);

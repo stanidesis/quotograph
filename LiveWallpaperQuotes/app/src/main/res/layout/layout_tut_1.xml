@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:scaleType="centerInside"
-        android:src="@mipmap/tutorial_bg_with_home_screen"
+        android:src="@drawable/tutorial_bg_with_home_screen"
         android:layout_below="@id/tv_tut_details"
         android:layout_centerHorizontal="true"
         app:layout_widthPercent="80%"

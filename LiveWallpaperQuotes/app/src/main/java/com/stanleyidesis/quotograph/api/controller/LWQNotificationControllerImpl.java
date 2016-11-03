@@ -102,7 +102,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setLargeIcon(notificationBitmap);
         notificationBuilder.setOngoing(false);
         notificationBuilder.setShowWhen(false);
-        notificationBuilder.setSmallIcon(R.mipmap.ic_stat);
+        notificationBuilder.setSmallIcon(R.drawable.ic_stat);
         notificationBuilder.setTicker(String.format("New quote from %s", wallpaperController.getAuthor()));
         notificationBuilder.setWhen(System.currentTimeMillis());
 
@@ -123,7 +123,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         shareIntent.setAction(context.getString(R.string.action_share));
         shareIntent.setData(Uri.parse(AnalyticsUtils.URI_SHARE_SOURCE_NOTIFICATION));
         final PendingIntent shareBroadcast = PendingIntent.getBroadcast(context, uniqueRequestCode++, shareIntent, 0);
-        final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.mipmap.ic_share_white,
+        final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.drawable.ic_share_white,
                 context.getString(R.string.share), shareBroadcast).build();
         notificationBuilder.addAction(shareAction);
 
@@ -131,7 +131,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         Intent saveToDiskIntent = new Intent(context, LWQSaveWallpaperActivity.class);
         saveToDiskIntent.setData(Uri.parse(AnalyticsUtils.URI_SAVE_SOURCE_NOTIFICATION));
         final PendingIntent saveToDiskActivity = PendingIntent.getActivity(context, uniqueRequestCode++, saveToDiskIntent, 0);
-        final NotificationCompat.Action saveToDiskAction = new NotificationCompat.Action.Builder(R.mipmap.ic_save_white,
+        final NotificationCompat.Action saveToDiskAction = new NotificationCompat.Action.Builder(R.drawable.ic_save_white,
                 context.getString(R.string.save_to_disk), saveToDiskActivity).build();
         notificationBuilder.addAction(saveToDiskAction);
 
@@ -142,7 +142,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         skipIntent.setData(Uri.parse(AnalyticsUtils.URI_CHANGE_SOURCE_NOTIFICATION));
         final PendingIntent skipBroadcast =
                 PendingIntent.getBroadcast(context, uniqueRequestCode++, skipIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.mipmap.ic_skip_next_white,
+        final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_white,
                 context.getString(R.string.skip), skipBroadcast).build();
         notificationBuilder.addAction(skipAction);
 
@@ -188,7 +188,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         // Add Settings Action
         Intent settingsIntent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
         final PendingIntent settingsBroadcast = PendingIntent.getActivity(context, uniqueRequestCode++, settingsIntent, 0);
-        final NotificationCompat.Action settingsAction = new NotificationCompat.Action.Builder(R.mipmap.ic_settings_white,
+        final NotificationCompat.Action settingsAction = new NotificationCompat.Action.Builder(R.drawable.ic_settings_white,
                 context.getString(R.string.notification_generation_failure_action_settings), settingsBroadcast).build();
         notificationBuilder.addAction(settingsAction);
 
@@ -197,7 +197,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         skipIntent.setAction(context.getString(R.string.action_change_wallpaper));
         skipIntent.setData(Uri.parse(AnalyticsUtils.URI_CHANGE_SOURCE_NOTIFICATION));
         final PendingIntent skipBroadcast = PendingIntent.getBroadcast(context, uniqueRequestCode++, skipIntent, 0);
-        final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.mipmap.ic_refresh_white_36dp,
+        final NotificationCompat.Action skipAction = new NotificationCompat.Action.Builder(R.drawable.ic_refresh_white_36dp,
                 context.getString(R.string.notification_generation_failure_action_try_again), skipBroadcast).build();
         notificationBuilder.addAction(skipAction);
 
@@ -229,7 +229,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setLargeIcon(notificationBitmap);
         notificationBuilder.setOngoing(false);
         notificationBuilder.setShowWhen(false);
-        notificationBuilder.setSmallIcon(R.mipmap.ic_stat);
+        notificationBuilder.setSmallIcon(R.drawable.ic_stat);
         notificationBuilder.setTicker(LWQApplication.get().getString(R.string.notification_title_save_image));
         notificationBuilder.setWhen(System.currentTimeMillis());
         notificationBuilder.setColor(LWQApplication.get().getResources().getColor(R.color.palette_A100));
@@ -255,7 +255,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         final Intent shareChooser = Intent.createChooser(shareIntent, LWQApplication.get().getString(R.string.share_using));
         final PendingIntent shareActivity = PendingIntent.getActivity(LWQApplication.get(),
                 uniqueRequestCode++, shareChooser, PendingIntent.FLAG_UPDATE_CURRENT);
-        final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.mipmap.ic_share_white,
+        final NotificationCompat.Action shareAction = new NotificationCompat.Action.Builder(R.drawable.ic_share_white,
                 LWQApplication.get().getString(R.string.share), shareActivity).build();
         notificationBuilder.addAction(shareAction);
 
@@ -275,7 +275,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
         notificationBuilder.setLights(LWQApplication.get().getResources().getColor(R.color.palette_A100), 500, 500);
         notificationBuilder.setOngoing(false);
         notificationBuilder.setShowWhen(false);
-        notificationBuilder.setSmallIcon(R.mipmap.ic_stat);
+        notificationBuilder.setSmallIcon(R.drawable.ic_stat);
         notificationBuilder.setTicker(String.format(LWQApplication.get().getString(R.string.notification_title_save_failed)));
         notificationBuilder.setWhen(System.currentTimeMillis());
 
@@ -331,7 +331,7 @@ public class LWQNotificationControllerImpl implements LWQNotificationController 
                 .setOngoing(false)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setShowWhen(false)
-                .setSmallIcon(R.mipmap.ic_stat)
+                .setSmallIcon(R.drawable.ic_stat)
                 .setTicker(lwqApplication.getString(R.string.survey_title))
                 .setWhen(System.currentTimeMillis());
 
