@@ -63,8 +63,8 @@ public class PlaylistCategory extends SugarRecord implements Comparable<Playlist
     @Override
     public boolean equals(Object o) {
         if (o instanceof PlaylistCategory) {
-            return playlist.getId() == ((PlaylistCategory) o).playlist.getId()
-                    && category.getId() == ((PlaylistCategory) o).category.getId();
+            return playlist.getId().equals(((PlaylistCategory) o).playlist.getId())
+                    && category.getId().equals(((PlaylistCategory) o).category.getId());
         }
         return super.equals(o);
     }

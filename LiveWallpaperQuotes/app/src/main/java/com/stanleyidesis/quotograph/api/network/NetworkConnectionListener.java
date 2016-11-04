@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 
 import com.stanleyidesis.quotograph.LWQApplication;
 import com.stanleyidesis.quotograph.api.event.NetworkConnectivityEvent;
@@ -59,22 +58,9 @@ public class NetworkConnectionListener {
         return get();
     }
 
-    public enum ConnectionType {
-        CONNECTION_NO_NETWORK,
-        CONNECTION_UNKNOWN,
-        CONNECTION_WIFI,
-        CONNECTION_MOBILE_DATA;
-
-        public boolean isConnected() {
-            return this != CONNECTION_NO_NETWORK;
-        }
-
-    }
-
     private BroadcastReceiver connectionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-//            Log.d(TAG, "Network connectivity change");
             if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 notifyConnectionUpdate();
             }
@@ -90,30 +76,16 @@ public class NetworkConnectionListener {
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
-    public ConnectionType getConnectionType() {
+    public boolean isConnected() {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) LWQApplication.get().getSystemService(
                         Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
-
-        if (netInfo != null) {
-            Log.d(TAG, netInfo.toString());
-        }
-        if (netInfo == null || !netInfo.isAvailable() || !netInfo.isConnected()) {
-            return ConnectionType.CONNECTION_NO_NETWORK;
-        } else if ((netInfo.getType() == ConnectivityManager.TYPE_WIFI)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_WIMAX)) {
-                return ConnectionType.CONNECTION_WIFI;
-        } else if ((netInfo.getType() == ConnectivityManager.TYPE_MOBILE)
-                    || (netInfo.getType() == ConnectivityManager.TYPE_MOBILE_DUN)) {
-                return ConnectionType.CONNECTION_MOBILE_DATA;
-        } else {
-            return ConnectionType.CONNECTION_UNKNOWN;
-        }
+        return netInfo != null && netInfo.isConnected();
     }
 
     private void notifyConnectionUpdate() {
-        EventBus.getDefault().post(new NetworkConnectivityEvent(getConnectionType()));
+        EventBus.getDefault().post(new NetworkConnectivityEvent(isConnected()));
     }
 
     @Override

@@ -173,7 +173,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
                 LWQWallpaperControllerHelper.get().retrieveActiveWallpaper();
             }
         } else {
-            if (!NetworkConnectionListener.get().getConnectionType().isConnected()) {
+            if (!NetworkConnectionListener.get().isConnected()) {
                 presentNetworkRequiredDialog();
             } else {
                 firstLaunchTask = new LWQFirstLaunchTask();
@@ -373,7 +373,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
 
     @Subscribe
     public void onEvent(NetworkConnectivityEvent networkConnectivityEvent) {
-        if (networkConnectivityEvent.getNewConnectionType().isConnected() && firstLaunchTask == null) {
+        if (networkConnectivityEvent.isConnected() && firstLaunchTask == null) {
             firstLaunchTask = new LWQFirstLaunchTask();
             firstLaunchTask.execute();
             runOnUiThread(new Runnable() {
@@ -389,7 +389,7 @@ public class LWQActivateActivity extends AppCompatActivity implements ViewPager.
                             }, null);
                 }
             });
-        } else if (!networkConnectivityEvent.getNewConnectionType().isConnected()) {
+        } else if (!networkConnectivityEvent.isConnected()) {
             if (firstLaunchTask != null && !firstLaunchTask.isCancelled()) {
                 firstLaunchTask.cancel(true);
                 firstLaunchTask = null;
