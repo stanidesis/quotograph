@@ -114,9 +114,11 @@ public class LWQApplication extends SugarApp implements IabHelper.OnIabSetupFini
             firebaseAnalytics.setAnalyticsCollectionEnabled(!BuildConfig.DEBUG);
             firebaseAnalytics.setMinimumSessionDuration(1000);
 
-            // AdMob
-            MobileAds.initialize(getApplicationContext(), getString(R.string.admob_app_id));
-            MobileAds.setAppMuted(true);
+            if (AdMobUtils.adsEnabled()) {
+                // AdMob
+                MobileAds.initialize(getApplicationContext(), getString(R.string.admob_app_id));
+                MobileAds.setAppMuted(true);
+            }
 
             // Enable
             setComponentsEnabled(!LWQPreferences.isFirstLaunch());
